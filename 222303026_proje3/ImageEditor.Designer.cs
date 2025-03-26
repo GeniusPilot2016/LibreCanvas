@@ -153,7 +153,7 @@
             panel1.BackColor = SystemColors.Window;
             panel1.Location = new Point(51, 35);
             panel1.Name = "panel1";
-            panel1.Size = new Size(973, 485);
+            panel1.Size = new Size(992, 485);
             panel1.TabIndex = 0;
             // 
             // toolStrip1
