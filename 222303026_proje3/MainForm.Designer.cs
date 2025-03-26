@@ -45,6 +45,7 @@
             // listBox1
             // 
             listBox1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            listBox1.Enabled = false;
             listBox1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             listBox1.FormattingEnabled = true;
             listBox1.Items.AddRange(new object[] { "There's no recently opened file" });
@@ -81,9 +82,9 @@
             // 
             pictureBox1.BackColor = Color.Transparent;
             pictureBox1.Image = Properties.Resources.artfusion_icon;
-            pictureBox1.Location = new Point(65, 54);
+            pictureBox1.Location = new Point(64, 63);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(141, 143);
+            pictureBox1.Size = new Size(142, 142);
             pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
             pictureBox1.TabIndex = 2;
             pictureBox1.TabStop = false;
