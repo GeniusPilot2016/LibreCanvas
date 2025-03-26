@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35828.75 d17.13
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "222303026_proje3", "222303026_proje3\222303026_proje3.csproj", "{6077E90E-BE36-494D-9BEC-EA666E33FFEE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArtFusion", "222303026_proje3\ArtFusion.csproj", "{6077E90E-BE36-494D-9BEC-EA666E33FFEE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
