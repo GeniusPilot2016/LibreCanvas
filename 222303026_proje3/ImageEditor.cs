@@ -10,11 +10,130 @@ namespace _222303026_proje3
         Pen brushes;
         Color color1 = Color.Black, color2 = Color.White;
         int brushSize = 1, eraserSize = 1, shapeSize = 1, shapeType = 0, textSize = 9;
+        bool isResizing = false;
+        Point lastMousePos;
+        Panel[] resizeHandles;
         public ImageEditor()
         {
             InitializeComponent();
+            InitializeResizeHandles();
+            pictureBoxCanvas.Image = canvas;
+        }
+        private void InitializeResizeHandles()
+        {
+            resizeHandles = new Panel[8];
+            for (int i = 0; i < resizeHandles.Length; i++)
+            {
+                resizeHandles[i] = new Panel
+                {
+                    Size = new Size(10, 10),
+                    BackColor = Color.Black
+                };
+                resizeHandles[i].MouseDown += ResizeHandle_MouseDown;
+                resizeHandles[i].MouseMove += ResizeHandle_MouseMove;
+                resizeHandles[i].MouseUp += ResizeHandle_MouseUp;
+                Controls.Add(resizeHandles[i]);
+            }
+
+            // Set appropriate cursors for each handle
+            resizeHandles[0].Cursor = Cursors.SizeNWSE; // Top-left
+            resizeHandles[1].Cursor = Cursors.SizeNESW; // Top-right
+            resizeHandles[2].Cursor = Cursors.SizeNESW; // Bottom-left
+            resizeHandles[3].Cursor = Cursors.SizeNWSE; // Bottom-right
+            resizeHandles[4].Cursor = Cursors.SizeWE;   // Middle-left
+            resizeHandles[5].Cursor = Cursors.SizeWE;   // Middle-right
+            resizeHandles[6].Cursor = Cursors.SizeNS;   // Top-middle
+            resizeHandles[7].Cursor = Cursors.SizeNS;   // Bottom-middle
+
+            PositionResizeHandles();
+        }
+        private void PositionResizeHandles()
+        {
+            int offset = 5;
+            resizeHandles[0].Location = new Point(pictureBoxCanvas.Left - offset, pictureBoxCanvas.Top - offset); // Top-left
+            resizeHandles[1].Location = new Point(pictureBoxCanvas.Right - offset, pictureBoxCanvas.Top - offset); // Top-right
+            resizeHandles[2].Location = new Point(pictureBoxCanvas.Left - offset, pictureBoxCanvas.Bottom - offset); // Bottom-left
+            resizeHandles[3].Location = new Point(pictureBoxCanvas.Right - offset, pictureBoxCanvas.Bottom - offset); // Bottom-right
+            resizeHandles[4].Location = new Point(pictureBoxCanvas.Left - offset, pictureBoxCanvas.Top + pictureBoxCanvas.Height / 2 - offset); // Middle-left
+            resizeHandles[5].Location = new Point(pictureBoxCanvas.Right - offset, pictureBoxCanvas.Top + pictureBoxCanvas.Height / 2 - offset); // Middle-right
+            resizeHandles[6].Location = new Point(pictureBoxCanvas.Left + pictureBoxCanvas.Width / 2 - offset, pictureBoxCanvas.Top - offset); // Top-middle
+            resizeHandles[7].Location = new Point(pictureBoxCanvas.Left + pictureBoxCanvas.Width / 2 - offset, pictureBoxCanvas.Bottom - offset); // Bottom-middle
         }
 
+        private void ResizeHandle_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                isResizing = true;
+                lastMousePos = e.Location;
+                labelSize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height} px";
+            }
+        }
+
+        private void ResizeHandle_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isResizing)
+            {
+                Panel handle = sender as Panel;
+                int dx = e.X - lastMousePos.X;
+                int dy = e.Y - lastMousePos.Y;
+
+                if (handle == resizeHandles[0]) // Top-left
+                {
+                    pictureBoxCanvas.Left += dx;
+                    pictureBoxCanvas.Top += dy;
+                    pictureBoxCanvas.Width -= dx;
+                    pictureBoxCanvas.Height -= dy;
+                }
+                else if (handle == resizeHandles[1]) // Top-right
+                {
+                    pictureBoxCanvas.Top += dy;
+                    pictureBoxCanvas.Width += dx;
+                    pictureBoxCanvas.Height -= dy;
+                }
+                else if (handle == resizeHandles[2]) // Bottom-left
+                {
+                    pictureBoxCanvas.Left += dx;
+                    pictureBoxCanvas.Width -= dx;
+                    pictureBoxCanvas.Height += dy;
+                }
+                else if (handle == resizeHandles[3]) // Bottom-right
+                {
+                    pictureBoxCanvas.Width += dx;
+                    pictureBoxCanvas.Height += dy;
+                }
+                else if (handle == resizeHandles[4]) // Middle-left
+                {
+                    pictureBoxCanvas.Left += dx;
+                    pictureBoxCanvas.Width -= dx;
+                }
+                else if (handle == resizeHandles[5]) // Middle-right
+                {
+                    pictureBoxCanvas.Width += dx;
+                }
+                else if (handle == resizeHandles[6]) // Top-middle
+                {
+                    pictureBoxCanvas.Top += dy;
+                    pictureBoxCanvas.Height -= dy;
+                }
+                else if (handle == resizeHandles[7]) // Bottom-middle
+                {
+                    pictureBoxCanvas.Height += dy;
+                }
+
+                PositionResizeHandles();
+                lastMousePos = e.Location;
+            }
+        }
+
+        private void ResizeHandle_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                isResizing = false;
+            }
+        }
+        
         private void removeObjectToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
@@ -208,6 +327,34 @@ namespace _222303026_proje3
         private void createWithAITool_Click(object sender, EventArgs e)
         {
 
+        }
+        private void pictureBoxCanvas_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                isResizing = true;
+                lastMousePos = e.Location;
+            }
+        }
+
+        private void pictureBoxCanvas_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isResizing)
+            {
+                int newWidth = pictureBoxCanvas.Width + (e.X - lastMousePos.X);
+                int newHeight = pictureBoxCanvas.Height + (e.Y - lastMousePos.Y);
+                pictureBoxCanvas.Size = new Size(newWidth, newHeight);
+                PositionResizeHandles();
+                lastMousePos = e.Location;
+            }
+        }
+
+        private void pictureBoxCanvas_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                isResizing = false;
+            }
         }
     }
 }

@@ -73,6 +73,16 @@ namespace _222303026_proje3.Properties {
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
+        internal static System.Drawing.Bitmap icons8_add_file_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-add-file-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
         internal static System.Drawing.Bitmap icons8_add_text_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-add-text-48", resourceCulture);
@@ -146,6 +156,16 @@ namespace _222303026_proje3.Properties {
         internal static System.Drawing.Bitmap icons8_cut_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-cut-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap icons8_dimension_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-dimension-48", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -243,6 +263,16 @@ namespace _222303026_proje3.Properties {
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
+        internal static System.Drawing.Bitmap icons8_open_file_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-open-file-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
         internal static System.Drawing.Bitmap icons8_paint_bucket_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-paint-bucket-48", resourceCulture);
@@ -273,6 +303,16 @@ namespace _222303026_proje3.Properties {
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
+        internal static System.Drawing.Bitmap icons8_print_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-print-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
         internal static System.Drawing.Bitmap icons8_rectangular_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-rectangular-48", resourceCulture);
@@ -296,6 +336,16 @@ namespace _222303026_proje3.Properties {
         internal static System.Drawing.Bitmap icons8_rounded_rectangle_stroked_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-rounded-rectangle-stroked-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap icons8_save_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-save-48", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

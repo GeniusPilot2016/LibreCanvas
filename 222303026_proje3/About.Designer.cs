@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            ListViewItem listViewItem2 = new ListViewItem(new string[] { "GeniusPilot2016 (Nisa Özdoğan)", "Designing and programming" }, -1);
+            ListViewItem listViewItem1 = new ListViewItem(new string[] { "GeniusPilot2016 (Nisa Özdoğan)", "Designing and programming" }, -1);
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(About));
             panel1 = new Panel();
             pictureBox1 = new PictureBox();
@@ -113,7 +113,7 @@
             listView1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             listView1.Columns.AddRange(new ColumnHeader[] { columnHeader1, columnHeader2 });
             listView1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            listView1.Items.AddRange(new ListViewItem[] { listViewItem2 });
+            listView1.Items.AddRange(new ListViewItem[] { listViewItem1 });
             listView1.Location = new Point(12, 473);
             listView1.Name = "listView1";
             listView1.Size = new Size(609, 206);
@@ -136,7 +136,7 @@
             label4.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
             label4.AutoSize = true;
             label4.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label4.Location = new Point(92, 331);
+            label4.Location = new Point(91, 332);
             label4.Name = "label4";
             label4.Size = new Size(449, 60);
             label4.TabIndex = 9;
@@ -148,7 +148,7 @@
             button1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             button1.ImageIndex = 0;
             button1.ImageList = icons;
-            button1.Location = new Point(65, 407);
+            button1.Location = new Point(64, 408);
             button1.Name = "button1";
             button1.Size = new Size(151, 29);
             button1.TabIndex = 10;
@@ -172,7 +172,7 @@
             button2.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             button2.ImageIndex = 1;
             button2.ImageList = icons;
-            button2.Location = new Point(222, 407);
+            button2.Location = new Point(221, 408);
             button2.Name = "button2";
             button2.Size = new Size(161, 29);
             button2.TabIndex = 10;
@@ -187,7 +187,7 @@
             button3.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             button3.ImageIndex = 2;
             button3.ImageList = icons;
-            button3.Location = new Point(388, 407);
+            button3.Location = new Point(387, 408);
             button3.Name = "button3";
             button3.Size = new Size(172, 29);
             button3.TabIndex = 10;
