@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            ListViewItem listViewItem4 = new ListViewItem(new string[] { "GeniusPilot2016 (Nisa Özdoğan)", "Designing and programming" }, -1);
+            ListViewItem listViewItem2 = new ListViewItem(new string[] { "GeniusPilot2016 (Nisa Özdoğan)", "Designing and programming" }, -1);
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(About));
             panel1 = new Panel();
             pictureBox1 = new PictureBox();
@@ -41,9 +41,9 @@
             columnHeader2 = new ColumnHeader();
             label4 = new Label();
             button1 = new Button();
+            icons = new ImageList(components);
             button2 = new Button();
             button3 = new Button();
-            icons = new ImageList(components);
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
@@ -66,7 +66,7 @@
             pictureBox1.Anchor = AnchorStyles.None;
             pictureBox1.BackColor = Color.Transparent;
             pictureBox1.Image = Properties.Resources.artfusion_icon;
-            pictureBox1.Location = new Point(92, 72);
+            pictureBox1.Location = new Point(92, 32);
             pictureBox1.Name = "pictureBox1";
             pictureBox1.Size = new Size(142, 142);
             pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
@@ -79,11 +79,11 @@
             label3.AutoSize = true;
             label3.BackColor = Color.Transparent;
             label3.Font = new Font("HarmonyOS Sans", 13.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label3.Location = new Point(239, 160);
+            label3.Location = new Point(239, 120);
             label3.Name = "label3";
             label3.Size = new Size(146, 30);
             label3.TabIndex = 1;
-            label3.Text = "Version 0.0.0";
+            label3.Text = "Version 0.1.0";
             // 
             // label2
             // 
@@ -91,7 +91,7 @@
             label2.AutoSize = true;
             label2.BackColor = Color.Transparent;
             label2.Font = new Font("HarmonyOS Sans", 35.9999962F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label2.Location = new Point(223, 81);
+            label2.Location = new Point(223, 41);
             label2.Name = "label2";
             label2.Size = new Size(314, 79);
             label2.TabIndex = 0;
@@ -113,7 +113,7 @@
             listView1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             listView1.Columns.AddRange(new ColumnHeader[] { columnHeader1, columnHeader2 });
             listView1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            listView1.Items.AddRange(new ListViewItem[] { listViewItem4 });
+            listView1.Items.AddRange(new ListViewItem[] { listViewItem2 });
             listView1.Location = new Point(12, 473);
             listView1.Name = "listView1";
             listView1.Size = new Size(609, 206);
@@ -157,6 +157,15 @@
             button1.TextImageRelation = TextImageRelation.ImageBeforeText;
             button1.UseVisualStyleBackColor = true;
             // 
+            // icons
+            // 
+            icons.ColorDepth = ColorDepth.Depth32Bit;
+            icons.ImageStream = (ImageListStreamer)resources.GetObject("icons.ImageStream");
+            icons.TransparentColor = Color.Transparent;
+            icons.Images.SetKeyName(0, "icons8-icons8-48.png");
+            icons.Images.SetKeyName(1, "icons8-license-48.png");
+            icons.Images.SetKeyName(2, "icons8-github-48.png");
+            // 
             // button2
             // 
             button2.Anchor = AnchorStyles.Top;
@@ -186,15 +195,6 @@
             button3.TextAlign = ContentAlignment.MiddleRight;
             button3.TextImageRelation = TextImageRelation.ImageBeforeText;
             button3.UseVisualStyleBackColor = true;
-            // 
-            // icons
-            // 
-            icons.ColorDepth = ColorDepth.Depth32Bit;
-            icons.ImageStream = (ImageListStreamer)resources.GetObject("icons.ImageStream");
-            icons.TransparentColor = Color.Transparent;
-            icons.Images.SetKeyName(0, "icons8-icons8-48.png");
-            icons.Images.SetKeyName(1, "icons8-license-48.png");
-            icons.Images.SetKeyName(2, "icons8-github-48.png");
             // 
             // About
             // 

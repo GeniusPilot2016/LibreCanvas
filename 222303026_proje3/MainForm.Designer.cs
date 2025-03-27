@@ -82,7 +82,7 @@
             // 
             pictureBox1.BackColor = Color.Transparent;
             pictureBox1.Image = Properties.Resources.artfusion_icon;
-            pictureBox1.Location = new Point(64, 63);
+            pictureBox1.Location = new Point(68, 63);
             pictureBox1.Name = "pictureBox1";
             pictureBox1.Size = new Size(142, 142);
             pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
@@ -94,7 +94,7 @@
             label3.AutoSize = true;
             label3.BackColor = Color.Transparent;
             label3.Font = new Font("HarmonyOS Sans", 13.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label3.Location = new Point(212, 158);
+            label3.Location = new Point(216, 158);
             label3.Name = "label3";
             label3.Size = new Size(146, 30);
             label3.TabIndex = 1;
@@ -105,7 +105,7 @@
             label2.AutoSize = true;
             label2.BackColor = Color.Transparent;
             label2.Font = new Font("HarmonyOS Sans", 35.9999962F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label2.Location = new Point(196, 79);
+            label2.Location = new Point(200, 79);
             label2.Name = "label2";
             label2.Size = new Size(314, 79);
             label2.TabIndex = 0;
