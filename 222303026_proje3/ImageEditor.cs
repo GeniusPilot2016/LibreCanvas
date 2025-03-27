@@ -88,8 +88,9 @@ namespace _222303026_proje3
             }
 
             // Uncheck all ToolStripButtons in the same ToolStrip
-            if (clickedMenuItem.Owner.Parent is ToolStrip toolStrip)
+            if (clickedMenuItem.Owner is ToolStripDropDown dropDown)
             {
+                ToolStrip toolStrip = dropDown.OwnerItem.GetCurrentParent();
                 foreach (ToolStripItem item in toolStrip.Items)
                 {
                     if (item is ToolStripButton button)
