@@ -83,7 +83,7 @@
             label3.Name = "label3";
             label3.Size = new Size(146, 30);
             label3.TabIndex = 1;
-            label3.Text = "Version 0.1.0";
+            label3.Text = "Version 0.2.0";
             // 
             // label2
             // 

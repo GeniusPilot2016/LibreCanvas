@@ -93,6 +93,36 @@ namespace _222303026_proje3.Properties {
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
+        internal static System.Drawing.Bitmap icons8_align_center_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-align-center-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap icons8_align_left_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-align-left-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap icons8_align_right_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-align-right-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
         internal static System.Drawing.Bitmap icons8_artificial_intelligence_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-artificial-intelligence-48", resourceCulture);
@@ -106,6 +136,16 @@ namespace _222303026_proje3.Properties {
         internal static System.Drawing.Bitmap icons8_background_remover_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-background-remover-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap icons8_bold_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-bold-48", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -233,6 +273,16 @@ namespace _222303026_proje3.Properties {
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
+        internal static System.Drawing.Bitmap icons8_italic_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-italic-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
         internal static System.Drawing.Bitmap icons8_line_48__1_ {
             get {
                 object obj = ResourceManager.GetObject("icons8-line-48 (1)", resourceCulture);
@@ -303,6 +353,16 @@ namespace _222303026_proje3.Properties {
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
+        internal static System.Drawing.Bitmap icons8_pencil_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-pencil-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
         internal static System.Drawing.Bitmap icons8_print_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-print-48", resourceCulture);
@@ -363,9 +423,39 @@ namespace _222303026_proje3.Properties {
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
+        internal static System.Drawing.Bitmap icons8_sheet_of_paper_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-sheet-of-paper-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap icons8_strikethrough_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-strikethrough-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
         internal static System.Drawing.Bitmap icons8_triangle_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-triangle-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap icons8_underline_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-underline-48", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

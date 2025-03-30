@@ -1,139 +1,50 @@
+using System.Drawing.Text;
 using System.Windows.Forms;
 
 namespace _222303026_proje3
 {
     public partial class ImageEditor : Form
     {
-        Bitmap canvas = new Bitmap(800, 600);
         int x = -1, y = -1;
         bool isdrawing = false;
+        static String[] drawType = { "Cursor", "Selection", "Magic Selection", "Brush", "Pen", "Eraser", "Bucket", "Spray", "Line", "Round", "Rectangle", "Rounded Rectangle", "Triangle", "Hexagon", "Text", "Color Drop" };
+        String currentTool = drawType[0];
         Pen brushes;
         Color color1 = Color.Black, color2 = Color.White;
         int brushSize = 1, eraserSize = 1, shapeSize = 1, shapeType = 0, textSize = 9;
         bool isResizing = false;
-        Point lastMousePos;
+        private ResizeDirection resizeDirection;
+        private Point lastMousePos;
+
+        private enum ResizeDirection
+        {
+            None,
+            Top,
+            Bottom,
+            Left,
+            Right,
+            TopLeft,
+            TopRight,
+            BottomLeft,
+            BottomRight
+        }
+
         Panel[] resizeHandles;
+        FontFamily[] fontFamilies;
+        InstalledFontCollection installedFontCollection = new InstalledFontCollection();
+
         public ImageEditor()
         {
             InitializeComponent();
-            InitializeResizeHandles();
-            pictureBoxCanvas.Image = canvas;
-        }
-        private void InitializeResizeHandles()
-        {
-            resizeHandles = new Panel[8];
-            for (int i = 0; i < resizeHandles.Length; i++)
+            fontFamilies = installedFontCollection.Families;
+            for (int i = 0; i < fontFamilies.Length; i++)
             {
-                resizeHandles[i] = new Panel
-                {
-                    Size = new Size(10, 10),
-                    BackColor = Color.Black
-                };
-                resizeHandles[i].MouseDown += ResizeHandle_MouseDown;
-                resizeHandles[i].MouseMove += ResizeHandle_MouseMove;
-                resizeHandles[i].MouseUp += ResizeHandle_MouseUp;
-                Controls.Add(resizeHandles[i]);
-            }
-
-            // Set appropriate cursors for each handle
-            resizeHandles[0].Cursor = Cursors.SizeNWSE; // Top-left
-            resizeHandles[1].Cursor = Cursors.SizeNESW; // Top-right
-            resizeHandles[2].Cursor = Cursors.SizeNESW; // Bottom-left
-            resizeHandles[3].Cursor = Cursors.SizeNWSE; // Bottom-right
-            resizeHandles[4].Cursor = Cursors.SizeWE;   // Middle-left
-            resizeHandles[5].Cursor = Cursors.SizeWE;   // Middle-right
-            resizeHandles[6].Cursor = Cursors.SizeNS;   // Top-middle
-            resizeHandles[7].Cursor = Cursors.SizeNS;   // Bottom-middle
-
-            PositionResizeHandles();
-        }
-        private void PositionResizeHandles()
-        {
-            int offset = 5;
-            resizeHandles[0].Location = new Point(pictureBoxCanvas.Left - offset, pictureBoxCanvas.Top - offset); // Top-left
-            resizeHandles[1].Location = new Point(pictureBoxCanvas.Right - offset, pictureBoxCanvas.Top - offset); // Top-right
-            resizeHandles[2].Location = new Point(pictureBoxCanvas.Left - offset, pictureBoxCanvas.Bottom - offset); // Bottom-left
-            resizeHandles[3].Location = new Point(pictureBoxCanvas.Right - offset, pictureBoxCanvas.Bottom - offset); // Bottom-right
-            resizeHandles[4].Location = new Point(pictureBoxCanvas.Left - offset, pictureBoxCanvas.Top + pictureBoxCanvas.Height / 2 - offset); // Middle-left
-            resizeHandles[5].Location = new Point(pictureBoxCanvas.Right - offset, pictureBoxCanvas.Top + pictureBoxCanvas.Height / 2 - offset); // Middle-right
-            resizeHandles[6].Location = new Point(pictureBoxCanvas.Left + pictureBoxCanvas.Width / 2 - offset, pictureBoxCanvas.Top - offset); // Top-middle
-            resizeHandles[7].Location = new Point(pictureBoxCanvas.Left + pictureBoxCanvas.Width / 2 - offset, pictureBoxCanvas.Bottom - offset); // Bottom-middle
-        }
-
-        private void ResizeHandle_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                isResizing = true;
-                lastMousePos = e.Location;
-                labelSize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height} px";
+                fontsComboBox.Items.Add(fontFamilies[i].Name);
             }
         }
 
-        private void ResizeHandle_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (isResizing)
-            {
-                Panel handle = sender as Panel;
-                int dx = e.X - lastMousePos.X;
-                int dy = e.Y - lastMousePos.Y;
 
-                if (handle == resizeHandles[0]) // Top-left
-                {
-                    pictureBoxCanvas.Left += dx;
-                    pictureBoxCanvas.Top += dy;
-                    pictureBoxCanvas.Width -= dx;
-                    pictureBoxCanvas.Height -= dy;
-                }
-                else if (handle == resizeHandles[1]) // Top-right
-                {
-                    pictureBoxCanvas.Top += dy;
-                    pictureBoxCanvas.Width += dx;
-                    pictureBoxCanvas.Height -= dy;
-                }
-                else if (handle == resizeHandles[2]) // Bottom-left
-                {
-                    pictureBoxCanvas.Left += dx;
-                    pictureBoxCanvas.Width -= dx;
-                    pictureBoxCanvas.Height += dy;
-                }
-                else if (handle == resizeHandles[3]) // Bottom-right
-                {
-                    pictureBoxCanvas.Width += dx;
-                    pictureBoxCanvas.Height += dy;
-                }
-                else if (handle == resizeHandles[4]) // Middle-left
-                {
-                    pictureBoxCanvas.Left += dx;
-                    pictureBoxCanvas.Width -= dx;
-                }
-                else if (handle == resizeHandles[5]) // Middle-right
-                {
-                    pictureBoxCanvas.Width += dx;
-                }
-                else if (handle == resizeHandles[6]) // Top-middle
-                {
-                    pictureBoxCanvas.Top += dy;
-                    pictureBoxCanvas.Height -= dy;
-                }
-                else if (handle == resizeHandles[7]) // Bottom-middle
-                {
-                    pictureBoxCanvas.Height += dy;
-                }
 
-                PositionResizeHandles();
-                lastMousePos = e.Location;
-            }
-        }
-
-        private void ResizeHandle_MouseUp(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                isResizing = false;
-            }
-        }
-        
         private void removeObjectToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
@@ -328,32 +239,301 @@ namespace _222303026_proje3
         {
 
         }
-        private void pictureBoxCanvas_MouseDown(object sender, MouseEventArgs e)
+
+
+        private void kaydetToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (e.Button == MouseButtons.Left)
+            DialogResult dialogResult = saveFileDialog1.ShowDialog();
+            if (dialogResult == DialogResult.OK)
             {
-                isResizing = true;
-                lastMousePos = e.Location;
+                pictureBoxCanvas.Image.Save(saveFileDialog1.FileName);
             }
         }
 
-        private void pictureBoxCanvas_MouseMove(object sender, MouseEventArgs e)
+        private void addTextTool_CheckedChanged(object sender, EventArgs e)
+        {
+            if (addTextTool.Checked)
+            {
+                currentTool = drawType[14];
+                toolStripText.Visible = true;
+            }
+            else
+            {
+                toolStripText.Visible = false;
+            }
+        }
+
+        private void panel1_MouseMove(object sender, MouseEventArgs e)
+        {
+            this.Cursor = Cursors.Default;
+        }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+        /*private void PositionResizeHandles()
+        {
+            // Panelin yeni boyutlarýný al
+            int panelLeft = canvasPanel.Left;
+            int panelTop = canvasPanel.Top;
+            int panelWidth = canvasPanel.Width;
+            int panelHeight = canvasPanel.Height;
+
+            // Tutmaçlarýn konumlarýný panelin boyutlarýna göre güncelle
+            resize_top_left.Location = new Point(panelLeft - resize_top_left.Width / 2, panelTop - resize_top_left.Height / 2);
+            resize_top.Location = new Point(panelLeft + (panelWidth / 2) - resize_top.Width / 2, panelTop - resize_top.Height / 2);
+            resize_top_right.Location = new Point(panelLeft + panelWidth - resize_top_right.Width / 2, panelTop - resize_top_right.Height / 2);
+
+            resize_left.Location = new Point(panelLeft - resize_left.Width / 2, panelTop + (panelHeight / 2) - resize_left.Height / 2);
+            resize_right.Location = new Point(panelLeft + panelWidth - resize_right.Width / 2, panelTop + (panelHeight / 2) - resize_right.Height / 2);
+
+            resize_bottom_left.Location = new Point(panelLeft - resize_bottom_left.Width / 2, panelTop + panelHeight - resize_bottom_left.Height / 2);
+            resize_bottom.Location = new Point(panelLeft + (panelWidth / 2) - resize_bottom.Width / 2, panelTop + panelHeight - resize_bottom.Height / 2);
+            resize_bottom_right.Location = new Point(panelLeft + panelWidth - resize_bottom_right.Width / 2, panelTop + panelHeight - resize_bottom_right.Height / 2);
+        }*/
+
+        private void resize_MouseUp(object sender, MouseEventArgs e)
+        {
+            isResizing = false;
+        }
+
+        private void resize_MouseMove(object sender, MouseEventArgs e)
         {
             if (isResizing)
             {
-                int newWidth = pictureBoxCanvas.Width + (e.X - lastMousePos.X);
-                int newHeight = pictureBoxCanvas.Height + (e.Y - lastMousePos.Y);
-                pictureBoxCanvas.Size = new Size(newWidth, newHeight);
-                PositionResizeHandles();
+                int deltaX = e.X - lastMousePos.X;
+                int deltaY = e.Y - lastMousePos.Y;
+
+                int newWidth = canvasPanel.Width;
+                int newHeight = canvasPanel.Height;
+
+                switch (resizeDirection)
+                {
+                    case ResizeDirection.TopLeft:
+                        newWidth = canvasPanel.Width - deltaX;
+                        newHeight = canvasPanel.Height - deltaY;
+                        canvasPanel.Location = new Point(canvasPanel.Left + deltaX, canvasPanel.Top + deltaY);
+                        break;
+                    case ResizeDirection.Top:
+                        newHeight = canvasPanel.Height - deltaY;
+                        canvasPanel.Location = new Point(canvasPanel.Left, canvasPanel.Top + deltaY);
+                        break;
+                    case ResizeDirection.TopRight:
+                        newWidth = canvasPanel.Width + deltaX;
+                        newHeight = canvasPanel.Height - deltaY;
+                        canvasPanel.Location = new Point(canvasPanel.Left, canvasPanel.Top + deltaY);
+                        break;
+                    case ResizeDirection.Left:
+                        newWidth = canvasPanel.Width - deltaX;
+                        canvasPanel.Location = new Point(canvasPanel.Left + deltaX, canvasPanel.Top);
+                        break;
+                    case ResizeDirection.Right:
+                        newWidth = canvasPanel.Width + deltaX;
+                        break;
+                    case ResizeDirection.BottomLeft:
+                        newWidth = canvasPanel.Width - deltaX;
+                        newHeight = canvasPanel.Height + deltaY;
+                        canvasPanel.Location = new Point(canvasPanel.Left + deltaX, canvasPanel.Top);
+                        break;
+                    case ResizeDirection.Bottom:
+                        newHeight = canvasPanel.Height + deltaY;
+                        break;
+                    case ResizeDirection.BottomRight:
+                        newWidth = canvasPanel.Width + deltaX;
+                        newHeight = canvasPanel.Height + deltaY;
+                        break;
+                }
+
+                // Minimum boyutlarý kontrol et
+                newWidth = Math.Max(newWidth, 1);
+                newHeight = Math.Max(newHeight, 1);
+
+                // Yeni boyutlarý uygula
+                canvasPanel.Size = new Size(newWidth, newHeight);
+
+                // Panelin her zaman ortalanmasý için konumunu yeniden hesaplýyoruz
+                int centerX = (this.ClientSize.Width - canvasPanel.Width) / 2;
+                int centerY = (this.ClientSize.Height - canvasPanel.Height) / 2;
+
+                // Paneli merkezi konumda yerleþtiriyoruz
+                canvasPanel.Location = new Point(centerX, centerY);
+
+                // Paneli hemen yenile (Refresh kullan)
+                canvasPanel.Refresh();
+
                 lastMousePos = e.Location;
+                labelSize.Text = $"{canvasPanel.Width} X {canvasPanel.Height}px";
             }
         }
 
-        private void pictureBoxCanvas_MouseUp(object sender, MouseEventArgs e)
+
+        private void resize_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left)
+            if (sender == resize_top_left)
+                resizeDirection = ResizeDirection.TopLeft;
+            else if (sender == resize_top)
+                resizeDirection = ResizeDirection.Top;
+            else if (sender == resize_top_right)
+                resizeDirection = ResizeDirection.TopRight;
+            else if (sender == resize_left)
+                resizeDirection = ResizeDirection.Left;
+            else if (sender == resize_right)
+                resizeDirection = ResizeDirection.Right;
+            else if (sender == resize_bottom_left)
+                resizeDirection = ResizeDirection.BottomLeft;
+            else if (sender == resize_bottom)
+                resizeDirection = ResizeDirection.Bottom;
+            else if (sender == resize_bottom_right)
+                resizeDirection = ResizeDirection.BottomRight;
+
+            // Resizing iþlemi baþladýðýnda
+            isResizing = true;
+            lastMousePos = e.Location;
+        }
+
+        private void brushTool_CheckedChanged(object sender, EventArgs e)
+        {
+            if (brushTool.Checked)
             {
-                isResizing = false;
+                currentTool = drawType[3];
+                toolStripBrush.Visible = true;
+            }
+            else
+            {
+                toolStripBrush.Visible = false;
+            }
+        }
+
+        private void penTool_Click(object sender, EventArgs e)
+        {
+            ToolStripButtonsClick(penTool);
+        }
+
+        private void penTool_CheckedChanged(object sender, EventArgs e)
+        {
+            if (penTool.Checked)
+            {
+                currentTool = drawType[4];
+                toolStripPen.Visible = true;
+            }
+            else
+            {
+                toolStripPen.Visible = false;
+            }
+        }
+
+        private void fontsComboBox_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void fontsComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            toolStripSample.Font = new Font(fontFamilies[fontsComboBox.SelectedIndex], 12);
+        }
+
+        private void mouseTool_CheckedChanged(object sender, EventArgs e)
+        {
+            if (mouseTool.Checked)
+            {
+                currentTool = drawType[0];
+            }
+        }
+
+        private void selectTool_CheckedChanged(object sender, EventArgs e)
+        {
+            if (selectTool.Checked)
+            {
+                currentTool = drawType[1];
+            }
+        }
+
+        private void magicSelectTool_CheckedChanged(object sender, EventArgs e)
+        {
+            if (magicSelectTool.Checked)
+            {
+                currentTool = drawType[2];
+            }
+        }
+
+        private void eraserTool_CheckedChanged(object sender, EventArgs e)
+        {
+            if (eraserTool.Checked)
+            {
+                currentTool = drawType[5];
+            }
+        }
+
+        private void bucketTool_CheckedChanged(object sender, EventArgs e)
+        {
+            if (bucketTool.Checked)
+            {
+                currentTool = drawType[6];
+            }
+        }
+
+        private void sprayTool_CheckedChanged(object sender, EventArgs e)
+        {
+            if (sprayTool.Checked)
+            {
+                currentTool = drawType[7];
+            }
+        }
+
+        private void lineToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+        {
+            if (lineToolStripMenuItem.Checked)
+            {
+                currentTool = drawType[8];
+            }
+        }
+
+        private void roundToolStripMenuItem1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (roundToolStripMenuItem1.Checked)
+            {
+                currentTool = drawType[9];
+            }
+        }
+
+        private void rectangleToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rectangleToolStripMenuItem.Checked)
+            {
+                currentTool = drawType[10];
+            }
+        }
+
+        private void roundedRectangleToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+        {
+            if (roundedRectangleToolStripMenuItem.Checked)
+            {
+                currentTool = drawType[11];
+            }
+        }
+
+        private void triangleToolStripMenuItem1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (triangleToolStripMenuItem1.Checked)
+            {
+                currentTool = drawType[12];
+            }
+        }
+
+        private void hexagonToolStripMenuItem1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (hexagonToolStripMenuItem1.Checked)
+            {
+                currentTool = drawType[13];
+            }
+        }
+
+        private void colorDropTool_CheckedChanged(object sender, EventArgs e)
+        {
+            if (colorDropTool.Checked)
+            {
+                currentTool = drawType[15];
             }
         }
     }
