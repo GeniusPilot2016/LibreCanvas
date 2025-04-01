@@ -11,10 +11,12 @@ namespace _222303026_proje3
         String currentTool = drawType[0];
         Pen brushes;
         Color color1 = Color.Black, color2 = Color.White;
-        int brushSize = 1, eraserSize = 1, shapeSize = 1, shapeType = 0, textSize = 9;
+        int brushSize = 11, penSize=9, eraserSize = 11, shapeThickness = 11, textSize = 9;
+        int zoom = 100;
         bool isResizing = false;
         private ResizeDirection resizeDirection;
         private Point lastMousePos;
+        Bitmap bitmap;
 
         private enum ResizeDirection
         {
@@ -33,9 +35,26 @@ namespace _222303026_proje3
         FontFamily[] fontFamilies;
         InstalledFontCollection installedFontCollection = new InstalledFontCollection();
 
-        public ImageEditor()
+        public ImageEditor(int width = 800, int height = 600)
         {
             InitializeComponent();
+            comboBoxBrushType.SelectedIndex = 0;
+            comboBoxPenType.SelectedIndex = 0;
+            brushSize = Convert.ToInt32(comboBoxBrushSize.SelectedItem);
+            eraserSize = Convert.ToInt32(comboBoxEraserSize.SelectedItem);
+            penSize = Convert.ToInt32(comboBoxPenSize.SelectedItem);
+            shapeThickness = Convert.ToInt32(comboBoxShapeThickness.SelectedItem);
+            canvasPanel.Size = new Size(width + 20, height + 20);
+            int centerX = (panel1.Width - canvasPanel.Width) / 2;
+            int centerY = (panel1.Height - canvasPanel.Height) / 2;
+
+            // Paneli merkezi konumda yerleþtiriyoruz
+            canvasPanel.Location = new Point(centerX, centerY);
+
+            // Paneli hemen yenile (Refresh kullan)
+            canvasPanel.Refresh();
+            bitmap = new Bitmap(width, height);
+            labelSize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height}px";
             fontFamilies = installedFontCollection.Families;
             for (int i = 0; i < fontFamilies.Length; i++)
             {
@@ -295,6 +314,9 @@ namespace _222303026_proje3
 
         private void resize_MouseUp(object sender, MouseEventArgs e)
         {
+            labelSize.Text = $"{canvasPanel.Width} X {canvasPanel.Height}px";
+            toolStripResize.Visible = false;
+            toolStripSeparator16.Visible = false;
             isResizing = false;
         }
 
@@ -352,9 +374,17 @@ namespace _222303026_proje3
                 // Yeni boyutlarý uygula
                 canvasPanel.Size = new Size(newWidth, newHeight);
 
+                // Bitmap'i yeniden boyutlandýr
+                Bitmap newBitmap = new Bitmap(newWidth, newHeight);
+                using (Graphics g = Graphics.FromImage(newBitmap))
+                {
+                    g.DrawImage(bitmap, 0, 0);
+                }
+                bitmap = newBitmap;
+
                 // Panelin her zaman ortalanmasý için konumunu yeniden hesaplýyoruz
-                int centerX = (this.ClientSize.Width - canvasPanel.Width) / 2;
-                int centerY = (this.ClientSize.Height - canvasPanel.Height) / 2;
+                int centerX = (panel1.Width - canvasPanel.Width) / 2;
+                int centerY = (panel1.Height - canvasPanel.Height) / 2;
 
                 // Paneli merkezi konumda yerleþtiriyoruz
                 canvasPanel.Location = new Point(centerX, centerY);
@@ -363,7 +393,7 @@ namespace _222303026_proje3
                 canvasPanel.Refresh();
 
                 lastMousePos = e.Location;
-                labelSize.Text = $"{canvasPanel.Width} X {canvasPanel.Height}px";
+                toolStripResize.Text = $"{canvasPanel.Width} X {canvasPanel.Height}px";
             }
         }
 
@@ -389,6 +419,9 @@ namespace _222303026_proje3
 
             // Resizing iþlemi baþladýðýnda
             isResizing = true;
+            toolStripResize.Visible = true;
+            toolStripSeparator16.Visible = true;
+            toolStripResize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height}px";
             lastMousePos = e.Location;
         }
 
@@ -462,6 +495,11 @@ namespace _222303026_proje3
             if (eraserTool.Checked)
             {
                 currentTool = drawType[5];
+                toolStripEraser.Visible = true;
+            }
+            else
+            {
+                toolStripEraser.Visible = false;
             }
         }
 
@@ -485,7 +523,12 @@ namespace _222303026_proje3
         {
             if (lineToolStripMenuItem.Checked)
             {
+                toolStripShapes.Visible = true;
                 currentTool = drawType[8];
+            }
+            else
+            {
+                toolStripShapes.Visible = false;
             }
         }
 
@@ -493,7 +536,12 @@ namespace _222303026_proje3
         {
             if (roundToolStripMenuItem1.Checked)
             {
+                toolStripShapes.Visible = true;
                 currentTool = drawType[9];
+            }
+            else
+            {
+                toolStripShapes.Visible = false;
             }
         }
 
@@ -501,7 +549,12 @@ namespace _222303026_proje3
         {
             if (rectangleToolStripMenuItem.Checked)
             {
+                toolStripShapes.Visible = true;
                 currentTool = drawType[10];
+            }
+            else
+            {
+                toolStripShapes.Visible = false;
             }
         }
 
@@ -509,7 +562,12 @@ namespace _222303026_proje3
         {
             if (roundedRectangleToolStripMenuItem.Checked)
             {
+                toolStripShapes.Visible = true;
                 currentTool = drawType[11];
+            }
+            else
+            {
+                toolStripShapes.Visible = false;
             }
         }
 
@@ -517,7 +575,12 @@ namespace _222303026_proje3
         {
             if (triangleToolStripMenuItem1.Checked)
             {
+                toolStripShapes.Visible = true;
                 currentTool = drawType[12];
+            }
+            else
+            {
+                toolStripShapes.Visible = false;
             }
         }
 
@@ -525,7 +588,12 @@ namespace _222303026_proje3
         {
             if (hexagonToolStripMenuItem1.Checked)
             {
+                toolStripShapes.Visible = true;
                 currentTool = drawType[13];
+            }
+            else
+            {
+                toolStripShapes.Visible = false;
             }
         }
 
@@ -535,6 +603,158 @@ namespace _222303026_proje3
             {
                 currentTool = drawType[15];
             }
+        }
+
+        private void pictureBoxCanvas_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (isdrawing == true)
+            {
+                isdrawing = false;
+                x = -1;
+                y = -1;
+            }
+        }
+
+        private void pictureBoxCanvas_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isdrawing)
+            {
+                drawIntoCanvas(e);
+            }
+            int x = e.X;
+            int y = e.Y;
+            if ((x < 0 || y < 0) || (x > pictureBoxCanvas.Width || y > pictureBoxCanvas.Height))
+            {
+                toolStripSeparator15.Visible = false;
+                labelCanvasPositon.Visible = false;
+            }
+            else
+            {
+                toolStripSeparator15.Visible = true;
+                labelCanvasPositon.Visible = true;
+                labelCanvasPositon.Text = $"{x}, {y}px";
+            }
+        }
+        private void drawIntoCanvas(MouseEventArgs e)
+        {
+            if (bitmap == null)
+            {
+                // Bitmap nesnesi oluþturulmamýþsa, oluþtur
+                bitmap = new Bitmap(pictureBoxCanvas.Width, pictureBoxCanvas.Height);
+            }
+
+            using (Graphics graphics = Graphics.FromImage(bitmap))
+            {
+                if (isdrawing)
+                {
+                    switch (currentTool)
+                    {
+                        case "Brush":
+                            using (Pen brushes = new Pen(color1, brushSize))
+                            {
+                                if (x == -1 && y == -1)
+                                {
+                                    graphics.FillEllipse(new SolidBrush(color1), e.X, e.Y, brushSize, brushSize);
+                                }
+                                else
+                                {
+                                    graphics.FillEllipse(new SolidBrush(color1), e.X, e.Y, brushSize, brushSize);
+                                    FillGap(graphics, new SolidBrush(color1), x, y, e.X, e.Y, brushSize);
+                                }
+                                x = e.X;
+                                y = e.Y;
+                            }
+                            break;
+                        case "Pen":
+                            using (Pen brushes = new Pen(color1, penSize))
+                            {
+                                if (x == -1 && y == -1)
+                                {
+                                    graphics.FillRectangle(new SolidBrush(color1), e.X, e.Y, penSize, penSize);
+                                }
+                                else
+                                {
+                                    graphics.FillRectangle(new SolidBrush(color1), e.X, e.Y, penSize, penSize);
+                                    FillGap(graphics, new SolidBrush(color1), x, y, e.X, e.Y, penSize);
+                                }
+                                x = e.X;
+                                y = e.Y;
+                            }
+                            break;
+                        case "Eraser":
+                            using (Pen brushes = new Pen(color2, eraserSize))
+                            {
+                                if (x == -1 && y == -1)
+                                {
+                                    graphics.FillEllipse(new SolidBrush(color2), e.X, e.Y, eraserSize, eraserSize);
+                                }
+                                else
+                                {
+                                    graphics.FillEllipse(new SolidBrush(color2), e.X, e.Y, eraserSize, eraserSize);
+                                    FillGap(graphics, new SolidBrush(color2), x, y, e.X, e.Y, eraserSize);
+                                }
+                                x = e.X;
+                                y = e.Y;
+                            }
+                            break;
+                        // Diðer araçlar için case bloklarý ekleyin
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            // pictureBoxCanvas kontrolünü yenile
+            pictureBoxCanvas.Image = bitmap;
+            pictureBoxCanvas.Invalidate();
+        }
+
+        private void FillGap(Graphics graphics, Brush brush, int x1, int y1, int x2, int y2, int size)
+        {
+            int dx = Math.Abs(x2 - x1);
+            int dy = Math.Abs(y2 - y1);
+            int sx = x1 < x2 ? 1 : -1;
+            int sy = y1 < y2 ? 1 : -1;
+            int err = dx - dy;
+
+            while (x1 != x2 || y1 != y2)
+            {
+                graphics.FillEllipse(brush, x1, y1, size, size);
+                int e2 = 2 * err;
+                if (e2 > -dy)
+                {
+                    err -= dy;
+                    x1 += sx;
+                }
+                if (e2 < dx)
+                {
+                    err += dx;
+                    y1 += sy;
+                }
+            }
+        }
+        private void pictureBoxCanvas_MouseDown(object sender, MouseEventArgs e)
+        {
+            isdrawing = true;
+            x = e.X;
+            y = e.Y;
+            drawIntoCanvas(e); // Tek týklamada nokta çizmek için
+        }
+
+        private void pictureBoxCanvas_MouseLeave(object sender, EventArgs e)
+        {
+            toolStripSeparator15.Visible = false;
+            labelCanvasPositon.Visible = false;
+        }
+
+        private void labelSize_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pictureBoxCanvas_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
