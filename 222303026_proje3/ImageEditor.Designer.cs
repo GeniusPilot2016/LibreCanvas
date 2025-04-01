@@ -305,6 +305,9 @@
             // panel1
             // 
             panel1.AutoScroll = true;
+            panel1.AutoScrollMargin = new Size(25, 25);
+            panel1.AutoScrollMinSize = new Size(820, 620);
+            panel1.AutoSize = true;
             panel1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             panel1.Controls.Add(canvasPanel);
             panel1.Dock = DockStyle.Fill;
@@ -317,7 +320,6 @@
             // 
             // canvasPanel
             // 
-            canvasPanel.Anchor = AnchorStyles.None;
             canvasPanel.Controls.Add(resize_bottom_left);
             canvasPanel.Controls.Add(resize_bottom_right);
             canvasPanel.Controls.Add(resize_right);
@@ -327,7 +329,7 @@
             canvasPanel.Controls.Add(resize_top_right);
             canvasPanel.Controls.Add(resize_top);
             canvasPanel.Controls.Add(pictureBoxCanvas);
-            canvasPanel.Location = new Point(226, 84);
+            canvasPanel.Location = new Point(228, 70);
             canvasPanel.Name = "canvasPanel";
             canvasPanel.Size = new Size(820, 620);
             canvasPanel.TabIndex = 2;
@@ -911,6 +913,7 @@
             çıkışToolStripMenuItem.Name = "çıkışToolStripMenuItem";
             çıkışToolStripMenuItem.Size = new Size(185, 26);
             çıkışToolStripMenuItem.Text = "&Exit";
+            çıkışToolStripMenuItem.Click += çıkışToolStripMenuItem_Click;
             // 
             // düzenleToolStripMenuItem
             // 
@@ -1345,8 +1348,9 @@
             // 
             // ImageEditor
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(120F, 120F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            AutoSize = true;
             ClientSize = new Size(1289, 812);
             Controls.Add(toolStripContainer1);
             Icon = (Icon)resources.GetObject("$this.Icon");
@@ -1355,6 +1359,7 @@
             toolStripContainer1.BottomToolStripPanel.ResumeLayout(false);
             toolStripContainer1.BottomToolStripPanel.PerformLayout();
             toolStripContainer1.ContentPanel.ResumeLayout(false);
+            toolStripContainer1.ContentPanel.PerformLayout();
             toolStripContainer1.LeftToolStripPanel.ResumeLayout(false);
             toolStripContainer1.LeftToolStripPanel.PerformLayout();
             toolStripContainer1.TopToolStripPanel.ResumeLayout(false);
@@ -1498,16 +1503,6 @@
         private ToolStripLabel toolStripLabel11;
         private ToolStripComboBox comboBoxPenType;
         private ToolStripLabel toolStripSample;
-        private PictureBox pictureBoxCanvas;
-        private Panel resize_top_left;
-        private Panel resize_top;
-        private Panel resize_right;
-        private Panel resize_bottom_right;
-        private Panel resize_top_right;
-        private Panel resize_bottom;
-        private Panel resize_left;
-        private Panel resize_bottom_left;
-        private Panel canvasPanel;
         private ToolStripButton penTool;
         private ToolStrip toolStripEraser;
         private ToolStripLabel toolStripLabel12;
@@ -1518,5 +1513,15 @@
         private ToolStripComboBox comboBoxShapeThickness;
         private ToolStripSeparator toolStripSeparator24;
         private ToolStripLabel labelZoom;
+        private Panel canvasPanel;
+        private Panel resize_bottom_left;
+        private Panel resize_bottom_right;
+        private Panel resize_right;
+        private Panel resize_bottom;
+        private Panel resize_left;
+        private Panel resize_top_left;
+        private Panel resize_top_right;
+        private Panel resize_top;
+        private PictureBox pictureBoxCanvas;
     }
 }

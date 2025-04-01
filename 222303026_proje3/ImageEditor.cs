@@ -11,7 +11,7 @@ namespace _222303026_proje3
         String currentTool = drawType[0];
         Pen brushes;
         Color color1 = Color.Black, color2 = Color.White;
-        int brushSize = 11, penSize=9, eraserSize = 11, shapeThickness = 11, textSize = 9;
+        int brushSize = 11, penSize = 9, eraserSize = 11, shapeThickness = 11, textSize = 9;
         int zoom = 100;
         bool isResizing = false;
         private ResizeDirection resizeDirection;
@@ -44,12 +44,18 @@ namespace _222303026_proje3
             eraserSize = Convert.ToInt32(comboBoxEraserSize.SelectedItem);
             penSize = Convert.ToInt32(comboBoxPenSize.SelectedItem);
             shapeThickness = Convert.ToInt32(comboBoxShapeThickness.SelectedItem);
+
+            // panel1'in AutoScroll özelliðini true yaparak kaydýrma çubuklarýný etkinleþtiriyoruz
+            panel1.AutoScroll = true;
+
+            // canvasPanel'in boyutlarýný ayarlýyoruz
             canvasPanel.Size = new Size(width + 20, height + 20);
-            int centerX = (panel1.Width - canvasPanel.Width) / 2;
-            int centerY = (panel1.Height - canvasPanel.Height) / 2;
+
+            // panel1'in AutoScrollMinSize özelliðini canvasPanel'in boyutlarýna ayarlýyoruz
+            panel1.AutoScrollMinSize = canvasPanel.Size;
 
             // Paneli merkezi konumda yerleþtiriyoruz
-            canvasPanel.Location = new Point(centerX, centerY);
+            CenterCanvasPanel();
 
             // Paneli hemen yenile (Refresh kullan)
             canvasPanel.Refresh();
@@ -61,8 +67,12 @@ namespace _222303026_proje3
                 fontsComboBox.Items.Add(fontFamilies[i].Name);
             }
         }
-
-
+        private void CenterCanvasPanel()
+        {
+            int centerX = (panel1.ClientSize.Width - canvasPanel.Width) / 2;
+            int centerY = (panel1.ClientSize.Height - canvasPanel.Height) / 2;
+            canvasPanel.Location = new Point(Math.Max(centerX, 0), Math.Max(centerY, 0));
+        }
 
         private void removeObjectToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -315,6 +325,7 @@ namespace _222303026_proje3
         private void resize_MouseUp(object sender, MouseEventArgs e)
         {
             labelSize.Text = $"{canvasPanel.Width} X {canvasPanel.Height}px";
+            panel1.AutoScrollMinSize = canvasPanel.Size;
             toolStripResize.Visible = false;
             toolStripSeparator16.Visible = false;
             isResizing = false;
@@ -374,6 +385,9 @@ namespace _222303026_proje3
                 // Yeni boyutlarý uygula
                 canvasPanel.Size = new Size(newWidth, newHeight);
 
+                // panel1'in AutoScrollMinSize özelliðini güncelle
+                panel1.AutoScrollMinSize = canvasPanel.Size;
+
                 // Bitmap'i yeniden boyutlandýr
                 Bitmap newBitmap = new Bitmap(newWidth, newHeight);
                 using (Graphics g = Graphics.FromImage(newBitmap))
@@ -382,12 +396,8 @@ namespace _222303026_proje3
                 }
                 bitmap = newBitmap;
 
-                // Panelin her zaman ortalanmasý için konumunu yeniden hesaplýyoruz
-                int centerX = (panel1.Width - canvasPanel.Width) / 2;
-                int centerY = (panel1.Height - canvasPanel.Height) / 2;
-
                 // Paneli merkezi konumda yerleþtiriyoruz
-                canvasPanel.Location = new Point(centerX, centerY);
+                CenterCanvasPanel();
 
                 // Paneli hemen yenile (Refresh kullan)
                 canvasPanel.Refresh();
@@ -396,7 +406,6 @@ namespace _222303026_proje3
                 toolStripResize.Text = $"{canvasPanel.Width} X {canvasPanel.Height}px";
             }
         }
-
 
         private void resize_MouseDown(object sender, MouseEventArgs e)
         {
@@ -424,7 +433,6 @@ namespace _222303026_proje3
             toolStripResize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height}px";
             lastMousePos = e.Location;
         }
-
         private void brushTool_CheckedChanged(object sender, EventArgs e)
         {
             if (brushTool.Checked)
@@ -755,6 +763,11 @@ namespace _222303026_proje3
         private void pictureBoxCanvas_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void çýkýþToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
     }
 }

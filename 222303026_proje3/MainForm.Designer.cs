@@ -38,6 +38,7 @@
             label2 = new Label();
             button1 = new Button();
             icons = new ImageList(components);
+            button2 = new Button();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
@@ -98,7 +99,7 @@
             label3.Name = "label3";
             label3.Size = new Size(146, 30);
             label3.TabIndex = 1;
-            label3.Text = "Version 0.2.0";
+            label3.Text = "Version 0.3.0";
             // 
             // label2
             // 
@@ -117,7 +118,7 @@
             button1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             button1.ImageIndex = 0;
             button1.ImageList = icons;
-            button1.Location = new Point(211, 470);
+            button1.Location = new Point(135, 470);
             button1.Name = "button1";
             button1.Size = new Size(158, 42);
             button1.TabIndex = 5;
@@ -132,12 +133,29 @@
             icons.ImageStream = (ImageListStreamer)resources.GetObject("icons.ImageStream");
             icons.TransparentColor = Color.Transparent;
             icons.Images.SetKeyName(0, "icons8-add-file-48.png");
+            icons.Images.SetKeyName(1, "icons8-open-file-48.png");
+            // 
+            // button2
+            // 
+            button2.Anchor = AnchorStyles.Bottom;
+            button2.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            button2.ImageIndex = 1;
+            button2.ImageList = icons;
+            button2.Location = new Point(299, 470);
+            button2.Name = "button2";
+            button2.Size = new Size(158, 42);
+            button2.TabIndex = 5;
+            button2.Text = "Open File";
+            button2.TextAlign = ContentAlignment.MiddleRight;
+            button2.TextImageRelation = TextImageRelation.ImageBeforeText;
+            button2.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(579, 519);
+            Controls.Add(button2);
             Controls.Add(button1);
             Controls.Add(panel1);
             Controls.Add(label1);
@@ -161,5 +179,6 @@
         private PictureBox pictureBox1;
         private Button button1;
         private ImageList icons;
+        private Button button2;
     }
 }
