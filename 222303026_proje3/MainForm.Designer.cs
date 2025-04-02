@@ -39,8 +39,14 @@
             button1 = new Button();
             icons = new ImageList(components);
             button2 = new Button();
+            openFileDialog1 = new OpenFileDialog();
+            contextMenuStrip1 = new ContextMenuStrip(components);
+            createFileFromScratchToolStripMenuItem = new ToolStripMenuItem();
+            createWithAIToolStripMenuItem = new ToolStripMenuItem();
+            createWithWebcamToolStripMenuItem = new ToolStripMenuItem();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+            contextMenuStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // listBox1
@@ -99,7 +105,7 @@
             label3.Name = "label3";
             label3.Size = new Size(146, 30);
             label3.TabIndex = 1;
-            label3.Text = "Version 0.3.0";
+            label3.Text = "Version 0.4.0";
             // 
             // label2
             // 
@@ -126,6 +132,7 @@
             button1.TextAlign = ContentAlignment.MiddleRight;
             button1.TextImageRelation = TextImageRelation.ImageBeforeText;
             button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click;
             // 
             // icons
             // 
@@ -134,6 +141,9 @@
             icons.TransparentColor = Color.Transparent;
             icons.Images.SetKeyName(0, "icons8-add-file-48.png");
             icons.Images.SetKeyName(1, "icons8-open-file-48.png");
+            icons.Images.SetKeyName(2, "icons8-create-48.png");
+            icons.Images.SetKeyName(3, "icons8-webcam-48.png");
+            icons.Images.SetKeyName(4, "icons8-artificial-intelligence-48.png");
             // 
             // button2
             // 
@@ -149,6 +159,42 @@
             button2.TextAlign = ContentAlignment.MiddleRight;
             button2.TextImageRelation = TextImageRelation.ImageBeforeText;
             button2.UseVisualStyleBackColor = true;
+            button2.Click += button2_Click;
+            // 
+            // openFileDialog1
+            // 
+            openFileDialog1.FileName = "openFileDialog1";
+            // 
+            // contextMenuStrip1
+            // 
+            contextMenuStrip1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            contextMenuStrip1.ImageScalingSize = new Size(20, 20);
+            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { createFileFromScratchToolStripMenuItem, createWithAIToolStripMenuItem, createWithWebcamToolStripMenuItem });
+            contextMenuStrip1.Name = "contextMenuStrip1";
+            contextMenuStrip1.Size = new Size(252, 82);
+            // 
+            // createFileFromScratchToolStripMenuItem
+            // 
+            createFileFromScratchToolStripMenuItem.Image = Properties.Resources.icons8_add_file_48;
+            createFileFromScratchToolStripMenuItem.Name = "createFileFromScratchToolStripMenuItem";
+            createFileFromScratchToolStripMenuItem.Size = new Size(251, 26);
+            createFileFromScratchToolStripMenuItem.Text = "Create File From Scratch";
+            createFileFromScratchToolStripMenuItem.Click += createFileFromScratchToolStripMenuItem_Click;
+            // 
+            // createWithAIToolStripMenuItem
+            // 
+            createWithAIToolStripMenuItem.Image = Properties.Resources.icons8_artificial_intelligence_48;
+            createWithAIToolStripMenuItem.Name = "createWithAIToolStripMenuItem";
+            createWithAIToolStripMenuItem.Size = new Size(251, 26);
+            createWithAIToolStripMenuItem.Text = "Create With AI";
+            createWithAIToolStripMenuItem.Click += createWithAIToolStripMenuItem_Click;
+            // 
+            // createWithWebcamToolStripMenuItem
+            // 
+            createWithWebcamToolStripMenuItem.Image = Properties.Resources.icons8_webcam_48;
+            createWithWebcamToolStripMenuItem.Name = "createWithWebcamToolStripMenuItem";
+            createWithWebcamToolStripMenuItem.Size = new Size(251, 26);
+            createWithWebcamToolStripMenuItem.Text = "Create With Webcam";
             // 
             // MainForm
             // 
@@ -160,12 +206,16 @@
             Controls.Add(panel1);
             Controls.Add(label1);
             Controls.Add(listBox1);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
+            MaximizeBox = false;
+            MinimizeBox = false;
             Name = "MainForm";
             Text = "ArtFusion";
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
+            contextMenuStrip1.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -180,5 +230,10 @@
         private Button button1;
         private ImageList icons;
         private Button button2;
+        private OpenFileDialog openFileDialog1;
+        private ContextMenuStrip contextMenuStrip1;
+        private ToolStripMenuItem createFileFromScratchToolStripMenuItem;
+        private ToolStripMenuItem createWithAIToolStripMenuItem;
+        private ToolStripMenuItem createWithWebcamToolStripMenuItem;
     }
 }

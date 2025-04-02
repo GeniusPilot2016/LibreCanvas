@@ -10,7 +10,7 @@
     <Product>ArtFusion</Product>
     <Company></Company>
     <Authors>Nisa Özdoğan</Authors>
-    <Version>0.3.0</Version>
+    <Version>0.4.0</Version>
     <Title>ArtFusion</Title>
     <PackageId>artfusion</PackageId>
     <ApplicationIcon>artfusion_icon.ico</ApplicationIcon>
@@ -18,6 +18,11 @@
 
   <ItemGroup>
     <Content Include="artfusion_icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="HuggingFace" Version="0.4.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>

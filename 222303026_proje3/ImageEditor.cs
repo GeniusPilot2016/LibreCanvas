@@ -1,5 +1,7 @@
 using System.Drawing.Text;
+using System.IO.Enumeration;
 using System.Windows.Forms;
+using System.Windows.Forms.Design;
 
 namespace _222303026_proje3
 {
@@ -12,7 +14,7 @@ namespace _222303026_proje3
         Pen brushes;
         Color color1 = Color.Black, color2 = Color.White;
         int brushSize = 11, penSize = 9, eraserSize = 11, shapeThickness = 11, textSize = 9;
-        int zoom = 100;
+        int zoom = 100; 
         bool isResizing = false;
         private ResizeDirection resizeDirection;
         private Point lastMousePos;
@@ -35,7 +37,22 @@ namespace _222303026_proje3
         FontFamily[] fontFamilies;
         InstalledFontCollection installedFontCollection = new InstalledFontCollection();
 
-        public ImageEditor(int width = 800, int height = 600)
+        public ImageEditor()
+        {
+            InitializeComponentAndFont();
+            createNewFile();
+        }
+        public ImageEditor(String fileName)
+        {
+            InitializeComponentAndFont();
+            openAFile(fileName);
+        }
+        public ImageEditor(Image image)
+        {
+            InitializeComponentAndFont();
+            createFileWithAI(image);
+        }
+        private void InitializeComponentAndFont()
         {
             InitializeComponent();
             comboBoxBrushType.SelectedIndex = 0;
@@ -44,12 +61,20 @@ namespace _222303026_proje3
             eraserSize = Convert.ToInt32(comboBoxEraserSize.SelectedItem);
             penSize = Convert.ToInt32(comboBoxPenSize.SelectedItem);
             shapeThickness = Convert.ToInt32(comboBoxShapeThickness.SelectedItem);
-
+            fontFamilies = installedFontCollection.Families;
+            for (int i = 0; i < fontFamilies.Length; i++)
+            {
+                fontsComboBox.Items.Add(fontFamilies[i].Name);
+            }
+        }
+        private void createNewFile()
+        {
+            pictureBoxCanvas.Image = null;
             // panel1'in AutoScroll özelliðini true yaparak kaydýrma çubuklarýný etkinleþtiriyoruz
             panel1.AutoScroll = true;
 
             // canvasPanel'in boyutlarýný ayarlýyoruz
-            canvasPanel.Size = new Size(width + 20, height + 20);
+            canvasPanel.Size = new Size(820, 620);
 
             // panel1'in AutoScrollMinSize özelliðini canvasPanel'in boyutlarýna ayarlýyoruz
             panel1.AutoScrollMinSize = canvasPanel.Size;
@@ -59,13 +84,55 @@ namespace _222303026_proje3
 
             // Paneli hemen yenile (Refresh kullan)
             canvasPanel.Refresh();
-            bitmap = new Bitmap(width, height);
+            bitmap = new Bitmap(800, 600);
             labelSize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height}px";
-            fontFamilies = installedFontCollection.Families;
-            for (int i = 0; i < fontFamilies.Length; i++)
-            {
-                fontsComboBox.Items.Add(fontFamilies[i].Name);
-            }
+            labelFileName.Text = "Unnamed File";
+        }
+        private void openAFile(string fileName)
+        {
+            pictureBoxCanvas.Image = null;
+            Image image = Image.FromFile(fileName);
+            // panel1'in AutoScroll özelliðini true yaparak kaydýrma çubuklarýný etkinleþtiriyoruz
+            panel1.AutoScroll = true;
+
+            // canvasPanel'in boyutlarýný ayarlýyoruz
+            canvasPanel.Size = image.Size;
+
+            // panel1'in AutoScrollMinSize özelliðini canvasPanel'in boyutlarýna ayarlýyoruz
+            panel1.AutoScrollMinSize = canvasPanel.Size;
+
+            // Paneli merkezi konumda yerleþtiriyoruz
+            CenterCanvasPanel();
+
+            // Paneli hemen yenile (Refresh kullan)
+            pictureBoxCanvas.Image = image;
+            bitmap = new Bitmap(image);
+            canvasPanel.Refresh();
+            labelSize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height}px";
+            labelFileName.Text = fileName;
+        }
+        private void createFileWithAI(Image generatedImage)
+        {
+            pictureBoxCanvas.Image = null;
+            Image image = generatedImage;
+            // panel1'in AutoScroll özelliðini true yaparak kaydýrma çubuklarýný etkinleþtiriyoruz
+            panel1.AutoScroll = true;
+
+            // canvasPanel'in boyutlarýný ayarlýyoruz
+            canvasPanel.Size = image.Size;
+
+            // panel1'in AutoScrollMinSize özelliðini canvasPanel'in boyutlarýna ayarlýyoruz
+            panel1.AutoScrollMinSize = canvasPanel.Size;
+
+            // Paneli merkezi konumda yerleþtiriyoruz
+            CenterCanvasPanel();
+
+            // Paneli hemen yenile (Refresh kullan)
+            pictureBoxCanvas.Image = image;
+            bitmap = new Bitmap(image);
+            canvasPanel.Refresh();
+            labelSize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height}px";
+            labelFileName.Text = "AI Generated Image";
         }
         private void CenterCanvasPanel()
         {
@@ -272,10 +339,11 @@ namespace _222303026_proje3
 
         private void kaydetToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            saveFileDialog1.Filter = "PNG Files|*.png|JPEG Files|*.jpg|Bitmap Files|*.bmp";
             DialogResult dialogResult = saveFileDialog1.ShowDialog();
             if (dialogResult == DialogResult.OK)
             {
-                pictureBoxCanvas.Image.Save(saveFileDialog1.FileName);
+                bitmap.Save(saveFileDialog1.FileName);
             }
         }
 
@@ -767,7 +835,46 @@ namespace _222303026_proje3
 
         private void çýkýþToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Application.Exit();
+        }
+
+        private void ImageEditor_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void açToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            openFileDialog1.Filter = "PNG Files|*.png|JPEG Files|*.jpg|Bitmap Files|*.bmp";
+            DialogResult dialogResult = openFileDialog1.ShowDialog();
+            if (dialogResult == DialogResult.OK)
+            {
+                string file = openFileDialog1.FileName;
+                openAFile(file);
+            }
+        }
+
+        private void yeniToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            createNewFile();
+        }
+
+        private void createWithAIToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CreateWithAIForm createWithAIForm = new CreateWithAIForm();
+            createWithAIForm.ShowDialog();
+            var generatedImage = createWithAIForm.GetGeneratedImage();
+            if (generatedImage != null)
+            {
+                createFileWithAI(generatedImage);
+            }
+        }
+    }
+    public partial class CreateWithAIForm : Form
+    {
+        public Image GetGeneratedImage()
+        {
+            return image;
         }
     }
 }

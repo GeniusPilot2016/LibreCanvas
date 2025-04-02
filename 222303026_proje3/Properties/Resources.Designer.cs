@@ -463,6 +463,26 @@ namespace _222303026_proje3.Properties {
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
+        internal static System.Drawing.Bitmap icons8_webcam_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-webcam-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap icons8_webcam_481 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-webcam-481", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
         internal static System.Drawing.Bitmap icons8_zoom_in_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-zoom-in-48", resourceCulture);

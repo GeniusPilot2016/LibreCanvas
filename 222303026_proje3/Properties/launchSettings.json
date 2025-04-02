@@ -1,0 +1,17 @@
+{
+  "profiles": {
+    "ArtFusion": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "APIKey": "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",
+        "APIURL": "https://api-inference.huggingface.co/models/ehristoforu/dalle-3-xl"
+      }
+    },
+    "1 Profili": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "apiKey": "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"
+      }
+    }
+  }
+}

@@ -31,10 +31,10 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ImageEditor));
             toolStripContainer1 = new ToolStripContainer();
             toolStripBase = new ToolStrip();
-            toolStripLabel4 = new ToolStripLabel();
+            labelFileName = new ToolStripLabel();
             toolStripSeparator12 = new ToolStripSeparator();
-            toolStripLabel5 = new ToolStripLabel();
-            toolStripProgressBar2 = new ToolStripProgressBar();
+            labelSaving = new ToolStripLabel();
+            progressBarSaving = new ToolStripProgressBar();
             toolStripSeparator13 = new ToolStripSeparator();
             labelCanvasPositon = new ToolStripLabel();
             toolStripSeparator15 = new ToolStripSeparator();
@@ -92,6 +92,8 @@
             menuStrip1 = new MenuStrip();
             dosyaToolStripMenuItem = new ToolStripMenuItem();
             yeniToolStripMenuItem = new ToolStripMenuItem();
+            createWithWebcamToolStripMenuItem = new ToolStripMenuItem();
+            createWithAIToolStripMenuItem = new ToolStripMenuItem();
             açToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator = new ToolStripSeparator();
             kaydetToolStripMenuItem = new ToolStripMenuItem();
@@ -216,37 +218,37 @@
             toolStripBase.Dock = DockStyle.None;
             toolStripBase.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             toolStripBase.ImageScalingSize = new Size(20, 20);
-            toolStripBase.Items.AddRange(new ToolStripItem[] { toolStripLabel4, toolStripSeparator12, toolStripLabel5, toolStripProgressBar2, toolStripSeparator13, labelCanvasPositon, toolStripSeparator15, toolStripResize, toolStripSeparator16, labelSize, toolStripSeparator14, labelZoom });
+            toolStripBase.Items.AddRange(new ToolStripItem[] { labelFileName, toolStripSeparator12, labelSaving, progressBarSaving, toolStripSeparator13, labelCanvasPositon, toolStripSeparator15, toolStripResize, toolStripSeparator16, labelSize, toolStripSeparator14, labelZoom });
             toolStripBase.Location = new Point(0, 0);
             toolStripBase.Name = "toolStripBase";
             toolStripBase.Size = new Size(1289, 25);
             toolStripBase.Stretch = true;
             toolStripBase.TabIndex = 1;
             // 
-            // toolStripLabel4
+            // labelFileName
             // 
-            toolStripLabel4.Name = "toolStripLabel4";
-            toolStripLabel4.Size = new Size(104, 22);
-            toolStripLabel4.Text = "Unnamed File";
+            labelFileName.Name = "labelFileName";
+            labelFileName.Size = new Size(104, 22);
+            labelFileName.Text = "Unnamed File";
             // 
             // toolStripSeparator12
             // 
             toolStripSeparator12.Name = "toolStripSeparator12";
             toolStripSeparator12.Size = new Size(6, 25);
             // 
-            // toolStripLabel5
+            // labelSaving
             // 
-            toolStripLabel5.Image = Properties.Resources.icons8_save_48;
-            toolStripLabel5.Name = "toolStripLabel5";
-            toolStripLabel5.Size = new Size(76, 22);
-            toolStripLabel5.Text = "Saving";
-            toolStripLabel5.Visible = false;
+            labelSaving.Image = Properties.Resources.icons8_save_48;
+            labelSaving.Name = "labelSaving";
+            labelSaving.Size = new Size(76, 22);
+            labelSaving.Text = "Saving";
+            labelSaving.Visible = false;
             // 
-            // toolStripProgressBar2
+            // progressBarSaving
             // 
-            toolStripProgressBar2.Name = "toolStripProgressBar2";
-            toolStripProgressBar2.Size = new Size(400, 22);
-            toolStripProgressBar2.Visible = false;
+            progressBarSaving.Name = "progressBarSaving";
+            progressBarSaving.Size = new Size(400, 22);
+            progressBarSaving.Visible = false;
             // 
             // toolStripSeparator13
             // 
@@ -320,6 +322,7 @@
             // 
             // canvasPanel
             // 
+            canvasPanel.Anchor = AnchorStyles.None;
             canvasPanel.Controls.Add(resize_bottom_left);
             canvasPanel.Controls.Add(resize_bottom_right);
             canvasPanel.Controls.Add(resize_right);
@@ -836,7 +839,7 @@
             // 
             // dosyaToolStripMenuItem
             // 
-            dosyaToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { yeniToolStripMenuItem, açToolStripMenuItem, toolStripSeparator, kaydetToolStripMenuItem, farklıKaydetToolStripMenuItem, toolStripSeparator1, yazdırToolStripMenuItem, baskıÖnizlemeToolStripMenuItem, toolStripSeparator2, çıkışToolStripMenuItem });
+            dosyaToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { yeniToolStripMenuItem, createWithWebcamToolStripMenuItem, createWithAIToolStripMenuItem, açToolStripMenuItem, toolStripSeparator, kaydetToolStripMenuItem, farklıKaydetToolStripMenuItem, toolStripSeparator1, yazdırToolStripMenuItem, baskıÖnizlemeToolStripMenuItem, toolStripSeparator2, çıkışToolStripMenuItem });
             dosyaToolStripMenuItem.Name = "dosyaToolStripMenuItem";
             dosyaToolStripMenuItem.Size = new Size(47, 24);
             dosyaToolStripMenuItem.Text = "&File";
@@ -847,8 +850,24 @@
             yeniToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             yeniToolStripMenuItem.Name = "yeniToolStripMenuItem";
             yeniToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.N;
-            yeniToolStripMenuItem.Size = new Size(185, 26);
+            yeniToolStripMenuItem.Size = new Size(235, 26);
             yeniToolStripMenuItem.Text = "&New";
+            yeniToolStripMenuItem.Click += yeniToolStripMenuItem_Click;
+            // 
+            // createWithWebcamToolStripMenuItem
+            // 
+            createWithWebcamToolStripMenuItem.Image = Properties.Resources.icons8_webcam_481;
+            createWithWebcamToolStripMenuItem.Name = "createWithWebcamToolStripMenuItem";
+            createWithWebcamToolStripMenuItem.Size = new Size(235, 26);
+            createWithWebcamToolStripMenuItem.Text = "Create with Webcam";
+            // 
+            // createWithAIToolStripMenuItem
+            // 
+            createWithAIToolStripMenuItem.Image = Properties.Resources.icons8_artificial_intelligence_48;
+            createWithAIToolStripMenuItem.Name = "createWithAIToolStripMenuItem";
+            createWithAIToolStripMenuItem.Size = new Size(235, 26);
+            createWithAIToolStripMenuItem.Text = "Create with AI";
+            createWithAIToolStripMenuItem.Click += createWithAIToolStripMenuItem_Click;
             // 
             // açToolStripMenuItem
             // 
@@ -856,13 +875,14 @@
             açToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             açToolStripMenuItem.Name = "açToolStripMenuItem";
             açToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.O;
-            açToolStripMenuItem.Size = new Size(185, 26);
+            açToolStripMenuItem.Size = new Size(235, 26);
             açToolStripMenuItem.Text = "&Open";
+            açToolStripMenuItem.Click += açToolStripMenuItem_Click;
             // 
             // toolStripSeparator
             // 
             toolStripSeparator.Name = "toolStripSeparator";
-            toolStripSeparator.Size = new Size(182, 6);
+            toolStripSeparator.Size = new Size(232, 6);
             // 
             // kaydetToolStripMenuItem
             // 
@@ -870,7 +890,7 @@
             kaydetToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             kaydetToolStripMenuItem.Name = "kaydetToolStripMenuItem";
             kaydetToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.S;
-            kaydetToolStripMenuItem.Size = new Size(185, 26);
+            kaydetToolStripMenuItem.Size = new Size(235, 26);
             kaydetToolStripMenuItem.Text = "&Save";
             kaydetToolStripMenuItem.Click += kaydetToolStripMenuItem_Click;
             // 
@@ -878,13 +898,13 @@
             // 
             farklıKaydetToolStripMenuItem.Enabled = false;
             farklıKaydetToolStripMenuItem.Name = "farklıKaydetToolStripMenuItem";
-            farklıKaydetToolStripMenuItem.Size = new Size(185, 26);
+            farklıKaydetToolStripMenuItem.Size = new Size(235, 26);
             farklıKaydetToolStripMenuItem.Text = "&Save As";
             // 
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new Size(182, 6);
+            toolStripSeparator1.Size = new Size(232, 6);
             // 
             // yazdırToolStripMenuItem
             // 
@@ -892,7 +912,7 @@
             yazdırToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             yazdırToolStripMenuItem.Name = "yazdırToolStripMenuItem";
             yazdırToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.P;
-            yazdırToolStripMenuItem.Size = new Size(185, 26);
+            yazdırToolStripMenuItem.Size = new Size(235, 26);
             yazdırToolStripMenuItem.Text = "&Print";
             // 
             // baskıÖnizlemeToolStripMenuItem
@@ -900,18 +920,18 @@
             baskıÖnizlemeToolStripMenuItem.Image = (Image)resources.GetObject("baskıÖnizlemeToolStripMenuItem.Image");
             baskıÖnizlemeToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             baskıÖnizlemeToolStripMenuItem.Name = "baskıÖnizlemeToolStripMenuItem";
-            baskıÖnizlemeToolStripMenuItem.Size = new Size(185, 26);
+            baskıÖnizlemeToolStripMenuItem.Size = new Size(235, 26);
             baskıÖnizlemeToolStripMenuItem.Text = "P&rint Preview";
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new Size(182, 6);
+            toolStripSeparator2.Size = new Size(232, 6);
             // 
             // çıkışToolStripMenuItem
             // 
             çıkışToolStripMenuItem.Name = "çıkışToolStripMenuItem";
-            çıkışToolStripMenuItem.Size = new Size(185, 26);
+            çıkışToolStripMenuItem.Size = new Size(235, 26);
             çıkışToolStripMenuItem.Text = "&Exit";
             çıkışToolStripMenuItem.Click += çıkışToolStripMenuItem_Click;
             // 
@@ -1342,10 +1362,6 @@
             colorDialog1.AnyColor = true;
             colorDialog1.FullOpen = true;
             // 
-            // openFileDialog1
-            // 
-            openFileDialog1.FileName = "openFileDialog1";
-            // 
             // ImageEditor
             // 
             AutoScaleDimensions = new SizeF(120F, 120F);
@@ -1356,6 +1372,7 @@
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "ImageEditor";
             Text = "ArtFusion";
+            FormClosed += ImageEditor_FormClosed;
             toolStripContainer1.BottomToolStripPanel.ResumeLayout(false);
             toolStripContainer1.BottomToolStripPanel.PerformLayout();
             toolStripContainer1.ContentPanel.ResumeLayout(false);
@@ -1464,10 +1481,10 @@
         private ToolStripSeparator toolStripSeparator10;
         private ToolStripSeparator toolStripSeparator11;
         private ToolStrip toolStripBase;
-        private ToolStripLabel toolStripLabel4;
+        private ToolStripLabel labelFileName;
         private ToolStripSeparator toolStripSeparator12;
-        private ToolStripProgressBar toolStripProgressBar2;
-        private ToolStripLabel toolStripLabel5;
+        private ToolStripProgressBar progressBarSaving;
+        private ToolStripLabel labelSaving;
         private ToolStripSeparator toolStripSeparator13;
         private ToolStripLabel labelSize;
         private ToolStripLabel labelCanvasPositon;
@@ -1523,5 +1540,7 @@
         private Panel resize_top_right;
         private Panel resize_top;
         private PictureBox pictureBoxCanvas;
+        private ToolStripMenuItem createWithWebcamToolStripMenuItem;
+        private ToolStripMenuItem createWithAIToolStripMenuItem;
     }
 }

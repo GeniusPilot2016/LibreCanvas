@@ -26,5 +26,46 @@ namespace _222303026_proje3
         {
 
         }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            DialogResult dialogResult = openFileDialog1.ShowDialog();
+            if (dialogResult == DialogResult.OK)
+            {
+                string file = openFileDialog1.FileName;
+                ImageEditor imageEditor = new ImageEditor(file);
+                this.Hide();
+                imageEditor.Show();
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            // Düğmenin ortasını hesapla
+            Point buttonCenter = new Point(button1.Width / 2, button1.Height / 2);
+            // Düğmenin ekran üzerindeki konumunu al
+            Point screenPoint = button1.PointToScreen(buttonCenter);
+            // ContextMenuStrip'i düğmenin ortasında göster
+            contextMenuStrip1.Show(screenPoint);
+        }
+
+        private void createFileFromScratchToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ImageEditor imageEditor = new ImageEditor();
+            this.Hide();
+            imageEditor.Show();
+        }
+
+        private void createWithAIToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CreateWithAIForm createWithAIForm = new CreateWithAIForm();
+            createWithAIForm.ShowDialog();
+            var generatedImage = createWithAIForm.GetGeneratedImage();
+            if (generatedImage != null)
+            {
+                ImageEditor imageEditor = new ImageEditor(generatedImage);
+                this.Hide(); imageEditor.Show();
+            }
+        }
     }
 }
