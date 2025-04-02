@@ -14,7 +14,7 @@ namespace _222303026_proje3
         Pen brushes;
         Color color1 = Color.Black, color2 = Color.White;
         int brushSize = 11, penSize = 9, eraserSize = 11, shapeThickness = 11, textSize = 9;
-        int zoom = 100; 
+        int zoom = 100;
         bool isResizing = false;
         private ResizeDirection resizeDirection;
         private Point lastMousePos;
@@ -47,10 +47,10 @@ namespace _222303026_proje3
             InitializeComponentAndFont();
             openAFile(fileName);
         }
-        public ImageEditor(Image image)
+        public ImageEditor(Image image, bool AIGenerated)
         {
             InitializeComponentAndFont();
-            createFileWithAI(image);
+            createFileWithAIorWebcam(image, AIGenerated);
         }
         private void InitializeComponentAndFont()
         {
@@ -111,7 +111,7 @@ namespace _222303026_proje3
             labelSize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height}px";
             labelFileName.Text = fileName;
         }
-        private void createFileWithAI(Image generatedImage)
+        private void createFileWithAIorWebcam(Image generatedImage, bool isAIGenerated)
         {
             pictureBoxCanvas.Image = null;
             Image image = generatedImage;
@@ -119,7 +119,7 @@ namespace _222303026_proje3
             panel1.AutoScroll = true;
 
             // canvasPanel'in boyutlarýný ayarlýyoruz
-            canvasPanel.Size = image.Size;
+            canvasPanel.Size = new Size(generatedImage.Width + 20, generatedImage.Height + 20);
 
             // panel1'in AutoScrollMinSize özelliðini canvasPanel'in boyutlarýna ayarlýyoruz
             panel1.AutoScrollMinSize = canvasPanel.Size;
@@ -132,7 +132,18 @@ namespace _222303026_proje3
             bitmap = new Bitmap(image);
             canvasPanel.Refresh();
             labelSize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height}px";
-            labelFileName.Text = "AI Generated Image";
+            switch (isAIGenerated)
+            {
+                case true:
+                    labelFileName.Text = "AI Generated File";
+                    break;
+                case false:
+                    labelFileName.Text = "Unnamed File";
+                    break;
+                default:
+                    labelFileName.Text = "Unnamed File";
+                    break;
+            }
         }
         private void CenterCanvasPanel()
         {
@@ -866,8 +877,21 @@ namespace _222303026_proje3
             var generatedImage = createWithAIForm.GetGeneratedImage();
             if (generatedImage != null)
             {
-                createFileWithAI(generatedImage);
+                createFileWithAIorWebcam(generatedImage, true);
             }
+        }
+
+        private void createWithWebcamToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TakePhotoFromWebcam takePhotoFromWebcam = new TakePhotoFromWebcam();
+            takePhotoFromWebcam.PhotoAccepted += TakePhotoFromWebcam_PhotoAccepted;
+            takePhotoFromWebcam.ShowDialog(this);
+        }
+
+        private void TakePhotoFromWebcam_PhotoAccepted(object sender, ImageAcceptedEventArgs e)
+        {
+            // Directly update the canvas with the accepted image
+            createFileWithAIorWebcam(e.AcceptedImage, false);
         }
     }
     public partial class CreateWithAIForm : Form

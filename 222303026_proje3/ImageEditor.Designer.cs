@@ -860,6 +860,7 @@
             createWithWebcamToolStripMenuItem.Name = "createWithWebcamToolStripMenuItem";
             createWithWebcamToolStripMenuItem.Size = new Size(235, 26);
             createWithWebcamToolStripMenuItem.Text = "Create with Webcam";
+            createWithWebcamToolStripMenuItem.Click += createWithWebcamToolStripMenuItem_Click;
             // 
             // createWithAIToolStripMenuItem
             // 

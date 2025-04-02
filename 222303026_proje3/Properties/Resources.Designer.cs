@@ -509,5 +509,15 @@ namespace _222303026_proje3.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        /// <summary>
+        ///   System.Byte[] türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static byte[] webcam_take_photo {
+            get {
+                object obj = ResourceManager.GetObject("webcam_take_photo", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

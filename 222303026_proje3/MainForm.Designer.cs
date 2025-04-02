@@ -171,7 +171,7 @@
             contextMenuStrip1.ImageScalingSize = new Size(20, 20);
             contextMenuStrip1.Items.AddRange(new ToolStripItem[] { createFileFromScratchToolStripMenuItem, createWithAIToolStripMenuItem, createWithWebcamToolStripMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(252, 82);
+            contextMenuStrip1.Size = new Size(252, 110);
             // 
             // createFileFromScratchToolStripMenuItem
             // 
@@ -195,6 +195,7 @@
             createWithWebcamToolStripMenuItem.Name = "createWithWebcamToolStripMenuItem";
             createWithWebcamToolStripMenuItem.Size = new Size(251, 26);
             createWithWebcamToolStripMenuItem.Text = "Create With Webcam";
+            createWithWebcamToolStripMenuItem.Click += createWithWebcamToolStripMenuItem_Click;
             // 
             // MainForm
             // 

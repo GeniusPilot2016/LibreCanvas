@@ -63,9 +63,28 @@ namespace _222303026_proje3
             var generatedImage = createWithAIForm.GetGeneratedImage();
             if (generatedImage != null)
             {
-                ImageEditor imageEditor = new ImageEditor(generatedImage);
+                ImageEditor imageEditor = new ImageEditor(generatedImage, true);
                 this.Hide(); imageEditor.Show();
             }
+        }
+
+        private void createWithWebcamToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TakePhotoFromWebcam takePhotoFromWebcam = new TakePhotoFromWebcam();
+            takePhotoFromWebcam.PhotoAccepted += TakePhotoFromWebcam_PhotoAccepted;
+            takePhotoFromWebcam.ShowDialog();
+        }
+
+        private void TakePhotoFromWebcam_PhotoAccepted(object sender, ImageAcceptedEventArgs e)
+        {
+            // Create an instance of ImageEditor with the accepted image
+            ImageEditor imageEditor = new ImageEditor(e.AcceptedImage, false);
+
+            // Hide the MainForm
+            this.Hide();
+
+            // Show the ImageEditor
+            imageEditor.Show();
         }
     }
 }
