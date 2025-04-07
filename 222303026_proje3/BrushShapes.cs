@@ -129,4 +129,17 @@ public class BrushShapes
             }
         }
     }
+    public static void DrawSprayBrush(Graphics graphics, Color color, int size, Point location)
+    {
+        Random rand = new Random();
+        for (int i = 0; i < size * 10; i++)
+        {
+            int offsetX = rand.Next(-size, size);
+            int offsetY = rand.Next(-size, size);
+            if (offsetX * offsetX + offsetY * offsetY <= size * size)
+            {
+                graphics.FillRectangle(new SolidBrush(color), location.X + offsetX, location.Y + offsetY, 1, 1);
+            }
+        }
+    }
 }

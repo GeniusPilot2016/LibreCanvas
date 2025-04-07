@@ -14,7 +14,8 @@ namespace _222303026_proje3
         String currentTool = drawType[0];
         Pen brushes;
         Color color1 = Color.Black, color2 = Color.White;
-        int brushSize = 11, penSize = 9, eraserSize = 11, shapeThickness = 11, textSize = 9;
+        int brushSize = 11, penSize = 9, eraserSize = 11, sprayToolSize = 11, shapeThickness = 11;
+        float textSize = 9;
         int zoom = 100;
         bool isResizing = false;
         private ResizeDirection resizeDirection;
@@ -604,6 +605,11 @@ namespace _222303026_proje3
             if (sprayTool.Checked)
             {
                 currentTool = drawType[7];
+                toolStripSpray.Visible = true;
+            }
+            else
+            {
+                toolStripSpray.Visible = false;
             }
         }
 
@@ -777,7 +783,9 @@ namespace _222303026_proje3
                         case "Eraser":
                             DrawBrush(graphics, BrushShapes.DrawCircleBrush, color2, eraserSize, new Point(e.X, e.Y));
                             break;
-                        // Diðer araçlar için case bloklarý ekleyin
+                        case "Spray":
+                            DrawBrush(graphics, BrushShapes.DrawSprayBrush, color1, sprayToolSize, new Point(e.X, e.Y));
+                            break;
                         default:
                             break;
                     }
@@ -832,7 +840,7 @@ namespace _222303026_proje3
         }
 
 
-        
+
         private void pictureBoxCanvas_MouseDown(object sender, MouseEventArgs e)
         {
             isdrawing = true;
@@ -905,6 +913,192 @@ namespace _222303026_proje3
         {
             // Directly update the canvas with the accepted image
             createFileWithAIorWebcam(e.AcceptedImage, false);
+        }
+
+        private void comboBoxSpraySize_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                sprayToolSize = Convert.ToInt32(comboBoxSpraySize.Text);
+                if (sprayToolSize <= 0)
+                {
+                    throw new OverflowException();
+                }
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                sprayToolSize = 11;
+            }
+            catch (OverflowException)
+            {
+                MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                sprayToolSize = 11;
+            }
+            finally
+            {
+                comboBoxSpraySize.Text = sprayToolSize.ToString();
+            }
+        }
+
+        private void comboBoxSpraySize_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            sprayToolSize = Convert.ToInt32(comboBoxSpraySize.SelectedItem);
+        }
+
+        private void comboBoxBrushSize_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            brushSize = Convert.ToInt32(comboBoxBrushSize.SelectedItem);
+        }
+
+        private void comboBoxBrushSize_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                brushSize = Convert.ToInt32(comboBoxBrushSize.Text);
+                if (brushSize <= 0)
+                {
+                    throw new OverflowException();
+                }
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                brushSize = 11;
+            }
+            catch (OverflowException)
+            {
+                MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                brushSize = 11;
+            }
+            finally
+            {
+                comboBoxBrushSize.Text = brushSize.ToString();
+            }
+        }
+
+        private void comboBoxEraserSize_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                eraserSize = Convert.ToInt32(comboBoxEraserSize.Text);
+                if (eraserSize <= 0)
+                {
+                    throw new OverflowException();
+                }
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                eraserSize = 11;
+            }
+            catch (OverflowException)
+            {
+                MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                eraserSize = 11;
+            }
+            finally
+            {
+                comboBoxEraserSize.Text = eraserSize.ToString();
+            }
+        }
+
+        private void comboBoxEraserSize_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            eraserSize = Convert.ToInt32(comboBoxEraserSize.SelectedItem);
+        }
+
+        private void comboBoxPenSize_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                penSize = Convert.ToInt32(comboBoxPenSize.Text);
+                if (penSize <= 0)
+                {
+                    throw new OverflowException();
+                }
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                penSize = 9;
+            }
+            catch (OverflowException)
+            {
+                MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                penSize = 9;
+            }
+            finally
+            {
+                comboBoxPenSize.Text = penSize.ToString();
+            }
+        }
+
+        private void comboBoxPenSize_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            penSize = Convert.ToInt32(comboBoxPenSize.SelectedItem);
+        }
+
+        private void comboBoxShapeThickness_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                shapeThickness = Convert.ToInt32(comboBoxShapeThickness.Text);
+                if (shapeThickness <= 0)
+                {
+                    throw new OverflowException();
+                }
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                shapeThickness = 11;
+            }
+            catch (OverflowException)
+            {
+                MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                shapeThickness = 11;
+            }
+            finally
+            {
+                comboBoxShapeThickness.Text = shapeThickness.ToString();
+            }
+        }
+
+        private void comboBoxShapeThickness_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void fontSizeComboBox_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                textSize = (float)Convert.ToDouble(fontSizeComboBox.Text);
+                if (textSize < 8)
+                {
+                    throw new OverflowException();
+                }
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                textSize = 9;
+            }
+            catch (OverflowException)
+            {
+                MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                textSize = 9;
+            }
+            finally
+            {
+                fontSizeComboBox.Text = textSize.ToString();
+            }
+        }
+
+        private void fontSizeComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            textSize = (float)Convert.ToDouble(fontSizeComboBox.SelectedItem);
         }
     }
     public partial class CreateWithAIForm : Form
