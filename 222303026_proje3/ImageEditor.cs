@@ -1,3 +1,4 @@
+using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using System.IO.Enumeration;
 using System.Windows.Forms;
@@ -726,7 +727,6 @@ namespace _222303026_proje3
         {
             if (bitmap == null)
             {
-                // Bitmap nesnesi oluþturulmamýþsa, oluþtur
                 bitmap = new Bitmap(pictureBoxCanvas.Width, pictureBoxCanvas.Height);
             }
 
@@ -737,89 +737,96 @@ namespace _222303026_proje3
                     switch (currentTool)
                     {
                         case "Brush":
-                            using (Pen brushes = new Pen(color1, brushSize))
+                            switch (comboBoxBrushType.SelectedIndex)
                             {
-                                if (x == -1 && y == -1)
-                                {
-                                    graphics.FillEllipse(new SolidBrush(color1), e.X, e.Y, brushSize, brushSize);
-                                }
-                                else
-                                {
-                                    graphics.FillEllipse(new SolidBrush(color1), e.X, e.Y, brushSize, brushSize);
-                                    FillGap(graphics, new SolidBrush(color1), x, y, e.X, e.Y, brushSize);
-                                }
-                                x = e.X;
-                                y = e.Y;
+                                case 0:
+                                    DrawBrush(graphics, BrushShapes.DrawCircleBrush, color1, brushSize, new Point(e.X, e.Y));
+                                    break;
+                                case 1:
+                                    DrawBrush(graphics, BrushShapes.DrawOilBrush, color1, brushSize, new Point(e.X, e.Y));
+                                    break;
+                                case 2:
+                                    DrawBrush(graphics, BrushShapes.DrawStarBrush, color1, brushSize, new Point(e.X, e.Y));
+                                    break;
+                                case 3:
+                                    DrawBrush(graphics, BrushShapes.DrawWatercolorBrush, color1, brushSize, new Point(e.X, e.Y));
+                                    break;
+                                default:
+                                    break;
                             }
                             break;
                         case "Pen":
-                            using (Pen brushes = new Pen(color1, penSize))
+                            switch (comboBoxPenType.SelectedIndex)
                             {
-                                if (x == -1 && y == -1)
-                                {
-                                    graphics.FillRectangle(new SolidBrush(color1), e.X, e.Y, penSize, penSize);
-                                }
-                                else
-                                {
-                                    graphics.FillRectangle(new SolidBrush(color1), e.X, e.Y, penSize, penSize);
-                                    FillGap(graphics, new SolidBrush(color1), x, y, e.X, e.Y, penSize);
-                                }
-                                x = e.X;
-                                y = e.Y;
+                                case 0:
+                                    DrawBrush(graphics, BrushShapes.DrawSquareBrush, color1, penSize, new Point(e.X, e.Y));
+                                    break;
+                                case 1:
+                                    // Diðer kalem türleri için eklemeler yapabilirsiniz
+                                    break;
+                                default:
+                                    break;
                             }
                             break;
                         case "Eraser":
-                            using (Pen brushes = new Pen(color2, eraserSize))
-                            {
-                                if (x == -1 && y == -1)
-                                {
-                                    graphics.FillEllipse(new SolidBrush(color2), e.X, e.Y, eraserSize, eraserSize);
-                                }
-                                else
-                                {
-                                    graphics.FillEllipse(new SolidBrush(color2), e.X, e.Y, eraserSize, eraserSize);
-                                    FillGap(graphics, new SolidBrush(color2), x, y, e.X, e.Y, eraserSize);
-                                }
-                                x = e.X;
-                                y = e.Y;
-                            }
+                            DrawBrush(graphics, BrushShapes.DrawCircleBrush, color2, eraserSize, new Point(e.X, e.Y));
                             break;
                         // Diðer araçlar için case bloklarý ekleyin
                         default:
                             break;
                     }
+
+                    x = e.X;
+                    y = e.Y;
                 }
             }
 
-            // pictureBoxCanvas kontrolünü yenile
             pictureBoxCanvas.Image = bitmap;
             pictureBoxCanvas.Invalidate();
         }
 
-        private void FillGap(Graphics graphics, Brush brush, int x1, int y1, int x2, int y2, int size)
+        private void DrawBrush(Graphics graphics, Action<Graphics, Color, int, Point> drawAction, Color color, int size, Point location)
         {
-            int dx = Math.Abs(x2 - x1);
-            int dy = Math.Abs(y2 - y1);
-            int sx = x1 < x2 ? 1 : -1;
-            int sy = y1 < y2 ? 1 : -1;
+            if (x == -1 && y == -1)
+            {
+                drawAction(graphics, color, size, location);
+            }
+            else
+            {
+                FillGap(graphics, drawAction, color, size, new Point(x, y), location);
+            }
+        }
+
+        private void FillGap(Graphics graphics, Action<Graphics, Color, int, Point> drawAction, Color color, int size, Point start, Point end)
+        {
+            int dx = Math.Abs(end.X - start.X);
+            int dy = Math.Abs(end.Y - start.Y);
+            int sx = start.X < end.X ? 1 : -1;
+            int sy = start.Y < end.Y ? 1 : -1;
             int err = dx - dy;
 
-            while (x1 != x2 || y1 != y2)
+            while (true)
             {
-                graphics.FillEllipse(brush, x1, y1, size, size);
+                drawAction(graphics, color, size, start);
+
+                if (start.X == end.X && start.Y == end.Y) break;
+
                 int e2 = 2 * err;
                 if (e2 > -dy)
                 {
                     err -= dy;
-                    x1 += sx;
+                    start.X += sx;
                 }
                 if (e2 < dx)
                 {
                     err += dx;
-                    y1 += sy;
+                    start.Y += sy;
                 }
             }
         }
+
+
+        
         private void pictureBoxCanvas_MouseDown(object sender, MouseEventArgs e)
         {
             isdrawing = true;
@@ -899,6 +906,117 @@ namespace _222303026_proje3
         public Image GetGeneratedImage()
         {
             return image;
+        }
+    }
+    public class BrushShapes
+    {
+        public static void DrawOilBrush(Graphics g, Color color, int size, Point location)
+        {
+            Random rand = new Random();
+
+            // Create multiple layers of slightly offset, varying opacity ellipses
+            for (int layer = 0; layer < 3; layer++) // Adjust number of layers for more texture
+            {
+                for (int i = 0; i < size * 1.5; i++) // More density
+                {
+                    int xOffset = rand.Next(-size / 8, size / 8);
+                    int yOffset = rand.Next(-size / 8, size / 8);
+                    int x = location.X + rand.Next(size / 4, 3 * size / 4) + xOffset;
+                    int y = location.Y + rand.Next(size / 4, 3 * size / 4) + yOffset;
+                    int width = rand.Next(size / 3, size / 2);
+                    int height = rand.Next(size / 3, size / 2);
+                    int alpha = rand.Next(150, 255); // Vary opacity
+                    using (var brush = new SolidBrush(Color.FromArgb(alpha, color)))
+                    {
+                        // Slightly rotate ellipses for a more organic feel
+                        g.TranslateTransform(x + width / 2, y + height / 2);
+                        g.RotateTransform((float)(rand.NextDouble() * 20 - 10));
+                        g.FillEllipse(brush, -width / 2, -height / 2, width, height);
+                        g.ResetTransform();
+                    }
+                }
+            }
+
+            // Add some subtle inner shadows/highlights for depth
+            for (int i = 0; i < size; i += size / 8)
+            {
+                using (var shadowBrush = new SolidBrush(Color.FromArgb(20, Color.Black)))
+                using (var highlightBrush = new SolidBrush(Color.FromArgb(20, Color.White)))
+                {
+                    g.FillEllipse(shadowBrush, location.X + i, location.Y + i, size / 4, size / 4);
+                    g.FillEllipse(highlightBrush, location.X + i + size / 8, location.Y + i + size / 8, size / 4, size / 4);
+                }
+            }
+        }
+
+        public static void DrawWatercolorBrush(Graphics g, Color color, int size, Point location)
+        {
+            Random rand = new Random();
+
+            // Create larger, more transparent shapes
+            for (int i = 0; i < size / 2; i++)
+            {
+                int x = location.X + rand.Next(-size / 4, size * 3 / 4);
+                int y = location.Y + rand.Next(-size / 4, size * 3 / 4);
+                int width = rand.Next(size / 2, size);
+                int height = rand.Next(size / 2, size);
+                int alpha = rand.Next(80, 180); // Higher transparency
+                using (var brush = new SolidBrush(Color.FromArgb(alpha, color)))
+                {
+                    g.FillEllipse(brush, x, y, width, height);
+                }
+            }
+
+            // Add some smaller, slightly darker/lighter variations for texture
+            for (int i = 0; i < size; i++)
+            {
+                int x = location.X + rand.Next(size);
+                int y = location.Y + rand.Next(size);
+                int smallSize = rand.Next(size / 8, size / 4);
+                int alphaVariation = rand.Next(-30, 30);
+                int clampedAlpha = Math.Max(0, Math.Min(255, 150 + alphaVariation)); // Keep alpha within bounds
+                Color variationColor = Color.FromArgb(clampedAlpha, color);
+                using (var brush = new SolidBrush(variationColor))
+                {
+                    g.FillEllipse(brush, x, y, smallSize, smallSize);
+                }
+            }
+        }
+
+        public static void DrawCircleBrush(Graphics g, Color color, int size, Point location)
+        {
+            using (var brush = new SolidBrush(color))
+            {
+                g.FillEllipse(brush, location.X, location.Y, size, size);
+            }
+        }
+
+        public static void DrawSquareBrush(Graphics g, Color color, int size, Point location)
+        {
+            using (var brush = new SolidBrush(color))
+            {
+                g.FillRectangle(brush, location.X, location.Y, size, size);
+            }
+        }
+
+        public static void DrawStarBrush(Graphics g, Color color, int size, Point location)
+        {
+            using (var brush = new SolidBrush(color))
+            {
+                GraphicsPath path = new GraphicsPath();
+                PointF[] points = new PointF[10];
+                double angle = Math.PI / 5;
+                for (int i = 0; i < 10; i++)
+                {
+                    float r = (i % 2 == 0) ? size / 2 : size / 4;
+                    points[i] = new PointF(
+                        (float)(location.X + size / 2 + r * Math.Cos(i * angle)),
+                        (float)(location.Y + size / 2 - r * Math.Sin(i * angle))
+                    );
+                }
+                path.AddPolygon(points);
+                g.FillPath(brush, path);
+            }
         }
     }
 }
