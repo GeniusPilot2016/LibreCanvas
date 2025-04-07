@@ -35,6 +35,12 @@
             button1 = new Button();
             icons = new ImageList(components);
             label2 = new Label();
+            numericUpDownWidth = new NumericUpDown();
+            labelWidth = new Label();
+            numericUpDownHeight = new NumericUpDown();
+            labelHeight = new Label();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownWidth).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownHeight).BeginInit();
             SuspendLayout();
             // 
             // textBox1
@@ -89,12 +95,58 @@
             label2.ImageAlign = ContentAlignment.MiddleLeft;
             label2.ImageIndex = 1;
             label2.ImageList = icons;
-            label2.Location = new Point(48, 89);
+            label2.Location = new Point(48, 122);
             label2.Name = "label2";
             label2.Size = new Size(576, 20);
             label2.TabIndex = 1;
             label2.Text = "     Warning: AI image generation may produce inaccurate or inappropriate images.";
             label2.TextAlign = ContentAlignment.MiddleRight;
+            // 
+            // numericUpDownWidth
+            // 
+            numericUpDownWidth.Anchor = AnchorStyles.None;
+            numericUpDownWidth.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            numericUpDownWidth.Location = new Point(221, 80);
+            numericUpDownWidth.Maximum = new decimal(new int[] { 1920, 0, 0, 0 });
+            numericUpDownWidth.Minimum = new decimal(new int[] { 64, 0, 0, 0 });
+            numericUpDownWidth.Name = "numericUpDownWidth";
+            numericUpDownWidth.Size = new Size(69, 27);
+            numericUpDownWidth.TabIndex = 3;
+            numericUpDownWidth.Value = new decimal(new int[] { 1024, 0, 0, 0 });
+            // 
+            // labelWidth
+            // 
+            labelWidth.Anchor = AnchorStyles.None;
+            labelWidth.AutoSize = true;
+            labelWidth.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            labelWidth.Location = new Point(164, 82);
+            labelWidth.Name = "labelWidth";
+            labelWidth.Size = new Size(51, 20);
+            labelWidth.TabIndex = 4;
+            labelWidth.Text = "Width";
+            // 
+            // numericUpDownHeight
+            // 
+            numericUpDownHeight.Anchor = AnchorStyles.None;
+            numericUpDownHeight.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            numericUpDownHeight.Location = new Point(376, 80);
+            numericUpDownHeight.Maximum = new decimal(new int[] { 1920, 0, 0, 0 });
+            numericUpDownHeight.Minimum = new decimal(new int[] { 64, 0, 0, 0 });
+            numericUpDownHeight.Name = "numericUpDownHeight";
+            numericUpDownHeight.Size = new Size(69, 27);
+            numericUpDownHeight.TabIndex = 3;
+            numericUpDownHeight.Value = new decimal(new int[] { 1024, 0, 0, 0 });
+            // 
+            // labelHeight
+            // 
+            labelHeight.Anchor = AnchorStyles.None;
+            labelHeight.AutoSize = true;
+            labelHeight.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            labelHeight.Location = new Point(314, 82);
+            labelHeight.Name = "labelHeight";
+            labelHeight.Size = new Size(56, 20);
+            labelHeight.TabIndex = 4;
+            labelHeight.Text = "Height";
             // 
             // CreateWithAIForm
             // 
@@ -102,7 +154,11 @@
             AutoScaleDimensions = new SizeF(120F, 120F);
             AutoScaleMode = AutoScaleMode.Dpi;
             AutoSize = true;
-            ClientSize = new Size(673, 130);
+            ClientSize = new Size(673, 163);
+            Controls.Add(labelHeight);
+            Controls.Add(numericUpDownHeight);
+            Controls.Add(labelWidth);
+            Controls.Add(numericUpDownWidth);
             Controls.Add(button1);
             Controls.Add(label2);
             Controls.Add(label1);
@@ -113,6 +169,8 @@
             Name = "CreateWithAIForm";
             ShowIcon = false;
             Text = "Create Image With AI";
+            ((System.ComponentModel.ISupportInitialize)numericUpDownWidth).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownHeight).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -124,5 +182,9 @@
         private Button button1;
         private ImageList icons;
         private Label label2;
+        private NumericUpDown numericUpDownWidth;
+        private Label labelWidth;
+        private NumericUpDown numericUpDownHeight;
+        private Label labelHeight;
     }
 }

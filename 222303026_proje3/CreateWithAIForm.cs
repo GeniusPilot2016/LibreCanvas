@@ -20,20 +20,29 @@ namespace _222303026_proje3
         {
             InitializeComponent();
         }
+        private void EnableDisableControls(bool enabled)
+        {
+            foreach (Control control in Controls)
+            {
+                control.Enabled = enabled;
+            }
+        }
 
-        private async Task<Image[]> GenerateImages(string prompt)
+        private async Task<Image[]> GenerateImages(string prompt, int width, int height)
         {
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey); // API anahtarını ekleyin
 
             var requestData = new
             {
                 inputs = prompt,
+                width = width,
+                height = height
             };
 
             var json = JsonConvert.SerializeObject(requestData);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await client.PostAsync("https://api-inference.huggingface.co/models/Keltezaa/Dall_E3_meet_FLUX_v0.1", content);
+            var response = await client.PostAsync("https://api-inference.huggingface.co/models/openfree/claude-monet", content);
 
             if (response.IsSuccessStatusCode)
             {
@@ -69,19 +78,48 @@ namespace _222303026_proje3
         }
         private async void button1_Click(object sender, EventArgs e)
         {
+            EnableDisableControls(false);
             string prompt = textBox1.Text;
-            Image[] generatedImages = await GenerateImages(prompt);
+            int width = (int)numericUpDownWidth.Value;
+            int height = (int)numericUpDownHeight.Value;
+            Image[] generatedImages = await GenerateImages(prompt, width, height);
 
             if (generatedImages != null && generatedImages.Length > 0)
             {
-                // İlk resmi PictureBox'ta gösterin (veya istediğiniz gibi işleyin)
-                image = generatedImages[0];
+                // İlk resmi yeniden boyutlandırın
+                image = ResizeImage(generatedImages[0], width, height);
+                EnableDisableControls(true);
                 this.Close();
             }
             else
             {
-                MessageBox.Show("Image generation failed.");   
+                MessageBox.Show("Image generation failed.");
+                EnableDisableControls(true);
             }
+        }
+        private Image ResizeImage(Image image, int width, int height)
+        {
+            var destRect = new Rectangle(0, 0, width, height);
+            var destImage = new Bitmap(width, height);
+
+            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+
+            using (var graphics = Graphics.FromImage(destImage))
+            {
+                graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
+                graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+
+                using (var wrapMode = new System.Drawing.Imaging.ImageAttributes())
+                {
+                    wrapMode.SetWrapMode(System.Drawing.Drawing2D.WrapMode.TileFlipXY);
+                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+                }
+            }
+
+            return destImage;
         }
     }
 }

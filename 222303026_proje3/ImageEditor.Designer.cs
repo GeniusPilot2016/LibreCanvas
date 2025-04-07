@@ -309,7 +309,6 @@
             panel1.AutoScroll = true;
             panel1.AutoScrollMargin = new Size(25, 25);
             panel1.AutoScrollMinSize = new Size(820, 620);
-            panel1.AutoSize = true;
             panel1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             panel1.Controls.Add(canvasPanel);
             panel1.Dock = DockStyle.Fill;
@@ -1365,9 +1364,7 @@
             // 
             // ImageEditor
             // 
-            AutoScaleDimensions = new SizeF(120F, 120F);
-            AutoScaleMode = AutoScaleMode.Dpi;
-            AutoSize = true;
+            AutoScaleMode = AutoScaleMode.None;
             ClientSize = new Size(1289, 812);
             Controls.Add(toolStripContainer1);
             Icon = (Icon)resources.GetObject("$this.Icon");
@@ -1377,7 +1374,6 @@
             toolStripContainer1.BottomToolStripPanel.ResumeLayout(false);
             toolStripContainer1.BottomToolStripPanel.PerformLayout();
             toolStripContainer1.ContentPanel.ResumeLayout(false);
-            toolStripContainer1.ContentPanel.PerformLayout();
             toolStripContainer1.LeftToolStripPanel.ResumeLayout(false);
             toolStripContainer1.LeftToolStripPanel.PerformLayout();
             toolStripContainer1.TopToolStripPanel.ResumeLayout(false);
