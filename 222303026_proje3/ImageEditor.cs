@@ -728,16 +728,40 @@ namespace _222303026_proje3
 
                 switch (currentTool)
                 {
-                    case "Rectangle":
+                    case "Line":
                         using (Graphics graphics = Graphics.FromImage(bitmap))
                         {
-                            DrawShapes.DrawRectangleOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
+                            DrawShapes.DrawLineOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
                         }
                         break;
                     case "Round":
                         using (Graphics graphics = Graphics.FromImage(bitmap))
                         {
                             DrawShapes.DrawRoundOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
+                        }
+                        break;
+                    case "Rectangle":
+                        using (Graphics graphics = Graphics.FromImage(bitmap))
+                        {
+                            DrawShapes.DrawRectangleOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
+                        }
+                        break;
+                    case "Rounded Rectangle":
+                        using (Graphics graphics = Graphics.FromImage(bitmap))
+                        {
+                            DrawShapes.DrawRoundedRectangleOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location, radius);
+                        }
+                        break;
+                    case "Triangle":
+                        using (Graphics graphics = Graphics.FromImage(bitmap))
+                        {
+                            DrawShapes.DrawTriangleOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
+                        }
+                        break;
+                    case "Hexagon":
+                        using (Graphics graphics = Graphics.FromImage(bitmap))
+                        {
+                            DrawShapes.DrawHexagonOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, points,startPoint, e.Location);
                         }
                         break;
                     default:
@@ -756,8 +780,8 @@ namespace _222303026_proje3
             if (isdrawing) {
                 switch (currentTool)
                 {
-                    case "Rectangle":
-                        pictureBoxCanvas.Image = ShapePreviews.RectanglePreview(
+                    case "Line":
+                        pictureBoxCanvas.Image = ShapePreviews.LinePreview(
                             bitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y
                         ); pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
                         break;
@@ -765,6 +789,26 @@ namespace _222303026_proje3
                         pictureBoxCanvas.Image = ShapePreviews.RoundPreview(
                             bitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y
                         );
+                        pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
+                        break;
+                    case "Rectangle":
+                        pictureBoxCanvas.Image = ShapePreviews.RectanglePreview(
+                            bitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y
+                        ); pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
+                        break;
+                    case "Rounded Rectangle":
+                        pictureBoxCanvas.Image = ShapePreviews.RoundedRectanglePreview(
+                            bitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y, radius
+                        ); pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
+                        break;
+                    case "Triangle":
+                        pictureBoxCanvas.Image = ShapePreviews.TrianglePreview(
+                            bitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y
+                        ); pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
+                        break;
+                    case "Hexagon":
+                        pictureBoxCanvas.Image = ShapePreviews.HexagonPreview(
+                            bitmap, color1, shapeThickness, points, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y); 
                         pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
                         break;
                     default:
@@ -906,9 +950,34 @@ namespace _222303026_proje3
             y = e.Y;
             switch (currentTool)
             {
+                case "Line":
+                    startPoint = e.Location;
+                    previewStartPoint = e.Location;
+                    previewBitmap = new Bitmap(bitmap);
+                    break;
+                case "Round":
+                    startPoint = e.Location;
+                    previewStartPoint = e.Location;
+                    previewBitmap = new Bitmap(bitmap);
+                    break;
                 case "Rectangle":
                     previewStartPoint = e.Location;
                     startPoint = e.Location;
+                    previewBitmap = new Bitmap(bitmap);
+                    break;
+                case "Rounded Rectangle":
+                    startPoint = e.Location;
+                    previewStartPoint = e.Location;
+                    previewBitmap = new Bitmap(bitmap);
+                    break;
+                case "Triangle":
+                    startPoint = e.Location;
+                    previewStartPoint = e.Location;
+                    previewBitmap = new Bitmap(bitmap);
+                    break;
+                case "Hexagon":
+                    startPoint = e.Location;
+                    previewStartPoint = e.Location;
                     previewBitmap = new Bitmap(bitmap);
                     break;
                 default:
