@@ -1,5 +1,6 @@
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Drawing.Imaging.Effects;
 public class BrushShapes
 {
     public static void DrawOilBrush(Graphics g, Color color, int size, Point location)
@@ -28,12 +29,25 @@ public class BrushShapes
                 }
             }
         }
+        double brightness = 0.2126 * color.R + 0.7152 * color.G + 0.0722 * color.B;
+        int shadowAdjustment = (int)(brightness * 0.15); // Set shadow adjustment based on brightness
+        // Shadow color
+        Color shadowColor = Color.FromArgb(255,
+            Math.Max(0, color.R - shadowAdjustment),
+            Math.Max(0, color.G - shadowAdjustment),
+            Math.Max(0, color.B - shadowAdjustment));
 
+        // Highlight color
+        int highlightAdjustment = (int)((255 - brightness) * 0.15); // Set highlight adjustment based on brightness
+        Color highlightColor = Color.FromArgb(255,
+            Math.Min(255, color.R + highlightAdjustment),
+            Math.Min(255, color.G + highlightAdjustment),
+            Math.Min(255, color.B + highlightAdjustment));
         // Add some subtle inner shadows/highlights for depth
         for (int i = 0; i < size; i += size / 8)
         {
-            using (var shadowBrush = new SolidBrush(Color.FromArgb(20, Color.Black)))
-            using (var highlightBrush = new SolidBrush(Color.FromArgb(20, Color.White)))
+            using (var shadowBrush = new SolidBrush(Color.FromArgb(20, shadowColor)))
+            using (var highlightBrush = new SolidBrush(Color.FromArgb(20, highlightColor)))
             {
                 g.FillEllipse(shadowBrush, location.X + i, location.Y + i, size / 4, size / 4);
                 g.FillEllipse(highlightBrush, location.X + i + size / 8, location.Y + i + size / 8, size / 4, size / 4);
