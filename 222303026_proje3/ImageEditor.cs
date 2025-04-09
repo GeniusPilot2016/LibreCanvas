@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using System.IO.Enumeration;
@@ -14,7 +16,7 @@ namespace _222303026_proje3
         String currentTool = drawType[0];
         Pen brushes;
         Color color1 = Color.Black, color2 = Color.White;
-        int brushSize = 11, penSize = 9, eraserSize = 11, sprayToolSize = 11, shapeThickness = 11;
+        int brushSize = 11, penSize = 9, eraserSize = 11, sprayToolSize = 11, shapeThickness = 11, radius = 9, points = 6;
         float textSize = 9;
         int zoom = 100;
         bool isResizing = false;
@@ -140,9 +142,6 @@ namespace _222303026_proje3
                     labelFileName.Text = "AI Generated File";
                     break;
                 case false:
-                    labelFileName.Text = "Unnamed File";
-                    break;
-                default:
                     labelFileName.Text = "Unnamed File";
                     break;
             }
@@ -277,31 +276,55 @@ namespace _222303026_proje3
         private void lineToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ToolStripMenuItemsClick(sender);
+            if(lineToolStripMenuItem.Checked==false)
+            {
+                lineToolStripMenuItem.Checked = true;
+            }
         }
 
         private void roundToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             ToolStripMenuItemsClick(sender);
+            if (roundToolStripMenuItem1.Checked == false)
+            {
+                roundToolStripMenuItem1.Checked = true;
+            }
         }
 
         private void rectangleToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ToolStripMenuItemsClick(sender);
+            if (rectangleToolStripMenuItem.Checked == false)
+            {
+                rectangleToolStripMenuItem.Checked = true;
+            }
         }
 
         private void roundedRectangleToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ToolStripMenuItemsClick(sender);
+            if (roundedRectangleToolStripMenuItem.Checked == false)
+            {
+                roundedRectangleToolStripMenuItem.Checked = true;
+            }
         }
 
         private void triangleToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             ToolStripMenuItemsClick(sender);
+            if (triangleToolStripMenuItem1.Checked == false)
+            {
+                triangleToolStripMenuItem1.Checked = true;
+            }
         }
 
         private void hexagonToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             ToolStripMenuItemsClick(sender);
+            if (hexagonToolStripMenuItem1.Checked == false)
+            {
+                hexagonToolStripMenuItem1.Checked = true;
+            }
         }
 
         private void toolStripButton7_Click(object sender, EventArgs e)
@@ -625,70 +648,68 @@ namespace _222303026_proje3
                 toolStripShapes.Visible = false;
             }
         }
+        private void UpdateToolStripVisibility()
+        {
+            toolStripShapes.Visible = lineToolStripMenuItem.Checked ||
+                                      roundToolStripMenuItem1.Checked ||
+                                      rectangleToolStripMenuItem.Checked ||
+                                      roundedRectangleToolStripMenuItem.Checked ||
+                                      triangleToolStripMenuItem1.Checked ||
+                                      hexagonToolStripMenuItem1.Checked;
 
+            Debug.WriteLine($"Round Checked: {roundToolStripMenuItem1.Checked}, ToolStrip Visible: {toolStripShapes.Visible}");
+
+            labelRadius.Visible = roundedRectangleToolStripMenuItem.Checked;
+            textBoxRadius.Visible = roundedRectangleToolStripMenuItem.Checked;
+            toolStripSeparator26.Visible = roundedRectangleToolStripMenuItem.Checked;
+
+            labelPoint.Visible = hexagonToolStripMenuItem1.Checked;
+            textBoxPoints.Visible = hexagonToolStripMenuItem1.Checked;
+            toolStripSeparator24.Visible = hexagonToolStripMenuItem1.Checked;
+        }
         private void roundToolStripMenuItem1_CheckedChanged(object sender, EventArgs e)
         {
             if (roundToolStripMenuItem1.Checked)
             {
-                toolStripShapes.Visible = true;
                 currentTool = drawType[9];
             }
-            else
-            {
-                toolStripShapes.Visible = false;
-            }
+            UpdateToolStripVisibility();
         }
 
         private void rectangleToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
         {
             if (rectangleToolStripMenuItem.Checked)
             {
-                toolStripShapes.Visible = true;
                 currentTool = drawType[10];
             }
-            else
-            {
-                toolStripShapes.Visible = false;
-            }
+            UpdateToolStripVisibility();
         }
 
         private void roundedRectangleToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
         {
             if (roundedRectangleToolStripMenuItem.Checked)
             {
-                toolStripShapes.Visible = true;
                 currentTool = drawType[11];
             }
-            else
-            {
-                toolStripShapes.Visible = false;
-            }
+            UpdateToolStripVisibility();
         }
 
         private void triangleToolStripMenuItem1_CheckedChanged(object sender, EventArgs e)
         {
             if (triangleToolStripMenuItem1.Checked)
             {
-                toolStripShapes.Visible = true;
                 currentTool = drawType[12];
             }
-            else
-            {
-                toolStripShapes.Visible = false;
-            }
+            UpdateToolStripVisibility();
         }
 
         private void hexagonToolStripMenuItem1_CheckedChanged(object sender, EventArgs e)
         {
             if (hexagonToolStripMenuItem1.Checked)
             {
-                toolStripShapes.Visible = true;
                 currentTool = drawType[13];
             }
-            else
-            {
-                toolStripShapes.Visible = false;
-            }
+            UpdateToolStripVisibility();
         }
 
         private void colorDropTool_CheckedChanged(object sender, EventArgs e)
@@ -701,19 +722,55 @@ namespace _222303026_proje3
 
         private void pictureBoxCanvas_MouseUp(object sender, MouseEventArgs e)
         {
-            if (isdrawing == true)
+            if (isdrawing)
             {
                 isdrawing = false;
-                x = -1;
-                y = -1;
+
+                switch (currentTool)
+                {
+                    case "Rectangle":
+                        using (Graphics graphics = Graphics.FromImage(bitmap))
+                        {
+                            DrawShapes.DrawRectangleOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
+                        }
+                        break;
+                    case "Round":
+                        using (Graphics graphics = Graphics.FromImage(bitmap))
+                        {
+                            DrawShapes.DrawRoundOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
+                        }
+                        break;
+                    default:
+                        drawIntoCanvas(e);
+                        break;
+                }
+                // Update the PictureBox with the new bitmap
+                pictureBoxCanvas.Image = bitmap;
+                pictureBoxCanvas.Invalidate();
             }
         }
 
         private void pictureBoxCanvas_MouseMove(object sender, MouseEventArgs e)
         {
-            if (isdrawing)
-            {
-                drawIntoCanvas(e);
+
+            if (isdrawing) {
+                switch (currentTool)
+                {
+                    case "Rectangle":
+                        pictureBoxCanvas.Image = ShapePreviews.RectanglePreview(
+                            bitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y
+                        ); pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
+                        break;
+                    case "Round":
+                        pictureBoxCanvas.Image = ShapePreviews.RoundPreview(
+                            bitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y
+                        );
+                        pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
+                        break;
+                    default:
+                        drawIntoCanvas(e);
+                        break;
+                }
             }
             int x = e.X;
             int y = e.Y;
@@ -838,15 +895,26 @@ namespace _222303026_proje3
                 }
             }
         }
-
-
-
+        
+        private Point startPoint;
+        private Point previewStartPoint; // Origin of the preview shape
+        private Bitmap previewBitmap;    // Temporary bitmap for previewing shapes
         private void pictureBoxCanvas_MouseDown(object sender, MouseEventArgs e)
         {
             isdrawing = true;
             x = e.X;
             y = e.Y;
-            drawIntoCanvas(e); // Tek týklamada nokta çizmek için
+            switch (currentTool)
+            {
+                case "Rectangle":
+                    previewStartPoint = e.Location;
+                    startPoint = e.Location;
+                    previewBitmap = new Bitmap(bitmap);
+                    break;
+                default:
+                    drawIntoCanvas(e); // To draw immediately on mouse down
+                    break;
+            }
         }
 
         private void pictureBoxCanvas_MouseLeave(object sender, EventArgs e)
@@ -1099,6 +1167,59 @@ namespace _222303026_proje3
         private void fontSizeComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             textSize = (float)Convert.ToDouble(fontSizeComboBox.SelectedItem);
+        }
+
+        private void textBoxRadius_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBoxRadius_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                radius = Convert.ToInt32(textBoxRadius.Text);
+                if (radius < 1 || radius > 255)
+                {
+                    throw new OverflowException();
+                }
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                radius = 9;
+                textBoxRadius.Text = radius.ToString();
+            }
+            catch (OverflowException)
+            {
+                MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                radius = 9;
+                textBoxRadius.Text = radius.ToString();
+            }
+        }
+
+        private void textBoxPoints_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                points = Convert.ToInt32(textBoxPoints.Text);
+                if (points < 5 || points > 255)
+                {
+                    throw new OverflowException();
+                }
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                points = 6;
+                textBoxPoints.Text = points.ToString();
+            }
+            catch (OverflowException)
+            {
+                MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                points = 6;
+                textBoxPoints.Text = points.ToString();
+            }
         }
     }
     public partial class CreateWithAIForm : Form
