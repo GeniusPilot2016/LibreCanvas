@@ -23,6 +23,7 @@ namespace _222303026_proje3
         private ResizeDirection resizeDirection;
         private Point lastMousePos;
         Bitmap bitmap;
+        private CommandHistory _commandHistory = new CommandHistory();
 
         private enum ResizeDirection
         {
@@ -276,7 +277,7 @@ namespace _222303026_proje3
         private void lineToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ToolStripMenuItemsClick(sender);
-            if(lineToolStripMenuItem.Checked==false)
+            if (lineToolStripMenuItem.Checked == false)
             {
                 lineToolStripMenuItem.Checked = true;
             }
@@ -732,43 +733,70 @@ namespace _222303026_proje3
                         using (Graphics graphics = Graphics.FromImage(bitmap))
                         {
                             DrawShapes.DrawLineOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
+                            UpdateCanvas(); 
+                            SaveCanvasState();
                         }
                         break;
                     case "Round":
                         using (Graphics graphics = Graphics.FromImage(bitmap))
                         {
                             DrawShapes.DrawRoundOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
+                            UpdateCanvas(); 
+                            SaveCanvasState();
                         }
                         break;
                     case "Rectangle":
                         using (Graphics graphics = Graphics.FromImage(bitmap))
                         {
                             DrawShapes.DrawRectangleOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
+                            UpdateCanvas();
+                            SaveCanvasState();
                         }
                         break;
                     case "Rounded Rectangle":
                         using (Graphics graphics = Graphics.FromImage(bitmap))
                         {
                             DrawShapes.DrawRoundedRectangleOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location, radius);
+                            UpdateCanvas(); 
+                            SaveCanvasState();
                         }
                         break;
                     case "Triangle":
                         using (Graphics graphics = Graphics.FromImage(bitmap))
                         {
                             DrawShapes.DrawTriangleOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
+                            UpdateCanvas();
+                            SaveCanvasState();
                         }
                         break;
                     case "Hexagon":
                         using (Graphics graphics = Graphics.FromImage(bitmap))
                         {
-                            DrawShapes.DrawHexagonOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, points,startPoint, e.Location);
+                            DrawShapes.DrawHexagonOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, points, startPoint, e.Location);
+                            UpdateCanvas();
+                            SaveCanvasState();
                         }
                         break;
                     default:
                         drawIntoCanvas(e);
+                        UpdateCanvas();
+                        SaveCanvasState();
                         break;
                 }
-                // Update the PictureBox with the new bitmap
+            }
+        }
+
+        private Bitmap previousBitmap; // Add this field to store the previous state of the bitmap.
+
+        private void SaveCanvasState()
+        {
+            if (bitmap != null)
+            {
+                previousBitmap = (Bitmap)bitmap.Clone(); // Store the current bitmap as the previous state.
+                Bitmap currentBitmap = (Bitmap)bitmap.Clone(); // Create a new bitmap for the current state.
+                var command = new UpdateBitmapCommand(pictureBoxCanvas, previousBitmap, currentBitmap);
+                _commandHistory.ExecuteCommand(command);
+
                 pictureBoxCanvas.Image = bitmap;
                 pictureBoxCanvas.Invalidate();
             }
@@ -777,7 +805,8 @@ namespace _222303026_proje3
         private void pictureBoxCanvas_MouseMove(object sender, MouseEventArgs e)
         {
 
-            if (isdrawing) {
+            if (isdrawing)
+            {
                 switch (currentTool)
                 {
                     case "Line":
@@ -808,7 +837,7 @@ namespace _222303026_proje3
                         break;
                     case "Hexagon":
                         pictureBoxCanvas.Image = ShapePreviews.HexagonPreview(
-                            bitmap, color1, shapeThickness, points, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y); 
+                            bitmap, color1, shapeThickness, points, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y);
                         pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
                         break;
                     default:
@@ -848,15 +877,19 @@ namespace _222303026_proje3
                             {
                                 case 0: // Regular brush
                                     DrawBrush(graphics, BrushShapes.DrawCircleBrush, color1, brushSize, new Point(e.X, e.Y));
+                                    UpdateCanvas();
                                     break;
                                 case 1: // Oil brush
                                     DrawBrush(graphics, BrushShapes.DrawOilBrush, color1, brushSize, new Point(e.X, e.Y));
+                                    UpdateCanvas();
                                     break;
                                 case 2: // Calligraphy brush
                                     DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, color1, brushSize, new Point(e.X, e.Y));
+                                    UpdateCanvas();
                                     break;
                                 case 3:
                                     DrawBrush(graphics, BrushShapes.DrawWatercolorBrush, color1, brushSize, new Point(e.X, e.Y));
+                                    UpdateCanvas();
                                     break;
                                 default:
                                     break;
@@ -867,15 +900,19 @@ namespace _222303026_proje3
                             {
                                 case 0: // Regular pen
                                     DrawBrush(graphics, BrushShapes.DrawSquareBrush, color1, penSize, new Point(e.X, e.Y));
+                                    UpdateCanvas();
                                     break;
                                 case 1:
                                     DrawBrush(graphics, BrushShapes.DrawMarkerBrush, color1, penSize, new Point(e.X, e.Y));
+                                    UpdateCanvas();
                                     break;
                                 case 2:
                                     DrawBrush(graphics, BrushShapes.DrawCrayonBrush, color1, penSize, new Point(e.X, e.Y));
+                                    UpdateCanvas();
                                     break;
                                 case 3: // Calligraphy pen
                                     DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, color1, penSize, new Point(e.X, e.Y));
+                                    UpdateCanvas();
                                     break;
                                 default:
                                     break;
@@ -883,9 +920,11 @@ namespace _222303026_proje3
                             break;
                         case "Eraser":
                             DrawBrush(graphics, BrushShapes.DrawCircleBrush, color2, eraserSize, new Point(e.X, e.Y));
+                            UpdateCanvas();
                             break;
                         case "Spray":
                             DrawBrush(graphics, BrushShapes.DrawSprayBrush, color1, sprayToolSize, new Point(e.X, e.Y));
+                            UpdateCanvas();
                             break;
                         default:
                             break;
@@ -896,10 +935,13 @@ namespace _222303026_proje3
                 }
             }
 
+
+        }
+        private void UpdateCanvas()
+        {
             pictureBoxCanvas.Image = bitmap;
             pictureBoxCanvas.Invalidate();
         }
-
         private void DrawBrush(Graphics graphics, Action<Graphics, Color, int, Point> drawAction, Color color, int size, Point location)
         {
             if (x == -1 && y == -1)
@@ -939,7 +981,7 @@ namespace _222303026_proje3
                 }
             }
         }
-        
+
         private Point startPoint;
         private Point previewStartPoint; // Origin of the preview shape
         private Bitmap previewBitmap;    // Temporary bitmap for previewing shapes
@@ -948,6 +990,7 @@ namespace _222303026_proje3
             isdrawing = true;
             x = e.X;
             y = e.Y;
+            SaveCanvasState();
             switch (currentTool)
             {
                 case "Line":
@@ -1289,6 +1332,16 @@ namespace _222303026_proje3
                 points = 6;
                 textBoxPoints.Text = points.ToString();
             }
+        }
+
+        private void geriAlToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _commandHistory.Undo();
+        }
+
+        private void yineleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _commandHistory.Redo();
         }
     }
     public partial class CreateWithAIForm : Form
