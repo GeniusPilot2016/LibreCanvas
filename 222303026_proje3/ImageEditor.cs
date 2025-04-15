@@ -45,6 +45,7 @@ namespace _222303026_proje3
         {
             InitializeComponentAndFont();
             createNewFile();
+            UpdateUndoRedoButtons(); // Baþlangýçta tuþlarý güncelle
         }
         public ImageEditor(String fileName)
         {
@@ -276,7 +277,7 @@ namespace _222303026_proje3
         private void lineToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ToolStripMenuItemsClick(sender);
-            if(lineToolStripMenuItem.Checked==false)
+            if (lineToolStripMenuItem.Checked == false)
             {
                 lineToolStripMenuItem.Checked = true;
             }
@@ -761,7 +762,7 @@ namespace _222303026_proje3
                     case "Hexagon":
                         using (Graphics graphics = Graphics.FromImage(bitmap))
                         {
-                            DrawShapes.DrawHexagonOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, points,startPoint, e.Location);
+                            DrawShapes.DrawHexagonOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, points, startPoint, e.Location);
                         }
                         break;
                     default:
@@ -777,7 +778,8 @@ namespace _222303026_proje3
         private void pictureBoxCanvas_MouseMove(object sender, MouseEventArgs e)
         {
 
-            if (isdrawing) {
+            if (isdrawing)
+            {
                 switch (currentTool)
                 {
                     case "Line":
@@ -808,7 +810,7 @@ namespace _222303026_proje3
                         break;
                     case "Hexagon":
                         pictureBoxCanvas.Image = ShapePreviews.HexagonPreview(
-                            bitmap, color1, shapeThickness, points, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y); 
+                            bitmap, color1, shapeThickness, points, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y);
                         pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
                         break;
                     default:
@@ -939,10 +941,12 @@ namespace _222303026_proje3
                 }
             }
         }
-        
+
         private Point startPoint;
         private Point previewStartPoint; // Origin of the preview shape
         private Bitmap previewBitmap;    // Temporary bitmap for previewing shapes
+        private Stack<Bitmap> undoStack = new Stack<Bitmap>();
+        private Stack<Bitmap> redoStack = new Stack<Bitmap>();
         private void pictureBoxCanvas_MouseDown(object sender, MouseEventArgs e)
         {
             isdrawing = true;
@@ -951,36 +955,43 @@ namespace _222303026_proje3
             switch (currentTool)
             {
                 case "Line":
+                    SaveStateForUndo();
                     startPoint = e.Location;
                     previewStartPoint = e.Location;
                     previewBitmap = new Bitmap(bitmap);
                     break;
                 case "Round":
+                    SaveStateForUndo();
                     startPoint = e.Location;
                     previewStartPoint = e.Location;
                     previewBitmap = new Bitmap(bitmap);
                     break;
                 case "Rectangle":
+                    SaveStateForUndo();
                     previewStartPoint = e.Location;
                     startPoint = e.Location;
                     previewBitmap = new Bitmap(bitmap);
                     break;
                 case "Rounded Rectangle":
+                    SaveStateForUndo();
                     startPoint = e.Location;
                     previewStartPoint = e.Location;
                     previewBitmap = new Bitmap(bitmap);
                     break;
                 case "Triangle":
+                    SaveStateForUndo();
                     startPoint = e.Location;
                     previewStartPoint = e.Location;
                     previewBitmap = new Bitmap(bitmap);
                     break;
                 case "Hexagon":
+                    SaveStateForUndo();
                     startPoint = e.Location;
                     previewStartPoint = e.Location;
                     previewBitmap = new Bitmap(bitmap);
                     break;
                 default:
+                    SaveStateForUndo();
                     drawIntoCanvas(e); // To draw immediately on mouse down
                     break;
             }
@@ -1289,6 +1300,65 @@ namespace _222303026_proje3
                 points = 6;
                 textBoxPoints.Text = points.ToString();
             }
+        }
+        private const int MaxStackSize = 20;
+
+        private void SaveStateForUndo()
+        {
+            if (bitmap != null)
+            {
+                if (undoStack.Count >= MaxStackSize)
+                {
+                    // En eski durumu kaldýr
+                    var tempList = undoStack.ToList();
+                    tempList.RemoveAt(0);
+                    undoStack = new Stack<Bitmap>(tempList);
+                }
+                undoStack.Push(new Bitmap(bitmap));
+                redoStack.Clear(); // Yeni iþlemde redo yýðýný temizlenir
+            }
+            UpdateUndoRedoButtons(); // Tuþlarý güncelle
+        }
+
+        private void Undo()
+        {
+            if (undoStack.Count > 0)
+            {
+                redoStack.Push(new Bitmap(bitmap)); // Mevcut durumu redo yýðýnýna kaydet
+                bitmap = undoStack.Pop(); // Son durumu geri yükle
+                pictureBoxCanvas.Image = bitmap;
+                pictureBoxCanvas.Invalidate();
+            }
+            UpdateUndoRedoButtons(); // Tuþlarý güncelle
+        }
+        private void Redo()
+        {
+            if (redoStack.Count > 0)
+            {
+                undoStack.Push(new Bitmap(bitmap)); // Mevcut durumu undo yýðýnýna kaydet
+                bitmap = redoStack.Pop(); // Sonraki durumu geri yükle
+                pictureBoxCanvas.Image = bitmap;
+                pictureBoxCanvas.Invalidate();
+            }
+            UpdateUndoRedoButtons(); // Tuþlarý güncelle
+        }
+
+        private void geriAlToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Undo();
+        }
+
+        private void yineleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Redo();
+        }
+        private void UpdateUndoRedoButtons()
+        {
+            // Undo tuþunu yýðýn doluysa etkinleþtir, boþsa devre dýþý býrak
+            geriAlToolStripMenuItem.Enabled = undoStack.Count > 0;
+
+            // Redo tuþunu yýðýn doluysa etkinleþtir, boþsa devre dýþý býrak
+            yineleToolStripMenuItem.Enabled = redoStack.Count > 0;
         }
     }
     public partial class CreateWithAIForm : Form
