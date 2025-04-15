@@ -991,7 +991,13 @@ namespace _222303026_proje3
                     previewBitmap = new Bitmap(bitmap);
                     break;
                 default:
-                    SaveStateForUndo();
+                    if(currentTool == "Brush" || currentTool == "Pen" || currentTool == "Eraser" || currentTool == "Spray" ||
+                        currentTool == "Bucket" || currentTool == "Line" || currentTool == "Round" || currentTool == "Rectangle" ||
+                        currentTool == "Rounded Rectangle" || currentTool == "Triangle" || currentTool == "Hexagon" || 
+                        currentTool == "Text")
+                    {
+                        SaveStateForUndo();
+                    }
                     drawIntoCanvas(e); // To draw immediately on mouse down
                     break;
             }
