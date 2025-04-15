@@ -959,7 +959,6 @@
             // 
             // yineleToolStripMenuItem
             // 
-            yineleToolStripMenuItem.Enabled = false;
             yineleToolStripMenuItem.Image = Properties.Resources.icons8_redo_48;
             yineleToolStripMenuItem.Name = "yineleToolStripMenuItem";
             yineleToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Y;
