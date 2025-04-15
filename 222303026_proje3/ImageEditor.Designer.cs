@@ -949,26 +949,22 @@
             // 
             // geriAlToolStripMenuItem
             // 
-            geriAlToolStripMenuItem.Image = Properties.Resources.icons8_undo_48;
             geriAlToolStripMenuItem.Name = "geriAlToolStripMenuItem";
             geriAlToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Z;
-            geriAlToolStripMenuItem.Size = new Size(224, 26);
+            geriAlToolStripMenuItem.Size = new Size(183, 26);
             geriAlToolStripMenuItem.Text = "&Undo";
-            geriAlToolStripMenuItem.Click += geriAlToolStripMenuItem_Click;
             // 
             // yineleToolStripMenuItem
             // 
-            yineleToolStripMenuItem.Image = Properties.Resources.icons8_redo_48;
             yineleToolStripMenuItem.Name = "yineleToolStripMenuItem";
             yineleToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Y;
-            yineleToolStripMenuItem.Size = new Size(224, 26);
+            yineleToolStripMenuItem.Size = new Size(183, 26);
             yineleToolStripMenuItem.Text = "&Redo";
-            yineleToolStripMenuItem.Click += yineleToolStripMenuItem_Click;
             // 
             // toolStripSeparator3
             // 
             toolStripSeparator3.Name = "toolStripSeparator3";
-            toolStripSeparator3.Size = new Size(221, 6);
+            toolStripSeparator3.Size = new Size(180, 6);
             // 
             // kesToolStripMenuItem
             // 
@@ -976,7 +972,7 @@
             kesToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             kesToolStripMenuItem.Name = "kesToolStripMenuItem";
             kesToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.X;
-            kesToolStripMenuItem.Size = new Size(224, 26);
+            kesToolStripMenuItem.Size = new Size(183, 26);
             kesToolStripMenuItem.Text = "&Cut";
             // 
             // kopyalaToolStripMenuItem
@@ -985,7 +981,7 @@
             kopyalaToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             kopyalaToolStripMenuItem.Name = "kopyalaToolStripMenuItem";
             kopyalaToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.C;
-            kopyalaToolStripMenuItem.Size = new Size(224, 26);
+            kopyalaToolStripMenuItem.Size = new Size(183, 26);
             kopyalaToolStripMenuItem.Text = "C&opy";
             // 
             // yapıştırToolStripMenuItem
@@ -994,13 +990,13 @@
             yapıştırToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             yapıştırToolStripMenuItem.Name = "yapıştırToolStripMenuItem";
             yapıştırToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.V;
-            yapıştırToolStripMenuItem.Size = new Size(224, 26);
+            yapıştırToolStripMenuItem.Size = new Size(183, 26);
             yapıştırToolStripMenuItem.Text = "&Paste";
             // 
             // toolStripSeparator4
             // 
             toolStripSeparator4.Name = "toolStripSeparator4";
-            toolStripSeparator4.Size = new Size(221, 6);
+            toolStripSeparator4.Size = new Size(180, 6);
             // 
             // araçlarToolStripMenuItem
             // 

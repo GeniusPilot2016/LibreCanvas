@@ -383,16 +383,6 @@ namespace _222303026_proje3.Properties {
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
-        internal static System.Drawing.Bitmap icons8_redo_48 {
-            get {
-                object obj = ResourceManager.GetObject("icons8-redo-48", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
-        /// </summary>
         internal static System.Drawing.Bitmap icons8_round_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-round-48", resourceCulture);
@@ -466,16 +456,6 @@ namespace _222303026_proje3.Properties {
         internal static System.Drawing.Bitmap icons8_underline_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-underline-48", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
-        /// </summary>
-        internal static System.Drawing.Bitmap icons8_undo_48 {
-            get {
-                object obj = ResourceManager.GetObject("icons8-undo-48", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
