@@ -885,6 +885,7 @@ namespace _222303026_proje3
                             }
                             break;
                         case "Eraser":
+                            graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
                             DrawBrush(graphics, BrushShapes.DrawCircleBrush, Color.FromArgb(0, 0, 0, 0), eraserSize, new Point(e.X, e.Y));
                             break;
                         case "Spray":
@@ -910,8 +911,6 @@ namespace _222303026_proje3
 
         private void DrawBrush(Graphics graphics, Action<Graphics, Color, int, Point> drawAction, Color color, int size, Point location)
         {
-            graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
-
             if (x == -1 && y == -1)
             {
                 drawAction(graphics, color, size, location);

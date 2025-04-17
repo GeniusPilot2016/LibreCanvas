@@ -30,7 +30,7 @@ public class BrushShapes
             }
         }
         double brightness = 0.2126 * color.R + 0.7152 * color.G + 0.0722 * color.B;
-        int shadowAdjustment = (int)(brightness * 0.15); // Set shadow adjustment based on brightness
+        int shadowAdjustment = (int)(brightness * 0.1); // Set shadow adjustment based on brightness
         // Shadow color
         Color shadowColor = Color.FromArgb(255,
             Math.Max(0, color.R - shadowAdjustment),
@@ -38,7 +38,7 @@ public class BrushShapes
             Math.Max(0, color.B - shadowAdjustment));
 
         // Highlight color
-        int highlightAdjustment = (int)((255 - brightness) * 0.15); // Set highlight adjustment based on brightness
+        int highlightAdjustment = (int)((255 - brightness) * 0.1); // Set highlight adjustment based on brightness
         Color highlightColor = Color.FromArgb(255,
             Math.Min(255, color.R + highlightAdjustment),
             Math.Min(255, color.G + highlightAdjustment),
@@ -50,6 +50,21 @@ public class BrushShapes
             using (var highlightBrush = new SolidBrush(Color.FromArgb(20, highlightColor)))
             {
                 g.FillEllipse(shadowBrush, location.X + i, location.Y + i, size / 4, size / 4);
+                g.FillEllipse(highlightBrush, location.X + i + size / 8, location.Y + i + size / 8, size / 4, size / 4);
+            }
+        }
+        // Gölge ve aydýnlatma için bulanýklýk eklenmiþ versiyon
+        for (int i = 0; i < size; i += size / 8)
+        {
+            using (var shadowBrush = new SolidBrush(Color.FromArgb(15, shadowColor)))
+            using (var highlightBrush = new SolidBrush(Color.FromArgb(15, highlightColor)))
+            {
+                // Gölge için daha büyük ve daha þeffaf elipsler
+                g.FillEllipse(shadowBrush, location.X + i - size / 16, location.Y + i - size / 16, size / 3, size / 3);
+                g.FillEllipse(shadowBrush, location.X + i, location.Y + i, size / 4, size / 4);
+
+                // Aydýnlatma için daha büyük ve daha þeffaf elipsler
+                g.FillEllipse(highlightBrush, location.X + i + size / 8 - size / 16, location.Y + i + size / 8 - size / 16, size / 3, size / 3);
                 g.FillEllipse(highlightBrush, location.X + i + size / 8, location.Y + i + size / 8, size / 4, size / 4);
             }
         }
