@@ -105,7 +105,7 @@
             label3.Name = "label3";
             label3.Size = new Size(146, 30);
             label3.TabIndex = 1;
-            label3.Text = "Version 0.4.0";
+            label3.Text = "Version 0.5.0";
             // 
             // label2
             // 
@@ -171,7 +171,7 @@
             contextMenuStrip1.ImageScalingSize = new Size(20, 20);
             contextMenuStrip1.Items.AddRange(new ToolStripItem[] { createFileFromScratchToolStripMenuItem, createWithAIToolStripMenuItem, createWithWebcamToolStripMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(252, 110);
+            contextMenuStrip1.Size = new Size(252, 82);
             // 
             // createFileFromScratchToolStripMenuItem
             // 

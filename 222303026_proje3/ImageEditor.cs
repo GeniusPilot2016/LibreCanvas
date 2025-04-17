@@ -1,3 +1,4 @@
+using _222303026_proje3.Properties;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -884,10 +885,15 @@ namespace _222303026_proje3
                             }
                             break;
                         case "Eraser":
-                            DrawBrush(graphics, BrushShapes.DrawCircleBrush, color2, eraserSize, new Point(e.X, e.Y));
+                            DrawBrush(graphics, BrushShapes.DrawCircleBrush, Color.FromArgb(0, 0, 0, 0), eraserSize, new Point(e.X, e.Y));
                             break;
                         case "Spray":
                             DrawBrush(graphics, BrushShapes.DrawSprayBrush, color1, sprayToolSize, new Point(e.X, e.Y));
+                            break;
+                        case "Color Drop":
+                            Color pixelColor = bitmap.GetPixel(e.X, e.Y);
+                            color1 = pixelColor;
+                            foregroundColorButton.BackColor = pixelColor;
                             break;
                         default:
                             break;
@@ -904,6 +910,8 @@ namespace _222303026_proje3
 
         private void DrawBrush(Graphics graphics, Action<Graphics, Color, int, Point> drawAction, Color color, int size, Point location)
         {
+            graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
+
             if (x == -1 && y == -1)
             {
                 drawAction(graphics, color, size, location);
@@ -991,9 +999,9 @@ namespace _222303026_proje3
                     previewBitmap = new Bitmap(bitmap);
                     break;
                 default:
-                    if(currentTool == "Brush" || currentTool == "Pen" || currentTool == "Eraser" || currentTool == "Spray" ||
+                    if (currentTool == "Brush" || currentTool == "Pen" || currentTool == "Eraser" || currentTool == "Spray" ||
                         currentTool == "Bucket" || currentTool == "Line" || currentTool == "Round" || currentTool == "Rectangle" ||
-                        currentTool == "Rounded Rectangle" || currentTool == "Triangle" || currentTool == "Hexagon" || 
+                        currentTool == "Rounded Rectangle" || currentTool == "Triangle" || currentTool == "Hexagon" ||
                         currentTool == "Text")
                     {
                         SaveStateForUndo();
@@ -1365,6 +1373,48 @@ namespace _222303026_proje3
 
             // Redo tuþunu yýðýn doluysa etkinleþtir, boþsa devre dýþý býrak
             yineleToolStripMenuItem.Enabled = redoStack.Count > 0;
+        }
+
+        private void toolStripButton9_Click(object sender, EventArgs e)
+        {
+            switch(toolStripButton9.Checked)
+            {
+                case false:
+                    {
+                        pictureBoxCanvas.BackgroundImage = null;
+                        break;
+                    }
+                case true:
+                    {
+                        pictureBoxCanvas.BackgroundImage = Resources.transparent_pattern;
+                        break;
+                    }
+            }
+
+        }
+        private void EraseWithTransparency(int x, int y, int size)
+        {
+            if (bitmap == null) return;
+
+            int startX = Math.Max(0, x - size / 2);
+            int startY = Math.Max(0, y - size / 2);
+            int endX = Math.Min(bitmap.Width, x + size / 2);
+            int endY = Math.Min(bitmap.Height, y + size / 2);
+
+            for (int i = startX; i < endX; i++)
+            {
+                for (int j = startY; j < endY; j++)
+                {
+                    double distance = Math.Sqrt(Math.Pow(i - x, 2) + Math.Pow(j - y, 2));
+                    if (distance <= size / 2)
+                    {
+                        bitmap.SetPixel(i, j, Color.FromArgb(0, 0, 0, 0)); // Þeffaf piksel
+                    }
+                }
+            }
+
+            pictureBoxCanvas.Image = bitmap;
+            pictureBoxCanvas.Invalidate();
         }
     }
     public partial class CreateWithAIForm : Form
