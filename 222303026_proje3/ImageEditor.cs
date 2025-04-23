@@ -107,7 +107,7 @@ namespace _222303026_proje3
             panel1.AutoScroll = true;
 
             // canvasPanel'in boyutlarýný ayarlýyoruz
-            canvasPanel.Size = new Size(image.Size.Width+20, image.Size.Height+20);
+            canvasPanel.Size = new Size(image.Size.Width + 20, image.Size.Height + 20);
 
             // panel1'in AutoScrollMinSize özelliðini canvasPanel'in boyutlarýna ayarlýyoruz
             panel1.AutoScrollMinSize = canvasPanel.Size;
@@ -1727,10 +1727,60 @@ namespace _222303026_proje3
         {
             SaveStateForUndo();
             bitmap = Filters.BasicFilters.MirrorEffect(bitmap);
-            canvasPanel.Size = new Size(bitmap.Size.Width+20, bitmap.Size.Height + 20);
+            canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
             pictureBoxCanvas.Image = bitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
+        }
+
+        private void flashToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveStateForUndo();
+            bitmap = Filters.BasicFilters.Flash(bitmap);
+            canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
+            pictureBoxCanvas.Image = bitmap;
+            pictureBoxCanvas.Invalidate();
+            CenterCanvasPanel();
+        }
+
+        private void frozenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void winterToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void blackAndWhiteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void oldPictureToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void cherryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lightAddToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void purpleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void fogToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
     }
     public partial class CreateWithAIForm : Form
