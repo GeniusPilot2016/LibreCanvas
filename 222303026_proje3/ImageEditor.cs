@@ -2,6 +2,7 @@ using _222303026_proje3.Properties;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.IO.Enumeration;
 using System.Windows.Forms;
@@ -17,7 +18,7 @@ namespace _222303026_proje3
         String currentTool = drawType[0];
         Pen brushes;
         Color color1 = Color.Black, color2 = Color.White;
-        int brushSize = 11, penSize = 9, eraserSize = 11, sprayToolSize = 11, shapeThickness = 11, radius = 9, points = 6;
+        int brushSize = 11, penSize = 9, eraserSize = 11, sprayToolSize = 11, shapeThickness = 11, radius = 9, points = 6, tolerance = 50;
         float textSize = 9;
         int zoom = 100;
         bool isResizing = false;
@@ -628,6 +629,11 @@ namespace _222303026_proje3
             if (bucketTool.Checked)
             {
                 currentTool = drawType[6];
+                toolStripBucketTool.Visible = true;
+            }
+            else
+            {
+                toolStripBucketTool.Visible = false;
             }
         }
 
@@ -1029,121 +1035,245 @@ namespace _222303026_proje3
 
         private void pictureBoxCanvas_Click(object sender, EventArgs e)
         {
-            if(currentTool == "Text")
+            switch (currentTool)
             {
-                SaveStateForUndo();
-                // MouseEventArgs'den týklama konumunu alýn
-                MouseEventArgs me = (MouseEventArgs)e;
-                int x = me.X;
-                int y = me.Y;
-                // Yeni bir TextBox oluþturun
-                TextBox textBox = new TextBox
-                {
-                    MaximumSize = Size.Empty, // Maksimum boyut
-                    AutoSize = false, // Otomatik boyutlandýrmayý devre dýþý býrakýn
-                    Multiline = true, // Çok satýrlý metin desteði
-                    WordWrap = true, // Metni sarmayý etkinleþtirin
-                    Font = new Font(fontsComboBox.Text, textSize), // Yazý tipi ayarý
-                    BorderStyle = BorderStyle.FixedSingle // Kenarlýk stili
-                };
-                textBox.Location = new Point(
-                    Math.Min(x, pictureBoxCanvas.Width - textBox.Width),
-                    Math.Min(y, pictureBoxCanvas.Height - textBox.Height)
-                );
-
-
-
-                // TextBox'ý pictureBoxCanvas'a ekleyin
-                pictureBoxCanvas.Controls.Add(textBox);
-
-                // TextBox'ý odaklayýn
-                textBox.Focus();
-
-                // TextBox'ýn metni deðiþtikçe boyutunu ayarlayýn
-                textBox.TextChanged += (s, args) =>
-                {
-                    // Measure the size of the text, including multi-line text
-                    Size textSize = TextRenderer.MeasureText(
-                        textBox.Text,
-                        textBox.Font,
-                        new Size(textBox.Width, int.MaxValue), // Allow wrapping by setting a maximum height
-                        TextFormatFlags.WordBreak // Enable word wrapping
-                    );
-
-                    // Adjust the TextBox's height based on the measured size
-                    textBox.Height = textSize.Height + 5; // Add padding
-                };
-                textBox.TextChanged += (s, args) =>
-                {
-                    using (Graphics g = textBox.CreateGraphics())
+                case "Text":
                     {
-                        // Measure the size of the text, including multi-line text
-                        SizeF textSize = g.MeasureString(textBox.Text, textBox.Font);
+                        SaveStateForUndo();
+                        // MouseEventArgs'den týklama konumunu alýn  
+                        MouseEventArgs me = (MouseEventArgs)e; // EventArgs yerine MouseEventArgs kullanýmý  
+                        int x = me.X;
+                        int y = me.Y;
+                        // Yeni bir TextBox oluþturun  
+                        TextBox textBox = new TextBox
+                        {
+                            MaximumSize = Size.Empty, // Maksimum boyut  
+                            AutoSize = false, // Otomatik boyutlandýrmayý devre dýþý býrakýn  
+                            Multiline = true, // Çok satýrlý metin desteði  
+                            WordWrap = true, // Metni sarmayý etkinleþtirin  
+                            Font = new Font(fontsComboBox.Text, textSize), // Yazý tipi ayarý  
+                            BorderStyle = BorderStyle.FixedSingle // Kenarlýk stili  
+                        };
+                        textBox.Location = new Point(
+                            Math.Min(x, pictureBoxCanvas.Width - textBox.Width),
+                            Math.Min(y, pictureBoxCanvas.Height - textBox.Height)
+                        );
 
-                        // Adjust the TextBox's width and height based on the measured size
-                        textBox.Width = Math.Max((int)textSize.Width + 10, textBox.MinimumSize.Width); // Add padding for width
-                        textBox.Height = Math.Max((int)textSize.Height + 10, textBox.MinimumSize.Height); // Add padding for height
+                        // TextBox'ý pictureBoxCanvas'a ekleyin  
+                        pictureBoxCanvas.Controls.Add(textBox);
+
+                        // TextBox'ý odaklayýn  
+                        textBox.Focus();
+
+                        // TextBox'ýn metni deðiþtikçe boyutunu ayarlayýn  
+                        textBox.TextChanged += (s, args) =>
+                        {
+                            // Measure the size of the text, including multi-line text  
+                            Size textSize = TextRenderer.MeasureText(
+                                textBox.Text,
+                                textBox.Font,
+                                new Size(textBox.Width, int.MaxValue), // Allow wrapping by setting a maximum height  
+                                TextFormatFlags.WordBreak // Enable word wrapping  
+                            );
+
+                            // Adjust the TextBox's height based on the measured size  
+                            textBox.Height = textSize.Height + 5; // Add padding  
+                        };
+                        textBox.TextChanged += (s, args) =>
+                        {
+                            using (Graphics g = textBox.CreateGraphics())
+                            {
+                                // Measure the size of the text, including multi-line text  
+                                SizeF textSize = g.MeasureString(textBox.Text, textBox.Font);
+
+                                // Adjust the TextBox's width and height based on the measured size  
+                                textBox.Width = Math.Max((int)textSize.Width + 10, textBox.MinimumSize.Width); // Add padding for width  
+                                textBox.Height = Math.Max((int)textSize.Height + 10, textBox.MinimumSize.Height); // Add padding for height  
+                            }
+                        };
+
+                        textBox.LostFocus += (s, args) =>
+                        {
+                            // Draw the TextBox content onto the bitmap  
+                            using (Graphics graphics = Graphics.FromImage(bitmap))
+                            {
+                                graphics.DrawString(textBox.Text, textBox.Font, new SolidBrush(color1), textBox.Location);
+                            }
+
+                            // Remove the TextBox from the canvas  
+                            pictureBoxCanvas.Controls.Remove(textBox);
+
+                            // Update the PictureBox with the updated bitmap  
+                            pictureBoxCanvas.Image = bitmap;
+                            pictureBoxCanvas.Invalidate(); // Force a redraw  
+                        };
+                        textBox.TextChanged += (s, args) =>
+                        {
+                            using (Graphics g = textBox.CreateGraphics())
+                            {
+                                // Measure the size of the text, including multi-line text  
+                                SizeF textSize = g.MeasureString(textBox.Text, textBox.Font, textBox.Width);
+
+                                // Adjust the TextBox's width and height based on the measured size  
+                                textBox.Width = Math.Max((int)textSize.Width + 10, textBox.MinimumSize.Width);
+                                textBox.Height = Math.Max((int)textSize.Height + 10, textBox.MinimumSize.Height);
+                            }
+                        };
+                        textBox.TextChanged += (s, args) =>
+                        {
+                            // Measure the size of the text, including multi-line text  
+                            Size textSize = TextRenderer.MeasureText(
+                                textBox.Text,
+                                textBox.Font,
+                                new Size(textBox.Width, int.MaxValue), // Allow wrapping by setting a maximum height  
+                                TextFormatFlags.WordBreak // Enable word wrapping  
+                            );
+
+                            // Adjust the TextBox's height based on the measured size  
+                            textBox.Height = Math.Max(textSize.Height + 5, textBox.MinimumSize.Height); // Add padding  
+                        };
+
+                        // TextBox'tan odak kaybolduðunda iþlemi tamamlayýn  
+                        textBox.LostFocus += (s, args) =>
+                        {
+                            // TextBox içeriðini bitmap'e çiz  
+                            using (Graphics graphics = Graphics.FromImage(bitmap))
+                            {
+                                graphics.DrawString(textBox.Text, textBox.Font, new SolidBrush(color1), textBox.Location);
+                            }
+
+                            // TextBox'ý kaldýr  
+                            pictureBoxCanvas.Controls.Remove(textBox);
+
+                            // Canvas'ý güncelle  
+                            pictureBoxCanvas.Image = bitmap;
+                            pictureBoxCanvas.Invalidate();
+                        };
                     }
-                };
-
-
-                textBox.LostFocus += (s, args) =>
-                {
-                    // Draw the TextBox content onto the bitmap
-                    using (Graphics graphics = Graphics.FromImage(bitmap))
+                    break;
+                case "Bucket":
                     {
-                        graphics.DrawString(textBox.Text, textBox.Font, new SolidBrush(color1), textBox.Location);
+                        SaveStateForUndo();
+                        MouseEventArgs me = (MouseEventArgs)e; // EventArgs yerine MouseEventArgs kullanýmý  
+                        FloodFill(bitmap, me.Location, bitmap.GetPixel(me.X, me.Y), color1, tolerance);
                     }
+                    break;
+            }
+        }
+        private void FloodFill(Bitmap bitmap, Point point, Color targetColor, Color replacementColor, int tolerance)
+        {
+            // Tolerance is given as 1-100. We can use this directly or scale it.
+            // A tolerance of 0 would mean exact match (though your current code handles this if target == replacement).
+            // A tolerance of 100 would mean fill almost anything within a certain distance.
+            // We need a way to compare colors based on tolerance. Comparing individual R, G, B components is common.
 
-                    // Remove the TextBox from the canvas
-                    pictureBoxCanvas.Controls.Remove(textBox);
+            if (targetColor.ToArgb() == replacementColor.ToArgb()) return;
 
-                    // Update the PictureBox with the updated bitmap
-                    pictureBoxCanvas.Image = bitmap;
-                    pictureBoxCanvas.Invalidate(); // Force a redraw
-                };
-                textBox.TextChanged += (s, args) =>
+            Rectangle rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
+            BitmapData data = bitmap.LockBits(rect, ImageLockMode.ReadWrite, bitmap.PixelFormat);
+
+            int bytesPerPixel = Image.GetPixelFormatSize(bitmap.PixelFormat) / 8;
+            int stride = data.Stride;
+            IntPtr scan0 = data.Scan0;
+
+            byte[] pixels = new byte[stride * bitmap.Height];
+            System.Runtime.InteropServices.Marshal.Copy(scan0, pixels, 0, pixels.Length);
+
+            Stack<Point> pixelsToCheck = new Stack<Point>();
+            pixelsToCheck.Push(point);
+
+            // Store target color components for easier comparison
+            byte targetR = targetColor.R;
+            byte targetG = targetColor.G;
+            byte targetB = targetColor.B;
+
+            // To avoid infinite loops on already filled pixels, we can use a boolean array
+            // or check if the pixel's color is already the replacement color.
+            // Checking against the replacement color is simpler here.
+            int replacementArgb = replacementColor.ToArgb();
+
+            while (pixelsToCheck.Count > 0)
+            {
+                Point pt = pixelsToCheck.Pop();
+                int x = pt.X;
+                int y = pt.Y;
+
+                // Check bounds first
+                if (x < 0 || y < 0 || x >= bitmap.Width || y >= bitmap.Height)
+                    continue;
+
+                int index = (y * stride) + (x * bytesPerPixel);
+
+                // Get the current pixel's color components
+                byte currentB = pixels[index];
+                byte currentG = pixels[index + 1];
+                byte currentR = pixels[index + 2];
+                // If alpha is present: byte currentA = pixels[index + 3];
+
+                // Reconstruct ARGB for comparison with replacement color if needed
+                // Note: This assumes ARGB or RGB. Adjust indexing if format is BGR or BGRA.
+                int pixelArgb = 0;
+                if (bytesPerPixel == 4) // Likely ARGB or BGRA
                 {
-                    using (Graphics g = textBox.CreateGraphics())
+                    pixelArgb = BitConverter.ToInt32(pixels, index);
+                }
+                else if (bytesPerPixel == 3) // Likely RGB or BGR
+                {
+                    pixelArgb = (255 << 24) | (currentR << 16) | (currentG << 8) | currentB; // Assume Alpha 255
+                }
+
+
+                // --- Tolerance Check ---
+                // If the pixel is already the replacement color, skip it to prevent infinite loops.
+                if (pixelArgb == replacementArgb)
+                {
+                    continue;
+                }
+
+                // Calculate the difference between the current pixel color and the target color.
+                // A simple way is sum of absolute differences of R, G, B components.
+                int diffR = Math.Abs(currentR - targetR);
+                int diffG = Math.Abs(currentG - targetG);
+                int diffB = Math.Abs(currentB - targetB);
+
+                // A common tolerance check sums the differences.
+                // The maximum possible sum of differences is 255 + 255 + 255 = 765.
+                // We can map the 1-100 tolerance to this range.
+                // tolerance 1 would be a small difference threshold, tolerance 100 a large one.
+                int colorDifferenceThreshold = (int)((tolerance / 100.0) * 765); // Scale 1-100 to 0-765
+
+                if ((diffR + diffG + diffB) <= colorDifferenceThreshold)
+                {
+                    // The pixel is within the tolerance range of the target color
+                    // Set the pixel to the replacement color
+                    if (bytesPerPixel == 4)
                     {
-                        // Measure the size of the text, including multi-line text
-                        SizeF textSize = g.MeasureString(textBox.Text, textBox.Font, textBox.Width);
-
-                        // Adjust the TextBox's width and height based on the measured size
-                        textBox.Width = Math.Max((int)textSize.Width + 10, textBox.MinimumSize.Width);
-                        textBox.Height = Math.Max((int)textSize.Height + 10, textBox.MinimumSize.Height);
+                        BitConverter.GetBytes(replacementArgb).CopyTo(pixels, index);
                     }
-                };
-                textBox.TextChanged += (s, args) =>
-                {
-                    // Measure the size of the text, including multi-line text
-                    Size textSize = TextRenderer.MeasureText(
-                        textBox.Text,
-                        textBox.Font,
-                        new Size(textBox.Width, int.MaxValue), // Allow wrapping by setting a maximum height
-                        TextFormatFlags.WordBreak // Enable word wrapping
-                    );
-
-                    // Adjust the TextBox's height based on the measured size
-                    textBox.Height = Math.Max(textSize.Height + 5, textBox.MinimumSize.Height); // Add padding
-                };
-
-                // TextBox'tan odak kaybolduðunda iþlemi tamamlayýn
-                textBox.LostFocus += (s, args) =>
-                {
-                    // TextBox içeriðini bitmap'e çiz
-                    using (Graphics graphics = Graphics.FromImage(bitmap))
+                    else if (bytesPerPixel == 3)
                     {
-                        graphics.DrawString(textBox.Text, textBox.Font, new SolidBrush(color1), textBox.Location);
+                        pixels[index] = (byte)(replacementArgb & 0xFF); // Blue
+                        pixels[index + 1] = (byte)((replacementArgb >> 8) & 0xFF); // Green
+                        pixels[index + 2] = (byte)((replacementArgb >> 16) & 0xFF); // Red
                     }
 
-                    // TextBox'ý kaldýr
-                    pictureBoxCanvas.Controls.Remove(textBox);
 
-                    // Canvas'ý güncelle
-                    pictureBoxCanvas.Image = bitmap;
-                    pictureBoxCanvas.Invalidate();
-                };
+                    // Add neighboring pixels to the stack
+                    pixelsToCheck.Push(new Point(x + 1, y));
+                    pixelsToCheck.Push(new Point(x - 1, y));
+                    pixelsToCheck.Push(new Point(x, y + 1));
+                    pixelsToCheck.Push(new Point(x, y - 1));
+                }
+                // Else: the pixel is not the target color (within tolerance) and is not the replacement color, so we stop flooding in this direction.
+            }
+
+            System.Runtime.InteropServices.Marshal.Copy(pixels, 0, scan0, pixels.Length);
+            bitmap.UnlockBits(data);
+
+            // Assuming pictureBoxCanvas is a PictureBox displaying the bitmap
+            if (pictureBoxCanvas != null)
+            {
+                pictureBoxCanvas.Refresh();
             }
         }
 
@@ -1512,30 +1642,6 @@ namespace _222303026_proje3
             }
 
         }
-        private void EraseWithTransparency(int x, int y, int size)
-        {
-            if (bitmap == null) return;
-
-            int startX = Math.Max(0, x - size / 2);
-            int startY = Math.Max(0, y - size / 2);
-            int endX = Math.Min(bitmap.Width, x + size / 2);
-            int endY = Math.Min(bitmap.Height, y + size / 2);
-
-            for (int i = startX; i < endX; i++)
-            {
-                for (int j = startY; j < endY; j++)
-                {
-                    double distance = Math.Sqrt(Math.Pow(i - x, 2) + Math.Pow(j - y, 2));
-                    if (distance <= size / 2)
-                    {
-                        bitmap.SetPixel(i, j, Color.FromArgb(0, 0, 0, 0)); // Þeffaf piksel
-                    }
-                }
-            }
-
-            pictureBoxCanvas.Image = bitmap;
-            pictureBoxCanvas.Invalidate();
-        }
 
         private void toolStripButton1_Click(object sender, EventArgs e)
         {
@@ -1555,6 +1661,59 @@ namespace _222303026_proje3
                     pictureBoxCanvas.Controls.Remove(textBox);
                 }
             }
+        }
+
+        private void canvasPanel_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void canvasPanel_Click(object sender, EventArgs e)
+        {
+            HideAddTextTextBoxes();
+        }
+
+        private void resize_top_Click(object sender, EventArgs e)
+        {
+            HideAddTextTextBoxes();
+        }
+
+        private void toolStripTextBox1_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if(string.IsNullOrEmpty(textBoxTolerance.Text))
+                {
+                    throw new FormatException();
+                }
+                else if(Convert.ToInt32(textBoxTolerance.Text) <= 0 || Convert.ToInt32(textBoxTolerance.Text) > 100)
+                {
+                    throw new OverflowException();
+                }
+                else
+                {
+                    tolerance = Convert.ToInt32(textBoxTolerance.Text);
+                }
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                tolerance = 50;
+            }
+            catch (OverflowException)
+            {
+                MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                tolerance = 50;
+            }
+            finally
+            {
+                textBoxTolerance.Text = tolerance.ToString();
+            }
+        }
+
+        private void toolStripTextBox1_Click(object sender, EventArgs e)
+        {
+
         }
     }
     public partial class CreateWithAIForm : Form
