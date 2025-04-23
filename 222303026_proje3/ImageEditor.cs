@@ -107,7 +107,7 @@ namespace _222303026_proje3
             panel1.AutoScroll = true;
 
             // canvasPanel'in boyutlarýný ayarlýyoruz
-            canvasPanel.Size = image.Size;
+            canvasPanel.Size = new Size(image.Size.Width+20, image.Size.Height+20);
 
             // panel1'in AutoScrollMinSize özelliðini canvasPanel'in boyutlarýna ayarlýyoruz
             panel1.AutoScrollMinSize = canvasPanel.Size;
@@ -540,6 +540,7 @@ namespace _222303026_proje3
                 resizeDirection = ResizeDirection.BottomRight;
 
             // Resizing iþlemi baþladýðýnda
+            SaveStateForUndo();
             isResizing = true;
             toolStripResize.Visible = true;
             toolStripSeparator16.Visible = true;
@@ -964,8 +965,8 @@ namespace _222303026_proje3
         private Point startPoint;
         private Point previewStartPoint; // Origin of the preview shape
         private Bitmap previewBitmap;    // Temporary bitmap for previewing shapes
-        private Stack<Bitmap> undoStack = new Stack<Bitmap>();
-        private Stack<Bitmap> redoStack = new Stack<Bitmap>();
+        private Stack<CanvasState> undoStack = new Stack<CanvasState>();
+        private Stack<CanvasState> redoStack = new Stack<CanvasState>();
         private void pictureBoxCanvas_MouseDown(object sender, MouseEventArgs e)
         {
             isdrawing = true;
@@ -1573,38 +1574,44 @@ namespace _222303026_proje3
             {
                 if (undoStack.Count >= MaxStackSize)
                 {
-                    // En eski durumu kaldýr
+                    // Remove the oldest state
                     var tempList = undoStack.ToList();
                     tempList.RemoveAt(0);
-                    undoStack = new Stack<Bitmap>(tempList);
+                    undoStack = new Stack<CanvasState>(tempList);
                 }
-                undoStack.Push(new Bitmap(bitmap));
-                redoStack.Clear(); // Yeni iþlemde redo yýðýný temizlenir
+                undoStack.Push(new CanvasState(new Bitmap(bitmap), canvasPanel.Size));
+                redoStack.Clear(); // Clear redo stack on new action
             }
-            UpdateUndoRedoButtons(); // Tuþlarý güncelle
+            UpdateUndoRedoButtons(); // Update buttons
         }
 
         private void Undo()
         {
             if (undoStack.Count > 0)
             {
-                redoStack.Push(new Bitmap(bitmap)); // Mevcut durumu redo yýðýnýna kaydet
-                bitmap = undoStack.Pop(); // Son durumu geri yükle
+                redoStack.Push(new CanvasState(new Bitmap(bitmap), canvasPanel.Size)); // Save current state to redo stack
+                var previousState = undoStack.Pop(); // Get the last state
+                bitmap = previousState.Bitmap;
+                canvasPanel.Size = previousState.CanvasSize;
                 pictureBoxCanvas.Image = bitmap;
                 pictureBoxCanvas.Invalidate();
+                CenterCanvasPanel(); // Center the canvas panel
             }
-            UpdateUndoRedoButtons(); // Tuþlarý güncelle
+            UpdateUndoRedoButtons(); // Update buttons
         }
         private void Redo()
         {
             if (redoStack.Count > 0)
             {
-                undoStack.Push(new Bitmap(bitmap)); // Mevcut durumu undo yýðýnýna kaydet
-                bitmap = redoStack.Pop(); // Sonraki durumu geri yükle
+                undoStack.Push(new CanvasState(new Bitmap(bitmap), canvasPanel.Size)); // Save current state to undo stack
+                var nextState = redoStack.Pop(); // Get the next state
+                bitmap = nextState.Bitmap;
+                canvasPanel.Size = nextState.CanvasSize;
                 pictureBoxCanvas.Image = bitmap;
                 pictureBoxCanvas.Invalidate();
+                CenterCanvasPanel(); // Center the canvas panel
             }
-            UpdateUndoRedoButtons(); // Tuþlarý güncelle
+            UpdateUndoRedoButtons(); // Update buttons
         }
 
         private void geriAlToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1682,11 +1689,11 @@ namespace _222303026_proje3
         {
             try
             {
-                if(string.IsNullOrEmpty(textBoxTolerance.Text))
+                if (string.IsNullOrEmpty(textBoxTolerance.Text))
                 {
                     throw new FormatException();
                 }
-                else if(Convert.ToInt32(textBoxTolerance.Text) <= 0 || Convert.ToInt32(textBoxTolerance.Text) > 100)
+                else if (Convert.ToInt32(textBoxTolerance.Text) <= 0 || Convert.ToInt32(textBoxTolerance.Text) > 100)
                 {
                     throw new OverflowException();
                 }
@@ -1714,6 +1721,16 @@ namespace _222303026_proje3
         private void toolStripTextBox1_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void mirrorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveStateForUndo();
+            bitmap = Filters.BasicFilters.MirrorEffect(bitmap);
+            canvasPanel.Size = new Size(bitmap.Size.Width+20, bitmap.Size.Height + 20);
+            pictureBoxCanvas.Image = bitmap;
+            pictureBoxCanvas.Invalidate();
+            CenterCanvasPanel();
         }
     }
     public partial class CreateWithAIForm : Form

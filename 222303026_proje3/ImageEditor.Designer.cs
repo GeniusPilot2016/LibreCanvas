@@ -113,7 +113,9 @@
             yapıştırToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator4 = new ToolStripSeparator();
             araçlarToolStripMenuItem = new ToolStripMenuItem();
-            seçeneklerToolStripMenuItem = new ToolStripMenuItem();
+            filtersToolStripMenuItem = new ToolStripMenuItem();
+            blackAndWhiteToolStripMenuItem = new ToolStripMenuItem();
+            artisticFİltersToolStripMenuItem = new ToolStripMenuItem();
             yardımToolStripMenuItem = new ToolStripMenuItem();
             içindekilerToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator5 = new ToolStripSeparator();
@@ -175,6 +177,7 @@
             colorDialog1 = new ColorDialog();
             openFileDialog1 = new OpenFileDialog();
             saveFileDialog1 = new SaveFileDialog();
+            mirrorToolStripMenuItem = new ToolStripMenuItem();
             toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             toolStripContainer1.ContentPanel.SuspendLayout();
             toolStripContainer1.LeftToolStripPanel.SuspendLayout();
@@ -1035,16 +1038,29 @@
             // 
             // araçlarToolStripMenuItem
             // 
-            araçlarToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { seçeneklerToolStripMenuItem });
+            araçlarToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { filtersToolStripMenuItem, artisticFİltersToolStripMenuItem });
             araçlarToolStripMenuItem.Name = "araçlarToolStripMenuItem";
             araçlarToolStripMenuItem.Size = new Size(59, 24);
             araçlarToolStripMenuItem.Text = "&Tools";
             // 
-            // seçeneklerToolStripMenuItem
+            // filtersToolStripMenuItem
             // 
-            seçeneklerToolStripMenuItem.Name = "seçeneklerToolStripMenuItem";
-            seçeneklerToolStripMenuItem.Size = new Size(165, 26);
-            seçeneklerToolStripMenuItem.Text = "C&ustomize";
+            filtersToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { mirrorToolStripMenuItem, blackAndWhiteToolStripMenuItem });
+            filtersToolStripMenuItem.Name = "filtersToolStripMenuItem";
+            filtersToolStripMenuItem.Size = new Size(224, 26);
+            filtersToolStripMenuItem.Text = "Basic Filters";
+            // 
+            // blackAndWhiteToolStripMenuItem
+            // 
+            blackAndWhiteToolStripMenuItem.Name = "blackAndWhiteToolStripMenuItem";
+            blackAndWhiteToolStripMenuItem.Size = new Size(224, 26);
+            blackAndWhiteToolStripMenuItem.Text = "Black and White";
+            // 
+            // artisticFİltersToolStripMenuItem
+            // 
+            artisticFİltersToolStripMenuItem.Name = "artisticFİltersToolStripMenuItem";
+            artisticFİltersToolStripMenuItem.Size = new Size(224, 26);
+            artisticFİltersToolStripMenuItem.Text = "Artistic Fİlters";
             // 
             // yardımToolStripMenuItem
             // 
@@ -1520,6 +1536,13 @@
             colorDialog1.AnyColor = true;
             colorDialog1.FullOpen = true;
             // 
+            // mirrorToolStripMenuItem
+            // 
+            mirrorToolStripMenuItem.Name = "mirrorToolStripMenuItem";
+            mirrorToolStripMenuItem.Size = new Size(224, 26);
+            mirrorToolStripMenuItem.Text = "Mirror";
+            mirrorToolStripMenuItem.Click += mirrorToolStripMenuItem_Click;
+            // 
             // ImageEditor
             // 
             AutoScaleMode = AutoScaleMode.None;
@@ -1604,7 +1627,6 @@
         private ToolStripMenuItem yapıştırToolStripMenuItem;
         private ToolStripSeparator toolStripSeparator4;
         private ToolStripMenuItem araçlarToolStripMenuItem;
-        private ToolStripMenuItem seçeneklerToolStripMenuItem;
         private ToolStripMenuItem yardımToolStripMenuItem;
         private ToolStripMenuItem içindekilerToolStripMenuItem;
         private ToolStripSeparator toolStripSeparator5;
@@ -1715,5 +1737,9 @@
         private ToolStrip toolStripBucketTool;
         private ToolStripLabel toolStripLabel4;
         private ToolStripTextBox textBoxTolerance;
+        private ToolStripMenuItem filtersToolStripMenuItem;
+        private ToolStripMenuItem blackAndWhiteToolStripMenuItem;
+        private ToolStripMenuItem artisticFİltersToolStripMenuItem;
+        private ToolStripMenuItem mirrorToolStripMenuItem;
     }
 }
