@@ -61,6 +61,10 @@ namespace _222303026_proje3
         private void InitializeComponentAndFont()
         {
             InitializeComponent();
+            if (fontsComboBox.Items.Count > 0)
+            {
+                fontsComboBox.SelectedIndex = 0;
+            }
             comboBoxBrushType.SelectedIndex = 0;
             comboBoxPenType.SelectedIndex = 0;
             brushSize = Convert.ToInt32(comboBoxBrushSize.SelectedItem);
@@ -362,6 +366,7 @@ namespace _222303026_proje3
         private void mouseTool_Click(object sender, EventArgs e)
         {
             ToolStripButtonsClick(mouseTool);
+
         }
 
         private void drawShapeTool_Click(object sender, EventArgs e)
@@ -395,6 +400,7 @@ namespace _222303026_proje3
             else
             {
                 toolStripText.Visible = false;
+                HideAddTextTextBoxes();
             }
         }
 
@@ -1023,7 +1029,122 @@ namespace _222303026_proje3
 
         private void pictureBoxCanvas_Click(object sender, EventArgs e)
         {
+            if(currentTool == "Text")
+            {
+                SaveStateForUndo();
+                // MouseEventArgs'den týklama konumunu alýn
+                MouseEventArgs me = (MouseEventArgs)e;
+                int x = me.X;
+                int y = me.Y;
+                // Yeni bir TextBox oluþturun
+                TextBox textBox = new TextBox
+                {
+                    MaximumSize = Size.Empty, // Maksimum boyut
+                    AutoSize = false, // Otomatik boyutlandýrmayý devre dýþý býrakýn
+                    Multiline = true, // Çok satýrlý metin desteði
+                    WordWrap = true, // Metni sarmayý etkinleþtirin
+                    Font = new Font(fontsComboBox.Text, textSize), // Yazý tipi ayarý
+                    BorderStyle = BorderStyle.FixedSingle // Kenarlýk stili
+                };
+                textBox.Location = new Point(
+                    Math.Min(x, pictureBoxCanvas.Width - textBox.Width),
+                    Math.Min(y, pictureBoxCanvas.Height - textBox.Height)
+                );
 
+
+
+                // TextBox'ý pictureBoxCanvas'a ekleyin
+                pictureBoxCanvas.Controls.Add(textBox);
+
+                // TextBox'ý odaklayýn
+                textBox.Focus();
+
+                // TextBox'ýn metni deðiþtikçe boyutunu ayarlayýn
+                textBox.TextChanged += (s, args) =>
+                {
+                    // Measure the size of the text, including multi-line text
+                    Size textSize = TextRenderer.MeasureText(
+                        textBox.Text,
+                        textBox.Font,
+                        new Size(textBox.Width, int.MaxValue), // Allow wrapping by setting a maximum height
+                        TextFormatFlags.WordBreak // Enable word wrapping
+                    );
+
+                    // Adjust the TextBox's height based on the measured size
+                    textBox.Height = textSize.Height + 5; // Add padding
+                };
+                textBox.TextChanged += (s, args) =>
+                {
+                    using (Graphics g = textBox.CreateGraphics())
+                    {
+                        // Measure the size of the text, including multi-line text
+                        SizeF textSize = g.MeasureString(textBox.Text, textBox.Font);
+
+                        // Adjust the TextBox's width and height based on the measured size
+                        textBox.Width = Math.Max((int)textSize.Width + 10, textBox.MinimumSize.Width); // Add padding for width
+                        textBox.Height = Math.Max((int)textSize.Height + 10, textBox.MinimumSize.Height); // Add padding for height
+                    }
+                };
+
+
+                textBox.LostFocus += (s, args) =>
+                {
+                    // Draw the TextBox content onto the bitmap
+                    using (Graphics graphics = Graphics.FromImage(bitmap))
+                    {
+                        graphics.DrawString(textBox.Text, textBox.Font, new SolidBrush(color1), textBox.Location);
+                    }
+
+                    // Remove the TextBox from the canvas
+                    pictureBoxCanvas.Controls.Remove(textBox);
+
+                    // Update the PictureBox with the updated bitmap
+                    pictureBoxCanvas.Image = bitmap;
+                    pictureBoxCanvas.Invalidate(); // Force a redraw
+                };
+                textBox.TextChanged += (s, args) =>
+                {
+                    using (Graphics g = textBox.CreateGraphics())
+                    {
+                        // Measure the size of the text, including multi-line text
+                        SizeF textSize = g.MeasureString(textBox.Text, textBox.Font, textBox.Width);
+
+                        // Adjust the TextBox's width and height based on the measured size
+                        textBox.Width = Math.Max((int)textSize.Width + 10, textBox.MinimumSize.Width);
+                        textBox.Height = Math.Max((int)textSize.Height + 10, textBox.MinimumSize.Height);
+                    }
+                };
+                textBox.TextChanged += (s, args) =>
+                {
+                    // Measure the size of the text, including multi-line text
+                    Size textSize = TextRenderer.MeasureText(
+                        textBox.Text,
+                        textBox.Font,
+                        new Size(textBox.Width, int.MaxValue), // Allow wrapping by setting a maximum height
+                        TextFormatFlags.WordBreak // Enable word wrapping
+                    );
+
+                    // Adjust the TextBox's height based on the measured size
+                    textBox.Height = Math.Max(textSize.Height + 5, textBox.MinimumSize.Height); // Add padding
+                };
+
+                // TextBox'tan odak kaybolduðunda iþlemi tamamlayýn
+                textBox.LostFocus += (s, args) =>
+                {
+                    // TextBox içeriðini bitmap'e çiz
+                    using (Graphics graphics = Graphics.FromImage(bitmap))
+                    {
+                        graphics.DrawString(textBox.Text, textBox.Font, new SolidBrush(color1), textBox.Location);
+                    }
+
+                    // TextBox'ý kaldýr
+                    pictureBoxCanvas.Controls.Remove(textBox);
+
+                    // Canvas'ý güncelle
+                    pictureBoxCanvas.Image = bitmap;
+                    pictureBoxCanvas.Invalidate();
+                };
+            }
         }
 
         private void çýkýþToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1376,7 +1497,7 @@ namespace _222303026_proje3
 
         private void toolStripButton9_Click(object sender, EventArgs e)
         {
-            switch(toolStripButton9.Checked)
+            switch (toolStripButton9.Checked)
             {
                 case false:
                     {
@@ -1414,6 +1535,26 @@ namespace _222303026_proje3
 
             pictureBoxCanvas.Image = bitmap;
             pictureBoxCanvas.Invalidate();
+        }
+
+        private void toolStripButton1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void panel1_Click(object sender, EventArgs e)
+        {
+            HideAddTextTextBoxes();
+        }
+        private void HideAddTextTextBoxes()
+        {
+            foreach (Control control in pictureBoxCanvas.Controls)
+            {
+                if (control is TextBox textBox)
+                {
+                    pictureBoxCanvas.Controls.Remove(textBox);
+                }
+            }
         }
     }
     public partial class CreateWithAIForm : Form
