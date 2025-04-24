@@ -193,7 +193,7 @@
             textBoxArtisticFilterIntensity = new ToolStripTextBox();
             toolStripSeparator28 = new ToolStripSeparator();
             toolStripLabel8 = new ToolStripLabel();
-            toolStripArtisticFilterThreshold = new ToolStripTextBox();
+            textBoxArtisticFilterThreshold = new ToolStripTextBox();
             buttonArtisticFiltersOK = new ToolStripButton();
             buttonArtisticFiltersCancel = new ToolStripButton();
             colorDialog1 = new ColorDialog();
@@ -1155,12 +1155,14 @@
             cartoonToolStripMenuItem.Name = "cartoonToolStripMenuItem";
             cartoonToolStripMenuItem.Size = new Size(173, 26);
             cartoonToolStripMenuItem.Text = "Cartoon";
+            cartoonToolStripMenuItem.Click += cartoonToolStripMenuItem_Click;
             // 
             // oilPaintingToolStripMenuItem
             // 
             oilPaintingToolStripMenuItem.Name = "oilPaintingToolStripMenuItem";
             oilPaintingToolStripMenuItem.Size = new Size(173, 26);
             oilPaintingToolStripMenuItem.Text = "Oil Painting";
+            oilPaintingToolStripMenuItem.Click += oilPaintingToolStripMenuItem_Click;
             // 
             // yardımToolStripMenuItem
             // 
@@ -1636,12 +1638,13 @@
             toolStripArtisticFilters.Dock = DockStyle.None;
             toolStripArtisticFilters.GripStyle = ToolStripGripStyle.Hidden;
             toolStripArtisticFilters.ImageScalingSize = new Size(20, 20);
-            toolStripArtisticFilters.Items.AddRange(new ToolStripItem[] { toolStripLabel5, textBoxArtisticFilterSize, toolStripSeparator27, toolStripLabel7, textBoxArtisticFilterIntensity, toolStripSeparator28, toolStripLabel8, toolStripArtisticFilterThreshold, buttonArtisticFiltersOK, buttonArtisticFiltersCancel });
+            toolStripArtisticFilters.Items.AddRange(new ToolStripItem[] { toolStripLabel5, textBoxArtisticFilterSize, toolStripSeparator27, toolStripLabel7, textBoxArtisticFilterIntensity, toolStripSeparator28, toolStripLabel8, textBoxArtisticFilterThreshold, buttonArtisticFiltersOK, buttonArtisticFiltersCancel });
             toolStripArtisticFilters.Location = new Point(0, 28);
             toolStripArtisticFilters.Name = "toolStripArtisticFilters";
             toolStripArtisticFilters.Size = new Size(1289, 27);
             toolStripArtisticFilters.Stretch = true;
             toolStripArtisticFilters.TabIndex = 9;
+            toolStripArtisticFilters.Visible = false;
             // 
             // toolStripLabel5
             // 
@@ -1655,6 +1658,8 @@
             textBoxArtisticFilterSize.Font = new Font("HarmonyOS Sans", 8.999999F);
             textBoxArtisticFilterSize.Name = "textBoxArtisticFilterSize";
             textBoxArtisticFilterSize.Size = new Size(50, 27);
+            textBoxArtisticFilterSize.Text = "5";
+            textBoxArtisticFilterSize.TextChanged += textBoxArtisticFilterSize_TextChanged;
             // 
             // toolStripSeparator27
             // 
@@ -1673,6 +1678,9 @@
             textBoxArtisticFilterIntensity.Font = new Font("HarmonyOS Sans", 8.999999F);
             textBoxArtisticFilterIntensity.Name = "textBoxArtisticFilterIntensity";
             textBoxArtisticFilterIntensity.Size = new Size(50, 27);
+            textBoxArtisticFilterIntensity.Text = "10";
+            textBoxArtisticFilterIntensity.Leave += textBoxArtisticFilterIntensity_Leave;
+            textBoxArtisticFilterIntensity.TextChanged += textBoxArtisticFilterIntensity_TextChanged;
             // 
             // toolStripSeparator28
             // 
@@ -1686,12 +1694,14 @@
             toolStripLabel8.Size = new Size(79, 24);
             toolStripLabel8.Text = "Threshold";
             // 
-            // toolStripArtisticFilterThreshold
+            // textBoxArtisticFilterThreshold
             // 
-            toolStripArtisticFilterThreshold.Font = new Font("HarmonyOS Sans", 8.999999F);
-            toolStripArtisticFilterThreshold.Name = "toolStripArtisticFilterThreshold";
-            toolStripArtisticFilterThreshold.Size = new Size(50, 27);
-            toolStripArtisticFilterThreshold.TextChanged += toolStripArtisticFilterThreshold_TextChanged;
+            textBoxArtisticFilterThreshold.Font = new Font("HarmonyOS Sans", 8.999999F);
+            textBoxArtisticFilterThreshold.Name = "textBoxArtisticFilterThreshold";
+            textBoxArtisticFilterThreshold.Size = new Size(50, 27);
+            textBoxArtisticFilterThreshold.Text = "50";
+            textBoxArtisticFilterThreshold.Leave += textBoxArtisticFilterThreshold_Leave;
+            textBoxArtisticFilterThreshold.TextChanged += textBoxArtisticFilterThreshold_TextChanged;
             // 
             // buttonArtisticFiltersOK
             // 
@@ -1935,7 +1945,7 @@
         private ToolStripTextBox textBoxArtisticFilterIntensity;
         private ToolStripSeparator toolStripSeparator28;
         private ToolStripLabel toolStripLabel8;
-        private ToolStripTextBox toolStripArtisticFilterThreshold;
+        private ToolStripTextBox textBoxArtisticFilterThreshold;
         private ToolStripButton buttonArtisticFiltersOK;
         private ToolStripButton buttonArtisticFiltersCancel;
         private ToolStripTextBox textBoxArtisticFilterSize;

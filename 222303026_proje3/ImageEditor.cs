@@ -1011,6 +1011,7 @@ namespace _222303026_proje3
             isdrawing = true;
             x = e.X;
             y = e.Y;
+            CancelArtisticFilters();
             switch (selectedTool)
             {
                 case Tools.Line:
@@ -1910,20 +1911,284 @@ namespace _222303026_proje3
             CenterCanvasPanel();
         }
 
-        private void toolStripArtisticFilterThreshold_TextChanged(object sender, EventArgs e)
+        private void RefreshArtisticFiltersPreview()
         {
-
+            switch (artisticFilters)
+            {
+                case ArtisticFilters.OilPainting:
+                    pictureBoxCanvas.Image = Filters.ArtisticFilters.OilPaintFilter(bitmap, FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity,
+                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize, (byte)FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold);
+                    break;
+                case ArtisticFilters.Cartoon:
+                    pictureBoxCanvas.Image = Filters.ArtisticFilters.CartoonFilter(bitmap, FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity,
+                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize, (byte)FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold);
+                    break;
+            }
+            pictureBoxCanvas.Invalidate();
         }
-
         private void buttonArtisticFiltersOK_Click(object sender, EventArgs e)
         {
-
+            SaveStateForUndo();
+            bitmap = pictureBoxCanvas.Image as Bitmap;
+            pictureBoxCanvas.Invalidate();
+            canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
+            CenterCanvasPanel();
+            toolStripArtisticFilters.Visible = false;
         }
 
         private void buttonArtisticFiltersCancel_Click(object sender, EventArgs e)
         {
+            CancelArtisticFilters();
+        }
+        private void CancelArtisticFilters()
+        {
             toolStripArtisticFilters.Visible = false;
             artisticFilters = ArtisticFilters.None;
+            pictureBoxCanvas.Image = bitmap;
+            pictureBoxCanvas.Invalidate();
+            pictureBoxCanvas.Refresh();
+        }
+
+        private void cartoonToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            InitializeArtisticFilters(ArtisticFilters.Cartoon);
+        }
+
+        private void oilPaintingToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            InitializeArtisticFilters(ArtisticFilters.OilPainting);
+        }
+        private void InitializeArtisticFilters(Enum filterType)
+        {
+            toolStripArtisticFilters.Visible = true;
+            artisticFilters = (ArtisticFilters)filterType;
+            switch (artisticFilters)
+            {
+                case ArtisticFilters.OilPainting:
+                    textBoxArtisticFilterSize.Text = FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize.ToString();
+                    textBoxArtisticFilterIntensity.Text = FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity.ToString();
+                    textBoxArtisticFilterThreshold.Text = FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold.ToString();
+                    RefreshArtisticFiltersPreview();
+                    break;
+                case ArtisticFilters.Cartoon:
+                    textBoxArtisticFilterSize.Text = FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize.ToString();
+                    textBoxArtisticFilterIntensity.Text = FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity.ToString();
+                    textBoxArtisticFilterThreshold.Text = FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold.ToString();
+                    RefreshArtisticFiltersPreview();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void textBoxArtisticFilterSize_Leave(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void textBoxArtisticFilterIntensity_Leave(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void textBoxArtisticFilterThreshold_Leave(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void textBoxArtisticFilterSize_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(textBoxArtisticFilterSize.Text))
+                {
+                    switch (artisticFilters)
+                    {
+                        case ArtisticFilters.OilPainting:
+                            if (Convert.ToInt32(textBoxArtisticFilterSize.Text) > 2 && Convert.ToInt32(textBoxArtisticFilterSize.Text) < 32)
+                            {
+                                FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize = Convert.ToInt32(textBoxArtisticFilterSize.Text);
+                            }
+                            else
+                            {
+                                throw new OverflowException();
+                            }
+                            break;
+                        case ArtisticFilters.Cartoon:
+                            if (Convert.ToInt32(textBoxArtisticFilterSize.Text) > 2 && Convert.ToInt32(textBoxArtisticFilterSize.Text) < 32)
+                            {
+                                FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize = Convert.ToInt32(textBoxArtisticFilterSize.Text);
+                            }
+                            else
+                            {
+                                throw new OverflowException();
+                            }
+                            break;
+                    }
+                }
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                switch (artisticFilters)
+                {
+                    case ArtisticFilters.OilPainting:
+                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize = 5;
+                        break;
+                    case ArtisticFilters.Cartoon:
+                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize = 5;
+                        break;
+                }
+                textBoxArtisticFilterSize.Text = "5";
+            }
+            catch (OverflowException)
+            {
+                MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                switch (artisticFilters)
+                {
+                    case ArtisticFilters.OilPainting:
+                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize = 5;
+                        break;
+                    case ArtisticFilters.Cartoon:
+                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize = 5;
+                        break;
+                }
+                textBoxArtisticFilterSize.Text = "5";
+            }
+            finally
+            {
+                RefreshArtisticFiltersPreview();
+            }
+        }
+
+        private void textBoxArtisticFilterIntensity_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(textBoxArtisticFilterIntensity.Text))
+                {
+                    switch (artisticFilters)
+                    {
+                        case ArtisticFilters.OilPainting:
+                            if (Convert.ToInt32(textBoxArtisticFilterIntensity.Text) > 0 && Convert.ToInt32(textBoxArtisticFilterIntensity.Text) < 256)
+                            {
+                                FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity = Convert.ToInt32(textBoxArtisticFilterIntensity.Text);
+                            }
+                            else
+                            {
+                                throw new OverflowException();
+                            }
+                            break;
+                        case ArtisticFilters.Cartoon:
+                            if (Convert.ToInt32(textBoxArtisticFilterIntensity.Text) > 0 && Convert.ToInt32(textBoxArtisticFilterSize.Text) < 256)
+                            {
+                                FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity = Convert.ToInt32(textBoxArtisticFilterIntensity.Text);
+                            }
+                            else
+                            {
+                                throw new OverflowException();
+                            }
+                            break;
+                    }
+                }
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                switch (artisticFilters)
+                {
+                    case ArtisticFilters.OilPainting:
+                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity = 10;
+                        break;
+                    case ArtisticFilters.Cartoon:
+                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity = 10;
+                        break;
+                }
+                textBoxArtisticFilterIntensity.Text = "10";
+            }
+            catch (OverflowException)
+            {
+                MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                switch (artisticFilters)
+                {
+                    case ArtisticFilters.OilPainting:
+                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity = 10;
+                        break;
+                    case ArtisticFilters.Cartoon:
+                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity = 10;
+                        break;
+                }
+                textBoxArtisticFilterIntensity.Text = "10";
+            }
+            finally
+            {
+                RefreshArtisticFiltersPreview();
+            }
+        }
+
+        private void textBoxArtisticFilterThreshold_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(textBoxArtisticFilterThreshold.Text))
+                {
+                    switch (artisticFilters)
+                    {
+                        case ArtisticFilters.OilPainting:
+                            if (Convert.ToInt32(textBoxArtisticFilterThreshold.Text) >= 0 && Convert.ToInt32(textBoxArtisticFilterThreshold.Text) < 256)
+                            {
+                                FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold = Convert.ToInt32(textBoxArtisticFilterThreshold.Text);
+                            }
+                            else
+                            {
+                                throw new OverflowException();
+                            }
+                            break;
+                        case ArtisticFilters.Cartoon:
+                            if (Convert.ToInt32(textBoxArtisticFilterThreshold.Text) >= 0 && Convert.ToInt32(textBoxArtisticFilterThreshold.Text) < 256)
+                            {
+                                FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold = Convert.ToInt32(textBoxArtisticFilterThreshold.Text);
+                            }
+                            else
+                            {
+                                throw new OverflowException();
+                            }
+                            break;
+                    }
+                }
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                switch (artisticFilters)
+                {
+                    case ArtisticFilters.OilPainting:
+                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold = 50;
+                        break;
+                    case ArtisticFilters.Cartoon:
+                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold = 50;
+                        break;
+                }
+                textBoxArtisticFilterThreshold.Text = "10";
+            }
+            catch (OverflowException)
+            {
+                MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                switch (artisticFilters)
+                {
+                    case ArtisticFilters.OilPainting:
+                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold = 50;
+                        break;
+                    case ArtisticFilters.Cartoon:
+                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold = 50;
+                        break;
+                }
+                textBoxArtisticFilterThreshold.Text = "10";
+            }
+            finally
+            {
+                RefreshArtisticFiltersPreview();
+            }
         }
     }
     public partial class CreateWithAIForm : Form
