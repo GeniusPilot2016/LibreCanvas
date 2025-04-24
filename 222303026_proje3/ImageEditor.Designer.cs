@@ -115,8 +115,16 @@
             araçlarToolStripMenuItem = new ToolStripMenuItem();
             filtersToolStripMenuItem = new ToolStripMenuItem();
             mirrorToolStripMenuItem = new ToolStripMenuItem();
+            flashToolStripMenuItem = new ToolStripMenuItem();
+            frozenToolStripMenuItem = new ToolStripMenuItem();
+            winterToolStripMenuItem = new ToolStripMenuItem();
             blackAndWhiteToolStripMenuItem = new ToolStripMenuItem();
-            artisticFİltersToolStripMenuItem = new ToolStripMenuItem();
+            oldPictureToolStripMenuItem = new ToolStripMenuItem();
+            cherryToolStripMenuItem = new ToolStripMenuItem();
+            lightAddToolStripMenuItem = new ToolStripMenuItem();
+            purpleToolStripMenuItem = new ToolStripMenuItem();
+            fogToolStripMenuItem = new ToolStripMenuItem();
+            artisticFiltersToolStripMenuItem = new ToolStripMenuItem();
             yardımToolStripMenuItem = new ToolStripMenuItem();
             içindekilerToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator5 = new ToolStripSeparator();
@@ -178,14 +186,8 @@
             colorDialog1 = new ColorDialog();
             openFileDialog1 = new OpenFileDialog();
             saveFileDialog1 = new SaveFileDialog();
-            flashToolStripMenuItem = new ToolStripMenuItem();
-            frozenToolStripMenuItem = new ToolStripMenuItem();
-            winterToolStripMenuItem = new ToolStripMenuItem();
-            oldPictureToolStripMenuItem = new ToolStripMenuItem();
-            cherryToolStripMenuItem = new ToolStripMenuItem();
-            lightAddToolStripMenuItem = new ToolStripMenuItem();
-            purpleToolStripMenuItem = new ToolStripMenuItem();
-            fogToolStripMenuItem = new ToolStripMenuItem();
+            cartoonToolStripMenuItem = new ToolStripMenuItem();
+            oilPaintingToolStripMenuItem = new ToolStripMenuItem();
             toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             toolStripContainer1.ContentPanel.SuspendLayout();
             toolStripContainer1.LeftToolStripPanel.SuspendLayout();
@@ -1046,7 +1048,7 @@
             // 
             // araçlarToolStripMenuItem
             // 
-            araçlarToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { filtersToolStripMenuItem, artisticFİltersToolStripMenuItem });
+            araçlarToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { filtersToolStripMenuItem, artisticFiltersToolStripMenuItem });
             araçlarToolStripMenuItem.Name = "araçlarToolStripMenuItem";
             araçlarToolStripMenuItem.Size = new Size(59, 24);
             araçlarToolStripMenuItem.Text = "&Tools";
@@ -1061,22 +1063,79 @@
             // mirrorToolStripMenuItem
             // 
             mirrorToolStripMenuItem.Name = "mirrorToolStripMenuItem";
-            mirrorToolStripMenuItem.Size = new Size(224, 26);
+            mirrorToolStripMenuItem.Size = new Size(204, 26);
             mirrorToolStripMenuItem.Text = "Mirror";
             mirrorToolStripMenuItem.Click += mirrorToolStripMenuItem_Click;
+            // 
+            // flashToolStripMenuItem
+            // 
+            flashToolStripMenuItem.Name = "flashToolStripMenuItem";
+            flashToolStripMenuItem.Size = new Size(204, 26);
+            flashToolStripMenuItem.Text = "Flash";
+            flashToolStripMenuItem.Click += flashToolStripMenuItem_Click;
+            // 
+            // frozenToolStripMenuItem
+            // 
+            frozenToolStripMenuItem.Name = "frozenToolStripMenuItem";
+            frozenToolStripMenuItem.Size = new Size(204, 26);
+            frozenToolStripMenuItem.Text = "Frozen";
+            frozenToolStripMenuItem.Click += frozenToolStripMenuItem_Click;
+            // 
+            // winterToolStripMenuItem
+            // 
+            winterToolStripMenuItem.Name = "winterToolStripMenuItem";
+            winterToolStripMenuItem.Size = new Size(204, 26);
+            winterToolStripMenuItem.Text = "Winter";
+            winterToolStripMenuItem.Click += winterToolStripMenuItem_Click;
             // 
             // blackAndWhiteToolStripMenuItem
             // 
             blackAndWhiteToolStripMenuItem.Name = "blackAndWhiteToolStripMenuItem";
-            blackAndWhiteToolStripMenuItem.Size = new Size(224, 26);
+            blackAndWhiteToolStripMenuItem.Size = new Size(204, 26);
             blackAndWhiteToolStripMenuItem.Text = "Black and White";
             blackAndWhiteToolStripMenuItem.Click += blackAndWhiteToolStripMenuItem_Click;
             // 
-            // artisticFİltersToolStripMenuItem
+            // oldPictureToolStripMenuItem
             // 
-            artisticFİltersToolStripMenuItem.Name = "artisticFİltersToolStripMenuItem";
-            artisticFİltersToolStripMenuItem.Size = new Size(224, 26);
-            artisticFİltersToolStripMenuItem.Text = "Artistic Fİlters";
+            oldPictureToolStripMenuItem.Name = "oldPictureToolStripMenuItem";
+            oldPictureToolStripMenuItem.Size = new Size(204, 26);
+            oldPictureToolStripMenuItem.Text = "Old Picture";
+            oldPictureToolStripMenuItem.Click += oldPictureToolStripMenuItem_Click;
+            // 
+            // cherryToolStripMenuItem
+            // 
+            cherryToolStripMenuItem.Name = "cherryToolStripMenuItem";
+            cherryToolStripMenuItem.Size = new Size(204, 26);
+            cherryToolStripMenuItem.Text = "Cherry";
+            cherryToolStripMenuItem.Click += cherryToolStripMenuItem_Click;
+            // 
+            // lightAddToolStripMenuItem
+            // 
+            lightAddToolStripMenuItem.Name = "lightAddToolStripMenuItem";
+            lightAddToolStripMenuItem.Size = new Size(204, 26);
+            lightAddToolStripMenuItem.Text = "Light add";
+            lightAddToolStripMenuItem.Click += lightAddToolStripMenuItem_Click;
+            // 
+            // purpleToolStripMenuItem
+            // 
+            purpleToolStripMenuItem.Name = "purpleToolStripMenuItem";
+            purpleToolStripMenuItem.Size = new Size(204, 26);
+            purpleToolStripMenuItem.Text = "Purple";
+            purpleToolStripMenuItem.Click += purpleToolStripMenuItem_Click;
+            // 
+            // fogToolStripMenuItem
+            // 
+            fogToolStripMenuItem.Name = "fogToolStripMenuItem";
+            fogToolStripMenuItem.Size = new Size(204, 26);
+            fogToolStripMenuItem.Text = "Fog";
+            fogToolStripMenuItem.Click += fogToolStripMenuItem_Click;
+            // 
+            // artisticFiltersToolStripMenuItem
+            // 
+            artisticFiltersToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { cartoonToolStripMenuItem, oilPaintingToolStripMenuItem });
+            artisticFiltersToolStripMenuItem.Name = "artisticFiltersToolStripMenuItem";
+            artisticFiltersToolStripMenuItem.Size = new Size(224, 26);
+            artisticFiltersToolStripMenuItem.Text = "Artistic Filters";
             // 
             // yardımToolStripMenuItem
             // 
@@ -1552,61 +1611,17 @@
             colorDialog1.AnyColor = true;
             colorDialog1.FullOpen = true;
             // 
-            // flashToolStripMenuItem
+            // cartoonToolStripMenuItem
             // 
-            flashToolStripMenuItem.Name = "flashToolStripMenuItem";
-            flashToolStripMenuItem.Size = new Size(224, 26);
-            flashToolStripMenuItem.Text = "Flash";
-            flashToolStripMenuItem.Click += flashToolStripMenuItem_Click;
+            cartoonToolStripMenuItem.Name = "cartoonToolStripMenuItem";
+            cartoonToolStripMenuItem.Size = new Size(224, 26);
+            cartoonToolStripMenuItem.Text = "Cartoon";
             // 
-            // frozenToolStripMenuItem
+            // oilPaintingToolStripMenuItem
             // 
-            frozenToolStripMenuItem.Name = "frozenToolStripMenuItem";
-            frozenToolStripMenuItem.Size = new Size(224, 26);
-            frozenToolStripMenuItem.Text = "Frozen";
-            frozenToolStripMenuItem.Click += frozenToolStripMenuItem_Click;
-            // 
-            // winterToolStripMenuItem
-            // 
-            winterToolStripMenuItem.Name = "winterToolStripMenuItem";
-            winterToolStripMenuItem.Size = new Size(224, 26);
-            winterToolStripMenuItem.Text = "Winter";
-            winterToolStripMenuItem.Click += winterToolStripMenuItem_Click;
-            // 
-            // oldPictureToolStripMenuItem
-            // 
-            oldPictureToolStripMenuItem.Name = "oldPictureToolStripMenuItem";
-            oldPictureToolStripMenuItem.Size = new Size(224, 26);
-            oldPictureToolStripMenuItem.Text = "Old Picture";
-            oldPictureToolStripMenuItem.Click += oldPictureToolStripMenuItem_Click;
-            // 
-            // cherryToolStripMenuItem
-            // 
-            cherryToolStripMenuItem.Name = "cherryToolStripMenuItem";
-            cherryToolStripMenuItem.Size = new Size(224, 26);
-            cherryToolStripMenuItem.Text = "Cherry";
-            cherryToolStripMenuItem.Click += cherryToolStripMenuItem_Click;
-            // 
-            // lightAddToolStripMenuItem
-            // 
-            lightAddToolStripMenuItem.Name = "lightAddToolStripMenuItem";
-            lightAddToolStripMenuItem.Size = new Size(224, 26);
-            lightAddToolStripMenuItem.Text = "Light add";
-            lightAddToolStripMenuItem.Click += lightAddToolStripMenuItem_Click;
-            // 
-            // purpleToolStripMenuItem
-            // 
-            purpleToolStripMenuItem.Name = "purpleToolStripMenuItem";
-            purpleToolStripMenuItem.Size = new Size(224, 26);
-            purpleToolStripMenuItem.Text = "Purple";
-            purpleToolStripMenuItem.Click += purpleToolStripMenuItem_Click;
-            // 
-            // fogToolStripMenuItem
-            // 
-            fogToolStripMenuItem.Name = "fogToolStripMenuItem";
-            fogToolStripMenuItem.Size = new Size(224, 26);
-            fogToolStripMenuItem.Text = "Fog";
-            fogToolStripMenuItem.Click += fogToolStripMenuItem_Click;
+            oilPaintingToolStripMenuItem.Name = "oilPaintingToolStripMenuItem";
+            oilPaintingToolStripMenuItem.Size = new Size(224, 26);
+            oilPaintingToolStripMenuItem.Text = "Oil Painting";
             // 
             // ImageEditor
             // 
@@ -1804,7 +1819,7 @@
         private ToolStripTextBox textBoxTolerance;
         private ToolStripMenuItem filtersToolStripMenuItem;
         private ToolStripMenuItem blackAndWhiteToolStripMenuItem;
-        private ToolStripMenuItem artisticFİltersToolStripMenuItem;
+        private ToolStripMenuItem artisticFiltersToolStripMenuItem;
         private ToolStripMenuItem mirrorToolStripMenuItem;
         private ToolStripMenuItem flashToolStripMenuItem;
         private ToolStripMenuItem frozenToolStripMenuItem;
@@ -1814,5 +1829,7 @@
         private ToolStripMenuItem lightAddToolStripMenuItem;
         private ToolStripMenuItem purpleToolStripMenuItem;
         private ToolStripMenuItem fogToolStripMenuItem;
+        private ToolStripMenuItem cartoonToolStripMenuItem;
+        private ToolStripMenuItem oilPaintingToolStripMenuItem;
     }
 }
