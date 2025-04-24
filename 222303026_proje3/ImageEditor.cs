@@ -14,18 +14,55 @@ namespace _222303026_proje3
     {
         int x = -1, y = -1;
         bool isdrawing = false;
-        static String[] drawType = { "Cursor", "Selection", "Magic Selection", "Brush", "Pen", "Eraser", "Bucket", "Spray", "Line", "Round", "Rectangle", "Rounded Rectangle", "Triangle", "Hexagon", "Text", "Color Drop" };
-        String currentTool = drawType[0];
-        Pen brushes;
         Color color1 = Color.Black, color2 = Color.White;
         int brushSize = 11, penSize = 9, eraserSize = 11, sprayToolSize = 11, shapeThickness = 11, radius = 9, points = 6, tolerance = 50;
         float textSize = 9;
         int zoom = 100;
         bool isResizing = false;
         private ResizeDirection resizeDirection;
+        private BasicFilters basicFilters;
+        private ArtisticFilters artisticFilters;
         private Point lastMousePos;
         Bitmap bitmap;
-
+        enum BasicFilters
+        {
+            None,
+            Mirror,
+            Flash,
+            Frozen,
+            Winter,
+            BlackAndWhite,
+            OldPhoto,
+            Cherry,
+            LightAdd,
+            Purple,
+            Fog
+        }
+        enum ArtisticFilters
+        {
+            None,
+            OilPainting,
+            Cartoon
+        }
+        enum Tools
+        {
+            Cursor,
+            Selection,
+            MagicSelection,
+            Brush,
+            Pen,
+            Eraser,
+            Bucket,
+            Spray,
+            Line,
+            Round,
+            Rectangle,
+            RoundedRectangle,
+            Triangle,
+            Hexagon,
+            Text,
+            ColorDrop
+        }
         private enum ResizeDirection
         {
             None,
@@ -391,11 +428,13 @@ namespace _222303026_proje3
             }
         }
 
+        // Example of updated references to the renamed variable `selectedTool`
+
         private void addTextTool_CheckedChanged(object sender, EventArgs e)
         {
             if (addTextTool.Checked)
             {
-                currentTool = drawType[14];
+                selectedTool = Tools.Text; // Use `selectedTool` instead of `currentTool`
                 toolStripText.Visible = true;
             }
             else
@@ -551,7 +590,7 @@ namespace _222303026_proje3
         {
             if (brushTool.Checked)
             {
-                currentTool = drawType[3];
+                selectedTool = Tools.Brush;
                 toolStripBrush.Visible = true;
             }
             else
@@ -569,7 +608,7 @@ namespace _222303026_proje3
         {
             if (penTool.Checked)
             {
-                currentTool = drawType[4];
+                selectedTool = Tools.Pen;
                 toolStripPen.Visible = true;
             }
             else
@@ -592,7 +631,7 @@ namespace _222303026_proje3
         {
             if (mouseTool.Checked)
             {
-                currentTool = drawType[0];
+                selectedTool = Tools.Cursor; // Use `selectedTool` instead of `currentTool`
             }
         }
 
@@ -600,7 +639,7 @@ namespace _222303026_proje3
         {
             if (selectTool.Checked)
             {
-                currentTool = drawType[1];
+                selectedTool = Tools.Selection;
             }
         }
 
@@ -608,7 +647,7 @@ namespace _222303026_proje3
         {
             if (magicSelectTool.Checked)
             {
-                currentTool = drawType[2];
+                selectedTool = Tools.MagicSelection;
             }
         }
 
@@ -616,7 +655,7 @@ namespace _222303026_proje3
         {
             if (eraserTool.Checked)
             {
-                currentTool = drawType[5];
+                selectedTool = Tools.Eraser;
                 toolStripEraser.Visible = true;
             }
             else
@@ -629,7 +668,7 @@ namespace _222303026_proje3
         {
             if (bucketTool.Checked)
             {
-                currentTool = drawType[6];
+                selectedTool = Tools.Bucket;
                 toolStripBucketTool.Visible = true;
             }
             else
@@ -642,7 +681,7 @@ namespace _222303026_proje3
         {
             if (sprayTool.Checked)
             {
-                currentTool = drawType[7];
+                selectedTool = Tools.Spray;
                 toolStripSpray.Visible = true;
             }
             else
@@ -656,7 +695,7 @@ namespace _222303026_proje3
             if (lineToolStripMenuItem.Checked)
             {
                 toolStripShapes.Visible = true;
-                currentTool = drawType[8];
+                selectedTool = Tools.Line;
             }
             else
             {
@@ -686,7 +725,7 @@ namespace _222303026_proje3
         {
             if (roundToolStripMenuItem1.Checked)
             {
-                currentTool = drawType[9];
+                selectedTool = Tools.Round;
             }
             UpdateToolStripVisibility();
         }
@@ -695,7 +734,7 @@ namespace _222303026_proje3
         {
             if (rectangleToolStripMenuItem.Checked)
             {
-                currentTool = drawType[10];
+                selectedTool = Tools.Rectangle;
             }
             UpdateToolStripVisibility();
         }
@@ -704,7 +743,7 @@ namespace _222303026_proje3
         {
             if (roundedRectangleToolStripMenuItem.Checked)
             {
-                currentTool = drawType[11];
+                selectedTool = Tools.RoundedRectangle;
             }
             UpdateToolStripVisibility();
         }
@@ -713,7 +752,7 @@ namespace _222303026_proje3
         {
             if (triangleToolStripMenuItem1.Checked)
             {
-                currentTool = drawType[12];
+                selectedTool = Tools.Triangle;
             }
             UpdateToolStripVisibility();
         }
@@ -722,7 +761,7 @@ namespace _222303026_proje3
         {
             if (hexagonToolStripMenuItem1.Checked)
             {
-                currentTool = drawType[13];
+                selectedTool = Tools.Hexagon;
             }
             UpdateToolStripVisibility();
         }
@@ -731,7 +770,7 @@ namespace _222303026_proje3
         {
             if (colorDropTool.Checked)
             {
-                currentTool = drawType[15];
+                selectedTool = Tools.ColorDrop;
             }
         }
 
@@ -741,39 +780,39 @@ namespace _222303026_proje3
             {
                 isdrawing = false;
 
-                switch (currentTool)
+                switch (selectedTool)
                 {
-                    case "Line":
+                    case Tools.Line:
                         using (Graphics graphics = Graphics.FromImage(bitmap))
                         {
                             DrawShapes.DrawLineOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
                         }
                         break;
-                    case "Round":
+                    case Tools.Round:
                         using (Graphics graphics = Graphics.FromImage(bitmap))
                         {
                             DrawShapes.DrawRoundOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
                         }
                         break;
-                    case "Rectangle":
+                    case Tools.Rectangle:
                         using (Graphics graphics = Graphics.FromImage(bitmap))
                         {
                             DrawShapes.DrawRectangleOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
                         }
                         break;
-                    case "Rounded Rectangle":
+                    case Tools.RoundedRectangle:
                         using (Graphics graphics = Graphics.FromImage(bitmap))
                         {
                             DrawShapes.DrawRoundedRectangleOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location, radius);
                         }
                         break;
-                    case "Triangle":
+                    case Tools.Triangle:
                         using (Graphics graphics = Graphics.FromImage(bitmap))
                         {
                             DrawShapes.DrawTriangleOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
                         }
                         break;
-                    case "Hexagon":
+                    case Tools.Hexagon:
                         using (Graphics graphics = Graphics.FromImage(bitmap))
                         {
                             DrawShapes.DrawHexagonOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, points, startPoint, e.Location);
@@ -794,35 +833,35 @@ namespace _222303026_proje3
 
             if (isdrawing)
             {
-                switch (currentTool)
+                switch (selectedTool)
                 {
-                    case "Line":
+                    case Tools.Line:
                         pictureBoxCanvas.Image = ShapePreviews.LinePreview(
                             bitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y
                         ); pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
                         break;
-                    case "Round":
+                    case Tools.Round:
                         pictureBoxCanvas.Image = ShapePreviews.RoundPreview(
                             bitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y
                         );
                         pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
                         break;
-                    case "Rectangle":
+                    case Tools.Rectangle:
                         pictureBoxCanvas.Image = ShapePreviews.RectanglePreview(
                             bitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y
                         ); pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
                         break;
-                    case "Rounded Rectangle":
+                    case Tools.RoundedRectangle:
                         pictureBoxCanvas.Image = ShapePreviews.RoundedRectanglePreview(
                             bitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y, radius
                         ); pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
                         break;
-                    case "Triangle":
+                    case Tools.Triangle:
                         pictureBoxCanvas.Image = ShapePreviews.TrianglePreview(
                             bitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y
                         ); pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
                         break;
-                    case "Hexagon":
+                    case Tools.Hexagon:
                         pictureBoxCanvas.Image = ShapePreviews.HexagonPreview(
                             bitmap, color1, shapeThickness, points, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y);
                         pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
@@ -857,9 +896,9 @@ namespace _222303026_proje3
             {
                 if (isdrawing)
                 {
-                    switch (currentTool)
+                    switch (selectedTool)
                     {
-                        case "Brush":
+                        case Tools.Brush:
                             switch (comboBoxBrushType.SelectedIndex)
                             {
                                 case 0: // Regular brush
@@ -878,7 +917,7 @@ namespace _222303026_proje3
                                     break;
                             }
                             break;
-                        case "Pen":
+                        case Tools.Pen:
                             switch (comboBoxPenType.SelectedIndex)
                             {
                                 case 0: // Regular pen
@@ -897,14 +936,14 @@ namespace _222303026_proje3
                                     break;
                             }
                             break;
-                        case "Eraser":
+                        case Tools.Eraser:
                             graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
                             DrawBrush(graphics, BrushShapes.DrawCircleBrush, Color.FromArgb(0, 0, 0, 0), eraserSize, new Point(e.X, e.Y));
                             break;
-                        case "Spray":
+                        case Tools.Spray:
                             DrawBrush(graphics, BrushShapes.DrawSprayBrush, color1, sprayToolSize, new Point(e.X, e.Y));
                             break;
-                        case "Color Drop":
+                        case Tools.ColorDrop:
                             Color pixelColor = bitmap.GetPixel(e.X, e.Y);
                             color1 = pixelColor;
                             foregroundColorButton.BackColor = pixelColor;
@@ -972,49 +1011,49 @@ namespace _222303026_proje3
             isdrawing = true;
             x = e.X;
             y = e.Y;
-            switch (currentTool)
+            switch (selectedTool)
             {
-                case "Line":
+                case Tools.Line:
                     SaveStateForUndo();
                     startPoint = e.Location;
                     previewStartPoint = e.Location;
                     previewBitmap = new Bitmap(bitmap);
                     break;
-                case "Round":
+                case Tools.Round:
                     SaveStateForUndo();
                     startPoint = e.Location;
                     previewStartPoint = e.Location;
                     previewBitmap = new Bitmap(bitmap);
                     break;
-                case "Rectangle":
+                case Tools.Rectangle:
                     SaveStateForUndo();
                     previewStartPoint = e.Location;
                     startPoint = e.Location;
                     previewBitmap = new Bitmap(bitmap);
                     break;
-                case "Rounded Rectangle":
+                case Tools.RoundedRectangle:
                     SaveStateForUndo();
                     startPoint = e.Location;
                     previewStartPoint = e.Location;
                     previewBitmap = new Bitmap(bitmap);
                     break;
-                case "Triangle":
+                case Tools.Triangle:
                     SaveStateForUndo();
                     startPoint = e.Location;
                     previewStartPoint = e.Location;
                     previewBitmap = new Bitmap(bitmap);
                     break;
-                case "Hexagon":
+                case Tools.Hexagon:
                     SaveStateForUndo();
                     startPoint = e.Location;
                     previewStartPoint = e.Location;
                     previewBitmap = new Bitmap(bitmap);
                     break;
                 default:
-                    if (currentTool == "Brush" || currentTool == "Pen" || currentTool == "Eraser" || currentTool == "Spray" ||
-                        currentTool == "Bucket" || currentTool == "Line" || currentTool == "Round" || currentTool == "Rectangle" ||
-                        currentTool == "Rounded Rectangle" || currentTool == "Triangle" || currentTool == "Hexagon" ||
-                        currentTool == "Text")
+                    if (selectedTool == Tools.Brush || selectedTool == Tools.Pen || selectedTool == Tools.Eraser ||
+                        selectedTool == Tools.Spray || selectedTool == Tools.Bucket || selectedTool == Tools.Line ||
+                        selectedTool == Tools.Round || selectedTool == Tools.Rectangle || selectedTool == Tools.RoundedRectangle ||
+                        selectedTool == Tools.Triangle || selectedTool == Tools.Hexagon || selectedTool == Tools.Text)
                     {
                         SaveStateForUndo();
                     }
@@ -1036,9 +1075,9 @@ namespace _222303026_proje3
 
         private void pictureBoxCanvas_Click(object sender, EventArgs e)
         {
-            switch (currentTool)
+            switch (selectedTool)
             {
-                case "Text":
+                case Tools.Text:
                     {
                         SaveStateForUndo();
                         // MouseEventArgs'den týklama konumunu alýn  
@@ -1152,7 +1191,7 @@ namespace _222303026_proje3
                         };
                     }
                     break;
-                case "Bucket":
+                case Tools.Bucket:
                     {
                         SaveStateForUndo();
                         MouseEventArgs me = (MouseEventArgs)e; // EventArgs yerine MouseEventArgs kullanýmý  
@@ -1568,6 +1607,13 @@ namespace _222303026_proje3
         }
         private const int MaxStackSize = 20;
 
+        // Fix for CS0118: 'ImageEditor.currentTool' bir tür öðesidir ancak deðiþken olarak kullanýlýr
+
+        // The issue occurs because `currentTool` is both an enum type and a variable name in the code.
+        // To resolve this, we need to rename the variable to avoid the conflict with the enum type.
+
+        private Tools selectedTool; // Rename the variable from `currentTool` to `selectedTool`
+
         private void SaveStateForUndo()
         {
             if (bitmap != null)
@@ -1726,6 +1772,11 @@ namespace _222303026_proje3
         private void mirrorToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveStateForUndo();
+            if (artisticFilters != ArtisticFilters.None)
+            {
+                artisticFilters = ArtisticFilters.None;
+            }
+            basicFilters = BasicFilters.Mirror;
             bitmap = Filters.BasicFilters.MirrorEffect(bitmap);
             canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
             pictureBoxCanvas.Image = bitmap;
@@ -1737,6 +1788,10 @@ namespace _222303026_proje3
         {
             SaveStateForUndo();
             bitmap = Filters.BasicFilters.Flash(bitmap);
+            if (artisticFilters != ArtisticFilters.None)
+            {
+                artisticFilters = ArtisticFilters.None;
+            }
             canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
             pictureBoxCanvas.Image = bitmap;
             pictureBoxCanvas.Invalidate();
@@ -1746,6 +1801,10 @@ namespace _222303026_proje3
         private void frozenToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveStateForUndo();
+            if (artisticFilters != ArtisticFilters.None)
+            {
+                artisticFilters = ArtisticFilters.None;
+            }
             bitmap = Filters.BasicFilters.Frozen(bitmap);
             canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
             pictureBoxCanvas.Image = bitmap;
@@ -1756,6 +1815,10 @@ namespace _222303026_proje3
         private void winterToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveStateForUndo();
+            if (artisticFilters != ArtisticFilters.None)
+            {
+                artisticFilters = ArtisticFilters.None;
+            }
             bitmap = Filters.BasicFilters.Winter(bitmap);
             canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
             pictureBoxCanvas.Image = bitmap;
@@ -1766,6 +1829,10 @@ namespace _222303026_proje3
         private void blackAndWhiteToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveStateForUndo();
+            if (artisticFilters != ArtisticFilters.None)
+            {
+                artisticFilters = ArtisticFilters.None;
+            }
             bitmap = Filters.BasicFilters.BlackAndWhite(bitmap);
             canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
             pictureBoxCanvas.Image = bitmap;
@@ -1776,6 +1843,10 @@ namespace _222303026_proje3
         private void oldPictureToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveStateForUndo();
+            if (artisticFilters != ArtisticFilters.None)
+            {
+                artisticFilters = ArtisticFilters.None;
+            }
             bitmap = Filters.BasicFilters.OldImage(bitmap);
             canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
             pictureBoxCanvas.Image = bitmap;
@@ -1786,6 +1857,10 @@ namespace _222303026_proje3
         private void cherryToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveStateForUndo();
+            if (artisticFilters != ArtisticFilters.None)
+            {
+                artisticFilters = ArtisticFilters.None;
+            }
             bitmap = Filters.BasicFilters.CherryFilter(bitmap);
             canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
             pictureBoxCanvas.Image = bitmap;
@@ -1796,6 +1871,10 @@ namespace _222303026_proje3
         private void lightAddToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveStateForUndo();
+            if (artisticFilters != ArtisticFilters.None)
+            {
+                artisticFilters = ArtisticFilters.None;
+            }
             bitmap = Filters.BasicFilters.LightAdd(bitmap);
             canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
             pictureBoxCanvas.Image = bitmap;
@@ -1806,6 +1885,10 @@ namespace _222303026_proje3
         private void purpleToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveStateForUndo();
+            if (artisticFilters != ArtisticFilters.None)
+            {
+                artisticFilters = ArtisticFilters.None;
+            }
             bitmap = Filters.BasicFilters.PurpleEffect(bitmap);
             canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
             pictureBoxCanvas.Image = bitmap;
@@ -1816,11 +1899,31 @@ namespace _222303026_proje3
         private void fogToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveStateForUndo();
+            if (artisticFilters != ArtisticFilters.None)
+            {
+                artisticFilters = ArtisticFilters.None;
+            }
             bitmap = Filters.BasicFilters.FogEffect(bitmap);
             canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
             pictureBoxCanvas.Image = bitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
+        }
+
+        private void toolStripArtisticFilterThreshold_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void buttonArtisticFiltersOK_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void buttonArtisticFiltersCancel_Click(object sender, EventArgs e)
+        {
+            toolStripArtisticFilters.Visible = false;
+            artisticFilters = ArtisticFilters.None;
         }
     }
     public partial class CreateWithAIForm : Form
