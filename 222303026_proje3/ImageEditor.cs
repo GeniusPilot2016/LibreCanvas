@@ -1786,7 +1786,7 @@ namespace _222303026_proje3
         private void cherryToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveStateForUndo();
-            bitmap = Filters.BasicFilters.Frozen(bitmap);
+            bitmap = Filters.BasicFilters.CherryFilter(bitmap);
             canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
             pictureBoxCanvas.Image = bitmap;
             pictureBoxCanvas.Invalidate();
@@ -1796,7 +1796,7 @@ namespace _222303026_proje3
         private void lightAddToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveStateForUndo();
-            bitmap = Filters.BasicFilters.Frozen(bitmap);
+            bitmap = Filters.BasicFilters.LightAdd(bitmap);
             canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
             pictureBoxCanvas.Image = bitmap;
             pictureBoxCanvas.Invalidate();
@@ -1806,7 +1806,7 @@ namespace _222303026_proje3
         private void purpleToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveStateForUndo();
-            bitmap = Filters.BasicFilters.Frozen(bitmap);
+            bitmap = Filters.BasicFilters.PurpleEffect(bitmap);
             canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
             pictureBoxCanvas.Image = bitmap;
             pictureBoxCanvas.Invalidate();
@@ -1816,7 +1816,7 @@ namespace _222303026_proje3
         private void fogToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveStateForUndo();
-            bitmap = Filters.BasicFilters.Frozen(bitmap);
+            bitmap = Filters.BasicFilters.FogEffect(bitmap);
             canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
             pictureBoxCanvas.Image = bitmap;
             pictureBoxCanvas.Invalidate();

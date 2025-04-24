@@ -120,6 +120,86 @@ namespace _222303026_proje3
                 g.Dispose();
                 return InvertedBitmap;
             }
+            public static Bitmap CherryFilter(Bitmap image)
+            {
+                Image img = image;
+                Bitmap InvertedBitmap = new Bitmap(img.Width, img.Height);
+                ImageAttributes imageAttributes = new ImageAttributes();
+                ColorMatrix colorMatrix = new ColorMatrix(
+                    new float[][]
+                    {
+                        new float[] { 0.393f, 0.349f, 0.272f+1.3f, 0, 0 },
+                        new float[] { 0.769f, 0.686f+0.5f, 0.534f, 0, 0 },
+                        new float[] { 0.189f+2.3f, 0.168f, 0.131f, 0, 0 },
+                        new float[] { 0, 0, 0, 1, 0 },
+                        new float[] { 0, 0, 0, 0, 1 }
+                    });
+                imageAttributes.SetColorMatrix(colorMatrix);
+                Graphics g = Graphics.FromImage(InvertedBitmap);
+                g.DrawImage(img, new Rectangle(0, 0, img.Width, img.Height), 0, 0, img.Width, img.Height, GraphicsUnit.Pixel, imageAttributes);
+                g.Dispose();
+                return InvertedBitmap;
+            }
+            public static Bitmap LightAdd(Bitmap image)
+            {
+                Image img = image;
+                Bitmap InvertedBitmap = new Bitmap(img.Width, img.Height);
+                ImageAttributes imageAttributes = new ImageAttributes();
+                ColorMatrix colorMatrix = new ColorMatrix(
+                    new float[][]
+                    {
+                        new float[] { 0.393f, 0.349f+0.5f, 0.272f, 0, 0 },
+                        new float[] { 0.769f+0.3f, 0.686f, 0.534f, 0, 0 },
+                        new float[] { 0.189f, 0.168f, 0.131f+0.5f, 0, 0 },
+                        new float[] { 0, 0, 0, 1, 0 },
+                        new float[] { 0, 0, 0, 0, 1 }
+                    });
+                imageAttributes.SetColorMatrix(colorMatrix);
+                Graphics g = Graphics.FromImage(InvertedBitmap);
+                g.DrawImage(img, new Rectangle(0, 0, img.Width, img.Height), 0, 0, img.Width, img.Height, GraphicsUnit.Pixel, imageAttributes);
+                g.Dispose();
+                return InvertedBitmap;
+            }
+            public static Bitmap PurpleEffect(Bitmap image)
+            {
+                Image img = image;
+                Bitmap InvertedBitmap = new Bitmap(img.Width, img.Height);
+                ImageAttributes imageAttributes = new ImageAttributes();
+                ColorMatrix colorMatrix = new ColorMatrix(
+                    new float[][]
+                    {
+                        new float[] { 0.393f+0.3f, 0.349f, 0.272f, 0, 0 },
+                        new float[] { 0.769f, 0.686f+0.2f, 0.534f, 0, 0 },
+                        new float[] { 0.189f, 0.168f, 0.131f+0.9f, 0, 0 },
+                        new float[] { 0, 0, 0, 1, 0 },
+                        new float[] { 0, 0, 0, 0, 1 }
+                    });
+                imageAttributes.SetColorMatrix(colorMatrix);
+                Graphics g = Graphics.FromImage(InvertedBitmap);
+                g.DrawImage(img, new Rectangle(0, 0, img.Width, img.Height), 0, 0, img.Width, img.Height, GraphicsUnit.Pixel, imageAttributes);
+                g.Dispose();
+                return InvertedBitmap;
+            }
+            public static Bitmap FogEffect(Bitmap image)
+            {
+                Image img = image;
+                Bitmap InvertedBitmap = new Bitmap(img.Width, img.Height);
+                ImageAttributes imageAttributes = new ImageAttributes();
+                ColorMatrix colorMatrix = new ColorMatrix(
+                    new float[][]
+                    {
+                        new float[] { 1+0.3f, 0, 0, 0, 0 },
+                        new float[] { 0, 1+0.7f, 0, 0, 0 },
+                        new float[] { 0, 0, 1+1.3f, 0, 0 },
+                        new float[] { 0, 0, 0, 1, 0 },
+                        new float[] { 0, 0, 0, 0, 1 }
+                    });
+                imageAttributes.SetColorMatrix(colorMatrix);
+                Graphics g = Graphics.FromImage(InvertedBitmap);
+                g.DrawImage(img, new Rectangle(0, 0, img.Width, img.Height), 0, 0, img.Width, img.Height, GraphicsUnit.Pixel, imageAttributes);
+                g.Dispose();
+                return InvertedBitmap;
+            }
             public class ArtisticFilters
             {
 
