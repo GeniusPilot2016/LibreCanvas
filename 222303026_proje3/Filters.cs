@@ -10,6 +10,20 @@ namespace _222303026_proje3
 {
     public static class Filters
     {
+        public static ColorMatrix CreateColorMatrix(float exposure, float contrast, float temperature, float tint, float saturation)
+        {
+            float ExposureFactor = exposure;
+
+            return new ColorMatrix(new float[][]
+            {
+        new float[] { 1*exposure, 0, 0, 0, 0 },
+        new float[] { 0, 1*contrast, 0, 0, 0 },
+        new float[] { 0, 0, 1*temperature, 0, 1 },
+        new float[] { 0, 0, 0, 1, 0 },
+        new float[] { 1*tint, 1, 0, 0, 1 }
+            });
+        }
+
         private static bool CheckThreshold(byte[] pixelBuffer,
                                    int offset1, int offset2,
                                    ref int gradientValue,
@@ -612,6 +626,21 @@ namespace _222303026_proje3
                 Bitmap paintFilterImage =
                        image.OilPaintFilter(levels, filterSize);
                 return paintFilterImage;
+            }
+        }
+        public static class AmbientFilters
+        {
+            public static Bitmap Chloe(Bitmap image)
+            {
+                Image img = image;
+                Bitmap InvertedBitmap = new Bitmap(img.Width, img.Height);
+                ImageAttributes imageAttributes = new ImageAttributes();
+                ColorMatrix colorMatrix = CreateColorMatrix(-1.6f, -2.5f, -1.0f, 3.0f, 2.0f);
+                imageAttributes.SetColorMatrix(colorMatrix);
+                Graphics g = Graphics.FromImage(InvertedBitmap);
+                g.DrawImage(img, new Rectangle(0, 0, img.Width, img.Height), 0, 0, img.Width, img.Height, GraphicsUnit.Pixel, imageAttributes);
+                g.Dispose();
+                return InvertedBitmap;
             }
         }
     }

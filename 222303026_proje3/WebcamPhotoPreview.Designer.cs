@@ -103,6 +103,7 @@
             Name = "WebcamPhotoPreview";
             ShowIcon = false;
             Text = "Preview";
+            FormClosed += WebcamPhotoPreview_FormClosed;
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
         }

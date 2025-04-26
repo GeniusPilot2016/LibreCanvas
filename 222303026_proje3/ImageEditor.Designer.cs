@@ -100,8 +100,8 @@
             kaydetToolStripMenuItem = new ToolStripMenuItem();
             farklıKaydetToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator1 = new ToolStripSeparator();
-            yazdırToolStripMenuItem = new ToolStripMenuItem();
-            baskıÖnizlemeToolStripMenuItem = new ToolStripMenuItem();
+            printToolStripMenuItem = new ToolStripMenuItem();
+            printPreviewToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator2 = new ToolStripSeparator();
             çıkışToolStripMenuItem = new ToolStripMenuItem();
             düzenleToolStripMenuItem = new ToolStripMenuItem();
@@ -127,6 +127,8 @@
             artisticFiltersToolStripMenuItem = new ToolStripMenuItem();
             cartoonToolStripMenuItem = new ToolStripMenuItem();
             oilPaintingToolStripMenuItem = new ToolStripMenuItem();
+            ambientFiltersToolStripMenuItem = new ToolStripMenuItem();
+            chloeToolStripMenuItem = new ToolStripMenuItem();
             yardımToolStripMenuItem = new ToolStripMenuItem();
             içindekilerToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator5 = new ToolStripSeparator();
@@ -199,6 +201,9 @@
             colorDialog1 = new ColorDialog();
             openFileDialog1 = new OpenFileDialog();
             saveFileDialog1 = new SaveFileDialog();
+            printImageDialog = new PrintDialog();
+            printImage = new System.Drawing.Printing.PrintDocument();
+            printPreviewDialog1 = new PrintPreviewDialog();
             toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             toolStripContainer1.ContentPanel.SuspendLayout();
             toolStripContainer1.LeftToolStripPanel.SuspendLayout();
@@ -231,7 +236,7 @@
             // toolStripContainer1.ContentPanel
             // 
             toolStripContainer1.ContentPanel.Controls.Add(panel1);
-            toolStripContainer1.ContentPanel.Size = new Size(1250, 732);
+            toolStripContainer1.ContentPanel.Size = new Size(1250, 759);
             toolStripContainer1.Dock = DockStyle.Fill;
             // 
             // toolStripContainer1.LeftToolStripPanel
@@ -358,7 +363,7 @@
             panel1.Dock = DockStyle.Fill;
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
-            panel1.Size = new Size(1250, 732);
+            panel1.Size = new Size(1250, 759);
             panel1.TabIndex = 3;
             panel1.Click += panel1_Click;
             panel1.Paint += panel1_Paint;
@@ -376,7 +381,7 @@
             canvasPanel.Controls.Add(resize_top_right);
             canvasPanel.Controls.Add(resize_top);
             canvasPanel.Controls.Add(pictureBoxCanvas);
-            canvasPanel.Location = new Point(228, 71);
+            canvasPanel.Location = new Point(228, 84);
             canvasPanel.Name = "canvasPanel";
             canvasPanel.Size = new Size(820, 620);
             canvasPanel.TabIndex = 2;
@@ -528,7 +533,7 @@
             toolStripTools.Items.AddRange(new ToolStripItem[] { mouseTool, toolStripSeparator11, selectTool, magicSelectTool, toolStripSeparator10, brushTool, penTool, eraserTool, bucketTool, sprayTool, addTextTool, drawShapeTool, toolStripSeparator6, createWithAITool, colorDropTool, zoomTool, toolStripSeparator9, foregroundColorButton, backgroundColorButton, toolStripSeparator7, pasteTool, copyTool, cutTool, toolStripButton9 });
             toolStripTools.Location = new Point(0, 0);
             toolStripTools.Name = "toolStripTools";
-            toolStripTools.Size = new Size(39, 732);
+            toolStripTools.Size = new Size(39, 759);
             toolStripTools.Stretch = true;
             toolStripTools.TabIndex = 0;
             // 
@@ -854,6 +859,7 @@
             pasteTool.Name = "pasteTool";
             pasteTool.Size = new Size(37, 24);
             pasteTool.Text = "&Paste";
+            pasteTool.Click += Paste_Click;
             // 
             // copyTool
             // 
@@ -863,6 +869,7 @@
             copyTool.Name = "copyTool";
             copyTool.Size = new Size(37, 24);
             copyTool.Text = "&Copy";
+            copyTool.Click += Copy_Click;
             // 
             // cutTool
             // 
@@ -872,6 +879,7 @@
             cutTool.Name = "cutTool";
             cutTool.Size = new Size(37, 24);
             cutTool.Text = "C&ut";
+            cutTool.Click += Cut_Click;
             // 
             // toolStripButton9
             // 
@@ -898,7 +906,7 @@
             // 
             // dosyaToolStripMenuItem
             // 
-            dosyaToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { yeniToolStripMenuItem, createWithWebcamToolStripMenuItem, createWithAIToolStripMenuItem, açToolStripMenuItem, toolStripSeparator, kaydetToolStripMenuItem, farklıKaydetToolStripMenuItem, toolStripSeparator1, yazdırToolStripMenuItem, baskıÖnizlemeToolStripMenuItem, toolStripSeparator2, çıkışToolStripMenuItem });
+            dosyaToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { yeniToolStripMenuItem, createWithWebcamToolStripMenuItem, createWithAIToolStripMenuItem, açToolStripMenuItem, toolStripSeparator, kaydetToolStripMenuItem, farklıKaydetToolStripMenuItem, toolStripSeparator1, printToolStripMenuItem, printPreviewToolStripMenuItem, toolStripSeparator2, çıkışToolStripMenuItem });
             dosyaToolStripMenuItem.Name = "dosyaToolStripMenuItem";
             dosyaToolStripMenuItem.Size = new Size(47, 24);
             dosyaToolStripMenuItem.Text = "&File";
@@ -966,22 +974,24 @@
             toolStripSeparator1.Name = "toolStripSeparator1";
             toolStripSeparator1.Size = new Size(232, 6);
             // 
-            // yazdırToolStripMenuItem
+            // printToolStripMenuItem
             // 
-            yazdırToolStripMenuItem.Image = Properties.Resources.icons8_print_48;
-            yazdırToolStripMenuItem.ImageTransparentColor = Color.Magenta;
-            yazdırToolStripMenuItem.Name = "yazdırToolStripMenuItem";
-            yazdırToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.P;
-            yazdırToolStripMenuItem.Size = new Size(235, 26);
-            yazdırToolStripMenuItem.Text = "&Print";
+            printToolStripMenuItem.Image = Properties.Resources.icons8_print_48;
+            printToolStripMenuItem.ImageTransparentColor = Color.Magenta;
+            printToolStripMenuItem.Name = "printToolStripMenuItem";
+            printToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.P;
+            printToolStripMenuItem.Size = new Size(235, 26);
+            printToolStripMenuItem.Text = "&Print";
+            printToolStripMenuItem.Click += printToolStripMenuItem_Click;
             // 
-            // baskıÖnizlemeToolStripMenuItem
+            // printPreviewToolStripMenuItem
             // 
-            baskıÖnizlemeToolStripMenuItem.Image = (Image)resources.GetObject("baskıÖnizlemeToolStripMenuItem.Image");
-            baskıÖnizlemeToolStripMenuItem.ImageTransparentColor = Color.Magenta;
-            baskıÖnizlemeToolStripMenuItem.Name = "baskıÖnizlemeToolStripMenuItem";
-            baskıÖnizlemeToolStripMenuItem.Size = new Size(235, 26);
-            baskıÖnizlemeToolStripMenuItem.Text = "P&rint Preview";
+            printPreviewToolStripMenuItem.Image = Properties.Resources.icons8_view_48;
+            printPreviewToolStripMenuItem.ImageTransparentColor = Color.Magenta;
+            printPreviewToolStripMenuItem.Name = "printPreviewToolStripMenuItem";
+            printPreviewToolStripMenuItem.Size = new Size(235, 26);
+            printPreviewToolStripMenuItem.Text = "P&rint Preview";
+            printPreviewToolStripMenuItem.Click += printPreviewToolStripMenuItem_Click;
             // 
             // toolStripSeparator2
             // 
@@ -1029,30 +1039,33 @@
             // 
             // kesToolStripMenuItem
             // 
-            kesToolStripMenuItem.Image = (Image)resources.GetObject("kesToolStripMenuItem.Image");
+            kesToolStripMenuItem.Image = Properties.Resources.icons8_cut_481;
             kesToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             kesToolStripMenuItem.Name = "kesToolStripMenuItem";
             kesToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.X;
             kesToolStripMenuItem.Size = new Size(183, 26);
             kesToolStripMenuItem.Text = "&Cut";
+            kesToolStripMenuItem.Click += Cut_Click;
             // 
             // kopyalaToolStripMenuItem
             // 
-            kopyalaToolStripMenuItem.Image = (Image)resources.GetObject("kopyalaToolStripMenuItem.Image");
+            kopyalaToolStripMenuItem.Image = Properties.Resources.icons8_copy_to_clipboard_481;
             kopyalaToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             kopyalaToolStripMenuItem.Name = "kopyalaToolStripMenuItem";
             kopyalaToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.C;
             kopyalaToolStripMenuItem.Size = new Size(183, 26);
             kopyalaToolStripMenuItem.Text = "C&opy";
+            kopyalaToolStripMenuItem.Click += Copy_Click;
             // 
             // yapıştırToolStripMenuItem
             // 
-            yapıştırToolStripMenuItem.Image = (Image)resources.GetObject("yapıştırToolStripMenuItem.Image");
+            yapıştırToolStripMenuItem.Image = Properties.Resources.icons8_paste_481;
             yapıştırToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             yapıştırToolStripMenuItem.Name = "yapıştırToolStripMenuItem";
             yapıştırToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.V;
             yapıştırToolStripMenuItem.Size = new Size(183, 26);
             yapıştırToolStripMenuItem.Text = "&Paste";
+            yapıştırToolStripMenuItem.Click += Paste_Click;
             // 
             // toolStripSeparator4
             // 
@@ -1061,7 +1074,7 @@
             // 
             // araçlarToolStripMenuItem
             // 
-            araçlarToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { filtersToolStripMenuItem, artisticFiltersToolStripMenuItem });
+            araçlarToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { filtersToolStripMenuItem, artisticFiltersToolStripMenuItem, ambientFiltersToolStripMenuItem });
             araçlarToolStripMenuItem.Name = "araçlarToolStripMenuItem";
             araçlarToolStripMenuItem.Size = new Size(59, 24);
             araçlarToolStripMenuItem.Text = "&Tools";
@@ -1069,12 +1082,14 @@
             // filtersToolStripMenuItem
             // 
             filtersToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { mirrorToolStripMenuItem, flashToolStripMenuItem, frozenToolStripMenuItem, winterToolStripMenuItem, blackAndWhiteToolStripMenuItem, oldPictureToolStripMenuItem, cherryToolStripMenuItem, lightAddToolStripMenuItem, purpleToolStripMenuItem, fogToolStripMenuItem });
+            filtersToolStripMenuItem.Image = Properties.Resources.icons8_photo_gallery_48;
             filtersToolStripMenuItem.Name = "filtersToolStripMenuItem";
-            filtersToolStripMenuItem.Size = new Size(188, 26);
+            filtersToolStripMenuItem.Size = new Size(224, 26);
             filtersToolStripMenuItem.Text = "Basic Filters";
             // 
             // mirrorToolStripMenuItem
             // 
+            mirrorToolStripMenuItem.Image = Properties.Resources.icons8_reflection_48;
             mirrorToolStripMenuItem.Name = "mirrorToolStripMenuItem";
             mirrorToolStripMenuItem.Size = new Size(204, 26);
             mirrorToolStripMenuItem.Text = "Mirror";
@@ -1082,6 +1097,7 @@
             // 
             // flashToolStripMenuItem
             // 
+            flashToolStripMenuItem.Image = Properties.Resources.icons8_flash_48;
             flashToolStripMenuItem.Name = "flashToolStripMenuItem";
             flashToolStripMenuItem.Size = new Size(204, 26);
             flashToolStripMenuItem.Text = "Flash";
@@ -1089,6 +1105,7 @@
             // 
             // frozenToolStripMenuItem
             // 
+            frozenToolStripMenuItem.Image = Properties.Resources.icons8_icy_48;
             frozenToolStripMenuItem.Name = "frozenToolStripMenuItem";
             frozenToolStripMenuItem.Size = new Size(204, 26);
             frozenToolStripMenuItem.Text = "Frozen";
@@ -1096,6 +1113,7 @@
             // 
             // winterToolStripMenuItem
             // 
+            winterToolStripMenuItem.Image = Properties.Resources.icons8_winter_48;
             winterToolStripMenuItem.Name = "winterToolStripMenuItem";
             winterToolStripMenuItem.Size = new Size(204, 26);
             winterToolStripMenuItem.Text = "Winter";
@@ -1103,6 +1121,7 @@
             // 
             // blackAndWhiteToolStripMenuItem
             // 
+            blackAndWhiteToolStripMenuItem.Image = Properties.Resources.icons8_black_and_white_48;
             blackAndWhiteToolStripMenuItem.Name = "blackAndWhiteToolStripMenuItem";
             blackAndWhiteToolStripMenuItem.Size = new Size(204, 26);
             blackAndWhiteToolStripMenuItem.Text = "Black and White";
@@ -1110,6 +1129,7 @@
             // 
             // oldPictureToolStripMenuItem
             // 
+            oldPictureToolStripMenuItem.Image = Properties.Resources.icons8_old_fashioned_family_photo_48;
             oldPictureToolStripMenuItem.Name = "oldPictureToolStripMenuItem";
             oldPictureToolStripMenuItem.Size = new Size(204, 26);
             oldPictureToolStripMenuItem.Text = "Old Picture";
@@ -1117,6 +1137,7 @@
             // 
             // cherryToolStripMenuItem
             // 
+            cherryToolStripMenuItem.Image = Properties.Resources.icons8_cherry_48;
             cherryToolStripMenuItem.Name = "cherryToolStripMenuItem";
             cherryToolStripMenuItem.Size = new Size(204, 26);
             cherryToolStripMenuItem.Text = "Cherry";
@@ -1124,6 +1145,7 @@
             // 
             // lightAddToolStripMenuItem
             // 
+            lightAddToolStripMenuItem.Image = Properties.Resources.icons8_light_48;
             lightAddToolStripMenuItem.Name = "lightAddToolStripMenuItem";
             lightAddToolStripMenuItem.Size = new Size(204, 26);
             lightAddToolStripMenuItem.Text = "Light add";
@@ -1131,6 +1153,7 @@
             // 
             // purpleToolStripMenuItem
             // 
+            purpleToolStripMenuItem.Image = Properties.Resources.icons8_lavender_48;
             purpleToolStripMenuItem.Name = "purpleToolStripMenuItem";
             purpleToolStripMenuItem.Size = new Size(204, 26);
             purpleToolStripMenuItem.Text = "Purple";
@@ -1138,6 +1161,7 @@
             // 
             // fogToolStripMenuItem
             // 
+            fogToolStripMenuItem.Image = Properties.Resources.icons8_fog_48;
             fogToolStripMenuItem.Name = "fogToolStripMenuItem";
             fogToolStripMenuItem.Size = new Size(204, 26);
             fogToolStripMenuItem.Text = "Fog";
@@ -1146,12 +1170,14 @@
             // artisticFiltersToolStripMenuItem
             // 
             artisticFiltersToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { cartoonToolStripMenuItem, oilPaintingToolStripMenuItem });
+            artisticFiltersToolStripMenuItem.Image = Properties.Resources.icons8_art_48;
             artisticFiltersToolStripMenuItem.Name = "artisticFiltersToolStripMenuItem";
-            artisticFiltersToolStripMenuItem.Size = new Size(188, 26);
+            artisticFiltersToolStripMenuItem.Size = new Size(224, 26);
             artisticFiltersToolStripMenuItem.Text = "Artistic Filters";
             // 
             // cartoonToolStripMenuItem
             // 
+            cartoonToolStripMenuItem.Image = Properties.Resources.icons8_cartoon_48;
             cartoonToolStripMenuItem.Name = "cartoonToolStripMenuItem";
             cartoonToolStripMenuItem.Size = new Size(173, 26);
             cartoonToolStripMenuItem.Text = "Cartoon";
@@ -1159,10 +1185,27 @@
             // 
             // oilPaintingToolStripMenuItem
             // 
+            oilPaintingToolStripMenuItem.Image = Properties.Resources.icons8_van_gogh_48;
             oilPaintingToolStripMenuItem.Name = "oilPaintingToolStripMenuItem";
             oilPaintingToolStripMenuItem.Size = new Size(173, 26);
             oilPaintingToolStripMenuItem.Text = "Oil Painting";
             oilPaintingToolStripMenuItem.Click += oilPaintingToolStripMenuItem_Click;
+            // 
+            // ambientFiltersToolStripMenuItem
+            // 
+            ambientFiltersToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { chloeToolStripMenuItem });
+            ambientFiltersToolStripMenuItem.Image = Properties.Resources.icons8_spa_candle_48;
+            ambientFiltersToolStripMenuItem.Name = "ambientFiltersToolStripMenuItem";
+            ambientFiltersToolStripMenuItem.Size = new Size(224, 26);
+            ambientFiltersToolStripMenuItem.Text = "Ambient Filters";
+            // 
+            // chloeToolStripMenuItem
+            // 
+            chloeToolStripMenuItem.Image = Properties.Resources.icons8_landscape_48;
+            chloeToolStripMenuItem.Name = "chloeToolStripMenuItem";
+            chloeToolStripMenuItem.Size = new Size(224, 26);
+            chloeToolStripMenuItem.Text = "Chloe";
+            chloeToolStripMenuItem.Click += chloeToolStripMenuItem_Click;
             // 
             // yardımToolStripMenuItem
             // 
@@ -1173,6 +1216,7 @@
             // 
             // içindekilerToolStripMenuItem
             // 
+            içindekilerToolStripMenuItem.Image = Properties.Resources.icons8_help_48;
             içindekilerToolStripMenuItem.Name = "içindekilerToolStripMenuItem";
             içindekilerToolStripMenuItem.Size = new Size(167, 26);
             içindekilerToolStripMenuItem.Text = "S&how Help";
@@ -1184,6 +1228,7 @@
             // 
             // hakkındaToolStripMenuItem
             // 
+            hakkındaToolStripMenuItem.Image = Properties.Resources.icons8_about_48;
             hakkındaToolStripMenuItem.Name = "hakkındaToolStripMenuItem";
             hakkındaToolStripMenuItem.Size = new Size(167, 26);
             hakkındaToolStripMenuItem.Text = "&About";
@@ -1641,7 +1686,7 @@
             toolStripArtisticFilters.Items.AddRange(new ToolStripItem[] { toolStripLabel5, textBoxArtisticFilterSize, toolStripSeparator27, toolStripLabel7, textBoxArtisticFilterIntensity, toolStripSeparator28, toolStripLabel8, textBoxArtisticFilterThreshold, buttonArtisticFiltersOK, buttonArtisticFiltersCancel });
             toolStripArtisticFilters.Location = new Point(0, 28);
             toolStripArtisticFilters.Name = "toolStripArtisticFilters";
-            toolStripArtisticFilters.Size = new Size(1289, 27);
+            toolStripArtisticFilters.Size = new Size(455, 27);
             toolStripArtisticFilters.Stretch = true;
             toolStripArtisticFilters.TabIndex = 9;
             toolStripArtisticFilters.Visible = false;
@@ -1728,6 +1773,24 @@
             colorDialog1.AnyColor = true;
             colorDialog1.FullOpen = true;
             // 
+            // printImageDialog
+            // 
+            printImageDialog.UseEXDialog = true;
+            // 
+            // printImage
+            // 
+            printImage.PrintPage += printImage_PrintPage;
+            // 
+            // printPreviewDialog1
+            // 
+            printPreviewDialog1.AutoScrollMargin = new Size(0, 0);
+            printPreviewDialog1.AutoScrollMinSize = new Size(0, 0);
+            printPreviewDialog1.ClientSize = new Size(400, 300);
+            printPreviewDialog1.Enabled = true;
+            printPreviewDialog1.Icon = (Icon)resources.GetObject("printPreviewDialog1.Icon");
+            printPreviewDialog1.Name = "printPreviewDialog1";
+            printPreviewDialog1.Visible = false;
+            // 
             // ImageEditor
             // 
             AutoScaleMode = AutoScaleMode.None;
@@ -1801,8 +1864,8 @@
         private ToolStripMenuItem kaydetToolStripMenuItem;
         private ToolStripMenuItem farklıKaydetToolStripMenuItem;
         private ToolStripSeparator toolStripSeparator1;
-        private ToolStripMenuItem yazdırToolStripMenuItem;
-        private ToolStripMenuItem baskıÖnizlemeToolStripMenuItem;
+        private ToolStripMenuItem printToolStripMenuItem;
+        private ToolStripMenuItem printPreviewToolStripMenuItem;
         private ToolStripSeparator toolStripSeparator2;
         private ToolStripMenuItem çıkışToolStripMenuItem;
         private ToolStripMenuItem düzenleToolStripMenuItem;
@@ -1949,5 +2012,10 @@
         private ToolStripButton buttonArtisticFiltersOK;
         private ToolStripButton buttonArtisticFiltersCancel;
         private ToolStripTextBox textBoxArtisticFilterSize;
+        private PrintDialog printImageDialog;
+        private System.Drawing.Printing.PrintDocument printImage;
+        private PrintPreviewDialog printPreviewDialog1;
+        private ToolStripMenuItem ambientFiltersToolStripMenuItem;
+        private ToolStripMenuItem chloeToolStripMenuItem;
     }
 }

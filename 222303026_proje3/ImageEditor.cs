@@ -1,12 +1,8 @@
 using _222303026_proje3.Properties;
 using System.Diagnostics;
-using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
-using System.IO.Enumeration;
-using System.Windows.Forms;
-using System.Windows.Forms.Design;
 
 namespace _222303026_proje3
 {
@@ -1983,17 +1979,17 @@ namespace _222303026_proje3
 
         private void textBoxArtisticFilterSize_Leave(object sender, EventArgs e)
         {
-            
+
         }
 
         private void textBoxArtisticFilterIntensity_Leave(object sender, EventArgs e)
         {
-            
+
         }
 
         private void textBoxArtisticFilterThreshold_Leave(object sender, EventArgs e)
         {
-            
+
         }
 
         private void textBoxArtisticFilterSize_TextChanged(object sender, EventArgs e)
@@ -2189,6 +2185,162 @@ namespace _222303026_proje3
             {
                 RefreshArtisticFiltersPreview();
             }
+        }
+
+        private void printImage_PrintPage(object sender, System.Drawing.Printing.PrintPageEventArgs e)
+        {
+            Bitmap bmp = bitmap;
+            if (bmp != null)
+            {
+                // Calculate the position to center the image on the page
+                float x = e.MarginBounds.Left + (e.MarginBounds.Width - bmp.Width) / 2f;
+                float y = e.MarginBounds.Top + (e.MarginBounds.Height - bmp.Height) / 2f;
+
+                // Draw the image at its original size
+                e.Graphics.DrawImage(bmp, x, y, bmp.Width, bmp.Height);
+            }
+            else
+            {
+                MessageBox.Show("No image to print.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void printToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            printImageDialog.Document = printImage;
+            if (printImageDialog.ShowDialog() == DialogResult.OK)
+            {
+                printImage.Print();
+            }
+        }
+
+        private void printPreviewToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            printPreviewDialog1.Document = printImage;
+            if (bitmap != null)
+            {
+                printPreviewDialog1.ShowDialog();
+            }
+            else
+            {
+                MessageBox.Show("No image to preview.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void Paste_Click(object sender, EventArgs e)
+        {
+            SaveStateForUndo();
+            Bitmap bmp = Clipboard.GetImage() as Bitmap;
+            if (bmp != null)
+            {
+                pictureBoxCanvas.Image = bmp;
+                canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
+                pictureBoxCanvas.Invalidate();
+                CenterCanvasPanel();
+            }
+            else
+            {
+                MessageBox.Show("No image in clipboard.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void Copy_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                CutOrCopy();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error copying image: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void CutOrCopy()
+        {
+            // Create a copy with the same pixel format as the original bitmap
+            // or explicitly use 32bppArgb if needed for transparency
+            Bitmap copyBitmap = new Bitmap(bitmap.Width, bitmap.Height, PixelFormat.Format32bppArgb);
+
+            // Set up color attributes to preserve transparency
+            ImageAttributes imageAttributes = new ImageAttributes();
+
+            // Create a color matrix that preserves alpha channel (the 4th row)
+            ColorMatrix colorMatrix = new ColorMatrix(new float[][] {
+            new float[] {1, 0, 0, 0, 0},
+            new float[] {0, 1, 0, 0, 0},
+            new float[] {0, 0, 1, 0, 0},
+            new float[] {0, 0, 0, 1, 0},
+            new float[] {0, 0, 0, 0, 1}
+        });
+
+            imageAttributes.SetColorMatrix(colorMatrix);
+
+            using (Graphics g = Graphics.FromImage(copyBitmap))
+            {
+                // Set high quality settings to prevent quality loss
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                g.SmoothingMode = SmoothingMode.HighQuality;
+                g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                g.CompositingQuality = CompositingQuality.HighQuality;
+
+                // Clear with transparent color first
+                g.Clear(Color.Transparent);
+
+                // Draw the original bitmap using the color matrix to preserve alpha
+                g.DrawImage(bitmap,
+                    new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                    0, 0, bitmap.Width, bitmap.Height,
+                    GraphicsUnit.Pixel,
+                    imageAttributes);
+            }
+
+            // Use PNG format specifically for the clipboard to preserve transparency
+            // This is a key part of the solution
+            DataObject dataObject = new DataObject();
+
+            // Add both PNG and standard bitmap format
+            using (MemoryStream pngStream = new MemoryStream())
+            {
+                copyBitmap.Save(pngStream, ImageFormat.Png);
+                dataObject.SetData("PNG", false, pngStream);
+            }
+
+            // Also include the standard bitmap format for compatibility
+            dataObject.SetData(DataFormats.Bitmap, true, copyBitmap);
+
+            // Set the data object to clipboard
+            Clipboard.SetDataObject(dataObject, true);
+        }
+
+        private void Cut_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                SaveStateForUndo();
+                CutOrCopy();
+                bitmap = new Bitmap(bitmap.Width, bitmap.Height);
+                pictureBoxCanvas.Image = bitmap;
+                pictureBoxCanvas.Invalidate();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error cutting image: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void chloeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveStateForUndo();
+            if (artisticFilters != ArtisticFilters.None)
+            {
+                artisticFilters = ArtisticFilters.None;
+            }
+            bitmap = Filters.AmbientFilters.Chloe(bitmap);
+            canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
+            pictureBoxCanvas.Image = bitmap;
+            pictureBoxCanvas.Invalidate();
+            CenterCanvasPanel();
         }
     }
     public partial class CreateWithAIForm : Form

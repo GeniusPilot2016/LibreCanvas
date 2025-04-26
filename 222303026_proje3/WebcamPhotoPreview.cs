@@ -32,5 +32,10 @@ namespace _222303026_proje3
             PhotoDiscarded?.Invoke(this, EventArgs.Empty);
             this.Close();
         }
+
+        private void WebcamPhotoPreview_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            PhotoDiscarded?.Invoke(this, EventArgs.Empty);
+        }
     }
 }
