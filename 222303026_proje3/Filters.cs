@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -10,20 +11,152 @@ namespace _222303026_proje3
 {
     public static class Filters
     {
-        public static ColorMatrix CreateColorMatrix(float exposure, float contrast, float temperature, float tint, float saturation)
+        public static ColorMatrix P5Matrix(float intensity)
         {
-            float ExposureFactor = exposure;
-
-            return new ColorMatrix(new float[][]
+            if (intensity < -50 || intensity > 50)
             {
-        new float[] { 1*exposure, 0, 0, 0, 0 },
-        new float[] { 0, 1*contrast, 0, 0, 0 },
-        new float[] { 0, 0, 1*temperature, 0, 1 },
-        new float[] { 0, 0, 0, 1, 0 },
-        new float[] { 1*tint, 1, 0, 0, 1 }
-            });
+                throw new ArgumentOutOfRangeException(nameof(intensity), "Intensity must be between -50 and 50.");
+            }
+
+            float i_ratio = intensity / 50.0f;
+
+            float[][] fullEffectMatrixValues = new float[][]
+            {
+            new float[] { 1.1f, 0.1f, 0,    0, 0 },
+            new float[] { 0,    1,    0,    0, 0 },
+            new float[] { 0.1f, 0.2f, 1.2f, 0, 1 },
+            new float[] { 0,    0,    0,    1, 0 },
+            new float[] { 0.05f,0.02f,0.1f, 0, 1 }
+            };
+
+            float[][] identityMatrixValues = new float[][]
+            {
+            new float[] { 1, 0, 0, 0, 0 },
+            new float[] { 0, 1, 0, 0, 0 },
+            new float[] { 0, 0, 1, 0, 0 },
+            new float[] { 0, 0, 0, 1, 0 },
+            new float[] { 0, 0, 0, 0, 1 }
+            };
+
+            float[][] resultMatrixValues = new float[5][];
+            for (int i = 0; i < 5; i++)
+            {
+                resultMatrixValues[i] = new float[5];
+                for (int j = 0; j < 5; j++)
+                {
+                    resultMatrixValues[i][j] = identityMatrixValues[i][j] + (fullEffectMatrixValues[i][j] - identityMatrixValues[i][j]) * i_ratio;
+                }
+            }
+
+            return new ColorMatrix(resultMatrixValues);
+        }
+        // Exposure Adjustment Matrix
+        public static ColorMatrix GetExposureMatrix(float exposure)
+        {
+            float bias = exposure * 0.05f; // Adjust the 0.1f factor based on desired sensitivity
+
+            float[][] matrix = new float[][]
+            {
+            new float[] { 1, 0, 0, 0, 0 },
+            new float[] { 0, 1, 0, 0, 0 },
+            new float[] { 0, 0, 1, 0, 0 },
+            new float[] { 0, 0, 0, 1, 0 },
+            new float[] { bias, bias, bias, 0, 1 } // Add bias to R, G, B translation
+            };
+            return new ColorMatrix(matrix);
         }
 
+        // Contrast Adjustment Matrix
+        public static ColorMatrix GetContrastMatrix(float contrast)
+        {
+            float c = 1.0f + contrast * 0.05f; // Adjust 0.1f for sensitivity. Negative contrast reduces 'c'.
+            float t = (1.0f - c) / 1.5f; // Translation to pivot around gray
+
+            float[][] matrix = new float[][]
+            {
+            new float[] { c, 0, 0, 0, 0 },
+            new float[] { 0, c, 0, 0, 0 },
+            new float[] { 0, 0, c, 0, 0 },
+            new float[] { 0, 0, 0, 1, 0 },
+            new float[] { t, t, t, 0, 1 } // Add translation to pivot around gray
+            };
+            return new ColorMatrix(matrix);
+        }
+
+        // Temperature Adjustment Matrix (Approximation)
+        public static ColorMatrix GetTemperatureMatrix(float temperature)
+        {
+            float blueIncrease = -temperature * 0.01f; // Negative temp increases blue
+            float redIncrease = temperature * 0.01f;  // Positive temp increases red
+
+            float[][] matrix = new float[][]
+            {
+             new float[] { 1 + redIncrease, 0, 0, 0, 0 },
+             new float[] { 0, 1, 0, 0, 0 },
+             new float[] { 0, 0, 1 + blueIncrease, 0, 0 },
+             new float[] { 0, 0, 0, 1, 0 },
+             new float[] { 0, 0, 0, 0, 1 }
+            };
+            return new ColorMatrix(matrix);
+        }
+
+        // Tint Adjustment Matrix (Approximation)
+        public static ColorMatrix GetTintMatrix(float tint)
+        {
+            float greenDecrease = -tint * 0.01f; // Positive tint decreases green
+            float redBlueIncrease = tint * 0.005f; // Positive tint slightly increases red/blue
+
+            float[][] matrix = new float[][]
+            {
+             new float[] { 1 + redBlueIncrease, 0, 0, 0, 0 },
+             new float[] { 0, 1 + greenDecrease, 0, 0, 0 },
+             new float[] { 0, 0, 1 + redBlueIncrease, 0, 0 },
+             new float[] { 0, 0, 0, 1, 0 },
+             new float[] { 0, 0, 0, 0, 1 }
+            };
+            return new ColorMatrix(matrix);
+        }
+
+        // Saturation Adjustment Matrix (Approximation)
+        public static ColorMatrix GetSaturationMatrix(float saturation)
+        {
+            float lumR = 0.299f;
+            float lumG = 0.587f;
+            float lumB = 0.114f;
+
+            float s = 1.0f + (saturation*0.5f); // Assuming user's 0 is neutral (s=1), and +2.0 means s=3.0.
+
+            float[][] matrix = new float[][]
+            {
+            new float[] { lumR * (1 - s) + s, lumR * (1 - s),     lumR * (1 - s),     0, 0 },
+            new float[] { lumG * (1 - s),     lumG * (1 - s) + s, lumG * (1 - s),     0, 0 },
+            new float[] { lumB * (1 - s),     lumB * (1 - s),     lumB * (1 - s) + s, 0, 0 },
+            new float[] { 0,                  0,                  0,                  1, 0 },
+            new float[] { 0,                  0,                  0,                  0, 1 }
+            };
+            return new ColorMatrix(matrix);
+        }
+
+        // Replace the MultiplyColorMatrices method with the following implementation  
+        public static ColorMatrix MultiplyColorMatrices(ColorMatrix matrix1, ColorMatrix matrix2)
+        {
+            float[][] result = new float[5][];
+
+            for (int i = 0; i < 5; i++)
+            {
+                result[i] = new float[5];
+                for (int j = 0; j < 5; j++)
+                {
+                    result[i][j] = 0;
+                    for (int k = 0; k < 5; k++)
+                    {
+                        result[i][j] += matrix1[i, k] * matrix2[k, j];
+                    }
+                }
+            }
+
+            return new ColorMatrix(result);
+        }
         private static bool CheckThreshold(byte[] pixelBuffer,
                                    int offset1, int offset2,
                                    ref int gradientValue,
@@ -633,14 +766,48 @@ namespace _222303026_proje3
             public static Bitmap Chloe(Bitmap image)
             {
                 Image img = image;
-                Bitmap InvertedBitmap = new Bitmap(img.Width, img.Height);
+                Bitmap resultBitmap = new Bitmap(img.Width, img.Height);
+                resultBitmap.SetResolution(image.HorizontalResolution, image.VerticalResolution); // Maintain resolution
+
+                // Define the adjustment values from the image
+                float p5Intensity = 6.0f;
+                float exposure = -1.6f;
+                float contrast = -2.5f;
+                float temperature = -1.0f;
+                float tint = +3.0f;
+                float saturation = +2.0f;
+
+                // Get individual matrices for each adjustment using the new methods
+                ColorMatrix p5Matrix = P5Matrix(p5Intensity);
+                ColorMatrix exposureMatrix = GetExposureMatrix(exposure);
+                ColorMatrix temperatureMatrix = GetTemperatureMatrix(temperature);
+                ColorMatrix tintMatrix = GetTintMatrix(tint);
+                ColorMatrix contrastMatrix = GetContrastMatrix(contrast);
+                ColorMatrix saturationMatrix = GetSaturationMatrix(saturation);
+
+                // Multiply the matrices in a desired order
+                // Example order: Exposure -> White Balance (Temp/Tint) -> Contrast -> Saturation -> Filter
+                ColorMatrix combinedMatrix = p5Matrix;
+                combinedMatrix = MultiplyColorMatrices(combinedMatrix, exposureMatrix);
+                combinedMatrix = MultiplyColorMatrices(combinedMatrix, temperatureMatrix);
+                combinedMatrix = MultiplyColorMatrices(combinedMatrix, tintMatrix);
+                combinedMatrix = MultiplyColorMatrices(combinedMatrix, contrastMatrix);
+                combinedMatrix = MultiplyColorMatrices(combinedMatrix, saturationMatrix); // Apply P5 last
+
                 ImageAttributes imageAttributes = new ImageAttributes();
-                ColorMatrix colorMatrix = CreateColorMatrix(-1.6f, -2.5f, -1.0f, 3.0f, 2.0f);
-                imageAttributes.SetColorMatrix(colorMatrix);
-                Graphics g = Graphics.FromImage(InvertedBitmap);
+                imageAttributes.SetColorMatrix(combinedMatrix);
+
+                Graphics g = Graphics.FromImage(resultBitmap);
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+                g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+
                 g.DrawImage(img, new Rectangle(0, 0, img.Width, img.Height), 0, 0, img.Width, img.Height, GraphicsUnit.Pixel, imageAttributes);
+
                 g.Dispose();
-                return InvertedBitmap;
+
+                return resultBitmap;
             }
         }
     }

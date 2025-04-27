@@ -1201,7 +1201,7 @@
             // 
             // chloeToolStripMenuItem
             // 
-            chloeToolStripMenuItem.Image = Properties.Resources.icons8_landscape_48;
+            chloeToolStripMenuItem.Image = Properties.Resources.icons8_lipstick_48;
             chloeToolStripMenuItem.Name = "chloeToolStripMenuItem";
             chloeToolStripMenuItem.Size = new Size(224, 26);
             chloeToolStripMenuItem.Text = "Chloe";
