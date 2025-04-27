@@ -1084,7 +1084,7 @@
             filtersToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { mirrorToolStripMenuItem, flashToolStripMenuItem, frozenToolStripMenuItem, winterToolStripMenuItem, blackAndWhiteToolStripMenuItem, oldPictureToolStripMenuItem, cherryToolStripMenuItem, lightAddToolStripMenuItem, purpleToolStripMenuItem, fogToolStripMenuItem });
             filtersToolStripMenuItem.Image = Properties.Resources.icons8_photo_gallery_48;
             filtersToolStripMenuItem.Name = "filtersToolStripMenuItem";
-            filtersToolStripMenuItem.Size = new Size(224, 26);
+            filtersToolStripMenuItem.Size = new Size(198, 26);
             filtersToolStripMenuItem.Text = "Basic Filters";
             // 
             // mirrorToolStripMenuItem
@@ -1172,7 +1172,7 @@
             artisticFiltersToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { cartoonToolStripMenuItem, oilPaintingToolStripMenuItem });
             artisticFiltersToolStripMenuItem.Image = Properties.Resources.icons8_art_48;
             artisticFiltersToolStripMenuItem.Name = "artisticFiltersToolStripMenuItem";
-            artisticFiltersToolStripMenuItem.Size = new Size(224, 26);
+            artisticFiltersToolStripMenuItem.Size = new Size(198, 26);
             artisticFiltersToolStripMenuItem.Text = "Artistic Filters";
             // 
             // cartoonToolStripMenuItem
@@ -1196,14 +1196,14 @@
             ambientFiltersToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { chloeToolStripMenuItem });
             ambientFiltersToolStripMenuItem.Image = Properties.Resources.icons8_spa_candle_48;
             ambientFiltersToolStripMenuItem.Name = "ambientFiltersToolStripMenuItem";
-            ambientFiltersToolStripMenuItem.Size = new Size(224, 26);
+            ambientFiltersToolStripMenuItem.Size = new Size(198, 26);
             ambientFiltersToolStripMenuItem.Text = "Ambient Filters";
             // 
             // chloeToolStripMenuItem
             // 
             chloeToolStripMenuItem.Image = Properties.Resources.icons8_landscape_48;
             chloeToolStripMenuItem.Name = "chloeToolStripMenuItem";
-            chloeToolStripMenuItem.Size = new Size(224, 26);
+            chloeToolStripMenuItem.Size = new Size(132, 26);
             chloeToolStripMenuItem.Text = "Chloe";
             chloeToolStripMenuItem.Click += chloeToolStripMenuItem_Click;
             // 

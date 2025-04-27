@@ -188,9 +188,16 @@ namespace _222303026_proje3
         }
         private void CenterCanvasPanel()
         {
-            int centerX = (panel1.ClientSize.Width - canvasPanel.Width) / 2;
-            int centerY = (panel1.ClientSize.Height - canvasPanel.Height) / 2;
-            canvasPanel.Location = new Point(Math.Max(centerX, 0), Math.Max(centerY, 0));
+            if (canvasPanel.Size.Width <= panel1.Size.Width && canvasPanel.Size.Height <= panel1.Size.Height)
+            {
+                int centerX = (panel1.ClientSize.Width - canvasPanel.Width) / 2;
+                int centerY = (panel1.ClientSize.Height - canvasPanel.Height) / 2;
+                canvasPanel.Location = new Point(Math.Max(centerX, 0), Math.Max(centerY, 0));
+            }
+            else
+            {
+                canvasPanel.Location = new Point(0, 0);
+            }
         }
 
         private void removeObjectToolStripMenuItem_Click(object sender, EventArgs e)
