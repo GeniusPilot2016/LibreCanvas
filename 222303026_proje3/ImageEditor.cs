@@ -14,12 +14,15 @@ namespace _222303026_proje3
         int brushSize = 11, penSize = 9, eraserSize = 11, sprayToolSize = 11, shapeThickness = 11, radius = 9, points = 6, tolerance = 50;
         float textSize = 9;
         int zoom = 100;
-        bool isResizing = false;
+        bool isResizing = false, isSelected = false;
         private ResizeDirection resizeDirection;
         private BasicFilters basicFilters;
         private ArtisticFilters artisticFilters;
         private Point lastMousePos;
-        Bitmap bitmap;
+        Bitmap MainBitmap;
+        Bitmap SelectedBitmap;
+        Rectangle SelectionRectangle = new Rectangle();
+        Point SelectionStartPoint;
         enum BasicFilters
         {
             None,
@@ -79,19 +82,36 @@ namespace _222303026_proje3
         public ImageEditor()
         {
             InitializeComponentAndFont();
+            InitializeSelectionPen(); // Initialize the SelectionPen
             createNewFile();
             UpdateUndoRedoButtons(); // Baþlangýçta tuþlarý güncelle
         }
         public ImageEditor(String fileName)
         {
             InitializeComponentAndFont();
+            InitializeSelectionPen(); // Initialize the SelectionPen
             openAFile(fileName);
         }
         public ImageEditor(Image image, bool AIGenerated)
         {
             InitializeComponentAndFont();
+            InitializeSelectionPen(); // Initialize the SelectionPen
             createFileWithAIorWebcam(image, AIGenerated);
         }
+        private Pen SelectionPen;
+
+        private void InitializeSelectionPen()
+        {
+            // Create a HatchBrush with alternating black and white colors
+            HatchBrush hatchBrush = new HatchBrush(HatchStyle.DashedHorizontal, Color.White, Color.Black);
+
+            // Create a new Pen using the HatchBrush
+            SelectionPen = new Pen(hatchBrush, 2)
+            {
+                DashStyle = DashStyle.Solid // Use solid style since the brush itself creates the dashed effect
+            };
+        }
+
         private void InitializeComponentAndFont()
         {
             InitializeComponent();
@@ -128,7 +148,7 @@ namespace _222303026_proje3
 
             // Paneli hemen yenile (Refresh kullan)
             canvasPanel.Refresh();
-            bitmap = new Bitmap(800, 600);
+            MainBitmap = new Bitmap(800, 600);
             labelSize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height}px";
             labelFileName.Text = "Unnamed File";
         }
@@ -150,7 +170,7 @@ namespace _222303026_proje3
 
             // Paneli hemen yenile (Refresh kullan)
             pictureBoxCanvas.Image = image;
-            bitmap = new Bitmap(image);
+            MainBitmap = new Bitmap(image);
             canvasPanel.Refresh();
             labelSize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height}px";
             labelFileName.Text = fileName;
@@ -173,7 +193,7 @@ namespace _222303026_proje3
 
             // Paneli hemen yenile (Refresh kullan)
             pictureBoxCanvas.Image = image;
-            bitmap = new Bitmap(image);
+            MainBitmap = new Bitmap(image);
             canvasPanel.Refresh();
             labelSize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height}px";
             switch (isAIGenerated)
@@ -427,7 +447,7 @@ namespace _222303026_proje3
             DialogResult dialogResult = saveFileDialog1.ShowDialog();
             if (dialogResult == DialogResult.OK)
             {
-                bitmap.Save(saveFileDialog1.FileName);
+                MainBitmap.Save(saveFileDialog1.FileName);
             }
         }
 
@@ -547,9 +567,9 @@ namespace _222303026_proje3
                 Bitmap newBitmap = new Bitmap(newWidth, newHeight);
                 using (Graphics g = Graphics.FromImage(newBitmap))
                 {
-                    g.DrawImage(bitmap, 0, 0);
+                    g.DrawImage(MainBitmap, 0, 0);
                 }
-                bitmap = newBitmap;
+                MainBitmap = newBitmap;
 
                 // Paneli merkezi konumda yerleþtiriyoruz
                 CenterCanvasPanel();
@@ -786,39 +806,39 @@ namespace _222303026_proje3
                 switch (selectedTool)
                 {
                     case Tools.Line:
-                        using (Graphics graphics = Graphics.FromImage(bitmap))
+                        using (Graphics graphics = Graphics.FromImage(MainBitmap))
                         {
-                            DrawShapes.DrawLineOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
+                            DrawShapes.DrawLineOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
                         }
                         break;
                     case Tools.Round:
-                        using (Graphics graphics = Graphics.FromImage(bitmap))
+                        using (Graphics graphics = Graphics.FromImage(MainBitmap))
                         {
-                            DrawShapes.DrawRoundOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
+                            DrawShapes.DrawRoundOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
                         }
                         break;
                     case Tools.Rectangle:
-                        using (Graphics graphics = Graphics.FromImage(bitmap))
+                        using (Graphics graphics = Graphics.FromImage(MainBitmap))
                         {
-                            DrawShapes.DrawRectangleOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
+                            DrawShapes.DrawRectangleOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
                         }
                         break;
                     case Tools.RoundedRectangle:
-                        using (Graphics graphics = Graphics.FromImage(bitmap))
+                        using (Graphics graphics = Graphics.FromImage(MainBitmap))
                         {
-                            DrawShapes.DrawRoundedRectangleOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location, radius);
+                            DrawShapes.DrawRoundedRectangleOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location, radius);
                         }
                         break;
                     case Tools.Triangle:
-                        using (Graphics graphics = Graphics.FromImage(bitmap))
+                        using (Graphics graphics = Graphics.FromImage(MainBitmap))
                         {
-                            DrawShapes.DrawTriangleOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
+                            DrawShapes.DrawTriangleOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
                         }
                         break;
                     case Tools.Hexagon:
-                        using (Graphics graphics = Graphics.FromImage(bitmap))
+                        using (Graphics graphics = Graphics.FromImage(MainBitmap))
                         {
-                            DrawShapes.DrawHexagonOnCanvas(bitmap, pictureBoxCanvas, color1, shapeThickness, points, startPoint, e.Location);
+                            DrawShapes.DrawHexagonOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, points, startPoint, e.Location);
                         }
                         break;
                     default:
@@ -826,7 +846,7 @@ namespace _222303026_proje3
                         break;
                 }
                 // Update the PictureBox with the new bitmap
-                pictureBoxCanvas.Image = bitmap;
+                pictureBoxCanvas.Image = MainBitmap;
                 pictureBoxCanvas.Invalidate();
             }
         }
@@ -840,34 +860,51 @@ namespace _222303026_proje3
                 {
                     case Tools.Line:
                         pictureBoxCanvas.Image = ShapePreviews.LinePreview(
-                            bitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y
+                            MainBitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y
                         ); pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
                         break;
                     case Tools.Round:
                         pictureBoxCanvas.Image = ShapePreviews.RoundPreview(
-                            bitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y
+                            MainBitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y
                         );
                         pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
                         break;
                     case Tools.Rectangle:
                         pictureBoxCanvas.Image = ShapePreviews.RectanglePreview(
-                            bitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y
+                            MainBitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y
                         ); pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
                         break;
                     case Tools.RoundedRectangle:
                         pictureBoxCanvas.Image = ShapePreviews.RoundedRectanglePreview(
-                            bitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y, radius
+                            MainBitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y, radius
                         ); pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
                         break;
                     case Tools.Triangle:
                         pictureBoxCanvas.Image = ShapePreviews.TrianglePreview(
-                            bitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y
+                            MainBitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y
                         ); pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
                         break;
                     case Tools.Hexagon:
                         pictureBoxCanvas.Image = ShapePreviews.HexagonPreview(
-                            bitmap, color1, shapeThickness, points, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y);
+                            MainBitmap, color1, shapeThickness, points, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y);
                         pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
+                        break;
+                    case Tools.Selection:
+                        if (e.Button != MouseButtons.Left)
+                        {
+                            return;
+                        }
+                        if (selectedTool == Tools.Selection && e.Button == MouseButtons.Left)
+                        {
+                            Point SelectionEndPoint = e.Location;
+                            SelectionRectangle.Location = new Point(
+                                Math.Min(SelectionStartPoint.X, SelectionEndPoint.X),
+                                Math.Min(SelectionStartPoint.Y, SelectionEndPoint.Y));
+                            SelectionRectangle.Size = new Size(
+                                Math.Abs(SelectionStartPoint.X - SelectionEndPoint.X),
+                                Math.Abs(SelectionStartPoint.Y - SelectionEndPoint.Y));
+                            pictureBoxCanvas.Invalidate();
+                        }
                         break;
                     default:
                         drawIntoCanvas(e);
@@ -890,15 +927,22 @@ namespace _222303026_proje3
         }
         private void drawIntoCanvas(MouseEventArgs e)
         {
-            if (bitmap == null)
+            if (MainBitmap == null)
             {
-                bitmap = new Bitmap(pictureBoxCanvas.Width, pictureBoxCanvas.Height);
+                MainBitmap = new Bitmap(pictureBoxCanvas.Width, pictureBoxCanvas.Height);
             }
 
-            using (Graphics graphics = Graphics.FromImage(bitmap))
+            using (Graphics graphics = Graphics.FromImage(MainBitmap))
             {
                 if (isdrawing)
                 {
+                    if (isSelected && !SelectionRectangle.IsEmpty)
+                    {
+                        if (!SelectionRectangle.Contains(e.Location))
+                        {
+                            return; // Ignore drawing outside the selection rectangle
+                        }
+                    }
                     switch (selectedTool)
                     {
                         case Tools.Brush:
@@ -947,7 +991,7 @@ namespace _222303026_proje3
                             DrawBrush(graphics, BrushShapes.DrawSprayBrush, color1, sprayToolSize, new Point(e.X, e.Y));
                             break;
                         case Tools.ColorDrop:
-                            Color pixelColor = bitmap.GetPixel(e.X, e.Y);
+                            Color pixelColor = MainBitmap.GetPixel(e.X, e.Y);
                             color1 = pixelColor;
                             foregroundColorButton.BackColor = pixelColor;
                             break;
@@ -960,12 +1004,39 @@ namespace _222303026_proje3
                 }
             }
 
-            pictureBoxCanvas.Image = bitmap;
+            pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
         }
 
         private void DrawBrush(Graphics graphics, Action<Graphics, Color, int, Point> drawAction, Color color, int size, Point location)
         {
+            // Ensure the brush stays within the SelectionRectangle
+            if (!SelectionRectangle.IsEmpty)
+            {
+                int halfSize = size / 2;
+                Rectangle brushBounds = new Rectangle(location.X - halfSize, location.Y - halfSize, size, size);
+
+                // Check if the brush bounds intersect with the SelectionRectangle
+                if (!SelectionRectangle.IntersectsWith(brushBounds))
+                {
+                    return; // Skip drawing if the brush is outside the selection
+                }
+
+                // Clip the brush bounds to the SelectionRectangle
+                Rectangle clippedBounds = Rectangle.Intersect(SelectionRectangle, brushBounds);
+                if (clippedBounds.IsEmpty)
+                {
+                    return; // Skip drawing if the clipped bounds are empty
+                }
+
+                // Adjust the location to ensure the brush is clipped
+                location = new Point(
+                    Math.Max(location.X, SelectionRectangle.Left + halfSize),
+                    Math.Max(location.Y, SelectionRectangle.Top + halfSize)
+                );
+            }
+
+            // Draw the brush
             if (x == -1 && y == -1)
             {
                 drawAction(graphics, color, size, location);
@@ -1021,37 +1092,42 @@ namespace _222303026_proje3
                     SaveStateForUndo();
                     startPoint = e.Location;
                     previewStartPoint = e.Location;
-                    previewBitmap = new Bitmap(bitmap);
+                    previewBitmap = new Bitmap(MainBitmap);
                     break;
                 case Tools.Round:
                     SaveStateForUndo();
                     startPoint = e.Location;
                     previewStartPoint = e.Location;
-                    previewBitmap = new Bitmap(bitmap);
+                    previewBitmap = new Bitmap(MainBitmap);
                     break;
                 case Tools.Rectangle:
                     SaveStateForUndo();
                     previewStartPoint = e.Location;
                     startPoint = e.Location;
-                    previewBitmap = new Bitmap(bitmap);
+                    previewBitmap = new Bitmap(MainBitmap);
                     break;
                 case Tools.RoundedRectangle:
                     SaveStateForUndo();
                     startPoint = e.Location;
                     previewStartPoint = e.Location;
-                    previewBitmap = new Bitmap(bitmap);
+                    previewBitmap = new Bitmap(MainBitmap);
                     break;
                 case Tools.Triangle:
                     SaveStateForUndo();
                     startPoint = e.Location;
                     previewStartPoint = e.Location;
-                    previewBitmap = new Bitmap(bitmap);
+                    previewBitmap = new Bitmap(MainBitmap);
                     break;
                 case Tools.Hexagon:
                     SaveStateForUndo();
                     startPoint = e.Location;
                     previewStartPoint = e.Location;
-                    previewBitmap = new Bitmap(bitmap);
+                    previewBitmap = new Bitmap(MainBitmap);
+                    break;
+                case Tools.Selection:
+                    isSelected = true;
+                    SelectionStartPoint = e.Location;
+                    pictureBoxCanvas.Invalidate();
                     break;
                 default:
                     if (selectedTool == Tools.Brush || selectedTool == Tools.Pen || selectedTool == Tools.Eraser ||
@@ -1139,7 +1215,7 @@ namespace _222303026_proje3
                         textBox.LostFocus += (s, args) =>
                         {
                             // Draw the TextBox content onto the bitmap  
-                            using (Graphics graphics = Graphics.FromImage(bitmap))
+                            using (Graphics graphics = Graphics.FromImage(MainBitmap))
                             {
                                 graphics.DrawString(textBox.Text, textBox.Font, new SolidBrush(color1), textBox.Location);
                             }
@@ -1148,7 +1224,7 @@ namespace _222303026_proje3
                             pictureBoxCanvas.Controls.Remove(textBox);
 
                             // Update the PictureBox with the updated bitmap  
-                            pictureBoxCanvas.Image = bitmap;
+                            pictureBoxCanvas.Image = MainBitmap;
                             pictureBoxCanvas.Invalidate(); // Force a redraw  
                         };
                         textBox.TextChanged += (s, args) =>
@@ -1181,7 +1257,7 @@ namespace _222303026_proje3
                         textBox.LostFocus += (s, args) =>
                         {
                             // TextBox içeriðini bitmap'e çiz  
-                            using (Graphics graphics = Graphics.FromImage(bitmap))
+                            using (Graphics graphics = Graphics.FromImage(MainBitmap))
                             {
                                 graphics.DrawString(textBox.Text, textBox.Font, new SolidBrush(color1), textBox.Location);
                             }
@@ -1190,7 +1266,7 @@ namespace _222303026_proje3
                             pictureBoxCanvas.Controls.Remove(textBox);
 
                             // Canvas'ý güncelle  
-                            pictureBoxCanvas.Image = bitmap;
+                            pictureBoxCanvas.Image = MainBitmap;
                             pictureBoxCanvas.Invalidate();
                         };
                     }
@@ -1199,18 +1275,13 @@ namespace _222303026_proje3
                     {
                         SaveStateForUndo();
                         MouseEventArgs me = (MouseEventArgs)e; // EventArgs yerine MouseEventArgs kullanýmý  
-                        FloodFill(bitmap, me.Location, bitmap.GetPixel(me.X, me.Y), color1, tolerance);
+                        FloodFill(MainBitmap, me.Location, MainBitmap.GetPixel(me.X, me.Y), color1, tolerance);
                     }
                     break;
             }
         }
         private void FloodFill(Bitmap bitmap, Point point, Color targetColor, Color replacementColor, int tolerance)
         {
-            // Tolerance is given as 1-100. We can use this directly or scale it.
-            // A tolerance of 0 would mean exact match (though your current code handles this if target == replacement).
-            // A tolerance of 100 would mean fill almost anything within a certain distance.
-            // We need a way to compare colors based on tolerance. Comparing individual R, G, B components is common.
-
             if (targetColor.ToArgb() == replacementColor.ToArgb()) return;
 
             Rectangle rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
@@ -1226,14 +1297,10 @@ namespace _222303026_proje3
             Stack<Point> pixelsToCheck = new Stack<Point>();
             pixelsToCheck.Push(point);
 
-            // Store target color components for easier comparison
             byte targetR = targetColor.R;
             byte targetG = targetColor.G;
             byte targetB = targetColor.B;
 
-            // To avoid infinite loops on already filled pixels, we can use a boolean array
-            // or check if the pixel's color is already the replacement color.
-            // Checking against the replacement color is simpler here.
             int replacementArgb = replacementColor.ToArgb();
 
             while (pixelsToCheck.Count > 0)
@@ -1246,75 +1313,60 @@ namespace _222303026_proje3
                 if (x < 0 || y < 0 || x >= bitmap.Width || y >= bitmap.Height)
                     continue;
 
+                // Check if the pixel is within the selection rectangle when isSelected is true
+                if (isSelected && !SelectionRectangle.IsEmpty && !SelectionRectangle.Contains(pt))
+                    continue;
+
                 int index = (y * stride) + (x * bytesPerPixel);
 
-                // Get the current pixel's color components
                 byte currentB = pixels[index];
                 byte currentG = pixels[index + 1];
                 byte currentR = pixels[index + 2];
-                // If alpha is present: byte currentA = pixels[index + 3];
 
-                // Reconstruct ARGB for comparison with replacement color if needed
-                // Note: This assumes ARGB or RGB. Adjust indexing if format is BGR or BGRA.
                 int pixelArgb = 0;
-                if (bytesPerPixel == 4) // Likely ARGB or BGRA
+                if (bytesPerPixel == 4)
                 {
                     pixelArgb = BitConverter.ToInt32(pixels, index);
                 }
-                else if (bytesPerPixel == 3) // Likely RGB or BGR
+                else if (bytesPerPixel == 3)
                 {
-                    pixelArgb = (255 << 24) | (currentR << 16) | (currentG << 8) | currentB; // Assume Alpha 255
+                    pixelArgb = (255 << 24) | (currentR << 16) | (currentG << 8) | currentB;
                 }
 
-
-                // --- Tolerance Check ---
-                // If the pixel is already the replacement color, skip it to prevent infinite loops.
                 if (pixelArgb == replacementArgb)
                 {
                     continue;
                 }
 
-                // Calculate the difference between the current pixel color and the target color.
-                // A simple way is sum of absolute differences of R, G, B components.
                 int diffR = Math.Abs(currentR - targetR);
                 int diffG = Math.Abs(currentG - targetG);
                 int diffB = Math.Abs(currentB - targetB);
 
-                // A common tolerance check sums the differences.
-                // The maximum possible sum of differences is 255 + 255 + 255 = 765.
-                // We can map the 1-100 tolerance to this range.
-                // tolerance 1 would be a small difference threshold, tolerance 100 a large one.
-                int colorDifferenceThreshold = (int)((tolerance / 100.0) * 765); // Scale 1-100 to 0-765
+                int colorDifferenceThreshold = (int)((tolerance / 100.0) * 765);
 
                 if ((diffR + diffG + diffB) <= colorDifferenceThreshold)
                 {
-                    // The pixel is within the tolerance range of the target color
-                    // Set the pixel to the replacement color
                     if (bytesPerPixel == 4)
                     {
                         BitConverter.GetBytes(replacementArgb).CopyTo(pixels, index);
                     }
                     else if (bytesPerPixel == 3)
                     {
-                        pixels[index] = (byte)(replacementArgb & 0xFF); // Blue
-                        pixels[index + 1] = (byte)((replacementArgb >> 8) & 0xFF); // Green
-                        pixels[index + 2] = (byte)((replacementArgb >> 16) & 0xFF); // Red
+                        pixels[index] = (byte)(replacementArgb & 0xFF);
+                        pixels[index + 1] = (byte)((replacementArgb >> 8) & 0xFF);
+                        pixels[index + 2] = (byte)((replacementArgb >> 16) & 0xFF);
                     }
 
-
-                    // Add neighboring pixels to the stack
                     pixelsToCheck.Push(new Point(x + 1, y));
                     pixelsToCheck.Push(new Point(x - 1, y));
                     pixelsToCheck.Push(new Point(x, y + 1));
                     pixelsToCheck.Push(new Point(x, y - 1));
                 }
-                // Else: the pixel is not the target color (within tolerance) and is not the replacement color, so we stop flooding in this direction.
             }
 
             System.Runtime.InteropServices.Marshal.Copy(pixels, 0, scan0, pixels.Length);
             bitmap.UnlockBits(data);
 
-            // Assuming pictureBoxCanvas is a PictureBox displaying the bitmap
             if (pictureBoxCanvas != null)
             {
                 pictureBoxCanvas.Refresh();
@@ -1620,7 +1672,7 @@ namespace _222303026_proje3
 
         private void SaveStateForUndo()
         {
-            if (bitmap != null)
+            if (MainBitmap != null)
             {
                 if (undoStack.Count >= MaxStackSize)
                 {
@@ -1629,7 +1681,7 @@ namespace _222303026_proje3
                     tempList.RemoveAt(0);
                     undoStack = new Stack<CanvasState>(tempList);
                 }
-                undoStack.Push(new CanvasState(new Bitmap(bitmap), canvasPanel.Size));
+                undoStack.Push(new CanvasState(new Bitmap(MainBitmap), canvasPanel.Size));
                 redoStack.Clear(); // Clear redo stack on new action
             }
             UpdateUndoRedoButtons(); // Update buttons
@@ -1639,11 +1691,11 @@ namespace _222303026_proje3
         {
             if (undoStack.Count > 0)
             {
-                redoStack.Push(new CanvasState(new Bitmap(bitmap), canvasPanel.Size)); // Save current state to redo stack
+                redoStack.Push(new CanvasState(new Bitmap(MainBitmap), canvasPanel.Size)); // Save current state to redo stack
                 var previousState = undoStack.Pop(); // Get the last state
-                bitmap = previousState.Bitmap;
+                MainBitmap = previousState.Bitmap;
                 canvasPanel.Size = previousState.CanvasSize;
-                pictureBoxCanvas.Image = bitmap;
+                pictureBoxCanvas.Image = MainBitmap;
                 pictureBoxCanvas.Invalidate();
                 CenterCanvasPanel(); // Center the canvas panel
             }
@@ -1653,11 +1705,11 @@ namespace _222303026_proje3
         {
             if (redoStack.Count > 0)
             {
-                undoStack.Push(new CanvasState(new Bitmap(bitmap), canvasPanel.Size)); // Save current state to undo stack
+                undoStack.Push(new CanvasState(new Bitmap(MainBitmap), canvasPanel.Size)); // Save current state to undo stack
                 var nextState = redoStack.Pop(); // Get the next state
-                bitmap = nextState.Bitmap;
+                MainBitmap = nextState.Bitmap;
                 canvasPanel.Size = nextState.CanvasSize;
-                pictureBoxCanvas.Image = bitmap;
+                pictureBoxCanvas.Image = MainBitmap;
                 pictureBoxCanvas.Invalidate();
                 CenterCanvasPanel(); // Center the canvas panel
             }
@@ -1707,6 +1759,7 @@ namespace _222303026_proje3
 
         private void panel1_Click(object sender, EventArgs e)
         {
+            SetAsUnselected();
             HideAddTextTextBoxes();
         }
         private void HideAddTextTextBoxes()
@@ -1727,12 +1780,21 @@ namespace _222303026_proje3
 
         private void canvasPanel_Click(object sender, EventArgs e)
         {
+            SetAsUnselected();
             HideAddTextTextBoxes();
         }
 
         private void resize_top_Click(object sender, EventArgs e)
         {
+            SetAsUnselected();
             HideAddTextTextBoxes();
+        }
+        private void SetAsUnselected()
+        {
+            isSelected = false;
+            SelectionRectangle = Rectangle.Empty; // Clear the selection rectangle
+            pictureBoxCanvas.Image = MainBitmap;
+            pictureBoxCanvas.Invalidate(); // Redraw the canvas
         }
 
         private void toolStripTextBox1_TextChanged(object sender, EventArgs e)
@@ -1781,9 +1843,9 @@ namespace _222303026_proje3
                 artisticFilters = ArtisticFilters.None;
             }
             basicFilters = BasicFilters.Mirror;
-            bitmap = Filters.BasicFilters.MirrorEffect(bitmap);
-            canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
-            pictureBoxCanvas.Image = bitmap;
+            MainBitmap = Filters.BasicFilters.MirrorEffect(MainBitmap);
+            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
+            pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
         }
@@ -1791,13 +1853,13 @@ namespace _222303026_proje3
         private void flashToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveStateForUndo();
-            bitmap = Filters.BasicFilters.Flash(bitmap);
+            MainBitmap = Filters.BasicFilters.Flash(MainBitmap);
             if (artisticFilters != ArtisticFilters.None)
             {
                 artisticFilters = ArtisticFilters.None;
             }
-            canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
-            pictureBoxCanvas.Image = bitmap;
+            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
+            pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
         }
@@ -1809,9 +1871,9 @@ namespace _222303026_proje3
             {
                 artisticFilters = ArtisticFilters.None;
             }
-            bitmap = Filters.BasicFilters.Frozen(bitmap);
-            canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
-            pictureBoxCanvas.Image = bitmap;
+            MainBitmap = Filters.BasicFilters.Frozen(MainBitmap);
+            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
+            pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
         }
@@ -1823,9 +1885,9 @@ namespace _222303026_proje3
             {
                 artisticFilters = ArtisticFilters.None;
             }
-            bitmap = Filters.BasicFilters.Winter(bitmap);
-            canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
-            pictureBoxCanvas.Image = bitmap;
+            MainBitmap = Filters.BasicFilters.Winter(MainBitmap);
+            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
+            pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
         }
@@ -1837,9 +1899,9 @@ namespace _222303026_proje3
             {
                 artisticFilters = ArtisticFilters.None;
             }
-            bitmap = Filters.BasicFilters.BlackAndWhite(bitmap);
-            canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
-            pictureBoxCanvas.Image = bitmap;
+            MainBitmap = Filters.BasicFilters.BlackAndWhite(MainBitmap);
+            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
+            pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
         }
@@ -1851,9 +1913,9 @@ namespace _222303026_proje3
             {
                 artisticFilters = ArtisticFilters.None;
             }
-            bitmap = Filters.BasicFilters.OldImage(bitmap);
-            canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
-            pictureBoxCanvas.Image = bitmap;
+            MainBitmap = Filters.BasicFilters.OldImage(MainBitmap);
+            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
+            pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
         }
@@ -1865,9 +1927,9 @@ namespace _222303026_proje3
             {
                 artisticFilters = ArtisticFilters.None;
             }
-            bitmap = Filters.BasicFilters.CherryFilter(bitmap);
-            canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
-            pictureBoxCanvas.Image = bitmap;
+            MainBitmap = Filters.BasicFilters.CherryFilter(MainBitmap);
+            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
+            pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
         }
@@ -1879,9 +1941,9 @@ namespace _222303026_proje3
             {
                 artisticFilters = ArtisticFilters.None;
             }
-            bitmap = Filters.BasicFilters.LightAdd(bitmap);
-            canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
-            pictureBoxCanvas.Image = bitmap;
+            MainBitmap = Filters.BasicFilters.LightAdd(MainBitmap);
+            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
+            pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
         }
@@ -1893,9 +1955,9 @@ namespace _222303026_proje3
             {
                 artisticFilters = ArtisticFilters.None;
             }
-            bitmap = Filters.BasicFilters.PurpleEffect(bitmap);
-            canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
-            pictureBoxCanvas.Image = bitmap;
+            MainBitmap = Filters.BasicFilters.PurpleEffect(MainBitmap);
+            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
+            pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
         }
@@ -1907,9 +1969,9 @@ namespace _222303026_proje3
             {
                 artisticFilters = ArtisticFilters.None;
             }
-            bitmap = Filters.BasicFilters.FogEffect(bitmap);
-            canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
-            pictureBoxCanvas.Image = bitmap;
+            MainBitmap = Filters.BasicFilters.FogEffect(MainBitmap);
+            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
+            pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
         }
@@ -1919,11 +1981,11 @@ namespace _222303026_proje3
             switch (artisticFilters)
             {
                 case ArtisticFilters.OilPainting:
-                    pictureBoxCanvas.Image = Filters.ArtisticFilters.OilPaintFilter(bitmap, FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity,
+                    pictureBoxCanvas.Image = Filters.ArtisticFilters.OilPaintFilter(MainBitmap, FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity,
                         FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize, (byte)FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold);
                     break;
                 case ArtisticFilters.Cartoon:
-                    pictureBoxCanvas.Image = Filters.ArtisticFilters.CartoonFilter(bitmap, FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity,
+                    pictureBoxCanvas.Image = Filters.ArtisticFilters.CartoonFilter(MainBitmap, FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity,
                         FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize, (byte)FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold);
                     break;
             }
@@ -1932,9 +1994,9 @@ namespace _222303026_proje3
         private void buttonArtisticFiltersOK_Click(object sender, EventArgs e)
         {
             SaveStateForUndo();
-            bitmap = pictureBoxCanvas.Image as Bitmap;
+            MainBitmap = pictureBoxCanvas.Image as Bitmap;
             pictureBoxCanvas.Invalidate();
-            canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
+            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
             CenterCanvasPanel();
             toolStripArtisticFilters.Visible = false;
         }
@@ -1947,7 +2009,7 @@ namespace _222303026_proje3
         {
             toolStripArtisticFilters.Visible = false;
             artisticFilters = ArtisticFilters.None;
-            pictureBoxCanvas.Image = bitmap;
+            pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             pictureBoxCanvas.Refresh();
         }
@@ -2196,7 +2258,7 @@ namespace _222303026_proje3
 
         private void printImage_PrintPage(object sender, System.Drawing.Printing.PrintPageEventArgs e)
         {
-            Bitmap bmp = bitmap;
+            Bitmap bmp = MainBitmap;
             if (bmp != null)
             {
                 // Calculate the position to center the image on the page
@@ -2224,7 +2286,7 @@ namespace _222303026_proje3
         private void printPreviewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             printPreviewDialog1.Document = printImage;
-            if (bitmap != null)
+            if (MainBitmap != null)
             {
                 printPreviewDialog1.ShowDialog();
             }
@@ -2241,7 +2303,7 @@ namespace _222303026_proje3
             if (bmp != null)
             {
                 pictureBoxCanvas.Image = bmp;
-                canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
+                canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
                 pictureBoxCanvas.Invalidate();
                 CenterCanvasPanel();
             }
@@ -2267,7 +2329,7 @@ namespace _222303026_proje3
         {
             // Create a copy with the same pixel format as the original bitmap
             // or explicitly use 32bppArgb if needed for transparency
-            Bitmap copyBitmap = new Bitmap(bitmap.Width, bitmap.Height, PixelFormat.Format32bppArgb);
+            Bitmap copyBitmap = new Bitmap(MainBitmap.Width, MainBitmap.Height, PixelFormat.Format32bppArgb);
 
             // Set up color attributes to preserve transparency
             ImageAttributes imageAttributes = new ImageAttributes();
@@ -2295,9 +2357,9 @@ namespace _222303026_proje3
                 g.Clear(Color.Transparent);
 
                 // Draw the original bitmap using the color matrix to preserve alpha
-                g.DrawImage(bitmap,
-                    new Rectangle(0, 0, bitmap.Width, bitmap.Height),
-                    0, 0, bitmap.Width, bitmap.Height,
+                g.DrawImage(MainBitmap,
+                    new Rectangle(0, 0, MainBitmap.Width, MainBitmap.Height),
+                    0, 0, MainBitmap.Width, MainBitmap.Height,
                     GraphicsUnit.Pixel,
                     imageAttributes);
             }
@@ -2326,8 +2388,8 @@ namespace _222303026_proje3
             {
                 SaveStateForUndo();
                 CutOrCopy();
-                bitmap = new Bitmap(bitmap.Width, bitmap.Height);
-                pictureBoxCanvas.Image = bitmap;
+                MainBitmap = new Bitmap(MainBitmap.Width, MainBitmap.Height);
+                pictureBoxCanvas.Image = MainBitmap;
                 pictureBoxCanvas.Invalidate();
             }
             catch (Exception ex)
@@ -2343,11 +2405,28 @@ namespace _222303026_proje3
             {
                 artisticFilters = ArtisticFilters.None;
             }
-            bitmap = Filters.AmbientFilters.Chloe(bitmap);
-            canvasPanel.Size = new Size(bitmap.Size.Width + 20, bitmap.Size.Height + 20);
-            pictureBoxCanvas.Image = bitmap;
+            MainBitmap = Filters.AmbientFilters.Chloe(MainBitmap);
+            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
+            pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
+        }
+
+        private void pictureBoxCanvas_Paint(object sender, PaintEventArgs e)
+        {
+            if (pictureBoxCanvas.Image != null)
+            {
+                if (SelectionRectangle != null &&
+                    SelectionRectangle.Width > 0 &&
+                    SelectionRectangle.Height > 0)
+                {
+                    // Draw each side of the rectangle individually
+                    e.Graphics.DrawLine(SelectionPen, SelectionRectangle.Left, SelectionRectangle.Top, SelectionRectangle.Right, SelectionRectangle.Top); // Top
+                    e.Graphics.DrawLine(SelectionPen, SelectionRectangle.Left, SelectionRectangle.Bottom, SelectionRectangle.Right, SelectionRectangle.Bottom); // Bottom
+                    e.Graphics.DrawLine(SelectionPen, SelectionRectangle.Left, SelectionRectangle.Top, SelectionRectangle.Left, SelectionRectangle.Bottom); // Left
+                    e.Graphics.DrawLine(SelectionPen, SelectionRectangle.Right, SelectionRectangle.Top, SelectionRectangle.Right, SelectionRectangle.Bottom); // Right
+                }
+            }
         }
     }
     public partial class CreateWithAIForm : Form
