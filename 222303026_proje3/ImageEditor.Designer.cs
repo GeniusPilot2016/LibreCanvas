@@ -520,6 +520,7 @@
             pictureBoxCanvas.TabIndex = 0;
             pictureBoxCanvas.TabStop = false;
             pictureBoxCanvas.Click += pictureBoxCanvas_Click;
+            pictureBoxCanvas.Paint += pictureBoxCanvas_Paint;
             pictureBoxCanvas.MouseDown += pictureBoxCanvas_MouseDown;
             pictureBoxCanvas.MouseLeave += pictureBoxCanvas_MouseLeave;
             pictureBoxCanvas.MouseMove += pictureBoxCanvas_MouseMove;
