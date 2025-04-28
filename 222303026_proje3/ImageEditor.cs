@@ -1015,6 +1015,42 @@ namespace _222303026_proje3
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
         }
+        private void pictureBoxCanvas_Paint(object sender, PaintEventArgs e)
+        {
+            if (pictureBoxCanvas.Image != null)
+            {
+                if (SelectionRectangle != null &&
+                    SelectionRectangle.Width > 0 &&
+                    SelectionRectangle.Height > 0)
+                {
+                    // Draw the black dashes
+                    using (Pen blackPen = new Pen(Color.Black, 2)
+                    {
+                        DashStyle = DashStyle.Custom,
+                        DashPattern = new float[] { 4, 4 }
+                    })
+                    {
+                        e.Graphics.DrawRectangle(blackPen, SelectionRectangle);
+                    }
+
+                    // Draw the white dashes slightly offset
+                    using (Pen whitePen = new Pen(Color.White, 2)
+                    {
+                        DashStyle = DashStyle.Custom,
+                        DashPattern = new float[] { 4, 4 }
+                    })
+                    {
+                        Rectangle offsetRectangle = new Rectangle(
+                            SelectionRectangle.X + 2,
+                            SelectionRectangle.Y + 2,
+                            SelectionRectangle.Width - 4,
+                            SelectionRectangle.Height - 4
+                        );
+                        e.Graphics.DrawRectangle(whitePen, offsetRectangle);
+                    }
+                }
+            }
+        }
 
         private void DrawBrush(Graphics graphics, Action<Graphics, Color, int, Point> drawAction, Color color, int size, Point location)
         {
@@ -1130,7 +1166,7 @@ namespace _222303026_proje3
                     SaveStateForUndo();
                     startPoint = e.Location;
                     previewStartPoint = e.Location;
-                    previewBitmap = new Bitmap(bitmap);
+                    previewBitmap = new Bitmap(MainBitmap);
                     break;
                 case Tools.Selection:
                     isSelected = true;
