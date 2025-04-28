@@ -3,7 +3,7 @@
     "ArtFusion": {
       "commandName": "Project",
       "environmentVariables": {
-        "APIKey": "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",
+        "APIKey": "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",
         "APIURL": "https://api-inference.huggingface.co/models/ehristoforu/dalle-3-xl"
       }
     },
