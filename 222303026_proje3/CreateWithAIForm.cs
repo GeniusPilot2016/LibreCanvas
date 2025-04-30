@@ -42,7 +42,7 @@ namespace _222303026_proje3
             var json = JsonConvert.SerializeObject(requestData);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await client.PostAsync("https://api-inference.huggingface.co/models/openfree/claude-monet", content);
+            var response = await client.PostAsync("https://api-inference.huggingface.co/models/dalle-mini/dalle-mega", content);
 
             if (response.IsSuccessStatusCode)
             {
