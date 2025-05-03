@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
+using System.Media;
 
 namespace _222303026_proje3
 {
@@ -13,7 +14,8 @@ namespace _222303026_proje3
         Color color1 = Color.Black, color2 = Color.White;
         int brushSize = 11, penSize = 9, eraserSize = 11, sprayToolSize = 11, shapeThickness = 11, radius = 9, points = 6, tolerance = 50;
         float textSize = 9;
-        int zoom = 100;
+        float zoom = 1;
+        Size OriginalSize;
         bool isResizing = false, isSelected = false;
         private ResizeDirection resizeDirection;
         private BasicFilters basicFilters;
@@ -141,6 +143,7 @@ namespace _222303026_proje3
         }
         private void createNewFile()
         {
+            zoom = 1;
             pictureBoxCanvas.Image = null;
             // panel1'in AutoScroll özelliðini true yaparak kaydýrma çubuklarýný etkinleþtiriyoruz
             panel1.AutoScroll = true;
@@ -157,11 +160,13 @@ namespace _222303026_proje3
             // Paneli hemen yenile (Refresh kullan)
             canvasPanel.Refresh();
             MainBitmap = new Bitmap(800, 600);
+            OriginalSize = new Size(800, 600);
             labelSize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height}px";
             labelFileName.Text = "Unnamed File";
         }
         private void openAFile(string fileName)
         {
+            zoom = 1;
             pictureBoxCanvas.Image = null;
             Image image;
             using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -185,11 +190,13 @@ namespace _222303026_proje3
             pictureBoxCanvas.Image = image;
             MainBitmap = new Bitmap(image);
             canvasPanel.Refresh();
+            OriginalSize = new Size(image.Size.Width, image.Size.Height);
             labelSize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height}px";
             labelFileName.Text = fileName;
         }
         private void createFileWithAIorWebcam(Image generatedImage, bool isAIGenerated)
         {
+            zoom = 1;
             pictureBoxCanvas.Image = null;
             Image image = generatedImage;
             // panel1'in AutoScroll özelliðini true yaparak kaydýrma çubuklarýný etkinleþtiriyoruz
@@ -312,10 +319,6 @@ namespace _222303026_proje3
             }
         }
 
-        private void Control_Clicked(object sender, EventArgs e)
-        {
-        }
-
         private void selectTool_Click(object sender, EventArgs e)
         {
             ToolStripButtonsClick(selectTool);
@@ -425,11 +428,6 @@ namespace _222303026_proje3
             ToolStripButtonsClick(colorDropTool);
         }
 
-        private void zoomInToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void mouseTool_Click(object sender, EventArgs e)
         {
             ToolStripButtonsClick(mouseTool);
@@ -454,8 +452,6 @@ namespace _222303026_proje3
             if (dialogResult == DialogResult.OK)
             {
                 string targetFilePath = saveFileDialog1.FileName;
-                string tempFilePath = Path.Combine(Path.GetDirectoryName(targetFilePath), Path.GetRandomFileName());
-                string backupFilePath = Path.Combine(Path.GetDirectoryName(targetFilePath), Path.GetRandomFileName());
 
                 labelSaving.Visible = true;
                 progressBarSaving.Visible = true;
@@ -465,41 +461,24 @@ namespace _222303026_proje3
 
                 try
                 {
-                    // Save the file to a temporary location in a background thread
+                    // Save the original bitmap (MainBitmap) directly to the selected file path
                     await Task.Run(() =>
                     {
-                        using (MemoryStream memoryStream = new MemoryStream())
+                        ImageFormat format = ImageFormat.Png; // Default format
+                        if (Path.GetExtension(targetFilePath).ToLower() == ".jpg")
                         {
-                            // Save the bitmap to memory
-                            MainBitmap.Save(memoryStream, ImageFormat.Png);
-                            byte[] imageData = memoryStream.ToArray();
-
-                            // Write the file in chunks to the temporary file
-                            using (FileStream fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
-                            {
-                                int totalBytes = imageData.Length;
-                                int chunkSize = 4096; // 4 KB
-                                int bytesWritten = 0;
-
-                                while (bytesWritten < totalBytes)
-                                {
-                                    int bytesToWrite = Math.Min(chunkSize, totalBytes - bytesWritten);
-                                    fileStream.Write(imageData, bytesWritten, bytesToWrite);
-                                    bytesWritten += bytesToWrite;
-
-                                    // Update the progress bar
-                                    int progress = (int)((bytesWritten / (float)totalBytes) * 100);
-                                    Invoke(new Action(() =>
-                                    {
-                                        progressBarSaving.Value = progress;
-                                    }));
-                                }
-                            }
+                            format = ImageFormat.Jpeg;
                         }
+                        else if (Path.GetExtension(targetFilePath).ToLower() == ".bmp")
+                        {
+                            format = ImageFormat.Bmp;
+                        }
+
+                        // Save the MainBitmap without resizing or applying zoom
+                        MainBitmap.Save(targetFilePath, format);
                     });
 
-                    // Replace the target file with the temporary file
-                    File.Replace(tempFilePath, targetFilePath, backupFilePath);
+                    MessageBox.Show("Image saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
                 {
@@ -508,16 +487,6 @@ namespace _222303026_proje3
                 }
                 finally
                 {
-                    // Clean up the temporary and backup files
-                    if (File.Exists(tempFilePath))
-                    {
-                        File.Delete(tempFilePath);
-                    }
-                    if (File.Exists(backupFilePath))
-                    {
-                        File.Delete(backupFilePath);
-                    }
-
                     // Hide saving indicators
                     labelSaving.Visible = false;
                     progressBarSaving.Visible = false;
@@ -591,7 +560,7 @@ namespace _222303026_proje3
 
         private void resize_MouseUp(object sender, MouseEventArgs e)
         {
-            labelSize.Text = $"{canvasPanel.Width} X {canvasPanel.Height}px";
+            labelSize.Text = $"{canvasPanel.Width/zoom} X {canvasPanel.Height/zoom}px";
             panel1.AutoScrollMinSize = canvasPanel.Size;
             toolStripResize.Visible = false;
             toolStripSeparator16.Visible = false;
@@ -656,13 +625,13 @@ namespace _222303026_proje3
                 panel1.AutoScrollMinSize = canvasPanel.Size;
 
                 // Bitmap'i yeniden boyutlandýr
-                Bitmap newBitmap = new Bitmap(newWidth, newHeight);
+                Bitmap newBitmap = new Bitmap((int)(newWidth / zoom), (int)(newHeight/zoom));
                 using (Graphics g = Graphics.FromImage(newBitmap))
                 {
                     g.DrawImage(MainBitmap, 0, 0);
                 }
                 MainBitmap = newBitmap;
-
+                OriginalSize = new Size(MainBitmap.Width, MainBitmap.Height);
                 // Paneli merkezi konumda yerleþtiriyoruz
                 CenterCanvasPanel();
 
@@ -670,7 +639,7 @@ namespace _222303026_proje3
                 canvasPanel.Refresh();
 
                 lastMousePos = e.Location;
-                toolStripResize.Text = $"{canvasPanel.Width} X {canvasPanel.Height}px";
+                toolStripResize.Text = $"{MainBitmap.Width} X {MainBitmap.Height}px";
             }
         }
 
@@ -1024,75 +993,86 @@ namespace _222303026_proje3
                 MainBitmap = new Bitmap(pictureBoxCanvas.Width, pictureBoxCanvas.Height);
             }
 
+            // Adjust mouse coordinates based on zoom
+            int adjustedX = (int)(e.X / zoom);
+            int adjustedY = (int)(e.Y / zoom);
+
             using (Graphics graphics = Graphics.FromImage(MainBitmap))
             {
                 if (isdrawing)
                 {
                     if (isSelected && !SelectionRectangle.IsEmpty)
                     {
-                        if (!SelectionRectangle.Contains(e.Location))
+                        if (!SelectionRectangle.Contains(new Point(adjustedX, adjustedY)))
                         {
                             return; // Ignore drawing outside the selection rectangle
                         }
                     }
+
                     switch (selectedTool)
                     {
                         case Tools.Brush:
                             switch (comboBoxBrushType.SelectedIndex)
                             {
                                 case 0: // Regular brush
-                                    DrawBrush(graphics, BrushShapes.DrawCircleBrush, color1, brushSize, new Point(e.X, e.Y));
+                                    DrawBrush(graphics, BrushShapes.DrawCircleBrush, color1, brushSize, new Point(adjustedX, adjustedY));
                                     break;
                                 case 1: // Oil brush
-                                    DrawBrush(graphics, BrushShapes.DrawOilBrush, color1, brushSize, new Point(e.X, e.Y));
+                                    DrawBrush(graphics, BrushShapes.DrawOilBrush, color1, brushSize, new Point(adjustedX, adjustedY));
                                     break;
                                 case 2: // Calligraphy brush
-                                    DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, color1, brushSize, new Point(e.X, e.Y));
+                                    DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, color1, brushSize, new Point(adjustedX, adjustedY));
                                     break;
-                                case 3:
-                                    DrawBrush(graphics, BrushShapes.DrawWatercolorBrush, color1, brushSize, new Point(e.X, e.Y));
+                                case 3: // Watercolor brush
+                                    DrawBrush(graphics, BrushShapes.DrawWatercolorBrush, color1, brushSize, new Point(adjustedX, adjustedY));
                                     break;
                                 default:
                                     break;
                             }
                             break;
+
                         case Tools.Pen:
                             switch (comboBoxPenType.SelectedIndex)
                             {
                                 case 0: // Regular pen
-                                    DrawBrush(graphics, BrushShapes.DrawSquareBrush, color1, penSize, new Point(e.X, e.Y));
+                                    DrawBrush(graphics, BrushShapes.DrawSquareBrush, color1, penSize, new Point(adjustedX, adjustedY));
                                     break;
-                                case 1:
-                                    DrawBrush(graphics, BrushShapes.DrawMarkerBrush, color1, penSize, new Point(e.X, e.Y));
+                                case 1: // Marker pen
+                                    DrawBrush(graphics, BrushShapes.DrawMarkerBrush, color1, penSize, new Point(adjustedX, adjustedY));
                                     break;
-                                case 2:
-                                    DrawBrush(graphics, BrushShapes.DrawCrayonBrush, color1, penSize, new Point(e.X, e.Y));
+                                case 2: // Crayon pen
+                                    DrawBrush(graphics, BrushShapes.DrawCrayonBrush, color1, penSize, new Point(adjustedX, adjustedY));
                                     break;
                                 case 3: // Calligraphy pen
-                                    DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, color1, penSize, new Point(e.X, e.Y));
+                                    DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, color1, penSize, new Point(adjustedX, adjustedY));
                                     break;
                                 default:
                                     break;
                             }
                             break;
+
                         case Tools.Eraser:
-                            graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
-                            DrawBrush(graphics, BrushShapes.DrawCircleBrush, Color.FromArgb(0, 0, 0, 0), eraserSize, new Point(e.X, e.Y));
+                            graphics.CompositingMode = CompositingMode.SourceCopy;
+                            DrawBrush(graphics, BrushShapes.DrawCircleBrush, Color.FromArgb(0, 0, 0, 0), eraserSize, new Point(adjustedX, adjustedY));
                             break;
+
                         case Tools.Spray:
-                            DrawBrush(graphics, BrushShapes.DrawSprayBrush, color1, sprayToolSize, new Point(e.X, e.Y));
+                            DrawBrush(graphics, BrushShapes.DrawSprayBrush, color1, sprayToolSize, new Point(adjustedX, adjustedY));
                             break;
+
                         case Tools.ColorDrop:
-                            Color pixelColor = MainBitmap.GetPixel(e.X, e.Y);
+                            Color pixelColor = MainBitmap.GetPixel(adjustedX, adjustedY);
                             color1 = pixelColor;
                             foregroundColorButton.BackColor = pixelColor;
                             break;
+
                         default:
                             break;
                     }
 
-                    x = e.X;
-                    y = e.Y;
+                    // Update the last drawn position
+                    x = adjustedX;
+                    y = adjustedY;
                 }
             }
 
@@ -1101,6 +1081,17 @@ namespace _222303026_proje3
         }
         private void pictureBoxCanvas_Paint(object sender, PaintEventArgs e)
         {
+            if (MainBitmap != null)
+            {
+                // Calculate the scaled dimensions
+                int scaledWidth = (int)(MainBitmap.Width * zoom);
+                int scaledHeight = (int)(MainBitmap.Height * zoom);
+
+                // Draw the MainBitmap at the scaled size
+                e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                e.Graphics.DrawImage(MainBitmap, new Rectangle(0, 0, scaledWidth, scaledHeight));
+            }
             if (pictureBoxCanvas.Image != null)
             {
                 if (SelectionRectangle != null &&
@@ -1138,11 +1129,14 @@ namespace _222303026_proje3
 
         private void DrawBrush(Graphics graphics, Action<Graphics, Color, int, Point> drawAction, Color color, int size, Point location)
         {
+            // Scale brush size based on zoom
+            int scaledSize = (int)(size * zoom);
+
             // Ensure the brush stays within the SelectionRectangle
             if (!SelectionRectangle.IsEmpty)
             {
-                int halfSize = size / 2;
-                Rectangle brushBounds = new Rectangle(location.X - halfSize, location.Y - halfSize, size, size);
+                int halfSize = scaledSize / 2;
+                Rectangle brushBounds = new Rectangle(location.X - halfSize, location.Y - halfSize, scaledSize, scaledSize);
 
                 // Check if the brush bounds intersect with the SelectionRectangle
                 if (!SelectionRectangle.IntersectsWith(brushBounds))
@@ -1167,38 +1161,42 @@ namespace _222303026_proje3
             // Draw the brush
             if (x == -1 && y == -1)
             {
-                drawAction(graphics, color, size, location);
+                drawAction(graphics, color, scaledSize, location);
             }
             else
             {
-                FillGap(graphics, drawAction, color, size, new Point(x, y), location);
+                FillGap(graphics, drawAction, color, scaledSize, new Point(x, y), location);
             }
         }
 
         private void FillGap(Graphics graphics, Action<Graphics, Color, int, Point> drawAction, Color color, int size, Point start, Point end)
         {
-            int dx = Math.Abs(end.X - start.X);
-            int dy = Math.Abs(end.Y - start.Y);
-            int sx = start.X < end.X ? 1 : -1;
-            int sy = start.Y < end.Y ? 1 : -1;
+            // Adjust start and end points based on zoom
+            Point adjustedStart = new Point((int)(start.X / zoom), (int)(start.Y / zoom));
+            Point adjustedEnd = new Point((int)(end.X / zoom), (int)(end.Y / zoom));
+
+            int dx = Math.Abs(adjustedEnd.X - adjustedStart.X);
+            int dy = Math.Abs(adjustedEnd.Y - adjustedStart.Y);
+            int sx = adjustedStart.X < adjustedEnd.X ? 1 : -1;
+            int sy = adjustedStart.Y < adjustedEnd.Y ? 1 : -1;
             int err = dx - dy;
 
             while (true)
             {
-                drawAction(graphics, color, size, start);
+                drawAction(graphics, color, (int)(size / zoom), adjustedStart);
 
-                if (start.X == end.X && start.Y == end.Y) break;
+                if (adjustedStart.X == adjustedEnd.X && adjustedStart.Y == adjustedEnd.Y) break;
 
                 int e2 = 2 * err;
                 if (e2 > -dy)
                 {
                     err -= dy;
-                    start.X += sx;
+                    adjustedStart.X += sx;
                 }
                 if (e2 < dx)
                 {
                     err += dx;
-                    start.Y += sy;
+                    adjustedStart.Y += sy;
                 }
             }
         }
@@ -1290,8 +1288,8 @@ namespace _222303026_proje3
                         SaveStateForUndo();
                         // MouseEventArgs'den týklama konumunu alýn  
                         MouseEventArgs me = (MouseEventArgs)e; // EventArgs yerine MouseEventArgs kullanýmý  
-                        int x = me.X;
-                        int y = me.Y;
+                        int x = (int)(me.X/ zoom);
+                        int y = (int)(me.Y / zoom);
                         // Yeni bir TextBox oluþturun  
                         TextBox textBox = new TextBox
                         {
@@ -1303,8 +1301,8 @@ namespace _222303026_proje3
                             BorderStyle = BorderStyle.FixedSingle // Kenarlýk stili  
                         };
                         textBox.Location = new Point(
-                            Math.Min(x, pictureBoxCanvas.Width - textBox.Width),
-                            Math.Min(y, pictureBoxCanvas.Height - textBox.Height)
+                            Math.Min(x, (int)((pictureBoxCanvas.Width * zoom) - (textBox.Width * zoom))),
+                            Math.Min(y, (int)((pictureBoxCanvas.Height * zoom) - (textBox.Height * zoom)))
                         );
 
                         // TextBox'ý pictureBoxCanvas'a ekleyin  
@@ -2538,6 +2536,60 @@ namespace _222303026_proje3
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
+        }
+        private void ResizeBitmapWithAspectRatio()
+        {
+            // Calculate the new dimensions based on the zoom level
+            int newWidth = (int)(OriginalSize.Width * zoom);
+            int newHeight = (int)(OriginalSize.Height * zoom);
+
+            // Create a new bitmap with the calculated dimensions
+            Bitmap resizedBitmap = new Bitmap(newWidth, newHeight);
+
+            // Draw the original bitmap onto the resized bitmap
+            using (Graphics g = Graphics.FromImage(resizedBitmap))
+            {
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                g.DrawImage(MainBitmap, 0, 0, newWidth, newHeight);
+            }
+
+            // Update the MainBitmap and PictureBox
+            MainBitmap = resizedBitmap;
+            pictureBoxCanvas.Image = MainBitmap;
+            pictureBoxCanvas.Refresh();
+        }
+
+        private void zoomInToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if(zoom<5)
+            {
+                zoom += 0.5f;
+                if (zoom > 5)
+                {
+                    zoom = 5;
+                    SystemSounds.Beep.Play();
+                }
+                canvasPanel.ClientSize = new Size((int)(OriginalSize.Width * zoom),
+                    (int)(OriginalSize.Height * zoom));
+                pictureBoxCanvas.Invalidate();
+                CenterCanvasPanel();
+            }
+        }
+        private void zoomOutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (zoom > 0.1)
+            {
+                zoom -= 0.5f;
+                if (zoom < 0.1)
+                {
+                    zoom = 0.1f;
+                    SystemSounds.Beep.Play();
+                }
+                canvasPanel.ClientSize = new Size((int)(OriginalSize.Width * zoom), 
+                    (int)(OriginalSize.Height * zoom));
+                pictureBoxCanvas.Invalidate();
+                CenterCanvasPanel();
+            }
         }
     }
     public partial class CreateWithAIForm : Form

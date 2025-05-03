@@ -806,7 +806,8 @@
             // 
             zoomInToolStripMenuItem.Image = Properties.Resources.icons8_zoom_in_48;
             zoomInToolStripMenuItem.Name = "zoomInToolStripMenuItem";
-            zoomInToolStripMenuItem.Size = new Size(132, 26);
+            zoomInToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Alt | Keys.Z;
+            zoomInToolStripMenuItem.Size = new Size(224, 26);
             zoomInToolStripMenuItem.Tag = "";
             zoomInToolStripMenuItem.Text = "Zoom In";
             zoomInToolStripMenuItem.Click += zoomInToolStripMenuItem_Click;
@@ -815,10 +816,11 @@
             // 
             zoomOutToolStripMenuItem.Image = Properties.Resources.icons8_zoom_out_48;
             zoomOutToolStripMenuItem.Name = "zoomOutToolStripMenuItem";
-            zoomOutToolStripMenuItem.Size = new Size(132, 26);
+            zoomOutToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Alt | Keys.Shift | Keys.Z;
+            zoomOutToolStripMenuItem.Size = new Size(224, 26);
             zoomOutToolStripMenuItem.Tag = "";
             zoomOutToolStripMenuItem.Text = "Zoom Out";
-            zoomOutToolStripMenuItem.Click += Control_Clicked;
+            zoomOutToolStripMenuItem.Click += zoomOutToolStripMenuItem_Click;
             // 
             // toolStripSeparator9
             // 
@@ -1797,6 +1799,7 @@
             AutoScaleMode = AutoScaleMode.None;
             ClientSize = new Size(1289, 812);
             Controls.Add(toolStripContainer1);
+            DoubleBuffered = true;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "ImageEditor";
             Text = "ArtFusion";
