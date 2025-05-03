@@ -163,7 +163,12 @@ namespace _222303026_proje3
         private void openAFile(string fileName)
         {
             pictureBoxCanvas.Image = null;
-            Image image = Image.FromFile(fileName);
+            Image image;
+            using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                image = Image.FromStream(fs);
+                // Use the image
+            }
             // panel1'in AutoScroll özelliðini true yaparak kaydýrma çubuklarýný etkinleþtiriyoruz
             panel1.AutoScroll = true;
 
@@ -442,13 +447,99 @@ namespace _222303026_proje3
         }
 
 
-        private void kaydetToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void kaydetToolStripMenuItem_Click(object sender, EventArgs e)
         {
             saveFileDialog1.Filter = "PNG Files|*.png|JPEG Files|*.jpg|Bitmap Files|*.bmp";
             DialogResult dialogResult = saveFileDialog1.ShowDialog();
             if (dialogResult == DialogResult.OK)
             {
-                MainBitmap.Save(saveFileDialog1.FileName);
+                string targetFilePath = saveFileDialog1.FileName;
+                string tempFilePath = Path.Combine(Path.GetDirectoryName(targetFilePath), Path.GetRandomFileName());
+                string backupFilePath = Path.Combine(Path.GetDirectoryName(targetFilePath), Path.GetRandomFileName());
+
+                labelSaving.Visible = true;
+                progressBarSaving.Visible = true;
+                toolStripSeparator13.Visible = true;
+
+                progressBarSaving.Value = 0;
+
+                try
+                {
+                    // Save the file to a temporary location in a background thread
+                    await Task.Run(() =>
+                    {
+                        using (MemoryStream memoryStream = new MemoryStream())
+                        {
+                            // Save the bitmap to memory
+                            MainBitmap.Save(memoryStream, ImageFormat.Png);
+                            byte[] imageData = memoryStream.ToArray();
+
+                            // Write the file in chunks to the temporary file
+                            using (FileStream fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                            {
+                                int totalBytes = imageData.Length;
+                                int chunkSize = 4096; // 4 KB
+                                int bytesWritten = 0;
+
+                                while (bytesWritten < totalBytes)
+                                {
+                                    int bytesToWrite = Math.Min(chunkSize, totalBytes - bytesWritten);
+                                    fileStream.Write(imageData, bytesWritten, bytesToWrite);
+                                    bytesWritten += bytesToWrite;
+
+                                    // Update the progress bar
+                                    int progress = (int)((bytesWritten / (float)totalBytes) * 100);
+                                    Invoke(new Action(() =>
+                                    {
+                                        progressBarSaving.Value = progress;
+                                    }));
+                                }
+                            }
+                        }
+                    });
+
+                    // Replace the target file with the temporary file
+                    File.Replace(tempFilePath, targetFilePath, backupFilePath);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"An error occurred while saving the file: {ex.Message}",
+                                    "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    // Clean up the temporary and backup files
+                    if (File.Exists(tempFilePath))
+                    {
+                        File.Delete(tempFilePath);
+                    }
+                    if (File.Exists(backupFilePath))
+                    {
+                        File.Delete(backupFilePath);
+                    }
+
+                    // Hide saving indicators
+                    labelSaving.Visible = false;
+                    progressBarSaving.Visible = false;
+                    toolStripSeparator13.Visible = false;
+                }
+            }
+        }
+
+        // Helper method to check if a file is locked
+        private bool IsFileLocked(string filePath)
+        {
+            try
+            {
+                using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None))
+                {
+                    // If we can open the file, it's not locked
+                }
+                return false;
+            }
+            catch (IOException)
+            {
+                return true; // File is locked
             }
         }
 
