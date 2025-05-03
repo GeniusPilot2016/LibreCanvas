@@ -549,7 +549,7 @@
             mouseTool.Name = "mouseTool";
             mouseTool.Size = new Size(37, 24);
             mouseTool.Tag = "";
-            mouseTool.Text = "toolStripButton11";
+            mouseTool.Text = "Cursor";
             mouseTool.CheckedChanged += mouseTool_CheckedChanged;
             mouseTool.Click += mouseTool_Click;
             // 
@@ -568,7 +568,7 @@
             selectTool.Name = "selectTool";
             selectTool.Size = new Size(37, 24);
             selectTool.Tag = "";
-            selectTool.Text = "toolStripButton5";
+            selectTool.Text = "Rectangle Selection";
             selectTool.CheckedChanged += selectTool_CheckedChanged;
             selectTool.Click += selectTool_Click;
             // 
@@ -581,7 +581,7 @@
             magicSelectTool.Name = "magicSelectTool";
             magicSelectTool.Size = new Size(37, 24);
             magicSelectTool.Tag = "";
-            magicSelectTool.Text = "toolStripButton6";
+            magicSelectTool.Text = "Magic Selection";
             magicSelectTool.CheckedChanged += magicSelectTool_CheckedChanged;
             magicSelectTool.Click += magicSelectTool_Click;
             // 
@@ -599,7 +599,7 @@
             brushTool.Name = "brushTool";
             brushTool.Size = new Size(37, 24);
             brushTool.Tag = "";
-            brushTool.Text = "toolStripButton1";
+            brushTool.Text = "Brush";
             brushTool.CheckedChanged += brushTool_CheckedChanged;
             brushTool.Click += brushTool_Click;
             // 
@@ -624,7 +624,7 @@
             eraserTool.Name = "eraserTool";
             eraserTool.Size = new Size(37, 24);
             eraserTool.Tag = "";
-            eraserTool.Text = "toolStripButton2";
+            eraserTool.Text = "Eraser";
             eraserTool.CheckedChanged += eraserTool_CheckedChanged;
             eraserTool.Click += eraserTool_Click;
             // 
@@ -637,7 +637,7 @@
             bucketTool.Name = "bucketTool";
             bucketTool.Size = new Size(37, 24);
             bucketTool.Tag = "";
-            bucketTool.Text = "toolStripButton3";
+            bucketTool.Text = "Bucket";
             bucketTool.CheckedChanged += bucketTool_CheckedChanged;
             bucketTool.Click += bucketTool_Click;
             // 
@@ -650,7 +650,7 @@
             sprayTool.Name = "sprayTool";
             sprayTool.Size = new Size(37, 24);
             sprayTool.Tag = "";
-            sprayTool.Text = "toolStripButton4";
+            sprayTool.Text = "Spray";
             sprayTool.CheckedChanged += sprayTool_CheckedChanged;
             sprayTool.Click += sprayTool_Click;
             // 
@@ -663,7 +663,7 @@
             addTextTool.Name = "addTextTool";
             addTextTool.Size = new Size(37, 24);
             addTextTool.Tag = "";
-            addTextTool.Text = "toolStripButton7";
+            addTextTool.Text = "Text";
             addTextTool.CheckedChanged += addTextTool_CheckedChanged;
             addTextTool.Click += toolStripButton7_Click;
             // 
@@ -675,7 +675,7 @@
             drawShapeTool.ImageTransparentColor = Color.Magenta;
             drawShapeTool.Name = "drawShapeTool";
             drawShapeTool.Size = new Size(37, 24);
-            drawShapeTool.Text = "toolStripDropDownButton1";
+            drawShapeTool.Text = "Shapes";
             drawShapeTool.Click += drawShapeTool_Click;
             // 
             // lineToolStripMenuItem
@@ -751,7 +751,7 @@
             createWithAITool.ImageTransparentColor = Color.Magenta;
             createWithAITool.Name = "createWithAITool";
             createWithAITool.Size = new Size(37, 24);
-            createWithAITool.Text = "toolStripDropDownButton1";
+            createWithAITool.Text = "AI Tools";
             createWithAITool.Click += createWithAITool_Click;
             // 
             // createImageToolStripMenuItem1
@@ -787,7 +787,7 @@
             colorDropTool.Name = "colorDropTool";
             colorDropTool.Size = new Size(37, 24);
             colorDropTool.Tag = "";
-            colorDropTool.Text = "toolStripButton8";
+            colorDropTool.Text = "Color Drop";
             colorDropTool.CheckedChanged += colorDropTool_CheckedChanged;
             colorDropTool.Click += toolStripButton8_Click;
             // 
@@ -800,7 +800,7 @@
             zoomTool.Name = "zoomTool";
             zoomTool.Size = new Size(37, 24);
             zoomTool.Tag = "group1";
-            zoomTool.Text = "toolStripDropDownButton2";
+            zoomTool.Text = "Zoom";
             // 
             // zoomInToolStripMenuItem
             // 
@@ -833,7 +833,7 @@
             foregroundColorButton.ImageTransparentColor = Color.Magenta;
             foregroundColorButton.Name = "foregroundColorButton";
             foregroundColorButton.Size = new Size(38, 38);
-            foregroundColorButton.Text = "toolStripButton10";
+            foregroundColorButton.Text = "Primary Color";
             foregroundColorButton.Click += foregroundColorButton_Click;
             // 
             // backgroundColorButton
@@ -844,7 +844,7 @@
             backgroundColorButton.ImageTransparentColor = Color.Magenta;
             backgroundColorButton.Name = "backgroundColorButton";
             backgroundColorButton.Size = new Size(38, 38);
-            backgroundColorButton.Text = "toolStripButton9";
+            backgroundColorButton.Text = "Secondary Color";
             backgroundColorButton.Click += backgroundColorButton_Click;
             // 
             // toolStripSeparator7
