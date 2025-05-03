@@ -204,6 +204,7 @@
             printImageDialog = new PrintDialog();
             printImage = new System.Drawing.Printing.PrintDocument();
             printPreviewDialog1 = new PrintPreviewDialog();
+            settingsToolStripMenuItem = new ToolStripMenuItem();
             toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             toolStripContainer1.ContentPanel.SuspendLayout();
             toolStripContainer1.LeftToolStripPanel.SuspendLayout();
@@ -900,7 +901,7 @@
             menuStrip1.Dock = DockStyle.None;
             menuStrip1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             menuStrip1.ImageScalingSize = new Size(20, 20);
-            menuStrip1.Items.AddRange(new ToolStripItem[] { dosyaToolStripMenuItem, düzenleToolStripMenuItem, araçlarToolStripMenuItem, yardımToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { dosyaToolStripMenuItem, düzenleToolStripMenuItem, araçlarToolStripMenuItem, settingsToolStripMenuItem, yardımToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(1289, 24);
@@ -1794,6 +1795,12 @@
             printPreviewDialog1.Name = "printPreviewDialog1";
             printPreviewDialog1.Visible = false;
             // 
+            // settingsToolStripMenuItem
+            // 
+            settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
+            settingsToolStripMenuItem.Size = new Size(63, 20);
+            settingsToolStripMenuItem.Text = "&Settings";
+            // 
             // ImageEditor
             // 
             AutoScaleMode = AutoScaleMode.None;
@@ -2021,5 +2028,6 @@
         private PrintPreviewDialog printPreviewDialog1;
         private ToolStripMenuItem ambientFiltersToolStripMenuItem;
         private ToolStripMenuItem chloeToolStripMenuItem;
+        private ToolStripMenuItem settingsToolStripMenuItem;
     }
 }

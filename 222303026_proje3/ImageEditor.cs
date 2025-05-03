@@ -1517,6 +1517,11 @@ namespace _222303026_proje3
             {
                 string file = openFileDialog1.FileName;
                 openAFile(file);
+                if (Settings1.Default.RecentFiles.Contains(file) == false)
+                {
+                    Settings1.Default.RecentFiles.Add(file);
+                    Settings1.Default.Save();
+                }
             }
         }
 

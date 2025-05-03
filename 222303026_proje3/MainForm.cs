@@ -15,6 +15,19 @@ namespace _222303026_proje3
         public MainForm()
         {
             InitializeComponent();
+            if (Settings1.Default.RecentFiles == null)
+            {
+                Settings1.Default.RecentFiles = new System.Collections.Specialized.StringCollection();
+            }
+            if (Settings1.Default.RecentFiles.Count > 0)
+            {
+                listBox1.Items.Clear();
+                foreach (var file in Settings1.Default.RecentFiles)
+                {
+                    listBox1.Items.Add(file);
+                }
+                listBox1.Enabled = true;
+            }
         }
 
         private void pictureBox1_Click(object sender, EventArgs e)
@@ -34,6 +47,11 @@ namespace _222303026_proje3
             {
                 string file = openFileDialog1.FileName;
                 ImageEditor imageEditor = new ImageEditor(file);
+                if (Settings1.Default.RecentFiles.Contains(file) == false)
+                {
+                    Settings1.Default.RecentFiles.Add(file);
+                    Settings1.Default.Save();
+                }
                 this.Hide();
                 imageEditor.Show();
             }
@@ -85,6 +103,35 @@ namespace _222303026_proje3
 
             // Show the ImageEditor
             imageEditor.Show();
+        }
+
+        private void listBox1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (listBox1.SelectedItem != null)
+                {
+                    string selectedFile = listBox1.SelectedItem.ToString();
+                    ImageEditor imageEditor = new ImageEditor(selectedFile);
+                    this.Hide();
+                    imageEditor.Show();
+                }
+            }
+            catch (FileNotFoundException)
+            {
+                MessageBox.Show("The selected file was not found. Please check the file path.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Settings1.Default.RecentFiles.Remove(listBox1.SelectedItem.ToString());
+                if (Settings1.Default.RecentFiles.Count == 0)
+                {
+                    listBox1.Items.Clear();
+                    listBox1.Enabled = false;
+                    listBox1.Items.Add("There's no recently opened file");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error occurred while opening the file: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }
