@@ -817,7 +817,8 @@
             // 
             zoomOutToolStripMenuItem.Image = Properties.Resources.icons8_zoom_out_48;
             zoomOutToolStripMenuItem.Name = "zoomOutToolStripMenuItem";
-            zoomOutToolStripMenuItem.Size = new Size(184, 26);
+            zoomOutToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Alt | Keys.Shift | Keys.Z;
+            zoomOutToolStripMenuItem.Size = new Size(224, 26);
             zoomOutToolStripMenuItem.Tag = "";
             zoomOutToolStripMenuItem.Text = "Zoom Out";
             zoomOutToolStripMenuItem.Click += zoomOutToolStripMenuItem_Click;
