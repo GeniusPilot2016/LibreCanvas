@@ -253,8 +253,8 @@
             // 
             toolStripContainer1.TopToolStripPanel.Controls.Add(menuStrip1);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripBrush);
-            toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripEraser);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripPen);
+            toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripEraser);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripShapes);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripSpray);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripText);
@@ -808,7 +808,7 @@
             zoomInToolStripMenuItem.Image = Properties.Resources.icons8_zoom_in_48;
             zoomInToolStripMenuItem.Name = "zoomInToolStripMenuItem";
             zoomInToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Alt | Keys.Z;
-            zoomInToolStripMenuItem.Size = new Size(184, 26);
+            zoomInToolStripMenuItem.Size = new Size(224, 26);
             zoomInToolStripMenuItem.Tag = "";
             zoomInToolStripMenuItem.Text = "Zoom In";
             zoomInToolStripMenuItem.Click += zoomInToolStripMenuItem_Click;
@@ -1216,6 +1216,7 @@
             settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
             settingsToolStripMenuItem.Size = new Size(63, 20);
             settingsToolStripMenuItem.Text = "&Settings";
+            settingsToolStripMenuItem.Click += settingsToolStripMenuItem_Click;
             // 
             // yardımToolStripMenuItem
             // 
@@ -1251,7 +1252,7 @@
             toolStripBrush.GripStyle = ToolStripGripStyle.Hidden;
             toolStripBrush.ImageScalingSize = new Size(20, 20);
             toolStripBrush.Items.AddRange(new ToolStripItem[] { toolStripLabel2, comboBoxBrushSize, toolStripSeparator17, toolStripLabel6, comboBoxBrushType });
-            toolStripBrush.Location = new Point(0, 28);
+            toolStripBrush.Location = new Point(0, 24);
             toolStripBrush.Name = "toolStripBrush";
             toolStripBrush.Size = new Size(385, 25);
             toolStripBrush.Stretch = true;
@@ -1333,7 +1334,7 @@
             toolStripPen.GripStyle = ToolStripGripStyle.Hidden;
             toolStripPen.ImageScalingSize = new Size(20, 20);
             toolStripPen.Items.AddRange(new ToolStripItem[] { toolStripLabel10, comboBoxPenSize, toolStripSeparator22, toolStripLabel11, comboBoxPenType });
-            toolStripPen.Location = new Point(0, 28);
+            toolStripPen.Location = new Point(0, 24);
             toolStripPen.Name = "toolStripPen";
             toolStripPen.Size = new Size(375, 25);
             toolStripPen.Stretch = true;

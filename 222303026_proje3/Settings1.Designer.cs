@@ -33,5 +33,161 @@ namespace _222303026_proje3 {
                 this["RecentFiles"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int PreferredTheme {
+            get {
+                return ((int)(this["PreferredTheme"]));
+            }
+            set {
+                this["PreferredTheme"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowRecentFiles {
+            get {
+                return ((bool)(this["ShowRecentFiles"]));
+            }
+            set {
+                this["ShowRecentFiles"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("800, 600")]
+        public global::System.Drawing.Size DefaultCanvasSize {
+            get {
+                return ((global::System.Drawing.Size)(this["DefaultCanvasSize"]));
+            }
+            set {
+                this["DefaultCanvasSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("11")]
+        public int DefaultBrushSize {
+            get {
+                return ((int)(this["DefaultBrushSize"]));
+            }
+            set {
+                this["DefaultBrushSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int DefaultBrushStyle {
+            get {
+                return ((int)(this["DefaultBrushStyle"]));
+            }
+            set {
+                this["DefaultBrushStyle"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("11")]
+        public int DefaultPenSize {
+            get {
+                return ((int)(this["DefaultPenSize"]));
+            }
+            set {
+                this["DefaultPenSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int DefaultPenStyle {
+            get {
+                return ((int)(this["DefaultPenStyle"]));
+            }
+            set {
+                this["DefaultPenStyle"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("11")]
+        public int DefaultSpraySize {
+            get {
+                return ((int)(this["DefaultSpraySize"]));
+            }
+            set {
+                this["DefaultSpraySize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("11")]
+        public int DefaultEraserSize {
+            get {
+                return ((int)(this["DefaultEraserSize"]));
+            }
+            set {
+                this["DefaultEraserSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("11")]
+        public int DefaultShapeSize {
+            get {
+                return ((int)(this["DefaultShapeSize"]));
+            }
+            set {
+                this["DefaultShapeSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("11")]
+        public int DefaultTextSize {
+            get {
+                return ((int)(this["DefaultTextSize"]));
+            }
+            set {
+                this["DefaultTextSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("White")]
+        public global::System.Drawing.Color PrimaryColor {
+            get {
+                return ((global::System.Drawing.Color)(this["PrimaryColor"]));
+            }
+            set {
+                this["PrimaryColor"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Black")]
+        public global::System.Drawing.Color SecondaryColor {
+            get {
+                return ((global::System.Drawing.Color)(this["SecondaryColor"]));
+            }
+            set {
+                this["SecondaryColor"] = value;
+            }
+        }
     }
 }

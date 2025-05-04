@@ -15,6 +15,7 @@ namespace _222303026_proje3
         public SettingsWindow()
         {
             InitializeComponent();
+            comboBoxTheme.SelectedIndex = Settings1.Default.PreferredTheme;
         }
     }
 }

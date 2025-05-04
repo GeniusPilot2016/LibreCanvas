@@ -2593,6 +2593,12 @@ namespace _222303026_proje3
         {
 
         }
+
+        private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SettingsWindow settingsWindow = new SettingsWindow();
+            settingsWindow.ShowDialog();
+        }
     }
     public partial class CreateWithAIForm : Form
     {

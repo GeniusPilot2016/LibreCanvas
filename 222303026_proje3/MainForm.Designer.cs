@@ -44,6 +44,7 @@
             createFileFromScratchToolStripMenuItem = new ToolStripMenuItem();
             createWithAIToolStripMenuItem = new ToolStripMenuItem();
             createWithWebcamToolStripMenuItem = new ToolStripMenuItem();
+            button3 = new Button();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             contextMenuStrip1.SuspendLayout();
@@ -128,7 +129,7 @@
             button1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             button1.ImageIndex = 0;
             button1.ImageList = icons;
-            button1.Location = new Point(118, 352);
+            button1.Location = new Point(40, 350);
             button1.Margin = new Padding(3, 2, 3, 2);
             button1.Name = "button1";
             button1.Size = new Size(138, 32);
@@ -149,6 +150,7 @@
             icons.Images.SetKeyName(2, "icons8-create-48.png");
             icons.Images.SetKeyName(3, "icons8-webcam-48.png");
             icons.Images.SetKeyName(4, "icons8-artificial-intelligence-48.png");
+            icons.Images.SetKeyName(5, "icons8-settings-48.png");
             // 
             // button2
             // 
@@ -156,7 +158,7 @@
             button2.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             button2.ImageIndex = 1;
             button2.ImageList = icons;
-            button2.Location = new Point(262, 352);
+            button2.Location = new Point(184, 350);
             button2.Margin = new Padding(3, 2, 3, 2);
             button2.Name = "button2";
             button2.Size = new Size(138, 32);
@@ -203,11 +205,29 @@
             createWithWebcamToolStripMenuItem.Text = "Create With Webcam";
             createWithWebcamToolStripMenuItem.Click += createWithWebcamToolStripMenuItem_Click;
             // 
+            // button3
+            // 
+            button3.Anchor = AnchorStyles.Bottom;
+            button3.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            button3.ImageIndex = 5;
+            button3.ImageList = icons;
+            button3.Location = new Point(328, 350);
+            button3.Margin = new Padding(3, 2, 3, 2);
+            button3.Name = "button3";
+            button3.Size = new Size(138, 32);
+            button3.TabIndex = 5;
+            button3.Text = "Settings";
+            button3.TextAlign = ContentAlignment.MiddleRight;
+            button3.TextImageRelation = TextImageRelation.ImageBeforeText;
+            button3.UseVisualStyleBackColor = true;
+            button3.Click += button3_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(507, 389);
+            Controls.Add(button3);
             Controls.Add(button2);
             Controls.Add(button1);
             Controls.Add(panel1);
@@ -243,5 +263,6 @@
         private ToolStripMenuItem createFileFromScratchToolStripMenuItem;
         private ToolStripMenuItem createWithAIToolStripMenuItem;
         private ToolStripMenuItem createWithWebcamToolStripMenuItem;
+        private Button button3;
     }
 }
