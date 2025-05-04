@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
+using System.Media;
 
 namespace _222303026_proje3
 {
@@ -13,7 +14,7 @@ namespace _222303026_proje3
         Color color1 = Color.Black, color2 = Color.White;
         int brushSize = 11, penSize = 9, eraserSize = 11, sprayToolSize = 11, shapeThickness = 11, radius = 9, points = 6, tolerance = 50;
         float textSize = 9;
-        int zoom = 100;
+        float zoom = 1;
         bool isResizing = false, isSelected = false;
         private ResizeDirection resizeDirection;
         private BasicFilters basicFilters;
@@ -143,13 +144,13 @@ namespace _222303026_proje3
         {
             pictureBoxCanvas.Image = null;
             // panel1'in AutoScroll özelliðini true yaparak kaydýrma çubuklarýný etkinleþtiriyoruz
-            panel1.AutoScroll = true;
+            UIPanel.AutoScroll = true;
 
             // canvasPanel'in boyutlarýný ayarlýyoruz
             canvasPanel.Size = new Size(820, 620);
 
             // panel1'in AutoScrollMinSize özelliðini canvasPanel'in boyutlarýna ayarlýyoruz
-            panel1.AutoScrollMinSize = canvasPanel.Size;
+            UIPanel.AutoScrollMinSize = canvasPanel.Size;
 
             // Paneli merkezi konumda yerleþtiriyoruz
             CenterCanvasPanel();
@@ -170,13 +171,13 @@ namespace _222303026_proje3
                 // Use the image
             }
             // panel1'in AutoScroll özelliðini true yaparak kaydýrma çubuklarýný etkinleþtiriyoruz
-            panel1.AutoScroll = true;
+            UIPanel.AutoScroll = true;
 
             // canvasPanel'in boyutlarýný ayarlýyoruz
             canvasPanel.Size = new Size(image.Size.Width + 20, image.Size.Height + 20);
 
             // panel1'in AutoScrollMinSize özelliðini canvasPanel'in boyutlarýna ayarlýyoruz
-            panel1.AutoScrollMinSize = canvasPanel.Size;
+            UIPanel.AutoScrollMinSize = canvasPanel.Size;
 
             // Paneli merkezi konumda yerleþtiriyoruz
             CenterCanvasPanel();
@@ -193,13 +194,13 @@ namespace _222303026_proje3
             pictureBoxCanvas.Image = null;
             Image image = generatedImage;
             // panel1'in AutoScroll özelliðini true yaparak kaydýrma çubuklarýný etkinleþtiriyoruz
-            panel1.AutoScroll = true;
+            UIPanel.AutoScroll = true;
 
             // canvasPanel'in boyutlarýný ayarlýyoruz
             canvasPanel.Size = new Size(generatedImage.Width + 20, generatedImage.Height + 20);
 
             // panel1'in AutoScrollMinSize özelliðini canvasPanel'in boyutlarýna ayarlýyoruz
-            panel1.AutoScrollMinSize = canvasPanel.Size;
+            UIPanel.AutoScrollMinSize = canvasPanel.Size;
 
             // Paneli merkezi konumda yerleþtiriyoruz
             CenterCanvasPanel();
@@ -221,8 +222,8 @@ namespace _222303026_proje3
         }
         private void CenterCanvasPanel()
         {
-            int centerX = (panel1.ClientSize.Width - canvasPanel.Width) / 2;
-            int centerY = (panel1.ClientSize.Height - canvasPanel.Height) / 2;
+            int centerX = (UIPanel.ClientSize.Width - canvasPanel.Width) / 2;
+            int centerY = (UIPanel.ClientSize.Height - canvasPanel.Height) / 2;
             canvasPanel.Location = new Point(Math.Max(centerX, 0), Math.Max(centerY, 0));
         }
 
@@ -310,10 +311,6 @@ namespace _222303026_proje3
                     }
                 }
             }
-        }
-
-        private void Control_Clicked(object sender, EventArgs e)
-        {
         }
 
         private void selectTool_Click(object sender, EventArgs e)
@@ -423,11 +420,6 @@ namespace _222303026_proje3
         private void toolStripButton8_Click(object sender, EventArgs e)
         {
             ToolStripButtonsClick(colorDropTool);
-        }
-
-        private void zoomInToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
         }
 
         private void mouseTool_Click(object sender, EventArgs e)
@@ -592,7 +584,7 @@ namespace _222303026_proje3
         private void resize_MouseUp(object sender, MouseEventArgs e)
         {
             labelSize.Text = $"{canvasPanel.Width} X {canvasPanel.Height}px";
-            panel1.AutoScrollMinSize = canvasPanel.Size;
+            UIPanel.AutoScrollMinSize = canvasPanel.Size;
             toolStripResize.Visible = false;
             toolStripSeparator16.Visible = false;
             isResizing = false;
@@ -653,7 +645,7 @@ namespace _222303026_proje3
                 canvasPanel.Size = new Size(newWidth, newHeight);
 
                 // panel1'in AutoScrollMinSize özelliðini güncelle
-                panel1.AutoScrollMinSize = canvasPanel.Size;
+                UIPanel.AutoScrollMinSize = canvasPanel.Size;
 
                 // Bitmap'i yeniden boyutlandýr
                 Bitmap newBitmap = new Bitmap(newWidth, newHeight);
@@ -2543,6 +2535,45 @@ namespace _222303026_proje3
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
+        }
+        private void zoomInToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (zoom < 5)
+            {
+                if (UIPanel.Controls.Count > 0)
+                {
+                    var control = UIPanel.Controls[0]; // Paneldeki ilk öðeyi al
+                    control.Width = (int)(control.Width * 1.1); // Geniþliði %10 artýr
+                    control.Height = (int)(control.Height * 1.1); // Yüksekliði %10 artýr
+                    CenterCanvasPanel(); // Paneli ortala
+                }
+                zoom += 0.1f;
+            }
+            else
+            {
+                zoom = 5;
+                SystemSounds.Beep.Play();
+            }
+        }
+
+        private void zoomOutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (zoom > 0.1f)
+            {
+                if (UIPanel.Controls.Count > 0)
+                {
+                    var control = UIPanel.Controls[0]; // Paneldeki ilk öðeyi al
+                    control.Width = (int)(control.Width * 0.9); // Geniþliði %10 azalt
+                    control.Height = (int)(control.Height * 0.9); // Yüksekliði %10 azalt
+                    CenterCanvasPanel(); // Paneli ortala
+                }
+                zoom -= 0.1f;
+            }
+            else
+            {
+                zoom = 0.1f;
+                SystemSounds.Beep.Play();
+            }
         }
     }
     public partial class CreateWithAIForm : Form

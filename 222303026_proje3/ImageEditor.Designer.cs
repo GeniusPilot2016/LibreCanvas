@@ -43,7 +43,7 @@
             labelSize = new ToolStripLabel();
             toolStripSeparator14 = new ToolStripSeparator();
             labelZoom = new ToolStripLabel();
-            panel1 = new Panel();
+            UIPanel = new Panel();
             canvasPanel = new Panel();
             resize_bottom_left = new Panel();
             resize_bottom_right = new Panel();
@@ -129,6 +129,7 @@
             oilPaintingToolStripMenuItem = new ToolStripMenuItem();
             ambientFiltersToolStripMenuItem = new ToolStripMenuItem();
             chloeToolStripMenuItem = new ToolStripMenuItem();
+            settingsToolStripMenuItem = new ToolStripMenuItem();
             yardımToolStripMenuItem = new ToolStripMenuItem();
             içindekilerToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator5 = new ToolStripSeparator();
@@ -204,14 +205,13 @@
             printImageDialog = new PrintDialog();
             printImage = new System.Drawing.Printing.PrintDocument();
             printPreviewDialog1 = new PrintPreviewDialog();
-            settingsToolStripMenuItem = new ToolStripMenuItem();
             toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             toolStripContainer1.ContentPanel.SuspendLayout();
             toolStripContainer1.LeftToolStripPanel.SuspendLayout();
             toolStripContainer1.TopToolStripPanel.SuspendLayout();
             toolStripContainer1.SuspendLayout();
             toolStripBase.SuspendLayout();
-            panel1.SuspendLayout();
+            UIPanel.SuspendLayout();
             canvasPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBoxCanvas).BeginInit();
             toolStripTools.SuspendLayout();
@@ -236,7 +236,7 @@
             // 
             // toolStripContainer1.ContentPanel
             // 
-            toolStripContainer1.ContentPanel.Controls.Add(panel1);
+            toolStripContainer1.ContentPanel.Controls.Add(UIPanel);
             toolStripContainer1.ContentPanel.Size = new Size(1250, 763);
             toolStripContainer1.Dock = DockStyle.Fill;
             // 
@@ -354,21 +354,21 @@
             labelZoom.Size = new Size(57, 22);
             labelZoom.Text = "100%";
             // 
-            // panel1
+            // UIPanel
             // 
-            panel1.AutoScroll = true;
-            panel1.AutoScrollMargin = new Size(25, 25);
-            panel1.AutoScrollMinSize = new Size(820, 620);
-            panel1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            panel1.Controls.Add(canvasPanel);
-            panel1.Dock = DockStyle.Fill;
-            panel1.Location = new Point(0, 0);
-            panel1.Name = "panel1";
-            panel1.Size = new Size(1250, 763);
-            panel1.TabIndex = 3;
-            panel1.Click += panel1_Click;
-            panel1.Paint += panel1_Paint;
-            panel1.MouseMove += panel1_MouseMove;
+            UIPanel.AutoScroll = true;
+            UIPanel.AutoScrollMargin = new Size(25, 25);
+            UIPanel.AutoScrollMinSize = new Size(820, 620);
+            UIPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            UIPanel.Controls.Add(canvasPanel);
+            UIPanel.Dock = DockStyle.Fill;
+            UIPanel.Location = new Point(0, 0);
+            UIPanel.Name = "UIPanel";
+            UIPanel.Size = new Size(1250, 763);
+            UIPanel.TabIndex = 3;
+            UIPanel.Click += panel1_Click;
+            UIPanel.Paint += panel1_Paint;
+            UIPanel.MouseMove += panel1_MouseMove;
             // 
             // canvasPanel
             // 
@@ -807,7 +807,7 @@
             // 
             zoomInToolStripMenuItem.Image = Properties.Resources.icons8_zoom_in_48;
             zoomInToolStripMenuItem.Name = "zoomInToolStripMenuItem";
-            zoomInToolStripMenuItem.Size = new Size(132, 26);
+            zoomInToolStripMenuItem.Size = new Size(184, 26);
             zoomInToolStripMenuItem.Tag = "";
             zoomInToolStripMenuItem.Text = "Zoom In";
             zoomInToolStripMenuItem.Click += zoomInToolStripMenuItem_Click;
@@ -816,10 +816,10 @@
             // 
             zoomOutToolStripMenuItem.Image = Properties.Resources.icons8_zoom_out_48;
             zoomOutToolStripMenuItem.Name = "zoomOutToolStripMenuItem";
-            zoomOutToolStripMenuItem.Size = new Size(132, 26);
+            zoomOutToolStripMenuItem.Size = new Size(184, 26);
             zoomOutToolStripMenuItem.Tag = "";
             zoomOutToolStripMenuItem.Text = "Zoom Out";
-            zoomOutToolStripMenuItem.Click += Control_Clicked;
+            zoomOutToolStripMenuItem.Click += zoomOutToolStripMenuItem_Click;
             // 
             // toolStripSeparator9
             // 
@@ -1208,6 +1208,12 @@
             chloeToolStripMenuItem.Size = new Size(110, 26);
             chloeToolStripMenuItem.Text = "Chloe";
             chloeToolStripMenuItem.Click += chloeToolStripMenuItem_Click;
+            // 
+            // settingsToolStripMenuItem
+            // 
+            settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
+            settingsToolStripMenuItem.Size = new Size(63, 20);
+            settingsToolStripMenuItem.Text = "&Settings";
             // 
             // yardımToolStripMenuItem
             // 
@@ -1793,12 +1799,6 @@
             printPreviewDialog1.Name = "printPreviewDialog1";
             printPreviewDialog1.Visible = false;
             // 
-            // settingsToolStripMenuItem
-            // 
-            settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            settingsToolStripMenuItem.Size = new Size(63, 20);
-            settingsToolStripMenuItem.Text = "&Settings";
-            // 
             // ImageEditor
             // 
             AutoScaleMode = AutoScaleMode.None;
@@ -1819,7 +1819,7 @@
             toolStripContainer1.PerformLayout();
             toolStripBase.ResumeLayout(false);
             toolStripBase.PerformLayout();
-            panel1.ResumeLayout(false);
+            UIPanel.ResumeLayout(false);
             canvasPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)pictureBoxCanvas).EndInit();
             toolStripTools.ResumeLayout(false);
@@ -1931,7 +1931,7 @@
         private ToolStripSeparator toolStripSeparator14;
         private ToolStripLabel toolStripResize;
         private ToolStripSeparator toolStripSeparator16;
-        private Panel panel1;
+        private Panel UIPanel;
         private OpenFileDialog openFileDialog1;
         private SaveFileDialog saveFileDialog1;
         private ToolStripSeparator toolStripSeparator17;
