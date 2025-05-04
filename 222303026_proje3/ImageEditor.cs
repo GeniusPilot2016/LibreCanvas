@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
+using System.Media;
+using System.Windows.Forms;
 
 namespace _222303026_proje3
 {
@@ -13,12 +15,13 @@ namespace _222303026_proje3
         Color color1 = Color.Black, color2 = Color.White;
         int brushSize = 11, penSize = 9, eraserSize = 11, sprayToolSize = 11, shapeThickness = 11, radius = 9, points = 6, tolerance = 50;
         float textSize = 9;
-        int zoom = 100;
+        float zoom = 1;
         bool isResizing = false, isSelected = false;
         private ResizeDirection resizeDirection;
         private BasicFilters basicFilters;
         private ArtisticFilters artisticFilters;
         private Point lastMousePos;
+        Size originalSize; // Unzoomed size
         Bitmap MainBitmap;
         Bitmap SelectedBitmap;
         Rectangle SelectionRectangle = new Rectangle();
@@ -143,13 +146,13 @@ namespace _222303026_proje3
         {
             pictureBoxCanvas.Image = null;
             // panel1'in AutoScroll özelliðini true yaparak kaydýrma çubuklarýný etkinleþtiriyoruz
-            panel1.AutoScroll = true;
+            UIPanel.AutoScroll = true;
 
             // canvasPanel'in boyutlarýný ayarlýyoruz
             canvasPanel.Size = new Size(820, 620);
 
             // panel1'in AutoScrollMinSize özelliðini canvasPanel'in boyutlarýna ayarlýyoruz
-            panel1.AutoScrollMinSize = canvasPanel.Size;
+            UIPanel.AutoScrollMinSize = canvasPanel.Size;
 
             // Paneli merkezi konumda yerleþtiriyoruz
             CenterCanvasPanel();
@@ -157,8 +160,14 @@ namespace _222303026_proje3
             // Paneli hemen yenile (Refresh kullan)
             canvasPanel.Refresh();
             MainBitmap = new Bitmap(800, 600);
+            originalSize = MainBitmap.Size;
+            pictureBoxCanvas.Image = MainBitmap;
             labelSize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height}px";
             labelFileName.Text = "Unnamed File";
+            undoStack.Clear();
+            redoStack.Clear();
+            geriAlToolStripMenuItem.Enabled = false;
+            yineleToolStripMenuItem.Enabled = false;
         }
         private void openAFile(string fileName)
         {
@@ -170,13 +179,13 @@ namespace _222303026_proje3
                 // Use the image
             }
             // panel1'in AutoScroll özelliðini true yaparak kaydýrma çubuklarýný etkinleþtiriyoruz
-            panel1.AutoScroll = true;
+            UIPanel.AutoScroll = true;
 
             // canvasPanel'in boyutlarýný ayarlýyoruz
             canvasPanel.Size = new Size(image.Size.Width + 20, image.Size.Height + 20);
 
             // panel1'in AutoScrollMinSize özelliðini canvasPanel'in boyutlarýna ayarlýyoruz
-            panel1.AutoScrollMinSize = canvasPanel.Size;
+            UIPanel.AutoScrollMinSize = canvasPanel.Size;
 
             // Paneli merkezi konumda yerleþtiriyoruz
             CenterCanvasPanel();
@@ -184,22 +193,27 @@ namespace _222303026_proje3
             // Paneli hemen yenile (Refresh kullan)
             pictureBoxCanvas.Image = image;
             MainBitmap = new Bitmap(image);
+            originalSize = MainBitmap.Size;
             canvasPanel.Refresh();
             labelSize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height}px";
             labelFileName.Text = fileName;
+            undoStack.Clear();
+            redoStack.Clear();
+            geriAlToolStripMenuItem.Enabled = false;
+            yineleToolStripMenuItem.Enabled = false;
         }
         private void createFileWithAIorWebcam(Image generatedImage, bool isAIGenerated)
         {
             pictureBoxCanvas.Image = null;
             Image image = generatedImage;
             // panel1'in AutoScroll özelliðini true yaparak kaydýrma çubuklarýný etkinleþtiriyoruz
-            panel1.AutoScroll = true;
+            UIPanel.AutoScroll = true;
 
             // canvasPanel'in boyutlarýný ayarlýyoruz
             canvasPanel.Size = new Size(generatedImage.Width + 20, generatedImage.Height + 20);
 
             // panel1'in AutoScrollMinSize özelliðini canvasPanel'in boyutlarýna ayarlýyoruz
-            panel1.AutoScrollMinSize = canvasPanel.Size;
+            UIPanel.AutoScrollMinSize = canvasPanel.Size;
 
             // Paneli merkezi konumda yerleþtiriyoruz
             CenterCanvasPanel();
@@ -207,6 +221,7 @@ namespace _222303026_proje3
             // Paneli hemen yenile (Refresh kullan)
             pictureBoxCanvas.Image = image;
             MainBitmap = new Bitmap(image);
+            originalSize = MainBitmap.Size;
             canvasPanel.Refresh();
             labelSize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height}px";
             switch (isAIGenerated)
@@ -218,11 +233,15 @@ namespace _222303026_proje3
                     labelFileName.Text = "Unnamed File";
                     break;
             }
+            undoStack.Clear();
+            redoStack.Clear();
+            geriAlToolStripMenuItem.Enabled = false;
+            yineleToolStripMenuItem.Enabled = false;
         }
         private void CenterCanvasPanel()
         {
-            int centerX = (panel1.ClientSize.Width - canvasPanel.Width) / 2;
-            int centerY = (panel1.ClientSize.Height - canvasPanel.Height) / 2;
+            int centerX = (UIPanel.ClientSize.Width - canvasPanel.ClientSize.Width) / 2;
+            int centerY = (UIPanel.ClientSize.Height - canvasPanel.ClientSize.Height) / 2;
             canvasPanel.Location = new Point(Math.Max(centerX, 0), Math.Max(centerY, 0));
         }
 
@@ -310,10 +329,6 @@ namespace _222303026_proje3
                     }
                 }
             }
-        }
-
-        private void Control_Clicked(object sender, EventArgs e)
-        {
         }
 
         private void selectTool_Click(object sender, EventArgs e)
@@ -423,11 +438,6 @@ namespace _222303026_proje3
         private void toolStripButton8_Click(object sender, EventArgs e)
         {
             ToolStripButtonsClick(colorDropTool);
-        }
-
-        private void zoomInToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
         }
 
         private void mouseTool_Click(object sender, EventArgs e)
@@ -591,8 +601,9 @@ namespace _222303026_proje3
 
         private void resize_MouseUp(object sender, MouseEventArgs e)
         {
-            labelSize.Text = $"{canvasPanel.Width} X {canvasPanel.Height}px";
-            panel1.AutoScrollMinSize = canvasPanel.Size;
+            originalSize = MainBitmap.Size;
+            labelSize.Text = $"{MainBitmap.Width} X {MainBitmap.Height}px";
+            UIPanel.AutoScrollMinSize = canvasPanel.Size;
             toolStripResize.Visible = false;
             toolStripSeparator16.Visible = false;
             isResizing = false;
@@ -653,7 +664,7 @@ namespace _222303026_proje3
                 canvasPanel.Size = new Size(newWidth, newHeight);
 
                 // panel1'in AutoScrollMinSize özelliðini güncelle
-                panel1.AutoScrollMinSize = canvasPanel.Size;
+                UIPanel.AutoScrollMinSize = canvasPanel.Size;
 
                 // Bitmap'i yeniden boyutlandýr
                 Bitmap newBitmap = new Bitmap(newWidth, newHeight);
@@ -670,7 +681,8 @@ namespace _222303026_proje3
                 canvasPanel.Refresh();
 
                 lastMousePos = e.Location;
-                toolStripResize.Text = $"{canvasPanel.Width} X {canvasPanel.Height}px";
+                originalSize = MainBitmap.Size;
+                toolStripResize.Text = $"{MainBitmap.Width} X {MainBitmap.Height}px";
             }
         }
 
@@ -698,7 +710,7 @@ namespace _222303026_proje3
             isResizing = true;
             toolStripResize.Visible = true;
             toolStripSeparator16.Visible = true;
-            toolStripResize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height}px";
+            toolStripResize.Text = $"{MainBitmap.Width} X {MainBitmap.Height}px";
             lastMousePos = e.Location;
         }
         private void brushTool_CheckedChanged(object sender, EventArgs e)
@@ -1101,6 +1113,11 @@ namespace _222303026_proje3
         }
         private void pictureBoxCanvas_Paint(object sender, PaintEventArgs e)
         {
+            if(MainBitmap != null)
+            {
+                e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+                e.Graphics.DrawImage(MainBitmap, 0, 0, pictureBoxCanvas.Width, pictureBoxCanvas.Height);
+            }
             if (pictureBoxCanvas.Image != null)
             {
                 if (SelectionRectangle != null &&
@@ -1289,9 +1306,14 @@ namespace _222303026_proje3
                     {
                         SaveStateForUndo();
                         // MouseEventArgs'den týklama konumunu alýn  
-                        MouseEventArgs me = (MouseEventArgs)e; // EventArgs yerine MouseEventArgs kullanýmý  
-                        int x = me.X;
-                        int y = me.Y;
+                        // MouseEventArgs kullanarak týklama konumunu alýn
+                        MouseEventArgs me = (MouseEventArgs)e;
+                        int clickedX = me.X;
+                        int clickedY = me.Y;
+
+                        // Büyütme oranýna göre gerçek koordinatlarý hesaplayýn
+                        int realX = (int)(clickedX / zoom);
+                        int realY = (int)(clickedY / zoom);
                         // Yeni bir TextBox oluþturun  
                         TextBox textBox = new TextBox
                         {
@@ -1303,8 +1325,8 @@ namespace _222303026_proje3
                             BorderStyle = BorderStyle.FixedSingle // Kenarlýk stili  
                         };
                         textBox.Location = new Point(
-                            Math.Min(x, pictureBoxCanvas.Width - textBox.Width),
-                            Math.Min(y, pictureBoxCanvas.Height - textBox.Height)
+                            Math.Min(realX, pictureBoxCanvas.Width - textBox.Width),
+                            Math.Min(realY, pictureBoxCanvas.Height - textBox.Height)
                         );
 
                         // TextBox'ý pictureBoxCanvas'a ekleyin  
@@ -1403,7 +1425,20 @@ namespace _222303026_proje3
                     {
                         SaveStateForUndo();
                         MouseEventArgs me = (MouseEventArgs)e; // EventArgs yerine MouseEventArgs kullanýmý  
-                        FloodFill(MainBitmap, me.Location, MainBitmap.GetPixel(me.X, me.Y), color1, tolerance);
+                                                               // Fix for CS0246: 'Location' türü veya ad alaný adý bulunamadý  
+                                                               // The issue occurs because 'Location' is not a valid type.  
+                                                               // The correct type to use here is 'Point', which represents a location in a two-dimensional plane.  
+
+                        // Replace the problematic line:  
+                        // Location unzoomedLocation = me.Location;  
+
+                        // With the following corrected line:  
+                        Point unzoomedLocation = me.Location;
+                        // Adjust the location based on the zoom level
+                        int adjustedX = (int)(unzoomedLocation.X / zoom);
+                        int adjustedY = (int)(unzoomedLocation.Y / zoom);
+                        Point adjustedLocation = new Point(adjustedX, adjustedY);
+                        FloodFill(MainBitmap, adjustedLocation, MainBitmap.GetPixel(adjustedX, adjustedY), color1, tolerance);
                     }
                     break;
             }
@@ -1831,6 +1866,8 @@ namespace _222303026_proje3
                 pictureBoxCanvas.Image = MainBitmap;
                 pictureBoxCanvas.Invalidate();
                 CenterCanvasPanel(); // Center the canvas panel
+                originalSize = MainBitmap.Size; // Update original size
+                labelSize.Text = $"{MainBitmap.Width} x {MainBitmap.Height} px"; // Update size label
             }
             UpdateUndoRedoButtons(); // Update buttons
         }
@@ -1844,6 +1881,8 @@ namespace _222303026_proje3
                 canvasPanel.Size = nextState.CanvasSize;
                 pictureBoxCanvas.Image = MainBitmap;
                 pictureBoxCanvas.Invalidate();
+                originalSize = MainBitmap.Size; // Update original size
+                labelSize.Text = $"{MainBitmap.Width} x {MainBitmap.Height} px"; // Update size label
                 CenterCanvasPanel(); // Center the canvas panel
             }
             UpdateUndoRedoButtons(); // Update buttons
@@ -2543,6 +2582,43 @@ namespace _222303026_proje3
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
+        }
+        private void zoomInToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SetAsUnselected();
+            HideAddTextTextBoxes();
+            if (zoom < 5)
+            {
+                zoom += 0.1f;
+                canvasPanel.Size = new Size((int)(originalSize.Width * zoom)+20,(int)(originalSize.Height * zoom)+20); 
+                pictureBoxCanvas.Invalidate();
+                CenterCanvasPanel(); // Paneli ortala
+            }
+            else
+            {
+                zoom = 5;
+                SystemSounds.Beep.Play();
+            }
+            labelZoom.Text = $"{Math.Round(zoom * 100)}%";
+        }
+
+        private void zoomOutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SetAsUnselected();
+            HideAddTextTextBoxes();
+            if (zoom > 0.1f)
+            {
+                zoom -= 0.1f;
+                canvasPanel.Size = new Size((int)(originalSize.Width * zoom) + 20, (int)(originalSize.Height * zoom) + 20);
+                pictureBoxCanvas.Invalidate();
+                CenterCanvasPanel(); // Paneli ortala
+            }
+            else
+            {
+                zoom = 0.1f;
+                SystemSounds.Beep.Play();
+            }
+            labelZoom.Text = $"{Math.Round(zoom * 100)}%";
         }
     }
     public partial class CreateWithAIForm : Form
