@@ -4,6 +4,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.Media;
+using System.Media;
 using System.Windows.Forms;
 
 namespace _222303026_proje3
@@ -240,8 +241,8 @@ namespace _222303026_proje3
         }
         private void CenterCanvasPanel()
         {
-            int centerX = (UIPanel.ClientSize.Width - canvasPanel.ClientSize.Width) / 2;
-            int centerY = (UIPanel.ClientSize.Height - canvasPanel.ClientSize.Height) / 2;
+            int centerX = (panel1.ClientSize.Width - canvasPanel.Width) / 2;
+            int centerY = (panel1.ClientSize.Height - canvasPanel.Height) / 2;
             canvasPanel.Location = new Point(Math.Max(centerX, 0), Math.Max(centerY, 0));
         }
 
@@ -601,9 +602,8 @@ namespace _222303026_proje3
 
         private void resize_MouseUp(object sender, MouseEventArgs e)
         {
-            originalSize = MainBitmap.Size;
-            labelSize.Text = $"{MainBitmap.Width} X {MainBitmap.Height}px";
-            UIPanel.AutoScrollMinSize = canvasPanel.Size;
+            labelSize.Text = $"{canvasPanel.Width} X {canvasPanel.Height}px";
+            panel1.AutoScrollMinSize = canvasPanel.Size;
             toolStripResize.Visible = false;
             toolStripSeparator16.Visible = false;
             isResizing = false;
@@ -2582,43 +2582,6 @@ namespace _222303026_proje3
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
-        }
-        private void zoomInToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            SetAsUnselected();
-            HideAddTextTextBoxes();
-            if (zoom < 5)
-            {
-                zoom += 0.1f;
-                canvasPanel.Size = new Size((int)(originalSize.Width * zoom)+20,(int)(originalSize.Height * zoom)+20); 
-                pictureBoxCanvas.Invalidate();
-                CenterCanvasPanel(); // Paneli ortala
-            }
-            else
-            {
-                zoom = 5;
-                SystemSounds.Beep.Play();
-            }
-            labelZoom.Text = $"{Math.Round(zoom * 100)}%";
-        }
-
-        private void zoomOutToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            SetAsUnselected();
-            HideAddTextTextBoxes();
-            if (zoom > 0.1f)
-            {
-                zoom -= 0.1f;
-                canvasPanel.Size = new Size((int)(originalSize.Width * zoom) + 20, (int)(originalSize.Height * zoom) + 20);
-                pictureBoxCanvas.Invalidate();
-                CenterCanvasPanel(); // Paneli ortala
-            }
-            else
-            {
-                zoom = 0.1f;
-                SystemSounds.Beep.Play();
-            }
-            labelZoom.Text = $"{Math.Round(zoom * 100)}%";
         }
     }
     public partial class CreateWithAIForm : Form
