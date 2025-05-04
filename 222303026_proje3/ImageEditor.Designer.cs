@@ -808,7 +808,6 @@
             zoomInToolStripMenuItem.Image = Properties.Resources.icons8_zoom_in_48;
             zoomInToolStripMenuItem.Name = "zoomInToolStripMenuItem";
             zoomInToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Alt | Keys.Z;
-            zoomInToolStripMenuItem.Size = new Size(224, 26);
             zoomInToolStripMenuItem.Size = new Size(184, 26);
             zoomInToolStripMenuItem.Tag = "";
             zoomInToolStripMenuItem.Text = "Zoom In";
@@ -818,7 +817,7 @@
             // 
             zoomOutToolStripMenuItem.Image = Properties.Resources.icons8_zoom_out_48;
             zoomOutToolStripMenuItem.Name = "zoomOutToolStripMenuItem";
-            zoomOutToolStripMenuItem.Size = new Size(132, 26);
+            zoomOutToolStripMenuItem.Size = new Size(184, 26);
             zoomOutToolStripMenuItem.Tag = "";
             zoomOutToolStripMenuItem.Text = "Zoom Out";
             zoomOutToolStripMenuItem.Click += zoomOutToolStripMenuItem_Click;

@@ -241,8 +241,8 @@ namespace _222303026_proje3
         }
         private void CenterCanvasPanel()
         {
-            int centerX = (panel1.ClientSize.Width - canvasPanel.Width) / 2;
-            int centerY = (panel1.ClientSize.Height - canvasPanel.Height) / 2;
+            int centerX = (UIPanel.ClientSize.Width - canvasPanel.Width) / 2;
+            int centerY = (UIPanel.ClientSize.Height - canvasPanel.Height) / 2;
             canvasPanel.Location = new Point(Math.Max(centerX, 0), Math.Max(centerY, 0));
         }
 
@@ -603,7 +603,7 @@ namespace _222303026_proje3
         private void resize_MouseUp(object sender, MouseEventArgs e)
         {
             labelSize.Text = $"{canvasPanel.Width} X {canvasPanel.Height}px";
-            panel1.AutoScrollMinSize = canvasPanel.Size;
+            UIPanel.AutoScrollMinSize = canvasPanel.Size;
             toolStripResize.Visible = false;
             toolStripSeparator16.Visible = false;
             isResizing = false;
@@ -1113,7 +1113,7 @@ namespace _222303026_proje3
         }
         private void pictureBoxCanvas_Paint(object sender, PaintEventArgs e)
         {
-            if(MainBitmap != null)
+            if (MainBitmap != null)
             {
                 e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
                 e.Graphics.DrawImage(MainBitmap, 0, 0, pictureBoxCanvas.Width, pictureBoxCanvas.Height);
@@ -2582,6 +2582,16 @@ namespace _222303026_proje3
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
+        }
+
+        private void zoomInToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void zoomOutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
     }
     public partial class CreateWithAIForm : Form
