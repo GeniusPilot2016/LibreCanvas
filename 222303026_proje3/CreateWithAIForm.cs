@@ -75,6 +75,25 @@ namespace _222303026_proje3
                 Debug.WriteLine($"Error: {response.StatusCode}");
                 return null;
             }
+            /*
+var googleAi = new GoogleAi(apiKey);
+
+// 2. Create the Imagen model instance with your chosen model name.  
+var imageModel = googleAi.CreateImageModel("gemini-2.0-flash-exp-image-generation");
+
+// 3. Generate images by providing a text prompt.  
+var response = await imageModel.GenerateImagesAsync(textBox1.Text);
+
+// Assuming the response contains image data in BytesBase64Encoded property  
+if (response.Predictions != null && response.Predictions.Count > 0)
+{
+    var imageBytes = Convert.FromBase64String(response.BytesBase64Encoded); // Corrected property name  
+
+    return new Image[]
+    {
+       Image.FromStream(new MemoryStream(imageBytes))
+    };
+}*/
         }
         private async void button1_Click(object sender, EventArgs e)
         {

@@ -1,0 +1,12 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="_222303026_proje3" GeneratedClassName="CrytograyphicSettings">
+  <Profiles />
+  <Settings>
+    <Setting Name="CipherKey" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Ohf3aR688kaRYSTu7lMeXPoSVUTFcS+WgraFY3mxda0=</Value>
+    </Setting>
+    <Setting Name="CipherIV" Type="System.String" Scope="User">
+      <Value Profile="(Default)">TZnoSs4H8yQZ8kQTgZ7xwg==</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

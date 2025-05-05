@@ -44,5 +44,11 @@
     <Setting Name="SecondaryColor" Type="System.Drawing.Color" Scope="User">
       <Value Profile="(Default)">Black</Value>
     </Setting>
+    <Setting Name="HashedAIAPIKey" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="DefaultAIGeneratedImageSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">1024, 1024</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

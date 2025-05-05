@@ -3,7 +3,8 @@
     "ArtFusion": {
       "commandName": "Project",
       "environmentVariables": {
-        "APIKey": "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"
+        "APIKey": "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",
+        "GeminiAPIKey": "AIzaSyC28nCbp8k8_5gDA5H4qZSqF5u5sduya2I"
       }
     },
     "1 Profili": {
