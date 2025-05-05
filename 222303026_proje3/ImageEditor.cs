@@ -665,7 +665,7 @@ namespace _222303026_proje3
                 newHeight = Math.Max(newHeight, 1);
 
                 // Bitmap'i yeniden boyutlandýr
-                Bitmap newBitmap = new Bitmap((int)Math.Round(newWidth / zoom), (int)Math.Round(newHeight/zoom));
+                Bitmap newBitmap = new Bitmap((int)Math.Round((newWidth - 20) / zoom), (int)Math.Round((newHeight - 20) /zoom));
                 using (Graphics g = Graphics.FromImage(newBitmap))
                 {
                     g.DrawImage(MainBitmap, 0, 0);
