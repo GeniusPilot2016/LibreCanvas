@@ -644,7 +644,7 @@ namespace _222303026_proje3
                         break;
                     case ResizeDirection.Right:
                         newWidth = canvasPanel.Width + deltaX;
-                        newHeight = canvasPanel.Height; 
+                        newHeight = canvasPanel.Height;
                         break;
                     case ResizeDirection.BottomLeft:
                         newWidth = canvasPanel.Width - deltaX;
@@ -665,7 +665,7 @@ namespace _222303026_proje3
                 newHeight = Math.Max(newHeight, 1);
 
                 // Bitmap'i yeniden boyutlandýr
-                Bitmap newBitmap = new Bitmap((int)Math.Round((newWidth - 20) / zoom), (int)Math.Round((newHeight - 20) /zoom));
+                Bitmap newBitmap = new Bitmap((int)Math.Round((newWidth - 20) / zoom), (int)Math.Round((newHeight - 20) / zoom));
                 using (Graphics g = Graphics.FromImage(newBitmap))
                 {
                     g.DrawImage(MainBitmap, 0, 0);
@@ -1233,43 +1233,43 @@ namespace _222303026_proje3
             {
                 case Tools.Line:
                     SaveStateForUndo();
-                    startPoint = e.Location;
-                    previewStartPoint = e.Location;
+                    startPoint = new Point((int)(e.X/zoom), (int)(e.Y/zoom));
+                    previewStartPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
                     previewBitmap = new Bitmap(MainBitmap);
                     break;
                 case Tools.Round:
                     SaveStateForUndo();
-                    startPoint = e.Location;
-                    previewStartPoint = e.Location;
+                    startPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
+                    previewStartPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
                     previewBitmap = new Bitmap(MainBitmap);
                     break;
                 case Tools.Rectangle:
                     SaveStateForUndo();
-                    previewStartPoint = e.Location;
-                    startPoint = e.Location;
+                    previewStartPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
+                    startPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
                     previewBitmap = new Bitmap(MainBitmap);
                     break;
                 case Tools.RoundedRectangle:
                     SaveStateForUndo();
-                    startPoint = e.Location;
-                    previewStartPoint = e.Location;
+                    startPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
+                    previewStartPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
                     previewBitmap = new Bitmap(MainBitmap);
                     break;
                 case Tools.Triangle:
                     SaveStateForUndo();
-                    startPoint = e.Location;
-                    previewStartPoint = e.Location;
+                    startPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
+                    previewStartPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
                     previewBitmap = new Bitmap(MainBitmap);
                     break;
                 case Tools.Hexagon:
                     SaveStateForUndo();
-                    startPoint = e.Location;
-                    previewStartPoint = e.Location;
+                    startPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
+                    previewStartPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
                     previewBitmap = new Bitmap(MainBitmap);
                     break;
                 case Tools.Selection:
                     isSelected = true;
-                    SelectionStartPoint = e.Location;
+                    SelectionStartPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
                     pictureBoxCanvas.Invalidate();
                     break;
                 default:
@@ -1308,10 +1308,6 @@ namespace _222303026_proje3
                         MouseEventArgs me = (MouseEventArgs)e;
                         int clickedX = me.X;
                         int clickedY = me.Y;
-
-                        // Büyütme oranýna göre gerçek koordinatlarý hesaplayýn
-                        int realX = (int)(clickedX / zoom);
-                        int realY = (int)(clickedY / zoom);
                         // Yeni bir TextBox oluþturun  
                         TextBox textBox = new TextBox
                         {
@@ -1323,8 +1319,8 @@ namespace _222303026_proje3
                             BorderStyle = BorderStyle.FixedSingle // Kenarlýk stili  
                         };
                         textBox.Location = new Point(
-                            Math.Min(realX, pictureBoxCanvas.Width - textBox.Width),
-                            Math.Min(realY, pictureBoxCanvas.Height - textBox.Height)
+                            Math.Min(clickedX, pictureBoxCanvas.Width - textBox.Width),
+                            Math.Min(clickedY, pictureBoxCanvas.Height - textBox.Height)
                         );
 
                         // TextBox'ý pictureBoxCanvas'a ekleyin  
@@ -1847,7 +1843,7 @@ namespace _222303026_proje3
                     tempList.RemoveAt(0);
                     undoStack = new Stack<CanvasState>(tempList);
                 }
-                undoStack.Push(new CanvasState(new Bitmap(MainBitmap), canvasPanel.Size));
+                undoStack.Push(new CanvasState(new Bitmap(MainBitmap), new Size(MainBitmap.Width, MainBitmap.Height)));
                 redoStack.Clear(); // Clear redo stack on new action
             }
             UpdateUndoRedoButtons(); // Update buttons
@@ -1857,11 +1853,11 @@ namespace _222303026_proje3
         {
             if (undoStack.Count > 0)
             {
-                redoStack.Push(new CanvasState(new Bitmap(MainBitmap), canvasPanel.Size)); // Save current state to redo stack
+                redoStack.Push(new CanvasState(new Bitmap(MainBitmap), originalSize)); // Save current state to redo stack
                 var previousState = undoStack.Pop(); // Get the last state
                 MainBitmap = previousState.Bitmap;
-                canvasPanel.Size = previousState.CanvasSize;
-                pictureBoxCanvas.Size = new Size(previousState.CanvasSize.Width-20, previousState.CanvasSize.Height-20);
+                canvasPanel.Size = new Size((int)Math.Round(previousState.MainBitmapSize.Width * zoom) + 20, (int)Math.Round(previousState.MainBitmapSize.Height * zoom) + 20);
+                pictureBoxCanvas.Size = panelResizer.Size;
                 pictureBoxCanvas.Image = MainBitmap;
                 pictureBoxCanvas.Invalidate();
                 CenterCanvasPanel(); // Center the canvas panel
@@ -1874,11 +1870,11 @@ namespace _222303026_proje3
         {
             if (redoStack.Count > 0)
             {
-                undoStack.Push(new CanvasState(new Bitmap(MainBitmap), canvasPanel.Size)); // Save current state to undo stack
+                undoStack.Push(new CanvasState(new Bitmap(MainBitmap), MainBitmap.Size)); // Save current state to undo stack
                 var nextState = redoStack.Pop(); // Get the next state
                 MainBitmap = nextState.Bitmap;
-                canvasPanel.Size = nextState.CanvasSize;
-                pictureBoxCanvas.Size = new Size(nextState.CanvasSize.Width - 20, nextState.CanvasSize.Height - 20);
+                canvasPanel.Size = new Size((int)Math.Round(nextState.MainBitmapSize.Width * zoom) + 20, (int)Math.Round(nextState.MainBitmapSize.Height * zoom) + 20);
+                pictureBoxCanvas.Size = panelResizer.Size;
                 pictureBoxCanvas.Image = MainBitmap;
                 pictureBoxCanvas.Invalidate();
                 originalSize = MainBitmap.Size; // Update original size
@@ -2017,6 +2013,7 @@ namespace _222303026_proje3
             basicFilters = BasicFilters.Mirror;
             MainBitmap = Filters.BasicFilters.MirrorEffect(MainBitmap);
             canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
+            pictureBoxCanvas.Size = panelResizer.Size;
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
@@ -2031,6 +2028,7 @@ namespace _222303026_proje3
                 artisticFilters = ArtisticFilters.None;
             }
             canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
+            pictureBoxCanvas.Size = panelResizer.Size;
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
@@ -2045,6 +2043,7 @@ namespace _222303026_proje3
             }
             MainBitmap = Filters.BasicFilters.Frozen(MainBitmap);
             canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
+            pictureBoxCanvas.Size = panelResizer.Size;
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
@@ -2059,6 +2058,7 @@ namespace _222303026_proje3
             }
             MainBitmap = Filters.BasicFilters.Winter(MainBitmap);
             canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
+            pictureBoxCanvas.Size = panelResizer.Size;
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
@@ -2073,6 +2073,7 @@ namespace _222303026_proje3
             }
             MainBitmap = Filters.BasicFilters.BlackAndWhite(MainBitmap);
             canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
+            pictureBoxCanvas.Size = panelResizer.Size;
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
@@ -2087,6 +2088,7 @@ namespace _222303026_proje3
             }
             MainBitmap = Filters.BasicFilters.OldImage(MainBitmap);
             canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
+            pictureBoxCanvas.Size = panelResizer.Size;
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
@@ -2101,6 +2103,7 @@ namespace _222303026_proje3
             }
             MainBitmap = Filters.BasicFilters.CherryFilter(MainBitmap);
             canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
+            pictureBoxCanvas.Size = panelResizer.Size;
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
@@ -2129,6 +2132,7 @@ namespace _222303026_proje3
             }
             MainBitmap = Filters.BasicFilters.PurpleEffect(MainBitmap);
             canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
+            pictureBoxCanvas.Size = panelResizer.Size;
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
@@ -2143,6 +2147,7 @@ namespace _222303026_proje3
             }
             MainBitmap = Filters.BasicFilters.FogEffect(MainBitmap);
             canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
+            pictureBoxCanvas.Size = panelResizer.Size;
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
@@ -2166,9 +2171,10 @@ namespace _222303026_proje3
         private void buttonArtisticFiltersOK_Click(object sender, EventArgs e)
         {
             SaveStateForUndo();
+            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
+            pictureBoxCanvas.Size = panelResizer.Size;
             MainBitmap = pictureBoxCanvas.Image as Bitmap;
             pictureBoxCanvas.Invalidate();
-            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
             CenterCanvasPanel();
             toolStripArtisticFilters.Visible = false;
         }
