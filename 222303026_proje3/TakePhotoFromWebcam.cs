@@ -91,12 +91,6 @@ namespace _222303026_proje3
             };
             webcamPhotoPreview.ShowDialog();
         }
-
-        private void TakePhotoFromWebcam_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            StopVideoCapture();
-        }
-
         private void StopVideoCapture()
         {
             if (videoSource != null)
@@ -112,6 +106,11 @@ namespace _222303026_proje3
         {
             StopVideoCapture();
             StartVideoCapture(comboBox1.SelectedIndex);
+        }
+
+        private void TakePhotoFromWebcam_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            StopVideoCapture();
         }
     }
 

@@ -105,7 +105,7 @@
             Name = "TakePhotoFromWebcam";
             ShowIcon = false;
             Text = "Take Photo From Webcam";
-            FormClosing += TakePhotoFromWebcam_FormClosing;
+            FormClosed += TakePhotoFromWebcam_FormClosed;
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
             PerformLayout();

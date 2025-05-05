@@ -189,5 +189,29 @@ namespace _222303026_proje3 {
                 this["SecondaryColor"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string HashedAIAPIKey {
+            get {
+                return ((string)(this["HashedAIAPIKey"]));
+            }
+            set {
+                this["HashedAIAPIKey"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1024, 1024")]
+        public global::System.Drawing.Size DefaultAIGeneratedImageSize {
+            get {
+                return ((global::System.Drawing.Size)(this["DefaultAIGeneratedImageSize"]));
+            }
+            set {
+                this["DefaultAIGeneratedImageSize"] = value;
+            }
+        }
     }
 }
