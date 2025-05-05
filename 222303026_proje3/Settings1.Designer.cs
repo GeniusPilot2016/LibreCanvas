@@ -156,7 +156,7 @@ namespace _222303026_proje3 {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("11")]
+        [global::System.Configuration.DefaultSettingValueAttribute("9")]
         public int DefaultTextSize {
             get {
                 return ((int)(this["DefaultTextSize"]));

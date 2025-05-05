@@ -36,7 +36,7 @@
       <Value Profile="(Default)">11</Value>
     </Setting>
     <Setting Name="DefaultTextSize" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">11</Value>
+      <Value Profile="(Default)">9</Value>
     </Setting>
     <Setting Name="PrimaryColor" Type="System.Drawing.Color" Scope="User">
       <Value Profile="(Default)">White</Value>

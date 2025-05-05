@@ -144,6 +144,7 @@
             tabPage1.TabIndex = 0;
             tabPage1.Text = "General";
             tabPage1.UseVisualStyleBackColor = true;
+            tabPage1.Click += tabPage1_Click;
             // 
             // groupBox3
             // 
@@ -178,6 +179,7 @@
             radioButton2.TabIndex = 0;
             radioButton2.Text = "Don't show startup window with recent files";
             radioButton2.UseVisualStyleBackColor = true;
+            radioButton2.CheckedChanged += radioButton1_CheckedChanged_1;
             // 
             // radioButton1
             // 
@@ -191,6 +193,7 @@
             radioButton1.TabStop = true;
             radioButton1.Text = "Show startup window with recent files";
             radioButton1.UseVisualStyleBackColor = true;
+            radioButton1.CheckedChanged += radioButton1_CheckedChanged_1;
             // 
             // groupBox2
             // 
@@ -233,6 +236,7 @@
             comboBoxTheme.Name = "comboBoxTheme";
             comboBoxTheme.Size = new Size(427, 24);
             comboBoxTheme.TabIndex = 1;
+            comboBoxTheme.SelectedIndexChanged += comboBoxTheme_SelectedIndexChanged;
             // 
             // tabPage2
             // 
@@ -391,7 +395,7 @@
             numericUpDown7.Name = "numericUpDown7";
             numericUpDown7.Size = new Size(58, 23);
             numericUpDown7.TabIndex = 0;
-            numericUpDown7.Value = new decimal(new int[] { 11, 0, 0, 0 });
+            numericUpDown7.Value = new decimal(new int[] { 9, 0, 0, 0 });
             // 
             // groupBox11
             // 

@@ -23,6 +23,8 @@ namespace _222303026_proje3
         private ArtisticFilters artisticFilters;
         private Point lastMousePos;
         Size originalSize; // Unzoomed size
+        Size originalSelectionRectangleSize; // Unzoomed size
+        Point originalSelectionRectangleLocation; // Unzoomed location
         Bitmap MainBitmap;
         Bitmap SelectedBitmap;
         Rectangle SelectionRectangle = new Rectangle();
@@ -150,7 +152,9 @@ namespace _222303026_proje3
             UIPanel.AutoScroll = true;
 
             // canvasPanel'in boyutlarýný ayarlýyoruz
-            canvasPanel.Size = new Size(820, 620);
+            canvasPanel.Size = new Size(Settings1.Default.DefaultCanvasSize.Width + 20,
+                Settings1.Default.DefaultCanvasSize.Height + 20);
+            pictureBoxCanvas.Size = panelResizer.Size;
 
             // panel1'in AutoScrollMinSize özelliðini canvasPanel'in boyutlarýna ayarlýyoruz
             UIPanel.AutoScrollMinSize = canvasPanel.Size;
@@ -160,7 +164,8 @@ namespace _222303026_proje3
 
             // Paneli hemen yenile (Refresh kullan)
             canvasPanel.Refresh();
-            MainBitmap = new Bitmap(800, 600);
+            MainBitmap = new Bitmap(Settings1.Default.DefaultCanvasSize.Width,
+                Settings1.Default.DefaultCanvasSize.Height);
             originalSize = MainBitmap.Size;
             pictureBoxCanvas.Image = MainBitmap;
             labelSize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height}px";
@@ -184,6 +189,7 @@ namespace _222303026_proje3
 
             // canvasPanel'in boyutlarýný ayarlýyoruz
             canvasPanel.Size = new Size(image.Size.Width + 20, image.Size.Height + 20);
+            pictureBoxCanvas.Size = panelResizer.Size;
 
             // panel1'in AutoScrollMinSize özelliðini canvasPanel'in boyutlarýna ayarlýyoruz
             UIPanel.AutoScrollMinSize = canvasPanel.Size;
@@ -212,6 +218,7 @@ namespace _222303026_proje3
 
             // canvasPanel'in boyutlarýný ayarlýyoruz
             canvasPanel.Size = new Size(generatedImage.Width + 20, generatedImage.Height + 20);
+            pictureBoxCanvas.Size = panelResizer.Size;
 
             // panel1'in AutoScrollMinSize özelliðini canvasPanel'in boyutlarýna ayarlýyoruz
             UIPanel.AutoScrollMinSize = canvasPanel.Size;
@@ -967,33 +974,33 @@ namespace _222303026_proje3
                 {
                     case Tools.Line:
                         pictureBoxCanvas.Image = ShapePreviews.LinePreview(
-                            MainBitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y
+                            MainBitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, (int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)
                         ); pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
                         break;
                     case Tools.Round:
                         pictureBoxCanvas.Image = ShapePreviews.RoundPreview(
-                            MainBitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y
+                            MainBitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, (int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)
                         );
                         pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
                         break;
                     case Tools.Rectangle:
                         pictureBoxCanvas.Image = ShapePreviews.RectanglePreview(
-                            MainBitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y
+                            MainBitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, (int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)
                         ); pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
                         break;
                     case Tools.RoundedRectangle:
                         pictureBoxCanvas.Image = ShapePreviews.RoundedRectanglePreview(
-                            MainBitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y, radius
+                            MainBitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, (int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom), radius
                         ); pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
                         break;
                     case Tools.Triangle:
                         pictureBoxCanvas.Image = ShapePreviews.TrianglePreview(
-                            MainBitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y
+                            MainBitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, (int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)
                         ); pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
                         break;
                     case Tools.Hexagon:
                         pictureBoxCanvas.Image = ShapePreviews.HexagonPreview(
-                            MainBitmap, color1, shapeThickness, points, previewStartPoint.X, previewStartPoint.Y, e.X, e.Y);
+                            MainBitmap, color1, shapeThickness, points, previewStartPoint.X, previewStartPoint.Y, (int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom));
                         pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
                         break;
                     case Tools.Selection:
@@ -1010,6 +1017,13 @@ namespace _222303026_proje3
                             SelectionRectangle.Size = new Size(
                                 Math.Abs(SelectionStartPoint.X - SelectionEndPoint.X),
                                 Math.Abs(SelectionStartPoint.Y - SelectionEndPoint.Y));
+                            // Koordinatlarý zoom'a göre ölçekle
+                            originalSelectionRectangleLocation = new Point(
+                                (int)(SelectionRectangle.X / zoom),
+                                (int)(SelectionRectangle.Y / zoom));
+                            originalSelectionRectangleSize = new Size(
+                                (int)(SelectionRectangle.Width / zoom),
+                                (int)(SelectionRectangle.Height / zoom));
                             pictureBoxCanvas.Invalidate();
                         }
                         break;
@@ -1045,69 +1059,24 @@ namespace _222303026_proje3
                 {
                     if (isSelected && !SelectionRectangle.IsEmpty)
                     {
-                        if (!SelectionRectangle.Contains(e.Location))
+                        // Koordinatlarý zoom'a göre ölçekle
+                        Point scaledLocation = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
+                        if (!SelectionRectangle.Contains(scaledLocation))
                         {
-                            return; // Ignore drawing outside the selection rectangle
+                            return; // Seçim dikdörtgeninin dýþýndaki çizimleri yoksay
                         }
                     }
+
                     switch (selectedTool)
                     {
                         case Tools.Brush:
-                            switch (comboBoxBrushType.SelectedIndex)
-                            {
-                                case 0: // Regular brush
-                                    DrawBrush(graphics, BrushShapes.DrawCircleBrush, color1, brushSize, new Point(e.X, e.Y));
-                                    break;
-                                case 1: // Oil brush
-                                    DrawBrush(graphics, BrushShapes.DrawOilBrush, color1, brushSize, new Point(e.X, e.Y));
-                                    break;
-                                case 2: // Calligraphy brush
-                                    DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, color1, brushSize, new Point(e.X, e.Y));
-                                    break;
-                                case 3:
-                                    DrawBrush(graphics, BrushShapes.DrawWatercolorBrush, color1, brushSize, new Point(e.X, e.Y));
-                                    break;
-                                default:
-                                    break;
-                            }
+                            DrawBrush(graphics, BrushShapes.DrawCircleBrush, color1, brushSize, new Point((int)(e.X / zoom), (int)(e.Y / zoom)));
                             break;
-                        case Tools.Pen:
-                            switch (comboBoxPenType.SelectedIndex)
-                            {
-                                case 0: // Regular pen
-                                    DrawBrush(graphics, BrushShapes.DrawSquareBrush, color1, penSize, new Point(e.X, e.Y));
-                                    break;
-                                case 1:
-                                    DrawBrush(graphics, BrushShapes.DrawMarkerBrush, color1, penSize, new Point(e.X, e.Y));
-                                    break;
-                                case 2:
-                                    DrawBrush(graphics, BrushShapes.DrawCrayonBrush, color1, penSize, new Point(e.X, e.Y));
-                                    break;
-                                case 3: // Calligraphy pen
-                                    DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, color1, penSize, new Point(e.X, e.Y));
-                                    break;
-                                default:
-                                    break;
-                            }
-                            break;
-                        case Tools.Eraser:
-                            graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
-                            DrawBrush(graphics, BrushShapes.DrawCircleBrush, Color.FromArgb(0, 0, 0, 0), eraserSize, new Point(e.X, e.Y));
-                            break;
-                        case Tools.Spray:
-                            DrawBrush(graphics, BrushShapes.DrawSprayBrush, color1, sprayToolSize, new Point(e.X, e.Y));
-                            break;
-                        case Tools.ColorDrop:
-                            Color pixelColor = MainBitmap.GetPixel(e.X, e.Y);
-                            color1 = pixelColor;
-                            foregroundColorButton.BackColor = pixelColor;
-                            break;
-                        default:
-                            break;
+                            // Diðer araçlar için benzer þekilde zoom'u uygula
                     }
 
-                    x = e.X;
-                    y = e.Y;
+                    x = (int)(e.X / zoom);
+                    y = (int)(e.Y / zoom);
                 }
             }
 
@@ -1153,45 +1122,52 @@ namespace _222303026_proje3
 
         private void DrawBrush(Graphics graphics, Action<Graphics, Color, int, Point> drawAction, Color color, int size, Point location)
         {
-            // Ensure the brush stays within the SelectionRectangle
+            // Fýrça boyutunu zoom'a göre ölçekle
+            int scaledSize = (int)(size / zoom);
+
             if (!SelectionRectangle.IsEmpty)
             {
-                int halfSize = size / 2;
-                Rectangle brushBounds = new Rectangle(location.X - halfSize, location.Y - halfSize, size, size);
+                int halfSize = scaledSize / 2;
+                Rectangle brushBounds = new Rectangle(
+                    (int)Math.Round((double)location.X - halfSize),
+                    (int)Math.Round((double)location.Y - halfSize),
+                    scaledSize,
+                    scaledSize
+                );
 
-                // Check if the brush bounds intersect with the SelectionRectangle
                 if (!SelectionRectangle.IntersectsWith(brushBounds))
                 {
-                    return; // Skip drawing if the brush is outside the selection
+                    return; // Fýrça seçim alanýnýn dýþýndaysa çizimi atla
                 }
 
-                // Clip the brush bounds to the SelectionRectangle
                 Rectangle clippedBounds = Rectangle.Intersect(SelectionRectangle, brushBounds);
                 if (clippedBounds.IsEmpty)
                 {
-                    return; // Skip drawing if the clipped bounds are empty
+                    return; // Kesiþim boþsa çizimi atla
                 }
 
-                // Adjust the location to ensure the brush is clipped
                 location = new Point(
                     Math.Max(location.X, SelectionRectangle.Left + halfSize),
                     Math.Max(location.Y, SelectionRectangle.Top + halfSize)
                 );
             }
 
-            // Draw the brush
             if (x == -1 && y == -1)
             {
-                drawAction(graphics, color, size, location);
+                drawAction(graphics, color, scaledSize, location);
             }
             else
             {
-                FillGap(graphics, drawAction, color, size, new Point(x, y), location);
+                FillGap(graphics, drawAction, color, scaledSize, new Point(x, y), location);
             }
         }
 
         private void FillGap(Graphics graphics, Action<Graphics, Color, int, Point> drawAction, Color color, int size, Point start, Point end)
         {
+            // Baþlangýç ve bitiþ noktalarýný zoom'a göre ölçekle
+            start = new Point((int)(start.X / zoom), (int)(start.Y / zoom));
+            end = new Point((int)(end.X / zoom), (int)(end.Y / zoom));
+
             int dx = Math.Abs(end.X - start.X);
             int dy = Math.Abs(end.Y - start.Y);
             int sx = start.X < end.X ? 1 : -1;
@@ -1753,12 +1729,12 @@ namespace _222303026_proje3
             catch (FormatException)
             {
                 MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                textSize = 9;
+                textSize = Settings1.Default.DefaultTextSize;
             }
             catch (OverflowException)
             {
                 MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                textSize = 9;
+                textSize = Settings1.Default.DefaultTextSize;
             }
             finally
             {
@@ -2596,6 +2572,7 @@ namespace _222303026_proje3
             {
                 zoom += 0.05f;
                 UpdatePictureBoxZoom();
+                ScaleSelection();
             }
             else
             {
@@ -2610,6 +2587,7 @@ namespace _222303026_proje3
             {
                 zoom -= 0.05f;
                 UpdatePictureBoxZoom();
+                ScaleSelection();
             }
             else
             {
@@ -2617,7 +2595,17 @@ namespace _222303026_proje3
                 SystemSounds.Beep.Play();
             }
         }
-
+        private void ScaleSelection()
+        {
+            if(isSelected && (SelectionRectangle != Rectangle.Empty))
+            {
+                SelectionRectangle.Location = new Point((int)Math.Round(originalSelectionRectangleLocation.X * zoom),
+                    (int)Math.Round(originalSelectionRectangleLocation.X * zoom));
+                SelectionRectangle.Size = new Size((int)Math.Round(originalSelectionRectangleSize.Width * zoom),
+                    (int)Math.Round(originalSelectionRectangleSize.Height * zoom));
+                pictureBoxCanvas.Invalidate();
+            }
+        }
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SettingsWindow settingsWindow = new SettingsWindow();

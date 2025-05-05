@@ -254,11 +254,11 @@
             // 
             toolStripContainer1.TopToolStripPanel.Controls.Add(menuStrip1);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripPen);
+            toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripText);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripBrush);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripEraser);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripShapes);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripSpray);
-            toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripText);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripAirBrush);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripBucketTool);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripArtisticFilters);
@@ -1498,7 +1498,7 @@
             toolStripText.GripStyle = ToolStripGripStyle.Hidden;
             toolStripText.ImageScalingSize = new Size(20, 20);
             toolStripText.Items.AddRange(new ToolStripItem[] { toolStripLabel3, fontSizeComboBox, toolStripSeparator8, toolStripLabel1, fontsComboBox, toolStripSample, toolStripSeparator18, toolStripButton1, toolStripButton2, toolStripButton3, toolStripButton4, toolStripSeparator19, toolStripButton5, toolStripButton6, toolStripButton7, toolStripSeparator20, toolStripButton8 });
-            toolStripText.Location = new Point(0, 28);
+            toolStripText.Location = new Point(0, 24);
             toolStripText.Name = "toolStripText";
             toolStripText.Size = new Size(747, 27);
             toolStripText.Stretch = true;
