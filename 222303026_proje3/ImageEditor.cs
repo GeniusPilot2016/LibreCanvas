@@ -962,13 +962,18 @@ namespace _222303026_proje3
                 // Merge the SelectedBitmap into the MainBitmap
                 using (Graphics g = Graphics.FromImage(MainBitmap))
                 {
-                    g.DrawImage(SelectedBitmap, SelectionRectangle);
+                    if (SelectedBitmap != null)
+                    {
+                        g.DrawImage(SelectedBitmap, SelectionRectangle);
+                    }
                 }
 
                 // Clear the SelectedBitmap and SelectionRectangle
-                SelectedBitmap.Dispose();
-                SelectedBitmap = null;
-                if (isSelected) { }
+                if (isSelected) 
+                {
+                    SelectedBitmap.Dispose();
+                    SelectedBitmap = null;
+                }
                 // Update the PictureBox with the new bitmap
                 pictureBoxCanvas.Image = MainBitmap;
                 pictureBoxCanvas.Invalidate();
@@ -2067,9 +2072,8 @@ namespace _222303026_proje3
                 // Clear the SelectedBitmap and SelectionRectangle
                 SelectedBitmap.Dispose();
                 SelectedBitmap = null;
-                SelectionRectangle = Rectangle.Empty;
             }
-
+            SelectionRectangle = Rectangle.Empty;
             // Update the canvas
             isSelected = false;
             pictureBoxCanvas.Image = MainBitmap;
