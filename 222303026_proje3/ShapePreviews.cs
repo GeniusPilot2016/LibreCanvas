@@ -23,6 +23,7 @@ namespace _222303026_proje3
         public static Image RoundPreview(Bitmap bmp, Color color, int thickness, int startX,
             int startY, int endX, int endY)
         {
+
             Bitmap previewBitmap = new Bitmap(bmp); // Orijinal bitmap'in bir kopyasını oluştur
             using (Graphics graphics = Graphics.FromImage(previewBitmap)) // Kopya üzerinde çizim yap
             {

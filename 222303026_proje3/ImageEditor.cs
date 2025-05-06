@@ -1109,13 +1109,20 @@ namespace _222303026_proje3
             }
             else if (isSelected && SelectedBitmap == null) 
             {
-                SelectedBitmap = new Bitmap((int)(SelectionRectangle.Width / zoom), 
-                    (int)(SelectionRectangle.Height / zoom));
+                if (SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
+                {
+                    SelectedBitmap = new Bitmap((int)(SelectionRectangle.Width / zoom), (int)(SelectionRectangle.Height / zoom));
+                }
             }
             if (isSelected)
             {
+                if (SelectedBitmap == null)
+                {
+                    return; // Or handle the case where SelectedBitmap is not initialized
+                }
                 using (Graphics graphics = Graphics.FromImage(SelectedBitmap))
                 {
+
                     if (isdrawing)
                     {
                         switch (selectedTool)
@@ -1320,16 +1327,20 @@ namespace _222303026_proje3
 
         private void DrawBrush(Graphics graphics, Action<Graphics, Color, int, Point> drawAction, Color color, int size, Point location)
         {
-            // Fýrça boyutunu zoom'a göre ölçekle
-            int scaledSize = (int)(size / zoom);
-            
+            // Scale the location based on the zoom level
+            Point scaledLocation = new Point((int)Math.Round(location.X / zoom), (int)Math.Round(location.Y / zoom));
+
             if (x == -1 && y == -1)
             {
-                drawAction(graphics, color, scaledSize, location);
+                // Set the initial position without drawing
+                x = scaledLocation.X;
+                y = scaledLocation.Y;
+                drawAction(graphics, color, size, scaledLocation);
             }
             else
             {
-                FillGap(graphics, drawAction, color, scaledSize, new Point(x, y), location);
+                // Draw and fill the gap between the previous and current positions
+                FillGap(graphics, drawAction, color, size, new Point(x, y), location);
             }
         }
 
