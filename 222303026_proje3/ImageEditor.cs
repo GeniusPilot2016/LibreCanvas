@@ -959,25 +959,65 @@ namespace _222303026_proje3
                         drawIntoCanvas(e);
                         break;
                 }
-                // Merge the SelectedBitmap into the MainBitmap
-                using (Graphics g = Graphics.FromImage(MainBitmap))
-                {
-                    if (SelectedBitmap != null)
-                    {
-                        g.DrawImage(SelectedBitmap, SelectionRectangle);
-                    }
-                }
 
-                // Clear the SelectedBitmap and SelectionRectangle
-                if (isSelected) 
+                // Merge the SelectedBitmap into the MainBitmap
+                if (SelectedBitmap != null && isSelected)
                 {
+                    using (Graphics g = Graphics.FromImage(MainBitmap))
+                    {
+                        // Seçim koordinatlarýný orijinal bitmap koordinat sistemine dönüþtür
+                        Rectangle targetRect = new Rectangle(
+                            (int)(originalSelectionRectangleLocation.X),
+                            (int)(originalSelectionRectangleLocation.Y),
+                            (int)(originalSelectionRectangleSize.Width),
+                            (int)(originalSelectionRectangleSize.Height));
+
+                        // Hedef dikdörtgenin ana bitmap sýnýrlarý içinde kalmasýný saðla
+                        targetRect = EnsureRectWithinBounds(targetRect, MainBitmap.Size);
+
+                        // Kaynak dikdörtgenin de SelectedBitmap sýnýrlarý içinde kalmasýný saðla
+                        Rectangle sourceRect = new Rectangle(0, 0,
+                            Math.Min(SelectedBitmap.Width, targetRect.Width),
+                            Math.Min(SelectedBitmap.Height, targetRect.Height));
+
+                        // Yüksek kalite ayarlarýný kullan
+                        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        g.SmoothingMode = SmoothingMode.AntiAlias;
+                        g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                        // Dönüþtürülmüþ alaný ana resme çiz
+                        g.DrawImage(SelectedBitmap, targetRect, sourceRect, GraphicsUnit.Pixel);
+                    }
+
+                    // Clear the SelectedBitmap
                     SelectedBitmap.Dispose();
                     SelectedBitmap = null;
                 }
+
                 // Update the PictureBox with the new bitmap
                 pictureBoxCanvas.Image = MainBitmap;
                 pictureBoxCanvas.Invalidate();
             }
+        }
+
+        // Yardýmcý metot: Dikdörtgenin belirtilen sýnýrlar içinde kalmasýný saðlar
+        private Rectangle EnsureRectWithinBounds(Rectangle rect, Size bounds)
+        {
+            Rectangle result = new Rectangle(rect.Location, rect.Size);
+
+            // X koordinatýný kontrol et
+            if (result.X < 0)
+                result.X = 0;
+            if (result.X + result.Width > bounds.Width)
+                result.Width = Math.Max(0, bounds.Width - result.X);
+
+            // Y koordinatýný kontrol et
+            if (result.Y < 0)
+                result.Y = 0;
+            if (result.Y + result.Height > bounds.Height)
+                result.Height = Math.Max(0, bounds.Height - result.Y);
+
+            return result;
         }
 
         private void pictureBoxCanvas_MouseMove(object sender, MouseEventArgs e)
@@ -1226,11 +1266,8 @@ namespace _222303026_proje3
             if (pictureBoxCanvas.Image != null)
             {
                 // Draw the selection rectangle with dashed lines
-                if (SelectionRectangle != null &&
-                    SelectionRectangle.Width > 0 &&
-                    SelectionRectangle.Height > 0)
+                if (SelectionRectangle != null && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
                 {
-                    // Draw the black dashes
                     using (Pen blackPen = new Pen(Color.Black, 2)
                     {
                         DashStyle = DashStyle.Custom,
@@ -1240,7 +1277,6 @@ namespace _222303026_proje3
                         e.Graphics.DrawRectangle(blackPen, SelectionRectangle);
                     }
 
-                    // Draw the white dashes slightly offset
                     using (Pen whitePen = new Pen(Color.White, 2)
                     {
                         DashStyle = DashStyle.Custom,
@@ -1257,18 +1293,28 @@ namespace _222303026_proje3
                     }
                 }
 
-                // Stretch and draw the SelectedBitmap if it exists
+                // Draw the SelectedBitmap if it exists
                 if (SelectedBitmap != null && !SelectionRectangle.IsEmpty)
                 {
+                    e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                    e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                    // Create a zoomed rectangle for proper scaling
                     Rectangle zoomedRectangle = new Rectangle(
-                        (int)(SelectionRectangle.X * zoom),
-                        (int)(SelectionRectangle.Y * zoom),
-                        (int)(SelectionRectangle.Width * zoom),
-                        (int)(SelectionRectangle.Height * zoom)
+                        SelectionRectangle.X,
+                        SelectionRectangle.Y,
+                        SelectionRectangle.Width,
+                        SelectionRectangle.Height
                     );
 
-                    e.Graphics.DrawImage(SelectedBitmap, zoomedRectangle);
+                    e.Graphics.DrawImage(
+                        SelectedBitmap,
+                        zoomedRectangle,
+                        new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                        GraphicsUnit.Pixel);
                 }
+
             }
         }
 
