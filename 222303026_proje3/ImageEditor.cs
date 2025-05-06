@@ -486,49 +486,82 @@ namespace _222303026_proje3
 
                 try
                 {
-                    // Save the file to a temporary location in a background thread
-                    await Task.Run(() =>
-                    {
-                        using (MemoryStream memoryStream = new MemoryStream())
+                    // Check if the temporary file exists
+                    if (File.Exists(tempFilePath))
+                    {   // Save the file to a temporary location in a background thread
+                        await Task.Run(() =>
                         {
-                            // Save the bitmap to memory
-                            MainBitmap.Save(memoryStream, ImageFormat.Png);
-                            byte[] imageData = memoryStream.ToArray();
-
-                            // Write the file in chunks to the temporary file
-                            using (FileStream fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                            using (MemoryStream memoryStream = new MemoryStream())
                             {
-                                int totalBytes = imageData.Length;
-                                int chunkSize = 4096; // 4 KB
-                                int bytesWritten = 0;
+                                // Save the bitmap to memory
+                                MainBitmap.Save(memoryStream, ImageFormat.Png);
+                                byte[] imageData = memoryStream.ToArray();
 
-                                while (bytesWritten < totalBytes)
+                                // Write the file in chunks to the temporary file
+                                using (FileStream fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
                                 {
-                                    int bytesToWrite = Math.Min(chunkSize, totalBytes - bytesWritten);
-                                    fileStream.Write(imageData, bytesWritten, bytesToWrite);
-                                    bytesWritten += bytesToWrite;
+                                    int totalBytes = imageData.Length;
+                                    int chunkSize = 4096; // 4 KB
+                                    int bytesWritten = 0;
 
-                                    // Update the progress bar
-                                    int progress = (int)((bytesWritten / (float)totalBytes) * 100);
-                                    Invoke(new Action(() =>
+                                    while (bytesWritten < totalBytes)
                                     {
-                                        progressBarSaving.Value = progress;
-                                    }));
+                                        int bytesToWrite = Math.Min(chunkSize, totalBytes - bytesWritten);
+                                        fileStream.Write(imageData, bytesWritten, bytesToWrite);
+                                        bytesWritten += bytesToWrite;
+
+                                        // Update the progress bar
+                                        int progress = (int)((bytesWritten / (float)totalBytes) * 100);
+                                        Invoke(new Action(() =>
+                                        {
+                                            progressBarSaving.Value = progress;
+                                        }));
+                                    }
                                 }
                             }
-                        }
-                    });
+                        });
+                        // Replace the target file with the temporary file
+                        File.Replace(tempFilePath, targetFilePath, backupFilePath);
+                    }
+                    else
+                    {
+                        // Save directly to the target file if the temporary file is missing
+                        await Task.Run(() =>
+                        {
+                            string newFilePath = saveFileDialog1.FileName;
+                            // Save the bitmap to the specified file
+                            using (MemoryStream memoryStream = new MemoryStream())
+                            {
+                                // Save the bitmap to memory
+                                MainBitmap.Save(memoryStream, ImageFormat.Png);
+                                byte[] imageData = memoryStream.ToArray();
 
-                    // Replace the target file with the temporary file
-                    File.Replace(tempFilePath, targetFilePath, backupFilePath);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"An error occurred while saving the file: {ex.Message}",
-                                    "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                finally
-                {
+                                // Write the file in chunks to the specified file
+                                using (FileStream fileStream = new FileStream(newFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                                {
+                                    int totalBytes = imageData.Length;
+                                    int chunkSize = 4096; // 4 KB
+                                    int bytesWritten = 0;
+
+                                    while (bytesWritten < totalBytes)
+                                    {
+                                        int bytesToWrite = Math.Min(chunkSize, totalBytes - bytesWritten);
+                                        fileStream.Write(imageData, bytesWritten, bytesToWrite);
+                                        bytesWritten += bytesToWrite;
+
+                                        // Optionally, update a progress bar if needed
+                                        int progress = (int)((bytesWritten / (float)totalBytes) * 100);
+                                        Invoke(new Action(() =>
+                                        {
+                                            progressBarSaving.Value = progress;
+                                        }));
+                                    }
+                                }
+                            }
+                        }); 
+                        MainBitmap.Save(targetFilePath, ImageFormat.Png);
+                    }
+
                     // Clean up the temporary and backup files
                     if (File.Exists(tempFilePath))
                     {
@@ -538,7 +571,14 @@ namespace _222303026_proje3
                     {
                         File.Delete(backupFilePath);
                     }
-
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"An error occurred while saving the file: {ex.Message}",
+                                    "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
                     // Hide saving indicators
                     labelSaving.Visible = false;
                     progressBarSaving.Visible = false;
@@ -2352,6 +2392,10 @@ namespace _222303026_proje3
         {
             SetAsUnselected();
             HideAddTextTextBoxes();
+        }
+        private void MergeMainBitmapWithSelected()
+        {
+
         }
         private void SetAsUnselected()
         {
