@@ -21,5 +21,15 @@ namespace _222303026_proje3
         {
 
         }
+
+        private void buttonVisitIcons8_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://icons8.com/") { UseShellExecute = true });
+        }
+
+        private void buttonForkMeOnGithub_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://github.com/GeniusPilot2016/ArtFusion") { UseShellExecute = true });
+        }
     }
 }

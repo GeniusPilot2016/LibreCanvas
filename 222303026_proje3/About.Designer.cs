@@ -40,10 +40,10 @@
             columnHeader1 = new ColumnHeader();
             columnHeader2 = new ColumnHeader();
             label4 = new Label();
-            button1 = new Button();
+            buttonVisitIcons8 = new Button();
             icons = new ImageList(components);
-            button2 = new Button();
-            button3 = new Button();
+            buttonViewLicenseText = new Button();
+            buttonForkMeOnGithub = new Button();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
@@ -83,7 +83,7 @@
             label3.Name = "label3";
             label3.Size = new Size(146, 30);
             label3.TabIndex = 1;
-            label3.Text = "Version 0.7.0";
+            label3.Text = "Version 0.8.0";
             // 
             // label2
             // 
@@ -142,20 +142,21 @@
             label4.TabIndex = 9;
             label4.Text = "Designed and programmed by GeniusPilot2016 (Nisa Özdoğan)\r\nAll icons in this program are downloaded from icons8.com\r\nArtFusion is licensed under the GNU General Public License v3.0\r\n";
             // 
-            // button1
+            // buttonVisitIcons8
             // 
-            button1.Anchor = AnchorStyles.Top;
-            button1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            button1.ImageIndex = 0;
-            button1.ImageList = icons;
-            button1.Location = new Point(64, 408);
-            button1.Name = "button1";
-            button1.Size = new Size(151, 29);
-            button1.TabIndex = 10;
-            button1.Text = "Visit icons8.com";
-            button1.TextAlign = ContentAlignment.MiddleRight;
-            button1.TextImageRelation = TextImageRelation.ImageBeforeText;
-            button1.UseVisualStyleBackColor = true;
+            buttonVisitIcons8.Anchor = AnchorStyles.Top;
+            buttonVisitIcons8.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            buttonVisitIcons8.ImageIndex = 0;
+            buttonVisitIcons8.ImageList = icons;
+            buttonVisitIcons8.Location = new Point(64, 408);
+            buttonVisitIcons8.Name = "buttonVisitIcons8";
+            buttonVisitIcons8.Size = new Size(151, 29);
+            buttonVisitIcons8.TabIndex = 10;
+            buttonVisitIcons8.Text = "Visit icons8.com";
+            buttonVisitIcons8.TextAlign = ContentAlignment.MiddleRight;
+            buttonVisitIcons8.TextImageRelation = TextImageRelation.ImageBeforeText;
+            buttonVisitIcons8.UseVisualStyleBackColor = true;
+            buttonVisitIcons8.Click += buttonVisitIcons8_Click;
             // 
             // icons
             // 
@@ -166,48 +167,49 @@
             icons.Images.SetKeyName(1, "icons8-license-48.png");
             icons.Images.SetKeyName(2, "icons8-github-48.png");
             // 
-            // button2
+            // buttonViewLicenseText
             // 
-            button2.Anchor = AnchorStyles.Top;
-            button2.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            button2.ImageIndex = 1;
-            button2.ImageList = icons;
-            button2.Location = new Point(221, 408);
-            button2.Name = "button2";
-            button2.Size = new Size(161, 29);
-            button2.TabIndex = 10;
-            button2.Text = "View License Text";
-            button2.TextAlign = ContentAlignment.MiddleRight;
-            button2.TextImageRelation = TextImageRelation.ImageBeforeText;
-            button2.UseVisualStyleBackColor = true;
+            buttonViewLicenseText.Anchor = AnchorStyles.Top;
+            buttonViewLicenseText.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            buttonViewLicenseText.ImageIndex = 1;
+            buttonViewLicenseText.ImageList = icons;
+            buttonViewLicenseText.Location = new Point(221, 408);
+            buttonViewLicenseText.Name = "buttonViewLicenseText";
+            buttonViewLicenseText.Size = new Size(161, 29);
+            buttonViewLicenseText.TabIndex = 10;
+            buttonViewLicenseText.Text = "View License Text";
+            buttonViewLicenseText.TextAlign = ContentAlignment.MiddleRight;
+            buttonViewLicenseText.TextImageRelation = TextImageRelation.ImageBeforeText;
+            buttonViewLicenseText.UseVisualStyleBackColor = true;
             // 
-            // button3
+            // buttonForkMeOnGithub
             // 
-            button3.Anchor = AnchorStyles.Top;
-            button3.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            button3.ImageIndex = 2;
-            button3.ImageList = icons;
-            button3.Location = new Point(387, 408);
-            button3.Name = "button3";
-            button3.Size = new Size(172, 29);
-            button3.TabIndex = 10;
-            button3.Text = "Fork Me On GitHub";
-            button3.TextAlign = ContentAlignment.MiddleRight;
-            button3.TextImageRelation = TextImageRelation.ImageBeforeText;
-            button3.UseVisualStyleBackColor = true;
+            buttonForkMeOnGithub.Anchor = AnchorStyles.Top;
+            buttonForkMeOnGithub.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            buttonForkMeOnGithub.ImageIndex = 2;
+            buttonForkMeOnGithub.ImageList = icons;
+            buttonForkMeOnGithub.Location = new Point(387, 408);
+            buttonForkMeOnGithub.Name = "buttonForkMeOnGithub";
+            buttonForkMeOnGithub.Size = new Size(172, 29);
+            buttonForkMeOnGithub.TabIndex = 10;
+            buttonForkMeOnGithub.Text = "Fork Me on GitHub";
+            buttonForkMeOnGithub.TextAlign = ContentAlignment.MiddleRight;
+            buttonForkMeOnGithub.TextImageRelation = TextImageRelation.ImageBeforeText;
+            buttonForkMeOnGithub.UseVisualStyleBackColor = true;
+            buttonForkMeOnGithub.Click += buttonForkMeOnGithub_Click;
             // 
             // About
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(633, 691);
-            Controls.Add(button3);
+            Controls.Add(buttonForkMeOnGithub);
             Controls.Add(listView1);
             Controls.Add(panel1);
-            Controls.Add(button2);
+            Controls.Add(buttonViewLicenseText);
             Controls.Add(label1);
             Controls.Add(label4);
-            Controls.Add(button1);
+            Controls.Add(buttonVisitIcons8);
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "About";
             Text = "About";
@@ -230,9 +232,9 @@
         private ColumnHeader columnHeader1;
         private ColumnHeader columnHeader2;
         private Label label4;
-        private Button button1;
-        private Button button2;
-        private Button button3;
+        private Button buttonVisitIcons8;
+        private Button buttonViewLicenseText;
+        private Button buttonForkMeOnGithub;
         private ImageList icons;
     }
 }
