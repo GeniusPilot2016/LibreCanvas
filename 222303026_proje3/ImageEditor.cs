@@ -959,6 +959,16 @@ namespace _222303026_proje3
                         drawIntoCanvas(e);
                         break;
                 }
+                // Merge the SelectedBitmap into the MainBitmap
+                using (Graphics g = Graphics.FromImage(MainBitmap))
+                {
+                    g.DrawImage(SelectedBitmap, SelectionRectangle);
+                }
+
+                // Clear the SelectedBitmap and SelectionRectangle
+                SelectedBitmap.Dispose();
+                SelectedBitmap = null;
+                if (isSelected) { }
                 // Update the PictureBox with the new bitmap
                 pictureBoxCanvas.Image = MainBitmap;
                 pictureBoxCanvas.Invalidate();
@@ -1048,45 +1058,169 @@ namespace _222303026_proje3
         }
         private void drawIntoCanvas(MouseEventArgs e)
         {
-            if (MainBitmap == null)
+            if (!isSelected && MainBitmap == null)
             {
                 MainBitmap = new Bitmap(pictureBoxCanvas.Width, pictureBoxCanvas.Height);
             }
-
-            using (Graphics graphics = Graphics.FromImage(MainBitmap))
+            else if (isSelected && SelectedBitmap == null) 
             {
-                if (isdrawing)
+                SelectedBitmap = new Bitmap((int)(SelectionRectangle.Width / zoom), 
+                    (int)(SelectionRectangle.Height / zoom));
+            }
+            if (isSelected)
+            {
+                using (Graphics graphics = Graphics.FromImage(SelectedBitmap))
                 {
-                    if (isSelected && !SelectionRectangle.IsEmpty)
+                    if (isdrawing)
                     {
-                        // Koordinatlarý zoom'a göre ölçekle
-                        Point scaledLocation = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
-                        if (!SelectionRectangle.Contains(scaledLocation))
+                        switch (selectedTool)
                         {
-                            return; // Seçim dikdörtgeninin dýþýndaki çizimleri yoksay
+                            case Tools.Brush:
+                                switch (comboBoxBrushType.SelectedIndex)
+                                {
+                                    case 0: // Regular brush
+                                        DrawBrush(graphics, BrushShapes.DrawCircleBrush, color1, brushSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
+                                            (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
+                                        break;
+                                    case 1: // Oil brush
+                                        DrawBrush(graphics, BrushShapes.DrawOilBrush, color1, brushSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
+                                            (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
+                                        break;
+                                    case 2: // Calligraphy brush
+                                        DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, color1, brushSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
+                                            (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
+                                        break;
+                                    case 3:
+                                        DrawBrush(graphics, BrushShapes.DrawWatercolorBrush, color1, brushSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
+                                            (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                break;
+                            case Tools.Pen:
+                                switch (comboBoxPenType.SelectedIndex)
+                                {
+                                    case 0: // Regular pen
+                                        DrawBrush(graphics, BrushShapes.DrawSquareBrush, color1, penSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
+                                            (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
+                                        break;
+                                    case 1:
+                                        DrawBrush(graphics, BrushShapes.DrawMarkerBrush, color1, penSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
+                                            (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
+                                        break;
+                                    case 2:
+                                        DrawBrush(graphics, BrushShapes.DrawCrayonBrush, color1, penSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
+                                            (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
+                                        break;
+                                    case 3: // Calligraphy pen
+                                        DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, color1, penSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
+                                            (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                break;
+                            case Tools.Eraser:
+                                graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
+                                DrawBrush(graphics, BrushShapes.DrawCircleBrush, Color.FromArgb(0, 0, 0, 0), eraserSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
+                                            (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
+                                break;
+                            case Tools.Spray:
+                                DrawBrush(graphics, BrushShapes.DrawSprayBrush, color1, sprayToolSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
+                                            (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
+                                break;
+                            case Tools.ColorDrop:
+                                Color pixelColor = MainBitmap.GetPixel((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
+                                            (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom));
+                                color1 = pixelColor;
+                                foregroundColorButton.BackColor = pixelColor;
+                                break;
+                            default:
+                                break;
                         }
-                    }
 
-                    switch (selectedTool)
+                        x = (int)Math.Round((e.X - SelectionRectangle.X) / zoom);
+                        y = (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom);
+                    }
+                }
+            }
+            else
+            {
+                using (Graphics graphics = Graphics.FromImage(MainBitmap))
+                {
+                    if (isdrawing)
                     {
-                        case Tools.Brush:
-                            DrawBrush(graphics, BrushShapes.DrawCircleBrush, color1, brushSize, new Point((int)(e.X / zoom), (int)(e.Y / zoom)));
-                            break;
-                            // Diðer araçlar için benzer þekilde zoom'u uygula
-                    }
+                        switch (selectedTool)
+                        {
+                            case Tools.Brush:
+                                switch (comboBoxBrushType.SelectedIndex)
+                                {
+                                    case 0: // Regular brush
+                                        DrawBrush(graphics, BrushShapes.DrawCircleBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                        break;
+                                    case 1: // Oil brush
+                                        DrawBrush(graphics, BrushShapes.DrawOilBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                        break;
+                                    case 2: // Calligraphy brush
+                                        DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                        break;
+                                    case 3:
+                                        DrawBrush(graphics, BrushShapes.DrawWatercolorBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                break;
+                            case Tools.Pen:
+                                switch (comboBoxPenType.SelectedIndex)
+                                {
+                                    case 0: // Regular pen
+                                        DrawBrush(graphics, BrushShapes.DrawSquareBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                        break;
+                                    case 1:
+                                        DrawBrush(graphics, BrushShapes.DrawMarkerBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                        break;
+                                    case 2:
+                                        DrawBrush(graphics, BrushShapes.DrawCrayonBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                        break;
+                                    case 3: // Calligraphy pen
+                                        DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                break;
+                            case Tools.Eraser:
+                                graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
+                                DrawBrush(graphics, BrushShapes.DrawCircleBrush, Color.FromArgb(0, 0, 0, 0), eraserSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                break;
+                            case Tools.Spray:
+                                DrawBrush(graphics, BrushShapes.DrawSprayBrush, color1, sprayToolSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                break;
+                            case Tools.ColorDrop:
+                                Color pixelColor = MainBitmap.GetPixel((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom));
+                                color1 = pixelColor;
+                                foregroundColorButton.BackColor = pixelColor;
+                                break;
+                            default:
+                                break;
+                        }
 
-                    x = (int)(e.X / zoom);
-                    y = (int)(e.Y / zoom);
+                        x = (int)Math.Round(e.X / zoom);
+                        y = (int)Math.Round(e.Y / zoom);
+                    }
                 }
             }
 
-            pictureBoxCanvas.Image = MainBitmap;
+                pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
         }
         private void pictureBoxCanvas_Paint(object sender, PaintEventArgs e)
         {
             if (pictureBoxCanvas.Image != null)
             {
+                // Draw the selection rectangle with dashed lines
                 if (SelectionRectangle != null &&
                     SelectionRectangle.Width > 0 &&
                     SelectionRectangle.Height > 0)
@@ -1117,6 +1251,19 @@ namespace _222303026_proje3
                         e.Graphics.DrawRectangle(whitePen, offsetRectangle);
                     }
                 }
+
+                // Stretch and draw the SelectedBitmap if it exists
+                if (SelectedBitmap != null && !SelectionRectangle.IsEmpty)
+                {
+                    Rectangle zoomedRectangle = new Rectangle(
+                        (int)(SelectionRectangle.X * zoom),
+                        (int)(SelectionRectangle.Y * zoom),
+                        (int)(SelectionRectangle.Width * zoom),
+                        (int)(SelectionRectangle.Height * zoom)
+                    );
+
+                    e.Graphics.DrawImage(SelectedBitmap, zoomedRectangle);
+                }
             }
         }
 
@@ -1124,34 +1271,7 @@ namespace _222303026_proje3
         {
             // Fýrça boyutunu zoom'a göre ölçekle
             int scaledSize = (int)(size / zoom);
-
-            if (!SelectionRectangle.IsEmpty)
-            {
-                int halfSize = scaledSize / 2;
-                Rectangle brushBounds = new Rectangle(
-                    (int)Math.Round((double)location.X - halfSize),
-                    (int)Math.Round((double)location.Y - halfSize),
-                    scaledSize,
-                    scaledSize
-                );
-
-                if (!SelectionRectangle.IntersectsWith(brushBounds))
-                {
-                    return; // Fýrça seçim alanýnýn dýþýndaysa çizimi atla
-                }
-
-                Rectangle clippedBounds = Rectangle.Intersect(SelectionRectangle, brushBounds);
-                if (clippedBounds.IsEmpty)
-                {
-                    return; // Kesiþim boþsa çizimi atla
-                }
-
-                location = new Point(
-                    Math.Max(location.X, SelectionRectangle.Left + halfSize),
-                    Math.Max(location.Y, SelectionRectangle.Top + halfSize)
-                );
-            }
-
+            
             if (x == -1 && y == -1)
             {
                 drawAction(graphics, color, scaledSize, location);
@@ -1202,14 +1322,14 @@ namespace _222303026_proje3
         private void pictureBoxCanvas_MouseDown(object sender, MouseEventArgs e)
         {
             isdrawing = true;
-            x = e.X;
-            y = e.Y;
+            x = -1;
+            y = -1;
             CancelArtisticFilters();
             switch (selectedTool)
             {
                 case Tools.Line:
                     SaveStateForUndo();
-                    startPoint = new Point((int)(e.X/zoom), (int)(e.Y/zoom));
+                    startPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
                     previewStartPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
                     previewBitmap = new Bitmap(MainBitmap);
                     break;
@@ -1244,6 +1364,7 @@ namespace _222303026_proje3
                     previewBitmap = new Bitmap(MainBitmap);
                     break;
                 case Tools.Selection:
+                    SetAsUnselected();
                     isSelected = true;
                     SelectionStartPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
                     pictureBoxCanvas.Invalidate();
@@ -1935,8 +2056,22 @@ namespace _222303026_proje3
         }
         private void SetAsUnselected()
         {
+            if (isSelected && SelectedBitmap != null && !SelectionRectangle.IsEmpty)
+            {
+                // Merge the SelectedBitmap into the MainBitmap
+                using (Graphics g = Graphics.FromImage(MainBitmap))
+                {
+                    g.DrawImage(SelectedBitmap, SelectionRectangle);
+                }
+
+                // Clear the SelectedBitmap and SelectionRectangle
+                SelectedBitmap.Dispose();
+                SelectedBitmap = null;
+                SelectionRectangle = Rectangle.Empty;
+            }
+
+            // Update the canvas
             isSelected = false;
-            SelectionRectangle = Rectangle.Empty; // Clear the selection rectangle
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate(); // Redraw the canvas
         }
@@ -2597,12 +2732,17 @@ namespace _222303026_proje3
         }
         private void ScaleSelection()
         {
-            if(isSelected && (SelectionRectangle != Rectangle.Empty))
+            if (isSelected && (SelectionRectangle != Rectangle.Empty))
             {
-                SelectionRectangle.Location = new Point((int)Math.Round(originalSelectionRectangleLocation.X * zoom),
-                    (int)Math.Round(originalSelectionRectangleLocation.X * zoom));
-                SelectionRectangle.Size = new Size((int)Math.Round(originalSelectionRectangleSize.Width * zoom),
-                    (int)Math.Round(originalSelectionRectangleSize.Height * zoom));
+                SelectionRectangle.Location = new Point(
+                    (int)Math.Round(originalSelectionRectangleLocation.X * zoom),
+                    (int)Math.Round(originalSelectionRectangleLocation.Y * zoom)
+                );
+                SelectionRectangle.Size = new Size(
+                    (int)Math.Round(originalSelectionRectangleSize.Width * zoom),
+                    (int)Math.Round(originalSelectionRectangleSize.Height * zoom)
+                );
+
                 pictureBoxCanvas.Invalidate();
             }
         }
@@ -2630,5 +2770,5 @@ namespace _222303026_proje3
             return image;
         }
     }
-    
+
 }
