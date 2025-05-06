@@ -147,6 +147,7 @@ namespace _222303026_proje3
         }
         private void createNewFile()
         {
+            SetAsUnselected();
             pictureBoxCanvas.Image = null;
             // panel1'in AutoScroll özelliðini true yaparak kaydýrma çubuklarýný etkinleþtiriyoruz
             UIPanel.AutoScroll = true;
@@ -177,6 +178,7 @@ namespace _222303026_proje3
         }
         private void openAFile(string fileName)
         {
+            SetAsUnselected();
             pictureBoxCanvas.Image = null;
             Image image;
             using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -211,6 +213,7 @@ namespace _222303026_proje3
         }
         private void createFileWithAIorWebcam(Image generatedImage, bool isAIGenerated)
         {
+            SetAsUnselected();
             pictureBoxCanvas.Image = null;
             Image image = generatedImage;
             // panel1'in AutoScroll özelliðini true yaparak kaydýrma çubuklarýný etkinleþtiriyoruz
@@ -917,47 +920,59 @@ namespace _222303026_proje3
             {
                 isdrawing = false;
 
-                switch (selectedTool)
+                if (isSelected && !SelectionRectangle.IsEmpty &&
+                    (selectedTool == Tools.Line || selectedTool == Tools.Round ||
+                     selectedTool == Tools.Rectangle || selectedTool == Tools.RoundedRectangle ||
+                     selectedTool == Tools.Triangle || selectedTool == Tools.Hexagon))
                 {
-                    case Tools.Line:
-                        using (Graphics graphics = Graphics.FromImage(MainBitmap))
-                        {
-                            DrawShapes.DrawLineOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
-                        }
-                        break;
-                    case Tools.Round:
-                        using (Graphics graphics = Graphics.FromImage(MainBitmap))
-                        {
-                            DrawShapes.DrawRoundOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
-                        }
-                        break;
-                    case Tools.Rectangle:
-                        using (Graphics graphics = Graphics.FromImage(MainBitmap))
-                        {
-                            DrawShapes.DrawRectangleOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
-                        }
-                        break;
-                    case Tools.RoundedRectangle:
-                        using (Graphics graphics = Graphics.FromImage(MainBitmap))
-                        {
-                            DrawShapes.DrawRoundedRectangleOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location, radius);
-                        }
-                        break;
-                    case Tools.Triangle:
-                        using (Graphics graphics = Graphics.FromImage(MainBitmap))
-                        {
-                            DrawShapes.DrawTriangleOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
-                        }
-                        break;
-                    case Tools.Hexagon:
-                        using (Graphics graphics = Graphics.FromImage(MainBitmap))
-                        {
-                            DrawShapes.DrawHexagonOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, points, startPoint, e.Location);
-                        }
-                        break;
-                    default:
-                        drawIntoCanvas(e);
-                        break;
+                    // The shape preview has already updated the SelectedBitmap
+                    // Just mark as invalidate to ensure the PictureBox updates
+                    pictureBoxCanvas.Invalidate();
+                }
+                else
+                {
+                    switch (selectedTool)
+                    {
+                        case Tools.Line:
+                            using (Graphics graphics = Graphics.FromImage(MainBitmap))
+                            {
+                                DrawShapes.DrawLineOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
+                            }
+                            break;
+                        case Tools.Round:
+                            using (Graphics graphics = Graphics.FromImage(MainBitmap))
+                            {
+                                DrawShapes.DrawRoundOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
+                            }
+                            break;
+                        case Tools.Rectangle:
+                            using (Graphics graphics = Graphics.FromImage(MainBitmap))
+                            {
+                                DrawShapes.DrawRectangleOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
+                            }
+                            break;
+                        case Tools.RoundedRectangle:
+                            using (Graphics graphics = Graphics.FromImage(MainBitmap))
+                            {
+                                DrawShapes.DrawRoundedRectangleOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location, radius);
+                            }
+                            break;
+                        case Tools.Triangle:
+                            using (Graphics graphics = Graphics.FromImage(MainBitmap))
+                            {
+                                DrawShapes.DrawTriangleOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
+                            }
+                            break;
+                        case Tools.Hexagon:
+                            using (Graphics graphics = Graphics.FromImage(MainBitmap))
+                            {
+                                DrawShapes.DrawHexagonOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, points, startPoint, e.Location);
+                            }
+                            break;
+                        default:
+                            drawIntoCanvas(e);
+                            break;
+                    }
                 }
 
                 // Merge the SelectedBitmap into the MainBitmap
@@ -1022,43 +1037,257 @@ namespace _222303026_proje3
 
         private void pictureBoxCanvas_MouseMove(object sender, MouseEventArgs e)
         {
-
             if (isdrawing)
             {
                 switch (selectedTool)
                 {
                     case Tools.Line:
-                        pictureBoxCanvas.Image = ShapePreviews.LinePreview(
-                            MainBitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, (int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)
-                        ); pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
-                        break;
                     case Tools.Round:
-                        pictureBoxCanvas.Image = ShapePreviews.RoundPreview(
-                            MainBitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, (int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)
-                        );
-                        pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
-                        break;
                     case Tools.Rectangle:
-                        pictureBoxCanvas.Image = ShapePreviews.RectanglePreview(
-                            MainBitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, (int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)
-                        ); pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
-                        break;
                     case Tools.RoundedRectangle:
-                        pictureBoxCanvas.Image = ShapePreviews.RoundedRectanglePreview(
-                            MainBitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, (int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom), radius
-                        ); pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
-                        break;
                     case Tools.Triangle:
-                        pictureBoxCanvas.Image = ShapePreviews.TrianglePreview(
-                            MainBitmap, color1, shapeThickness, previewStartPoint.X, previewStartPoint.Y, (int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)
-                        ); pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
-                        break;
                     case Tools.Hexagon:
-                        pictureBoxCanvas.Image = ShapePreviews.HexagonPreview(
-                            MainBitmap, color1, shapeThickness, points, previewStartPoint.X, previewStartPoint.Y, (int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom));
-                        pictureBoxCanvas.Invalidate(); // Update the PictureBox to show the preview
+                        if (isSelected && !SelectionRectangle.IsEmpty)
+                        {
+                            // Calculate relative coordinates
+                            int relativeStartX = previewStartPoint.X - (int)(SelectionRectangle.X / zoom);
+                            int relativeStartY = previewStartPoint.Y - (int)(SelectionRectangle.Y / zoom);
+                            int relativeEndX = (int)Math.Round(e.X / zoom) - (int)(SelectionRectangle.X / zoom);
+                            int relativeEndY = (int)Math.Round(e.Y / zoom) - (int)(SelectionRectangle.Y / zoom);
+
+                            // Create a completely fresh bitmap rather than modifying the existing one
+                            Bitmap newSelectedBitmap = new Bitmap(
+                                (int)(SelectionRectangle.Width / zoom),
+                                (int)(SelectionRectangle.Height / zoom));
+
+                            // Copy the original content from MainBitmap to the new bitmap
+                            using (Graphics g = Graphics.FromImage(newSelectedBitmap))
+                            {
+                                g.Clear(Color.Transparent);
+
+                                // Source rectangle from main bitmap
+                                Rectangle sourceRect = new Rectangle(
+                                    (int)(originalSelectionRectangleLocation.X),
+                                    (int)(originalSelectionRectangleLocation.Y),
+                                    (int)(originalSelectionRectangleSize.Width),
+                                    (int)(originalSelectionRectangleSize.Height));
+
+                                // Draw the portion from MainBitmap
+                                g.DrawImage(MainBitmap,
+                                    new Rectangle(0, 0, newSelectedBitmap.Width, newSelectedBitmap.Height),
+                                    sourceRect,
+                                    GraphicsUnit.Pixel);
+
+                                // Now draw the shape directly on this fresh bitmap
+                                // This way we don't need a separate preview bitmap
+                                switch (selectedTool)
+                                {
+                                    case Tools.Line:
+                                        using (Pen pen = new Pen(color1, shapeThickness))
+                                        {
+                                            g.DrawLine(pen, relativeStartX, relativeStartY, relativeEndX, relativeEndY);
+                                        }
+                                        break;
+                                    case Tools.Round:
+                                        using (Pen pen = new Pen(color1, shapeThickness))
+                                        {
+                                            Rectangle rect = new Rectangle(
+                                                Math.Min(relativeStartX, relativeEndX),
+                                                Math.Min(relativeStartY, relativeEndY),
+                                                Math.Abs(relativeEndX - relativeStartX),
+                                                Math.Abs(relativeEndY - relativeStartY)
+                                            );
+                                            g.DrawEllipse(pen, rect);
+                                        }
+                                        break;
+                                    case Tools.Rectangle:
+                                        using (Pen pen = new Pen(color1, shapeThickness))
+                                        {
+                                            Rectangle rect = new Rectangle(
+                                                Math.Min(relativeStartX, relativeEndX),
+                                                Math.Min(relativeStartY, relativeEndY),
+                                                Math.Abs(relativeEndX - relativeStartX),
+                                                Math.Abs(relativeEndY - relativeStartY)
+                                            );
+                                            g.DrawRectangle(pen, rect);
+                                        }
+                                        break;
+                                    case Tools.RoundedRectangle:
+                                        using (Pen pen = new Pen(color1, shapeThickness))
+                                        {
+                                            Rectangle rect = new Rectangle(
+                                                Math.Min(relativeStartX, relativeEndX),
+                                                Math.Min(relativeStartY, relativeEndY),
+                                                Math.Abs(relativeEndX - relativeStartX),
+                                                Math.Abs(relativeEndY - relativeStartY)
+                                            );
+
+                                            GraphicsPath path = new GraphicsPath();
+                                            path.AddArc(rect.X, rect.Y, radius, radius, 180, 90);
+                                            path.AddArc(rect.X + rect.Width - radius, rect.Y, radius, radius, 270, 90);
+                                            path.AddArc(rect.X + rect.Width - radius, rect.Y + rect.Height - radius, radius, radius, 0, 90);
+                                            path.AddArc(rect.X, rect.Y + rect.Height - radius, radius, radius, 90, 90);
+                                            path.CloseFigure();
+
+                                            g.DrawPath(pen, path);
+                                        }
+                                        break;
+                                    case Tools.Triangle:
+                                        using (Pen pen = new Pen(color1, shapeThickness))
+                                        {
+                                            Point[] points = new Point[]
+                                            {
+                                                new Point(relativeStartX, relativeEndY),
+                                                new Point(relativeEndX, relativeEndY),
+                                                new Point((relativeStartX + relativeEndX) / 2, relativeStartY)
+                                            };
+                                            g.DrawPolygon(pen, points);
+                                        }
+                                        break;
+                                    case Tools.Hexagon:
+                                        using (Pen pen = new Pen(color1, shapeThickness))
+                                        {
+                                            Point[] hexagonPoints = new Point[points];
+                                            double angle = 2 * Math.PI / points;
+                                            for (int i = 0; i < points; i++)
+                                            {
+                                                hexagonPoints[i] = new Point(
+                                                    (int)(relativeStartX + (relativeEndX - relativeStartX) * Math.Cos(i * angle)),
+                                                    (int)(relativeStartY + (relativeEndY - relativeStartY) * Math.Sin(i * angle))
+                                                );
+                                            }
+                                            g.DrawPolygon(pen, hexagonPoints);
+                                        }
+                                        break;
+                                }
+                            }
+
+                            // Dispose of the old bitmap before assigning the new one
+                            if (SelectedBitmap != null)
+                            {
+                                SelectedBitmap.Dispose();
+                            }
+
+                            // Set the new bitmap
+                            SelectedBitmap = newSelectedBitmap;
+
+                            pictureBoxCanvas.Invalidate();
+                        }
+                        else
+                        {
+                            // For drawing on the main canvas
+                            // Create a new bitmap for the preview
+                            Bitmap newPreview = new Bitmap(MainBitmap.Width, MainBitmap.Height);
+
+                            using (Graphics g = Graphics.FromImage(newPreview))
+                            {
+                                // Draw the original bitmap first
+                                g.DrawImage(MainBitmap, 0, 0);
+
+                                // Now draw the shape on top
+                                int startX = previewStartPoint.X;
+                                int startY = previewStartPoint.Y;
+                                int endX = (int)Math.Round(e.X / zoom);
+                                int endY = (int)Math.Round(e.Y / zoom);
+
+                                switch (selectedTool)
+                                {
+                                    case Tools.Line:
+                                        using (Pen pen = new Pen(color1, shapeThickness))
+                                        {
+                                            g.DrawLine(pen, startX, startY, endX, endY);
+                                        }
+                                        break;
+                                    case Tools.Round:
+                                        using (Pen pen = new Pen(color1, shapeThickness))
+                                        {
+                                            Rectangle rect = new Rectangle(
+                                                Math.Min(startX, endX),
+                                                Math.Min(startY, endY),
+                                                Math.Abs(endX - startX),
+                                                Math.Abs(endY - startY)
+                                            );
+                                            g.DrawEllipse(pen, rect);
+                                        }
+                                        break;
+                                    case Tools.Rectangle:
+                                        using (Pen pen = new Pen(color1, shapeThickness))
+                                        {
+                                            Rectangle rect = new Rectangle(
+                                                Math.Min(startX, endX),
+                                                Math.Min(startY, endY),
+                                                Math.Abs(endX - startX),
+                                                Math.Abs(endY - startY)
+                                            );
+                                            g.DrawRectangle(pen, rect);
+                                        }
+                                        break;
+                                    case Tools.RoundedRectangle:
+                                        using (Pen pen = new Pen(color1, shapeThickness))
+                                        {
+                                            Rectangle rect = new Rectangle(
+                                                Math.Min(startX, endX),
+                                                Math.Min(startY, endY),
+                                                Math.Abs(endX - startX),
+                                                Math.Abs(endY - startY)
+                                            );
+
+                                            GraphicsPath path = new GraphicsPath();
+                                            path.AddArc(rect.X, rect.Y, radius, radius, 180, 90);
+                                            path.AddArc(rect.X + rect.Width - radius, rect.Y, radius, radius, 270, 90);
+                                            path.AddArc(rect.X + rect.Width - radius, rect.Y + rect.Height - radius, radius, radius, 0, 90);
+                                            path.AddArc(rect.X, rect.Y + rect.Height - radius, radius, radius, 90, 90);
+                                            path.CloseFigure();
+
+                                            g.DrawPath(pen, path);
+                                        }
+                                        break;
+                                    case Tools.Triangle:
+                                        using (Pen pen = new Pen(color1, shapeThickness))
+                                        {
+                                            Point[] points = new Point[]
+                                            {
+                                                new Point(startX, endY),
+                                                new Point(endX, endY),
+                                                new Point((startX + endX) / 2, startY)
+                                            };
+                                            g.DrawPolygon(pen, points);
+                                        }
+                                        break;
+                                    case Tools.Hexagon:
+                                        using (Pen pen = new Pen(color1, shapeThickness))
+                                        {
+                                            Point[] hexagonPoints = new Point[points];
+                                            double angle = 2 * Math.PI / points;
+                                            for (int i = 0; i < points; i++)
+                                            {
+                                                hexagonPoints[i] = new Point(
+                                                    (int)(startX + (endX - startX) * Math.Cos(i * angle)),
+                                                    (int)(startY + (endY - startY) * Math.Sin(i * angle))
+                                                );
+                                            }
+                                            g.DrawPolygon(pen, hexagonPoints);
+                                        }
+                                        break;
+                                }
+                            }
+
+                            // Swap out the image instead of modifying existing
+                            var oldImage = pictureBoxCanvas.Image;
+                            pictureBoxCanvas.Image = newPreview;
+
+                            // Dispose of old image if not the main bitmap
+                            if (oldImage != null && oldImage != MainBitmap)
+                            {
+                                oldImage.Dispose();
+                            }
+
+                            pictureBoxCanvas.Invalidate();
+                        }
                         break;
+
                     case Tools.Selection:
+                        // Selection code remains the same
                         if (e.Button != MouseButtons.Left)
                         {
                             return;
@@ -1072,6 +1301,7 @@ namespace _222303026_proje3
                             SelectionRectangle.Size = new Size(
                                 Math.Abs(SelectionStartPoint.X - SelectionEndPoint.X),
                                 Math.Abs(SelectionStartPoint.Y - SelectionEndPoint.Y));
+
                             // Koordinatlarý zoom'a göre ölçekle
                             originalSelectionRectangleLocation = new Point(
                                 (int)(SelectionRectangle.X / zoom),
@@ -1082,11 +1312,14 @@ namespace _222303026_proje3
                             pictureBoxCanvas.Invalidate();
                         }
                         break;
+
                     default:
                         drawIntoCanvas(e);
                         break;
                 }
             }
+
+            // Cursor position handling remains the same
             int x = e.X;
             int y = e.Y;
             if ((x < 0 || y < 0) || (x > pictureBoxCanvas.Width || y > pictureBoxCanvas.Height))
@@ -1272,8 +1505,22 @@ namespace _222303026_proje3
         {
             if (pictureBoxCanvas.Image != null)
             {
+                // Draw the SelectedBitmap if it exists
+                if (SelectedBitmap != null && !SelectionRectangle.IsEmpty)
+                {
+                    e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                    e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                    e.Graphics.DrawImage(
+                        SelectedBitmap,
+                        SelectionRectangle,
+                        new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                        GraphicsUnit.Pixel);
+                }
+
                 // Draw the selection rectangle with dashed lines
-                if (SelectionRectangle != null && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
+                if (!SelectionRectangle.IsEmpty)
                 {
                     using (Pen blackPen = new Pen(Color.Black, 2)
                     {
@@ -1299,29 +1546,6 @@ namespace _222303026_proje3
                         e.Graphics.DrawRectangle(whitePen, offsetRectangle);
                     }
                 }
-
-                // Draw the SelectedBitmap if it exists
-                if (SelectedBitmap != null && !SelectionRectangle.IsEmpty)
-                {
-                    e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                    e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                    e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-
-                    // Create a zoomed rectangle for proper scaling
-                    Rectangle zoomedRectangle = new Rectangle(
-                        SelectionRectangle.X,
-                        SelectionRectangle.Y,
-                        SelectionRectangle.Width,
-                        SelectionRectangle.Height
-                    );
-
-                    e.Graphics.DrawImage(
-                        SelectedBitmap,
-                        zoomedRectangle,
-                        new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                        GraphicsUnit.Pixel);
-                }
-
             }
         }
 
@@ -1387,55 +1611,68 @@ namespace _222303026_proje3
             x = -1;
             y = -1;
             CancelArtisticFilters();
+
             switch (selectedTool)
             {
                 case Tools.Line:
-                    SaveStateForUndo();
-                    startPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
-                    previewStartPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
-                    previewBitmap = new Bitmap(MainBitmap);
-                    break;
                 case Tools.Round:
-                    SaveStateForUndo();
-                    startPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
-                    previewStartPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
-                    previewBitmap = new Bitmap(MainBitmap);
-                    break;
                 case Tools.Rectangle:
-                    SaveStateForUndo();
-                    previewStartPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
-                    startPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
-                    previewBitmap = new Bitmap(MainBitmap);
-                    break;
                 case Tools.RoundedRectangle:
-                    SaveStateForUndo();
-                    startPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
-                    previewStartPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
-                    previewBitmap = new Bitmap(MainBitmap);
-                    break;
                 case Tools.Triangle:
-                    SaveStateForUndo();
-                    startPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
-                    previewStartPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
-                    previewBitmap = new Bitmap(MainBitmap);
-                    break;
                 case Tools.Hexagon:
                     SaveStateForUndo();
+
+                    // Whether in a selection or on main canvas, store the starting point
                     startPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
-                    previewStartPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
-                    previewBitmap = new Bitmap(MainBitmap);
+                    previewStartPoint = startPoint;
+
+                    // If there's a selection and we're inside it, setup for drawing in the selection
+                    if (isSelected && !SelectionRectangle.IsEmpty && SelectionRectangle.Contains(e.Location))
+                    {
+                        // If we had a SelectedBitmap, dispose of it
+                        if (SelectedBitmap != null)
+                        {
+                            SelectedBitmap.Dispose();
+                            SelectedBitmap = null;
+                        }
+
+                        // Create a fresh bitmap for the selection
+                        SelectedBitmap = new Bitmap(
+                            (int)(SelectionRectangle.Width / zoom),
+                            (int)(SelectionRectangle.Height / zoom));
+
+                        using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                        {
+                            g.Clear(Color.Transparent);
+
+                            // Copy the content from MainBitmap for the selection area
+                            Rectangle sourceRect = new Rectangle(
+                                (int)(originalSelectionRectangleLocation.X),
+                                (int)(originalSelectionRectangleLocation.Y),
+                                (int)(originalSelectionRectangleSize.Width),
+                                (int)(originalSelectionRectangleSize.Height));
+
+                            g.DrawImage(MainBitmap,
+                                new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                                sourceRect,
+                                GraphicsUnit.Pixel);
+                        }
+                    }
                     break;
+
                 case Tools.Selection:
-                    SetAsUnselected();
+                    if (isSelected && !SelectionRectangle.Contains(e.Location))
+                    {
+                        SetAsUnselected();
+                    }
                     isSelected = true;
-                    SelectionStartPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
+                    SelectionStartPoint = e.Location;
                     pictureBoxCanvas.Invalidate();
                     break;
+
                 default:
                     if (selectedTool == Tools.Brush || selectedTool == Tools.Pen || selectedTool == Tools.Eraser ||
-                        selectedTool == Tools.Spray || selectedTool == Tools.Bucket || selectedTool == Tools.Line ||
-                        selectedTool == Tools.Round || selectedTool == Tools.Rectangle || selectedTool == Tools.RoundedRectangle ||
-                        selectedTool == Tools.Triangle || selectedTool == Tools.Hexagon || selectedTool == Tools.Text)
+                        selectedTool == Tools.Spray || selectedTool == Tools.Bucket || selectedTool == Tools.Text)
                     {
                         SaveStateForUndo();
                     }
@@ -2123,18 +2360,34 @@ namespace _222303026_proje3
                 // Merge the SelectedBitmap into the MainBitmap
                 using (Graphics g = Graphics.FromImage(MainBitmap))
                 {
-                    g.DrawImage(SelectedBitmap, SelectionRectangle);
+                    // Set high quality drawing modes
+                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                    g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                    Rectangle sourceRect = new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height);
+                    Rectangle destRect = new Rectangle(
+                        originalSelectionRectangleLocation.X,
+                        originalSelectionRectangleLocation.Y,
+                        originalSelectionRectangleSize.Width,
+                        originalSelectionRectangleSize.Height);
+
+                    // Draw the selection into the main bitmap
+                    g.DrawImage(SelectedBitmap, destRect, sourceRect, GraphicsUnit.Pixel);
                 }
 
-                // Clear the SelectedBitmap and SelectionRectangle
+                // Properly dispose of the SelectedBitmap
                 SelectedBitmap.Dispose();
                 SelectedBitmap = null;
             }
+
+            // Clear the selection
             SelectionRectangle = Rectangle.Empty;
-            // Update the canvas
             isSelected = false;
+
+            // Update the display
             pictureBoxCanvas.Image = MainBitmap;
-            pictureBoxCanvas.Invalidate(); // Redraw the canvas
+            pictureBoxCanvas.Invalidate();
         }
 
         private void toolStripTextBox1_TextChanged(object sender, EventArgs e)
