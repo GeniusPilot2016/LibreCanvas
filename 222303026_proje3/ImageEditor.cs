@@ -2399,12 +2399,6 @@ namespace _222303026_proje3
         }
         private void SetAsUnselected()
         {
-            // MainBitmap'in null olmadýðýndan emin olun
-            if (MainBitmap == null)
-            {
-                MainBitmap = new Bitmap(pictureBoxCanvas.Width, pictureBoxCanvas.Height);
-            }
-
             // Seçim kaldýrýlýrken mevcut içeriði koruyarak iþlemi gerçekleþtirin
             if (isSelected && SelectedBitmap != null && !SelectionRectangle.IsEmpty)
             {
@@ -2412,7 +2406,7 @@ namespace _222303026_proje3
                 {
                     CancelArtisticFilters();
                 }
-
+                
                 using (Graphics g = Graphics.FromImage(MainBitmap))
                 {
                     g.InterpolationMode = InterpolationMode.HighQualityBicubic;
@@ -2439,10 +2433,15 @@ namespace _222303026_proje3
             // Seçim durumunu sýfýrlayýn
             SelectionRectangle = Rectangle.Empty;
             isSelected = false;
-
-            // Tuvali güncelleyin
-            pictureBoxCanvas.Image = MainBitmap;
-            pictureBoxCanvas.Invalidate();
+            if(artisticFilters == ArtisticFilters.None)
+            {
+                pictureBoxCanvas.Image = MainBitmap;
+            }
+            else
+            {
+                pictureBoxCanvas.Image = previewBitmap;
+            }
+                pictureBoxCanvas.Invalidate();
         }
 
         private void toolStripTextBox1_TextChanged(object sender, EventArgs e)
@@ -2844,6 +2843,7 @@ namespace _222303026_proje3
         }
         private void RefreshArtisticFiltersPreview()
         {
+            previewBitmap = new Bitmap(MainBitmap);
             if (isSelected)
             {
                 // Create SelectedBitmap if it doesn't exist
@@ -2860,7 +2860,7 @@ namespace _222303026_proje3
                             (int)(originalSelectionRectangleLocation.Y),
                             (int)(originalSelectionRectangleSize.Width),
                             (int)(originalSelectionRectangleSize.Height));
-                        g.DrawImage(MainBitmap,
+                        g.DrawImage(previewBitmap,
                             new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
                             sourceRect,
                             GraphicsUnit.Pixel);
@@ -2894,7 +2894,7 @@ namespace _222303026_proje3
                 SelectedBitmap = filteredBitmap;
 
                 // Keep MainBitmap as the image but update the display to show selection
-                pictureBoxCanvas.Image = MainBitmap;
+                pictureBoxCanvas.Image = previewBitmap;
             }
             else
             {
@@ -2930,6 +2930,8 @@ namespace _222303026_proje3
         {
             SaveStateForUndo();
             MainBitmap = previewBitmap;
+            artisticFilters = ArtisticFilters.None;
+            pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             toolStripArtisticFilters.Visible = false;
         }
