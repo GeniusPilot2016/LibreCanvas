@@ -558,7 +558,7 @@ namespace _222303026_proje3
                                     }
                                 }
                             }
-                        }); 
+                        });
                         MainBitmap.Save(targetFilePath, ImageFormat.Png);
                     }
 
@@ -1380,7 +1380,7 @@ namespace _222303026_proje3
             {
                 MainBitmap = new Bitmap(pictureBoxCanvas.Width, pictureBoxCanvas.Height);
             }
-            else if (isSelected && SelectedBitmap == null) 
+            else if (isSelected && SelectedBitmap == null)
             {
                 if (SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
                 {
@@ -1538,7 +1538,7 @@ namespace _222303026_proje3
                 }
             }
 
-                pictureBoxCanvas.Image = MainBitmap;
+            pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
         }
         private void pictureBoxCanvas_Paint(object sender, PaintEventArgs e)
@@ -2399,16 +2399,27 @@ namespace _222303026_proje3
         }
         private void SetAsUnselected()
         {
+            // MainBitmap'in null olmadýðýndan emin olun
+            if (MainBitmap == null)
+            {
+                MainBitmap = new Bitmap(pictureBoxCanvas.Width, pictureBoxCanvas.Height);
+            }
+
+            // Seçim kaldýrýlýrken mevcut içeriði koruyarak iþlemi gerçekleþtirin
             if (isSelected && SelectedBitmap != null && !SelectionRectangle.IsEmpty)
             {
-                // Merge the SelectedBitmap into the MainBitmap
+                if (artisticFilters != ArtisticFilters.None)
+                {
+                    CancelArtisticFilters();
+                }
+
                 using (Graphics g = Graphics.FromImage(MainBitmap))
                 {
-                    // Set high quality drawing modes
                     g.InterpolationMode = InterpolationMode.HighQualityBicubic;
                     g.SmoothingMode = SmoothingMode.AntiAlias;
                     g.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
+                    // Seçili alaný MainBitmap üzerine çizin
                     Rectangle sourceRect = new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height);
                     Rectangle destRect = new Rectangle(
                         originalSelectionRectangleLocation.X,
@@ -2416,20 +2427,20 @@ namespace _222303026_proje3
                         originalSelectionRectangleSize.Width,
                         originalSelectionRectangleSize.Height);
 
-                    // Draw the selection into the main bitmap
+                    // MainBitmap'in mevcut içeriðini koruyarak seçili alaný güncelle
                     g.DrawImage(SelectedBitmap, destRect, sourceRect, GraphicsUnit.Pixel);
                 }
 
-                // Properly dispose of the SelectedBitmap
+                // SelectedBitmap'i serbest býrakýn
                 SelectedBitmap.Dispose();
                 SelectedBitmap = null;
             }
 
-            // Clear the selection
+            // Seçim durumunu sýfýrlayýn
             SelectionRectangle = Rectangle.Empty;
             isSelected = false;
 
-            // Update the display
+            // Tuvali güncelleyin
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
         }
@@ -2474,6 +2485,7 @@ namespace _222303026_proje3
 
         private void mirrorToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            SetAsUnselected();
             SaveStateForUndo();
             if (artisticFilters != ArtisticFilters.None)
             {
@@ -2491,17 +2503,41 @@ namespace _222303026_proje3
         private void flashToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveStateForUndo();
-            MainBitmap = Filters.BasicFilters.Flash(MainBitmap);
             if (artisticFilters != ArtisticFilters.None)
             {
                 artisticFilters = ArtisticFilters.None;
             }
-            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
-            pictureBoxCanvas.Size = panelResizer.Size;
+            if (isSelected)
+            {
+                if (SelectedBitmap == null)
+                {
+                    SelectedBitmap = new Bitmap(
+                        (int)(SelectionRectangle.Width / zoom),
+                        (int)(SelectionRectangle.Height / zoom));
+                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                    {
+                        g.Clear(Color.Transparent);
+                        Rectangle sourceRect = new Rectangle(
+                            (int)(originalSelectionRectangleLocation.X),
+                            (int)(originalSelectionRectangleLocation.Y),
+                            (int)(originalSelectionRectangleSize.Width),
+                            (int)(originalSelectionRectangleSize.Height));
+                        g.DrawImage(MainBitmap,
+                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                            sourceRect,
+                            GraphicsUnit.Pixel);
+                    }
+                }
+                SelectedBitmap = Filters.BasicFilters.Flash(SelectedBitmap);
+            }
+            else
+            {
+                MainBitmap = Filters.BasicFilters.Flash(MainBitmap);
+            }
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
-            CenterCanvasPanel();
         }
+
 
         private void frozenToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -2510,12 +2546,35 @@ namespace _222303026_proje3
             {
                 artisticFilters = ArtisticFilters.None;
             }
-            MainBitmap = Filters.BasicFilters.Frozen(MainBitmap);
-            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
-            pictureBoxCanvas.Size = panelResizer.Size;
+            if (isSelected)
+            {
+                if (SelectedBitmap == null)
+                {
+                    SelectedBitmap = new Bitmap(
+                        (int)(SelectionRectangle.Width / zoom),
+                        (int)(SelectionRectangle.Height / zoom));
+                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                    {
+                        g.Clear(Color.Transparent);
+                        Rectangle sourceRect = new Rectangle(
+                            (int)(originalSelectionRectangleLocation.X),
+                            (int)(originalSelectionRectangleLocation.Y),
+                            (int)(originalSelectionRectangleSize.Width),
+                            (int)(originalSelectionRectangleSize.Height));
+                        g.DrawImage(MainBitmap,
+                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                            sourceRect,
+                            GraphicsUnit.Pixel);
+                    }
+                }
+                SelectedBitmap = Filters.BasicFilters.Frozen(SelectedBitmap);
+            }
+            else
+            {
+                MainBitmap = Filters.BasicFilters.Frozen(MainBitmap);
+            }
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
-            CenterCanvasPanel();
         }
 
         private void winterToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2525,12 +2584,35 @@ namespace _222303026_proje3
             {
                 artisticFilters = ArtisticFilters.None;
             }
-            MainBitmap = Filters.BasicFilters.Winter(MainBitmap);
-            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
-            pictureBoxCanvas.Size = panelResizer.Size;
+            if (isSelected)
+            {
+                if (SelectedBitmap == null)
+                {
+                    SelectedBitmap = new Bitmap(
+                        (int)(SelectionRectangle.Width / zoom),
+                        (int)(SelectionRectangle.Height / zoom));
+                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                    {
+                        g.Clear(Color.Transparent);
+                        Rectangle sourceRect = new Rectangle(
+                            (int)(originalSelectionRectangleLocation.X),
+                            (int)(originalSelectionRectangleLocation.Y),
+                            (int)(originalSelectionRectangleSize.Width),
+                            (int)(originalSelectionRectangleSize.Height));
+                        g.DrawImage(MainBitmap,
+                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                            sourceRect,
+                            GraphicsUnit.Pixel);
+                    }
+                }
+                SelectedBitmap = Filters.BasicFilters.Winter(SelectedBitmap);
+            }
+            else
+            {
+                MainBitmap = Filters.BasicFilters.Winter(MainBitmap);
+            }
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
-            CenterCanvasPanel();
         }
 
         private void blackAndWhiteToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2540,12 +2622,35 @@ namespace _222303026_proje3
             {
                 artisticFilters = ArtisticFilters.None;
             }
-            MainBitmap = Filters.BasicFilters.BlackAndWhite(MainBitmap);
-            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
-            pictureBoxCanvas.Size = panelResizer.Size;
+            if (isSelected)
+            {
+                if (SelectedBitmap == null)
+                {
+                    SelectedBitmap = new Bitmap(
+                        (int)(SelectionRectangle.Width / zoom),
+                        (int)(SelectionRectangle.Height / zoom));
+                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                    {
+                        g.Clear(Color.Transparent);
+                        Rectangle sourceRect = new Rectangle(
+                            (int)(originalSelectionRectangleLocation.X),
+                            (int)(originalSelectionRectangleLocation.Y),
+                            (int)(originalSelectionRectangleSize.Width),
+                            (int)(originalSelectionRectangleSize.Height));
+                        g.DrawImage(MainBitmap,
+                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                            sourceRect,
+                            GraphicsUnit.Pixel);
+                    }
+                }
+                SelectedBitmap = Filters.BasicFilters.BlackAndWhite(SelectedBitmap);
+            }
+            else
+            {
+                MainBitmap = Filters.BasicFilters.BlackAndWhite(MainBitmap);
+            }
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
-            CenterCanvasPanel();
         }
 
         private void oldPictureToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2555,12 +2660,35 @@ namespace _222303026_proje3
             {
                 artisticFilters = ArtisticFilters.None;
             }
-            MainBitmap = Filters.BasicFilters.OldImage(MainBitmap);
-            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
-            pictureBoxCanvas.Size = panelResizer.Size;
+            if (isSelected)
+            {
+                if (SelectedBitmap == null)
+                {
+                    SelectedBitmap = new Bitmap(
+                        (int)(SelectionRectangle.Width / zoom),
+                        (int)(SelectionRectangle.Height / zoom));
+                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                    {
+                        g.Clear(Color.Transparent);
+                        Rectangle sourceRect = new Rectangle(
+                            (int)(originalSelectionRectangleLocation.X),
+                            (int)(originalSelectionRectangleLocation.Y),
+                            (int)(originalSelectionRectangleSize.Width),
+                            (int)(originalSelectionRectangleSize.Height));
+                        g.DrawImage(MainBitmap,
+                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                            sourceRect,
+                            GraphicsUnit.Pixel);
+                    }
+                }
+                SelectedBitmap = Filters.BasicFilters.OldImage(SelectedBitmap);
+            }
+            else
+            {
+                MainBitmap = Filters.BasicFilters.OldImage(MainBitmap);
+            }
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
-            CenterCanvasPanel();
         }
 
         private void cherryToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2570,12 +2698,35 @@ namespace _222303026_proje3
             {
                 artisticFilters = ArtisticFilters.None;
             }
-            MainBitmap = Filters.BasicFilters.CherryFilter(MainBitmap);
-            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
-            pictureBoxCanvas.Size = panelResizer.Size;
+            if (isSelected)
+            {
+                if (SelectedBitmap == null)
+                {
+                    SelectedBitmap = new Bitmap(
+                        (int)(SelectionRectangle.Width / zoom),
+                        (int)(SelectionRectangle.Height / zoom));
+                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                    {
+                        g.Clear(Color.Transparent);
+                        Rectangle sourceRect = new Rectangle(
+                            (int)(originalSelectionRectangleLocation.X),
+                            (int)(originalSelectionRectangleLocation.Y),
+                            (int)(originalSelectionRectangleSize.Width),
+                            (int)(originalSelectionRectangleSize.Height));
+                        g.DrawImage(MainBitmap,
+                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                            sourceRect,
+                            GraphicsUnit.Pixel);
+                    }
+                }
+                SelectedBitmap = Filters.BasicFilters.CherryFilter(SelectedBitmap);
+            }
+            else
+            {
+                MainBitmap = Filters.BasicFilters.CherryFilter(MainBitmap);
+            }
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
-            CenterCanvasPanel();
         }
 
         private void lightAddToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2585,11 +2736,35 @@ namespace _222303026_proje3
             {
                 artisticFilters = ArtisticFilters.None;
             }
-            MainBitmap = Filters.BasicFilters.LightAdd(MainBitmap);
-            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
+            if (isSelected)
+            {
+                if (SelectedBitmap == null)
+                {
+                    SelectedBitmap = new Bitmap(
+                        (int)(SelectionRectangle.Width / zoom),
+                        (int)(SelectionRectangle.Height / zoom));
+                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                    {
+                        g.Clear(Color.Transparent);
+                        Rectangle sourceRect = new Rectangle(
+                            (int)(originalSelectionRectangleLocation.X),
+                            (int)(originalSelectionRectangleLocation.Y),
+                            (int)(originalSelectionRectangleSize.Width),
+                            (int)(originalSelectionRectangleSize.Height));
+                        g.DrawImage(MainBitmap,
+                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                            sourceRect,
+                            GraphicsUnit.Pixel);
+                    }
+                }
+                SelectedBitmap = Filters.BasicFilters.LightAdd(SelectedBitmap);
+            }
+            else
+            {
+                MainBitmap = Filters.BasicFilters.LightAdd(MainBitmap);
+            }
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
-            CenterCanvasPanel();
         }
 
         private void purpleToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2599,12 +2774,35 @@ namespace _222303026_proje3
             {
                 artisticFilters = ArtisticFilters.None;
             }
-            MainBitmap = Filters.BasicFilters.PurpleEffect(MainBitmap);
-            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
-            pictureBoxCanvas.Size = panelResizer.Size;
+            if (isSelected)
+            {
+                if (SelectedBitmap == null)
+                {
+                    SelectedBitmap = new Bitmap(
+                        (int)(SelectionRectangle.Width / zoom),
+                        (int)(SelectionRectangle.Height / zoom));
+                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                    {
+                        g.Clear(Color.Transparent);
+                        Rectangle sourceRect = new Rectangle(
+                            (int)(originalSelectionRectangleLocation.X),
+                            (int)(originalSelectionRectangleLocation.Y),
+                            (int)(originalSelectionRectangleSize.Width),
+                            (int)(originalSelectionRectangleSize.Height));
+                        g.DrawImage(MainBitmap,
+                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                            sourceRect,
+                            GraphicsUnit.Pixel);
+                    }
+                }
+                SelectedBitmap = Filters.BasicFilters.PurpleEffect(SelectedBitmap);
+            }
+            else
+            {
+                MainBitmap = Filters.BasicFilters.PurpleEffect(MainBitmap);
+            }
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
-            CenterCanvasPanel();
         }
 
         private void fogToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2614,37 +2812,125 @@ namespace _222303026_proje3
             {
                 artisticFilters = ArtisticFilters.None;
             }
-            MainBitmap = Filters.BasicFilters.FogEffect(MainBitmap);
-            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
-            pictureBoxCanvas.Size = panelResizer.Size;
+            if (isSelected)
+            {
+                if (SelectedBitmap == null)
+                {
+                    SelectedBitmap = new Bitmap(
+                        (int)(SelectionRectangle.Width / zoom),
+                        (int)(SelectionRectangle.Height / zoom));
+                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                    {
+                        g.Clear(Color.Transparent);
+                        Rectangle sourceRect = new Rectangle(
+                            (int)(originalSelectionRectangleLocation.X),
+                            (int)(originalSelectionRectangleLocation.Y),
+                            (int)(originalSelectionRectangleSize.Width),
+                            (int)(originalSelectionRectangleSize.Height));
+                        g.DrawImage(MainBitmap,
+                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                            sourceRect,
+                            GraphicsUnit.Pixel);
+                    }
+                }
+                SelectedBitmap = Filters.BasicFilters.FogEffect(SelectedBitmap);
+            }
+            else
+            {
+                MainBitmap = Filters.BasicFilters.FogEffect(MainBitmap);
+            }
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
-            CenterCanvasPanel();
         }
-
         private void RefreshArtisticFiltersPreview()
         {
-            switch (artisticFilters)
+            if (isSelected)
             {
-                case ArtisticFilters.OilPainting:
-                    pictureBoxCanvas.Image = Filters.ArtisticFilters.OilPaintFilter(MainBitmap, FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity,
-                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize, (byte)FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold);
-                    break;
-                case ArtisticFilters.Cartoon:
-                    pictureBoxCanvas.Image = Filters.ArtisticFilters.CartoonFilter(MainBitmap, FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity,
-                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize, (byte)FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold);
-                    break;
+                // Create SelectedBitmap if it doesn't exist
+                if (SelectedBitmap == null)
+                {
+                    SelectedBitmap = new Bitmap(
+                        (int)(SelectionRectangle.Width / zoom),
+                        (int)(SelectionRectangle.Height / zoom));
+                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                    {
+                        g.Clear(Color.Transparent);
+                        Rectangle sourceRect = new Rectangle(
+                            (int)(originalSelectionRectangleLocation.X),
+                            (int)(originalSelectionRectangleLocation.Y),
+                            (int)(originalSelectionRectangleSize.Width),
+                            (int)(originalSelectionRectangleSize.Height));
+                        g.DrawImage(MainBitmap,
+                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                            sourceRect,
+                            GraphicsUnit.Pixel);
+                    }
+                }
+
+                // Create a temporary copy of SelectedBitmap to apply filter
+                Bitmap filteredBitmap;
+
+                switch (artisticFilters)
+                {
+                    case ArtisticFilters.OilPainting:
+                        filteredBitmap = Filters.ArtisticFilters.OilPaintFilter(SelectedBitmap,
+                            FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity,
+                            FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize,
+                            (byte)FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold);
+                        break;
+                    case ArtisticFilters.Cartoon:
+                        filteredBitmap = Filters.ArtisticFilters.CartoonFilter(SelectedBitmap,
+                            FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity,
+                            FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize,
+                            (byte)FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold);
+                        break;
+                    default:
+                        filteredBitmap = new Bitmap(SelectedBitmap);
+                        break;
+                }
+
+                // Update SelectedBitmap with filtered result
+                SelectedBitmap.Dispose();
+                SelectedBitmap = filteredBitmap;
+
+                // Keep MainBitmap as the image but update the display to show selection
+                pictureBoxCanvas.Image = MainBitmap;
             }
+            else
+            {
+                // For the entire image
+                Bitmap filteredBitmap;
+
+                switch (artisticFilters)
+                {
+                    case ArtisticFilters.OilPainting:
+                        filteredBitmap = Filters.ArtisticFilters.OilPaintFilter(MainBitmap,
+                            FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity,
+                            FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize,
+                            (byte)FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold);
+                        break;
+                    case ArtisticFilters.Cartoon:
+                        filteredBitmap = Filters.ArtisticFilters.CartoonFilter(MainBitmap,
+                            FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity,
+                            FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize,
+                            (byte)FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold);
+                        break;
+                    default:
+                        filteredBitmap = new Bitmap(MainBitmap);
+                        break;
+                }
+
+                previewBitmap = filteredBitmap;
+                pictureBoxCanvas.Image = previewBitmap;
+            }
+
             pictureBoxCanvas.Invalidate();
         }
         private void buttonArtisticFiltersOK_Click(object sender, EventArgs e)
         {
             SaveStateForUndo();
-            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
-            pictureBoxCanvas.Size = panelResizer.Size;
-            MainBitmap = pictureBoxCanvas.Image as Bitmap;
+            MainBitmap = previewBitmap;
             pictureBoxCanvas.Invalidate();
-            CenterCanvasPanel();
             toolStripArtisticFilters.Visible = false;
         }
 
@@ -2656,6 +2942,41 @@ namespace _222303026_proje3
         {
             toolStripArtisticFilters.Visible = false;
             artisticFilters = ArtisticFilters.None;
+
+            if (previewBitmap != null && previewBitmap != MainBitmap)
+            {
+                previewBitmap.Dispose();
+                previewBitmap = null;
+            }
+
+            if (isSelected && SelectedBitmap != null)
+            {
+                SelectedBitmap.Dispose();
+                SelectedBitmap = null;
+
+                if (!SelectionRectangle.IsEmpty && MainBitmap != null)
+                {
+                    SelectedBitmap = new Bitmap(
+                        (int)(SelectionRectangle.Width / zoom),
+                        (int)(SelectionRectangle.Height / zoom));
+
+                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                    {
+                        g.Clear(Color.Transparent);
+                        Rectangle sourceRect = new Rectangle(
+                            (int)(originalSelectionRectangleLocation.X),
+                            (int)(originalSelectionRectangleLocation.Y),
+                            (int)(originalSelectionRectangleSize.Width),
+                            (int)(originalSelectionRectangleSize.Height));
+
+                        g.DrawImage(MainBitmap,
+                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                            sourceRect,
+                            GraphicsUnit.Pixel);
+                    }
+                }
+            }
+
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             pictureBoxCanvas.Refresh();
@@ -3052,11 +3373,35 @@ namespace _222303026_proje3
             {
                 artisticFilters = ArtisticFilters.None;
             }
-            MainBitmap = Filters.AmbientFilters.Chloe(MainBitmap);
-            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
+            if (isSelected)
+            {
+                if (SelectedBitmap == null)
+                {
+                    SelectedBitmap = new Bitmap(
+                        (int)(SelectionRectangle.Width / zoom),
+                        (int)(SelectionRectangle.Height / zoom));
+                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                    {
+                        g.Clear(Color.Transparent);
+                        Rectangle sourceRect = new Rectangle(
+                            (int)(originalSelectionRectangleLocation.X),
+                            (int)(originalSelectionRectangleLocation.Y),
+                            (int)(originalSelectionRectangleSize.Width),
+                            (int)(originalSelectionRectangleSize.Height));
+                        g.DrawImage(MainBitmap,
+                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                            sourceRect,
+                            GraphicsUnit.Pixel);
+                    }
+                }
+                SelectedBitmap = Filters.AmbientFilters.Chloe(MainBitmap);
+            }
+            else
+            {
+                MainBitmap = Filters.AmbientFilters.Chloe(MainBitmap);
+            }
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
-            CenterCanvasPanel();
         }
 
         private void zoomInToolStripMenuItem_Click(object sender, EventArgs e)
