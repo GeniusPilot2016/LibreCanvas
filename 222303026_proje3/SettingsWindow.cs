@@ -18,9 +18,9 @@ namespace _222303026_proje3
             comboBoxTheme.SelectedIndex = Settings1.Default.PreferredTheme;
             if (!string.IsNullOrEmpty(Settings1.Default.HashedAIAPIKey))
             {
-                textBox1.Text = EncryptionHelper.DecryptString(Settings1.Default.HashedAIAPIKey);
+                textBoxGeminiAPIKey.Text = EncryptionHelper.DecryptString(Settings1.Default.HashedAIAPIKey);
                 Settings1.Default.Save();
-                button5.Enabled = true;
+                buttonResetGeminiAPIKey.Enabled = true;
             }
         }
 
@@ -37,14 +37,15 @@ namespace _222303026_proje3
 
         private void radioButton1_CheckedChanged_1(object sender, EventArgs e)
         {
-            if (radioButton1.Checked)
+            if (radioButtonShowStartup.Checked)
             {
                 Settings1.Default.ShowRecentFiles = true;
             }
-            else if (radioButton2.Checked)
+            else if (radioButtonDontShowStartup.Checked)
             {
                 Settings1.Default.ShowRecentFiles = false;
             }
+            Settings1.Default.Save(); // Save the settings to persist the changes
         }
 
         private void groupBox2_Enter(object sender, EventArgs e)
@@ -54,30 +55,30 @@ namespace _222303026_proje3
 
         private void button3_Click(object sender, EventArgs e)
         {
-            if (textBox1.UseSystemPasswordChar)
+            if (textBoxGeminiAPIKey.UseSystemPasswordChar)
             {
-                textBox1.UseSystemPasswordChar = false;
-                button3.ImageIndex = 6;
-                button3.Text = "Hide";
+                textBoxGeminiAPIKey.UseSystemPasswordChar = false;
+                buttonShowHideGeminiAPIKey.ImageIndex = 6;
+                buttonShowHideGeminiAPIKey.Text = "Hide";
             }
             else
             {
-                textBox1.UseSystemPasswordChar = true;
-                button3.ImageIndex = 5;
-                button3.Text = "Show";
+                textBoxGeminiAPIKey.UseSystemPasswordChar = true;
+                buttonShowHideGeminiAPIKey.ImageIndex = 5;
+                buttonShowHideGeminiAPIKey.Text = "Show";
             }
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(textBox1.Text) ||
-                textBox1.Text == EncryptionHelper.DecryptString(Settings1.Default.HashedAIAPIKey))
+            if (string.IsNullOrEmpty(textBoxGeminiAPIKey.Text) ||
+                textBoxGeminiAPIKey.Text == EncryptionHelper.DecryptString(Settings1.Default.HashedAIAPIKey))
             {
-                button4.Enabled = false;
+                buttonUpdateGeminiAPIKey.Enabled = false;
             }
             else
             {
-                button4.Enabled = true;
+                buttonUpdateGeminiAPIKey.Enabled = true;
             }
         }
 
@@ -85,10 +86,10 @@ namespace _222303026_proje3
         {
             try
             {
-                Settings1.Default.HashedAIAPIKey = EncryptionHelper.EncryptString(textBox1.Text);
+                Settings1.Default.HashedAIAPIKey = EncryptionHelper.EncryptString(textBoxGeminiAPIKey.Text);
                 Settings1.Default.Save(); // Save the settings to persist the changes
-                button4.Enabled = false;
-                button5.Enabled = true;
+                buttonUpdateGeminiAPIKey.Enabled = false;
+                buttonResetGeminiAPIKey.Enabled = true;
                 MessageBox.Show("Google Gemini™ API key is saved successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
@@ -103,9 +104,9 @@ namespace _222303026_proje3
             {
                 Settings1.Default.HashedAIAPIKey = string.Empty; // Clear the API key by setting it to an empty string  
                 Settings1.Default.Save(); // Save the settings to persist the changes
-                button4.Enabled = false;
-                button5.Enabled = false; // Disable the button after clearing the key  
-                textBox1.Clear(); // Clear the text box
+                buttonUpdateGeminiAPIKey.Enabled = false;
+                buttonResetGeminiAPIKey.Enabled = false; // Disable the button after clearing the key  
+                textBoxGeminiAPIKey.Clear(); // Clear the text box
                 MessageBox.Show("Google Gemini™ API key has been cleared successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
@@ -119,6 +120,88 @@ namespace _222303026_proje3
             Settings1.Default.DefaultAIGeneratedImageSize = new Size((int)numericUpDownDefaultAIGeneratedImageWidth.Value,
                 (int)numericUpDownDefaultAIGeneratedImageHeight.Value);
             Settings1.Default.Save();
+        }
+
+        private void numericUpDownDefaultRadius_ValueChanged(object sender, EventArgs e)
+        {
+            Settings1.Default.DefaultRadiusSize = (int)numericUpDownDefaultRadius.Value;
+            Settings1.Default.Save();
+        }
+
+        private void comboBoxDefaultBrushStyle_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Settings1.Default.DefaultBrushStyle = comboBoxDefaultBrushStyle.SelectedIndex;
+            Settings1.Default.Save();
+        }
+
+        private void numericUpDownDefaultBrushSize_ValueChanged(object sender, EventArgs e)
+        {
+            Settings1.Default.DefaultBrushSize = (int)numericUpDownDefaultBrushSize.Value;
+            Settings1.Default.Save();
+        }
+
+        private void numericUpDownDefaultPenSize_ValueChanged(object sender, EventArgs e)
+        {
+            Settings1.Default.DefaultPenSize = (int)numericUpDownDefaultPenSize.Value;
+            Settings1.Default.Save();
+        }
+
+        private void comboBoxDefaultPenStyle_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Settings1.Default.DefaultPenStyle = comboBoxDefaultPenStyle.SelectedIndex;
+            Settings1.Default.Save();
+        }
+
+        private void numericUpDownDefaultSpraySize_ValueChanged(object sender, EventArgs e)
+        {
+            Settings1.Default.DefaultSpraySize = (int)numericUpDownDefaultSpraySize.Value;
+            Settings1.Default.Save();
+        }
+
+        private void numericUpDownDefaultEraserSize_ValueChanged(object sender, EventArgs e)
+        {
+            Settings1.Default.DefaultEraserSize = (int)numericUpDownDefaultEraserSize.Value;
+            Settings1.Default.Save();
+        }
+
+        private void numericUpDownDefaultShapeSize_ValueChanged(object sender, EventArgs e)
+        {
+            Settings1.Default.DefaultShapeSize = (int)numericUpDownDefaultShapeSize.Value;
+            Settings1.Default.Save();
+        }
+
+        private void numericUpDownDefaultTextSize_ValueChanged(object sender, EventArgs e)
+        {
+            Settings1.Default.DefaultTextSize = (int)numericUpDownDefaultTextSize.Value;
+            Settings1.Default.Save();
+        }
+
+        private void numericUpDownDefaultBucketTolerance_ValueChanged(object sender, EventArgs e)
+        {
+            Settings1.Default.DefaultBucketTolerance = (int)numericUpDownDefaultBucketTolerance.Value;
+            Settings1.Default.Save();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            colorDialog1.Color = Settings1.Default.PrimaryColor;
+            if (colorDialog1.ShowDialog() == DialogResult.OK)
+            {
+                Settings1.Default.PrimaryColor = colorDialog1.Color;
+                panelPrimaryColorPreview.BackColor = colorDialog1.Color;
+                Settings1.Default.Save();
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            colorDialog1.Color = Settings1.Default.SecondaryColor;
+            if (colorDialog1.ShowDialog() == DialogResult.OK)
+            {
+                Settings1.Default.SecondaryColor = colorDialog1.Color;
+                panelSecondaryColorPreview.BackColor = colorDialog1.Color;
+                Settings1.Default.Save();
+            }
         }
     }
 }

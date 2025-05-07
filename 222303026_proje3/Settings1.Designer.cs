@@ -213,5 +213,29 @@ namespace _222303026_proje3 {
                 this["DefaultAIGeneratedImageSize"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("9")]
+        public int DefaultRadiusSize {
+            get {
+                return ((int)(this["DefaultRadiusSize"]));
+            }
+            set {
+                this["DefaultRadiusSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("50")]
+        public int DefaultBucketTolerance {
+            get {
+                return ((int)(this["DefaultBucketTolerance"]));
+            }
+            set {
+                this["DefaultBucketTolerance"] = value;
+            }
+        }
     }
 }

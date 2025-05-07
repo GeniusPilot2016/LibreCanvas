@@ -19,6 +19,8 @@ namespace _222303026_proje3
         public CreateWithAIForm()
         {
             InitializeComponent();
+            numericUpDownWidth.Value = Settings1.Default.DefaultAIGeneratedImageSize.Width;
+            numericUpDownHeight.Value = Settings1.Default.DefaultAIGeneratedImageSize.Height;
         }
         private void EnableDisableControls(bool enabled)
         {

@@ -11,6 +11,15 @@ namespace _222303026_proje3
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
+            switch(Settings1.Default.ShowRecentFiles)
+            {
+                case true:
+                    Application.Run(new MainForm());
+                    break;
+                case false:
+                    Application.Run(new ImageEditor());
+                    break;
+            }
             Application.Run(new MainForm());
         }
     }

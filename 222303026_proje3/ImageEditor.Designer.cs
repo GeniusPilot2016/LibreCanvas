@@ -238,7 +238,7 @@
             // toolStripContainer1.ContentPanel
             // 
             toolStripContainer1.ContentPanel.Controls.Add(UIPanel);
-            toolStripContainer1.ContentPanel.Size = new Size(1250, 759);
+            toolStripContainer1.ContentPanel.Size = new Size(1250, 731);
             toolStripContainer1.Dock = DockStyle.Fill;
             // 
             // toolStripContainer1.LeftToolStripPanel
@@ -365,7 +365,7 @@
             UIPanel.Dock = DockStyle.Fill;
             UIPanel.Location = new Point(0, 0);
             UIPanel.Name = "UIPanel";
-            UIPanel.Size = new Size(1250, 759);
+            UIPanel.Size = new Size(1250, 731);
             UIPanel.TabIndex = 3;
             UIPanel.Click += panel1_Click;
             UIPanel.Paint += panel1_Paint;
@@ -384,7 +384,7 @@
             canvasPanel.Controls.Add(resize_top);
             canvasPanel.Controls.Add(pictureBoxCanvas);
             canvasPanel.Controls.Add(panelResizer);
-            canvasPanel.Location = new Point(228, 86);
+            canvasPanel.Location = new Point(228, 72);
             canvasPanel.Name = "canvasPanel";
             canvasPanel.Size = new Size(820, 620);
             canvasPanel.TabIndex = 2;
@@ -546,7 +546,7 @@
             toolStripTools.Items.AddRange(new ToolStripItem[] { mouseTool, toolStripSeparator11, selectTool, magicSelectTool, toolStripSeparator10, brushTool, penTool, eraserTool, bucketTool, sprayTool, addTextTool, drawShapeTool, toolStripSeparator6, createWithAITool, colorDropTool, zoomTool, toolStripSeparator9, foregroundColorButton, backgroundColorButton, toolStripSeparator7, pasteTool, copyTool, cutTool, toolStripButton9 });
             toolStripTools.Location = new Point(0, 0);
             toolStripTools.Name = "toolStripTools";
-            toolStripTools.Size = new Size(39, 759);
+            toolStripTools.Size = new Size(39, 731);
             toolStripTools.Stretch = true;
             toolStripTools.TabIndex = 0;
             // 
@@ -594,6 +594,7 @@
             magicSelectTool.Size = new Size(37, 24);
             magicSelectTool.Tag = "";
             magicSelectTool.Text = "Magic Selection";
+            magicSelectTool.Visible = false;
             magicSelectTool.CheckedChanged += magicSelectTool_CheckedChanged;
             magicSelectTool.Click += magicSelectTool_Click;
             // 
@@ -764,6 +765,7 @@
             createWithAITool.Name = "createWithAITool";
             createWithAITool.Size = new Size(37, 24);
             createWithAITool.Text = "AI Tools";
+            createWithAITool.Visible = false;
             createWithAITool.Click += createWithAITool_Click;
             // 
             // createImageToolStripMenuItem1
@@ -1099,14 +1101,14 @@
             filtersToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { mirrorToolStripMenuItem, flashToolStripMenuItem, frozenToolStripMenuItem, winterToolStripMenuItem, blackAndWhiteToolStripMenuItem, oldPictureToolStripMenuItem, cherryToolStripMenuItem, lightAddToolStripMenuItem, purpleToolStripMenuItem, fogToolStripMenuItem });
             filtersToolStripMenuItem.Image = Properties.Resources.icons8_photo_gallery_48;
             filtersToolStripMenuItem.Name = "filtersToolStripMenuItem";
-            filtersToolStripMenuItem.Size = new Size(224, 26);
+            filtersToolStripMenuItem.Size = new Size(198, 26);
             filtersToolStripMenuItem.Text = "Basic Filters";
             // 
             // mirrorToolStripMenuItem
             // 
             mirrorToolStripMenuItem.Image = Properties.Resources.icons8_reflection_48;
             mirrorToolStripMenuItem.Name = "mirrorToolStripMenuItem";
-            mirrorToolStripMenuItem.Size = new Size(224, 26);
+            mirrorToolStripMenuItem.Size = new Size(204, 26);
             mirrorToolStripMenuItem.Text = "Mirror";
             mirrorToolStripMenuItem.Click += mirrorToolStripMenuItem_Click;
             // 
@@ -1114,7 +1116,7 @@
             // 
             flashToolStripMenuItem.Image = Properties.Resources.icons8_flash_48;
             flashToolStripMenuItem.Name = "flashToolStripMenuItem";
-            flashToolStripMenuItem.Size = new Size(224, 26);
+            flashToolStripMenuItem.Size = new Size(204, 26);
             flashToolStripMenuItem.Text = "Flash";
             flashToolStripMenuItem.Click += flashToolStripMenuItem_Click;
             // 
@@ -1122,7 +1124,7 @@
             // 
             frozenToolStripMenuItem.Image = Properties.Resources.icons8_icy_48;
             frozenToolStripMenuItem.Name = "frozenToolStripMenuItem";
-            frozenToolStripMenuItem.Size = new Size(224, 26);
+            frozenToolStripMenuItem.Size = new Size(204, 26);
             frozenToolStripMenuItem.Text = "Frozen";
             frozenToolStripMenuItem.Click += frozenToolStripMenuItem_Click;
             // 
@@ -1130,7 +1132,7 @@
             // 
             winterToolStripMenuItem.Image = Properties.Resources.icons8_winter_48;
             winterToolStripMenuItem.Name = "winterToolStripMenuItem";
-            winterToolStripMenuItem.Size = new Size(224, 26);
+            winterToolStripMenuItem.Size = new Size(204, 26);
             winterToolStripMenuItem.Text = "Winter";
             winterToolStripMenuItem.Click += winterToolStripMenuItem_Click;
             // 
@@ -1138,7 +1140,7 @@
             // 
             blackAndWhiteToolStripMenuItem.Image = Properties.Resources.icons8_black_and_white_48;
             blackAndWhiteToolStripMenuItem.Name = "blackAndWhiteToolStripMenuItem";
-            blackAndWhiteToolStripMenuItem.Size = new Size(224, 26);
+            blackAndWhiteToolStripMenuItem.Size = new Size(204, 26);
             blackAndWhiteToolStripMenuItem.Text = "Black and White";
             blackAndWhiteToolStripMenuItem.Click += blackAndWhiteToolStripMenuItem_Click;
             // 
@@ -1146,7 +1148,7 @@
             // 
             oldPictureToolStripMenuItem.Image = Properties.Resources.icons8_old_fashioned_family_photo_48;
             oldPictureToolStripMenuItem.Name = "oldPictureToolStripMenuItem";
-            oldPictureToolStripMenuItem.Size = new Size(224, 26);
+            oldPictureToolStripMenuItem.Size = new Size(204, 26);
             oldPictureToolStripMenuItem.Text = "Old Picture";
             oldPictureToolStripMenuItem.Click += oldPictureToolStripMenuItem_Click;
             // 
@@ -1154,7 +1156,7 @@
             // 
             cherryToolStripMenuItem.Image = Properties.Resources.icons8_cherry_48;
             cherryToolStripMenuItem.Name = "cherryToolStripMenuItem";
-            cherryToolStripMenuItem.Size = new Size(224, 26);
+            cherryToolStripMenuItem.Size = new Size(204, 26);
             cherryToolStripMenuItem.Text = "Cherry";
             cherryToolStripMenuItem.Click += cherryToolStripMenuItem_Click;
             // 
@@ -1162,7 +1164,7 @@
             // 
             lightAddToolStripMenuItem.Image = Properties.Resources.icons8_light_48;
             lightAddToolStripMenuItem.Name = "lightAddToolStripMenuItem";
-            lightAddToolStripMenuItem.Size = new Size(224, 26);
+            lightAddToolStripMenuItem.Size = new Size(204, 26);
             lightAddToolStripMenuItem.Text = "Light add";
             lightAddToolStripMenuItem.Click += lightAddToolStripMenuItem_Click;
             // 
@@ -1170,7 +1172,7 @@
             // 
             purpleToolStripMenuItem.Image = Properties.Resources.icons8_lavender_48;
             purpleToolStripMenuItem.Name = "purpleToolStripMenuItem";
-            purpleToolStripMenuItem.Size = new Size(224, 26);
+            purpleToolStripMenuItem.Size = new Size(204, 26);
             purpleToolStripMenuItem.Text = "Purple";
             purpleToolStripMenuItem.Click += purpleToolStripMenuItem_Click;
             // 
@@ -1178,7 +1180,7 @@
             // 
             fogToolStripMenuItem.Image = Properties.Resources.icons8_fog_48;
             fogToolStripMenuItem.Name = "fogToolStripMenuItem";
-            fogToolStripMenuItem.Size = new Size(224, 26);
+            fogToolStripMenuItem.Size = new Size(204, 26);
             fogToolStripMenuItem.Text = "Fog";
             fogToolStripMenuItem.Click += fogToolStripMenuItem_Click;
             // 
@@ -1187,7 +1189,7 @@
             artisticFiltersToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { cartoonToolStripMenuItem, oilPaintingToolStripMenuItem });
             artisticFiltersToolStripMenuItem.Image = Properties.Resources.icons8_art_48;
             artisticFiltersToolStripMenuItem.Name = "artisticFiltersToolStripMenuItem";
-            artisticFiltersToolStripMenuItem.Size = new Size(224, 26);
+            artisticFiltersToolStripMenuItem.Size = new Size(198, 26);
             artisticFiltersToolStripMenuItem.Text = "Artistic Filters";
             // 
             // cartoonToolStripMenuItem
@@ -1211,14 +1213,14 @@
             ambientFiltersToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { chloeToolStripMenuItem });
             ambientFiltersToolStripMenuItem.Image = Properties.Resources.icons8_spa_candle_48;
             ambientFiltersToolStripMenuItem.Name = "ambientFiltersToolStripMenuItem";
-            ambientFiltersToolStripMenuItem.Size = new Size(224, 26);
+            ambientFiltersToolStripMenuItem.Size = new Size(198, 26);
             ambientFiltersToolStripMenuItem.Text = "Ambient Filters";
             // 
             // chloeToolStripMenuItem
             // 
             chloeToolStripMenuItem.Image = Properties.Resources.icons8_lipstick_48;
             chloeToolStripMenuItem.Name = "chloeToolStripMenuItem";
-            chloeToolStripMenuItem.Size = new Size(224, 26);
+            chloeToolStripMenuItem.Size = new Size(132, 26);
             chloeToolStripMenuItem.Text = "Chloe";
             chloeToolStripMenuItem.Click += chloeToolStripMenuItem_Click;
             // 
@@ -1540,7 +1542,7 @@
             toolStripShapes.Items.AddRange(new ToolStripItem[] { toolStripLabel13, comboBoxShapeThickness, toolStripSeparator24, labelRadius, textBoxRadius, toolStripSeparator26, labelPoint, textBoxPoints });
             toolStripShapes.Location = new Point(0, 28);
             toolStripShapes.Name = "toolStripShapes";
-            toolStripShapes.Size = new Size(342, 28);
+            toolStripShapes.Size = new Size(1289, 28);
             toolStripShapes.Stretch = true;
             toolStripShapes.TabIndex = 6;
             toolStripShapes.Visible = false;
