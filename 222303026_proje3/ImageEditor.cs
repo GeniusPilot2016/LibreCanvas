@@ -17,7 +17,7 @@ namespace _222303026_proje3
         int brushSize = 11, penSize = 9, eraserSize = 11, sprayToolSize = 11, shapeThickness = 11, radius = 9, points = 6, tolerance = 50;
         float textSize = 9;
         float zoom = 1;
-        bool isResizing = false, isSelected = false;
+        bool isResizing = false, isSelected = false, backgroundFilling = false;
         private ResizeDirection resizeDirection;
         private BasicFilters basicFilters;
         private ArtisticFilters artisticFilters;
@@ -30,6 +30,13 @@ namespace _222303026_proje3
         Rectangle SelectionRectangle = new Rectangle();
         Point SelectionStartPoint;
         FontStyle fontStyle = FontStyle.Regular;
+        private TextToolAlign textToolAlign = TextToolAlign.Left;
+        enum TextToolAlign
+        {
+            Left,
+            Middle,
+            Right
+        }
         enum BasicFilters
         {
             None,
@@ -1753,8 +1760,12 @@ namespace _222303026_proje3
                             Multiline = true, // Çok satýrlý metin desteði  
                             WordWrap = true, // Metni sarmayý etkinleþtirin  
                             Font = new Font(fontsComboBox.Text, textSize, fontStyle), // Yazý tipi ayarý  
-                            BorderStyle = BorderStyle.FixedSingle // Kenarlýk stili  
+                            BorderStyle = BorderStyle.FixedSingle // Kenarlýk stili 
                         };
+                        if (backgroundFilling == true)
+                        {
+                            textBox.BackColor = color2;
+                        }
                         textBox.Location = new Point(
                             Math.Min(clickedX, pictureBoxCanvas.Width - textBox.Width),
                             Math.Min(clickedY, pictureBoxCanvas.Height - textBox.Height)
@@ -1795,13 +1806,29 @@ namespace _222303026_proje3
 
                         textBox.LostFocus += (s, args) =>
                         {
-                            if(isSelected && !SelectionRectangle.IsEmpty && SelectedBitmap!=null)
+                            if (isSelected && !SelectionRectangle.IsEmpty && SelectedBitmap != null)
                             {
                                 // Draw the TextBox content onto the bitmap  
                                 using (Graphics graphics = Graphics.FromImage(SelectedBitmap))
                                 {
+                                    if (backgroundFilling && !string.IsNullOrEmpty(textBox.Text))
+                                    {
+                                        // Draw background rectangle
+                                        RectangleF backgroundRect = new RectangleF(
+                                            (int)Math.Round(textBox.Location.X / zoom) - SelectionRectangle.X,
+                                            (int)Math.Round(textBox.Location.Y / zoom) - SelectionRectangle.Y,
+                                            textBox.Width / zoom,
+                                            textBox.Height / zoom
+                                        );
+                                        using (Brush backgroundBrush = new SolidBrush(color2))
+                                        {
+                                            graphics.FillRectangle(backgroundBrush, backgroundRect);
+                                        }
+                                    }
+
+                                    // Draw the text
                                     graphics.DrawString(textBox.Text, textBox.Font, new SolidBrush(color1),
-                                        (int)Math.Round(textBox.Location.X / zoom) - SelectionRectangle.X, 
+                                        (int)Math.Round(textBox.Location.X / zoom) - SelectionRectangle.X,
                                         (int)Math.Round(textBox.Location.Y / zoom) - SelectionRectangle.Y);
                                 }
                                 MergeMainBitmapWithSelected();
@@ -1811,10 +1838,27 @@ namespace _222303026_proje3
                                 // Draw the TextBox content onto the bitmap  
                                 using (Graphics graphics = Graphics.FromImage(MainBitmap))
                                 {
+                                    if (backgroundFilling && !string.IsNullOrEmpty(textBox.Text))
+                                    {
+                                        // Draw background rectangle
+                                        RectangleF backgroundRect = new RectangleF(
+                                            (int)Math.Round(textBox.Location.X / zoom),
+                                            (int)Math.Round(textBox.Location.Y / zoom),
+                                            textBox.Width / zoom,
+                                            textBox.Height / zoom
+                                        );
+                                        using (Brush backgroundBrush = new SolidBrush(color2))
+                                        {
+                                            graphics.FillRectangle(backgroundBrush, backgroundRect);
+                                        }
+                                    }
+
+                                    // Draw the text
                                     graphics.DrawString(textBox.Text, textBox.Font, new SolidBrush(color1),
                                         (int)Math.Round(textBox.Location.X / zoom), (int)Math.Round(textBox.Location.Y / zoom));
                                 }
                             }
+
                             // Remove the TextBox from the canvas  
                             pictureBoxCanvas.Controls.Remove(textBox);
 
@@ -3491,7 +3535,7 @@ namespace _222303026_proje3
 
         private void buttonStrikeout_CheckedChanged(object sender, EventArgs e)
         {
-            if (buttonStrikeout.Checked) 
+            if (buttonStrikeout.Checked)
             {
                 fontStyle |= FontStyle.Strikeout;
             }
@@ -3499,6 +3543,35 @@ namespace _222303026_proje3
             {
                 fontStyle &= ~FontStyle.Strikeout;
             }
+        }
+
+        private void buttonAlignLeft_Click(object sender, EventArgs e)
+        {
+            textToolAlign = TextToolAlign.Left;
+            buttonAlignLeft.Checked = true;
+            buttonAlignMiddle.Checked = false;
+            buttonAlignRight.Checked = false;
+        }
+
+        private void buttonAlignMiddle_Click(object sender, EventArgs e)
+        {
+            textToolAlign = TextToolAlign.Middle;
+            buttonAlignMiddle.Checked = true;
+            buttonAlignLeft.Checked = false;
+            buttonAlignRight.Checked = false;
+        }
+
+        private void buttonAlignRight_Click(object sender, EventArgs e)
+        {
+            textToolAlign = TextToolAlign.Right;
+            buttonAlignRight.Checked = true;
+            buttonAlignLeft.Checked = false;
+            buttonAlignMiddle.Checked = false;
+        }
+
+        private void buttonBackgroundFilling_CheckedChanged(object sender, EventArgs e)
+        {
+            backgroundFilling = buttonBackgroundFilling.Checked;
         }
     }
     public partial class CreateWithAIForm : Form

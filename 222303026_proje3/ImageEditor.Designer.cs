@@ -238,7 +238,7 @@
             // toolStripContainer1.ContentPanel
             // 
             toolStripContainer1.ContentPanel.Controls.Add(UIPanel);
-            toolStripContainer1.ContentPanel.Size = new Size(1250, 731);
+            toolStripContainer1.ContentPanel.Size = new Size(1250, 759);
             toolStripContainer1.Dock = DockStyle.Fill;
             // 
             // toolStripContainer1.LeftToolStripPanel
@@ -365,7 +365,7 @@
             UIPanel.Dock = DockStyle.Fill;
             UIPanel.Location = new Point(0, 0);
             UIPanel.Name = "UIPanel";
-            UIPanel.Size = new Size(1250, 731);
+            UIPanel.Size = new Size(1250, 759);
             UIPanel.TabIndex = 3;
             UIPanel.Click += panel1_Click;
             UIPanel.Paint += panel1_Paint;
@@ -384,7 +384,7 @@
             canvasPanel.Controls.Add(resize_top);
             canvasPanel.Controls.Add(pictureBoxCanvas);
             canvasPanel.Controls.Add(panelResizer);
-            canvasPanel.Location = new Point(228, 74);
+            canvasPanel.Location = new Point(228, 88);
             canvasPanel.Name = "canvasPanel";
             canvasPanel.Size = new Size(820, 620);
             canvasPanel.TabIndex = 2;
@@ -546,7 +546,7 @@
             toolStripTools.Items.AddRange(new ToolStripItem[] { mouseTool, toolStripSeparator11, selectTool, magicSelectTool, toolStripSeparator10, brushTool, penTool, eraserTool, bucketTool, sprayTool, addTextTool, drawShapeTool, toolStripSeparator6, createWithAITool, colorDropTool, zoomTool, toolStripSeparator9, foregroundColorButton, backgroundColorButton, toolStripSeparator7, pasteTool, copyTool, cutTool, toolStripButton9 });
             toolStripTools.Location = new Point(0, 0);
             toolStripTools.Name = "toolStripTools";
-            toolStripTools.Size = new Size(39, 731);
+            toolStripTools.Size = new Size(39, 759);
             toolStripTools.Stretch = true;
             toolStripTools.TabIndex = 0;
             // 
@@ -1316,6 +1316,7 @@
             toolStripText.Size = new Size(1289, 28);
             toolStripText.Stretch = true;
             toolStripText.TabIndex = 11;
+            toolStripText.Visible = false;
             // 
             // toolStripLabel3
             // 
@@ -1329,6 +1330,8 @@
             fontSizeComboBox.Name = "fontSizeComboBox";
             fontSizeComboBox.Size = new Size(75, 28);
             fontSizeComboBox.Text = "11";
+            fontSizeComboBox.SelectedIndexChanged += fontSizeComboBox_TextChanged;
+            fontSizeComboBox.TextChanged += fontSizeComboBox_TextChanged;
             // 
             // toolStripSeparator8
             // 
@@ -1411,12 +1414,15 @@
             // 
             // buttonAlignLeft
             // 
+            buttonAlignLeft.Checked = true;
+            buttonAlignLeft.CheckState = CheckState.Checked;
             buttonAlignLeft.DisplayStyle = ToolStripItemDisplayStyle.Image;
             buttonAlignLeft.Image = Properties.Resources.icons8_align_left_48;
             buttonAlignLeft.ImageTransparentColor = Color.Magenta;
             buttonAlignLeft.Name = "buttonAlignLeft";
             buttonAlignLeft.Size = new Size(29, 25);
             buttonAlignLeft.Text = "Align to left";
+            buttonAlignLeft.Click += buttonAlignLeft_Click;
             // 
             // buttonAlignMiddle
             // 
@@ -1426,6 +1432,7 @@
             buttonAlignMiddle.Name = "buttonAlignMiddle";
             buttonAlignMiddle.Size = new Size(29, 25);
             buttonAlignMiddle.Text = "Align to middle";
+            buttonAlignMiddle.Click += buttonAlignMiddle_Click;
             // 
             // buttonAlignRight
             // 
@@ -1435,6 +1442,7 @@
             buttonAlignRight.Name = "buttonAlignRight";
             buttonAlignRight.Size = new Size(29, 25);
             buttonAlignRight.Text = "Align to right";
+            buttonAlignRight.Click += buttonAlignRight_Click;
             // 
             // toolStripSeparator20
             // 
@@ -1449,6 +1457,7 @@
             buttonBackgroundFilling.Name = "buttonBackgroundFilling";
             buttonBackgroundFilling.Size = new Size(163, 25);
             buttonBackgroundFilling.Text = "Background Filling";
+            buttonBackgroundFilling.CheckedChanged += buttonBackgroundFilling_CheckedChanged;
             // 
             // toolStripBrush
             // 
