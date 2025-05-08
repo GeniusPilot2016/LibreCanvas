@@ -20,7 +20,6 @@ namespace _222303026_proje3
                     Application.Run(new ImageEditor());
                     break;
             }
-            Application.Run(new MainForm());
         }
     }
 }

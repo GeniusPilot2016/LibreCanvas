@@ -29,6 +29,7 @@ namespace _222303026_proje3
         Bitmap SelectedBitmap;
         Rectangle SelectionRectangle = new Rectangle();
         Point SelectionStartPoint;
+        FontStyle fontStyle = FontStyle.Regular;
         enum BasicFilters
         {
             None,
@@ -1751,7 +1752,7 @@ namespace _222303026_proje3
                             AutoSize = false, // Otomatik boyutlandýrmayý devre dýþý býrakýn  
                             Multiline = true, // Çok satýrlý metin desteði  
                             WordWrap = true, // Metni sarmayý etkinleþtirin  
-                            Font = new Font(fontsComboBox.Text, textSize), // Yazý tipi ayarý  
+                            Font = new Font(fontsComboBox.Text, textSize, fontStyle), // Yazý tipi ayarý  
                             BorderStyle = BorderStyle.FixedSingle // Kenarlýk stili  
                         };
                         textBox.Location = new Point(
@@ -1794,12 +1795,26 @@ namespace _222303026_proje3
 
                         textBox.LostFocus += (s, args) =>
                         {
-                            // Draw the TextBox content onto the bitmap  
-                            using (Graphics graphics = Graphics.FromImage(MainBitmap))
+                            if(isSelected && !SelectionRectangle.IsEmpty && SelectedBitmap!=null)
                             {
-                                graphics.DrawString(textBox.Text, textBox.Font, new SolidBrush(color1), textBox.Location);
+                                // Draw the TextBox content onto the bitmap  
+                                using (Graphics graphics = Graphics.FromImage(SelectedBitmap))
+                                {
+                                    graphics.DrawString(textBox.Text, textBox.Font, new SolidBrush(color1),
+                                        (int)Math.Round(textBox.Location.X / zoom) - SelectionRectangle.X, 
+                                        (int)Math.Round(textBox.Location.Y / zoom) - SelectionRectangle.Y);
+                                }
+                                MergeMainBitmapWithSelected();
                             }
-
+                            else
+                            {
+                                // Draw the TextBox content onto the bitmap  
+                                using (Graphics graphics = Graphics.FromImage(MainBitmap))
+                                {
+                                    graphics.DrawString(textBox.Text, textBox.Font, new SolidBrush(color1),
+                                        (int)Math.Round(textBox.Location.X / zoom), (int)Math.Round(textBox.Location.Y / zoom));
+                                }
+                            }
                             // Remove the TextBox from the canvas  
                             pictureBoxCanvas.Controls.Remove(textBox);
 
@@ -1818,36 +1833,6 @@ namespace _222303026_proje3
                                 textBox.Width = Math.Max((int)textSize.Width + 10, textBox.MinimumSize.Width);
                                 textBox.Height = Math.Max((int)textSize.Height + 10, textBox.MinimumSize.Height);
                             }
-                        };
-                        textBox.TextChanged += (s, args) =>
-                        {
-                            // Measure the size of the text, including multi-line text  
-                            Size textSize = TextRenderer.MeasureText(
-                                textBox.Text,
-                                textBox.Font,
-                                new Size(textBox.Width, int.MaxValue), // Allow wrapping by setting a maximum height  
-                                TextFormatFlags.WordBreak // Enable word wrapping  
-                            );
-
-                            // Adjust the TextBox's height based on the measured size  
-                            textBox.Height = Math.Max(textSize.Height + 5, textBox.MinimumSize.Height); // Add padding  
-                        };
-
-                        // TextBox'tan odak kaybolduðunda iþlemi tamamlayýn  
-                        textBox.LostFocus += (s, args) =>
-                        {
-                            // TextBox içeriðini bitmap'e çiz  
-                            using (Graphics graphics = Graphics.FromImage(MainBitmap))
-                            {
-                                graphics.DrawString(textBox.Text, textBox.Font, new SolidBrush(color1), textBox.Location);
-                            }
-
-                            // TextBox'ý kaldýr  
-                            pictureBoxCanvas.Controls.Remove(textBox);
-
-                            // Canvas'ý güncelle  
-                            pictureBoxCanvas.Image = MainBitmap;
-                            pictureBoxCanvas.Invalidate();
                         };
                     }
                     break;
@@ -2406,7 +2391,7 @@ namespace _222303026_proje3
                 {
                     CancelArtisticFilters();
                 }
-                
+
                 using (Graphics g = Graphics.FromImage(MainBitmap))
                 {
                     g.InterpolationMode = InterpolationMode.HighQualityBicubic;
@@ -2433,7 +2418,7 @@ namespace _222303026_proje3
             // Seçim durumunu sýfýrlayýn
             SelectionRectangle = Rectangle.Empty;
             isSelected = false;
-            if(artisticFilters == ArtisticFilters.None)
+            if (artisticFilters == ArtisticFilters.None)
             {
                 pictureBoxCanvas.Image = MainBitmap;
             }
@@ -2441,7 +2426,7 @@ namespace _222303026_proje3
             {
                 pictureBoxCanvas.Image = previewBitmap;
             }
-                pictureBoxCanvas.Invalidate();
+            pictureBoxCanvas.Invalidate();
         }
 
         private void toolStripTextBox1_TextChanged(object sender, EventArgs e)
@@ -3466,6 +3451,54 @@ namespace _222303026_proje3
             CenterCanvasPanel();
             pictureBoxCanvas.Invalidate(); // Yeniden çizim için tetikleyin
             labelZoom.Text = $"{(int)Math.Round(zoom * 100)}%";
+        }
+
+        private void buttonBold_CheckedChanged(object sender, EventArgs e)
+        {
+            if (buttonBold.Checked)
+            {
+                fontStyle |= FontStyle.Bold;
+            }
+            else
+            {
+                fontStyle &= ~FontStyle.Bold;
+            }
+        }
+
+        private void buttonItalic_CheckedChanged(object sender, EventArgs e)
+        {
+            if (buttonItalic.Checked)
+            {
+                fontStyle |= FontStyle.Italic;
+            }
+            else
+            {
+                fontStyle &= ~FontStyle.Italic;
+            }
+        }
+
+        private void buttonUnderline_CheckedChanged(object sender, EventArgs e)
+        {
+            if (buttonUnderline.Checked)
+            {
+                fontStyle |= FontStyle.Underline;
+            }
+            else
+            {
+                fontStyle &= ~FontStyle.Underline;
+            }
+        }
+
+        private void buttonStrikeout_CheckedChanged(object sender, EventArgs e)
+        {
+            if (buttonStrikeout.Checked) 
+            {
+                fontStyle |= FontStyle.Strikeout;
+            }
+            else
+            {
+                fontStyle &= ~FontStyle.Strikeout;
+            }
         }
     }
     public partial class CreateWithAIForm : Form
