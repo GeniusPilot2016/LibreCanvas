@@ -1739,6 +1739,42 @@ namespace _222303026_proje3
         {
 
         }
+        private StringAlignment GetHorizontalAlignment(HorizontalAlignment alignment)
+        {
+            return alignment switch
+            {
+                HorizontalAlignment.Left => StringAlignment.Near,
+                HorizontalAlignment.Center => StringAlignment.Center,
+                HorizontalAlignment.Right => StringAlignment.Far,
+                _ => StringAlignment.Near
+            };
+        }
+
+        private PointF GetAlignedTextPosition(TextBox textBox, float zoom, Rectangle selectionRectangle)
+        {
+            // Calculate the base position
+            float x = (float)Math.Round(textBox.Location.X / zoom) - selectionRectangle.X;
+            float y = (float)Math.Round(textBox.Location.Y / zoom) - selectionRectangle.Y;
+
+            // Measure the size of the text
+            using (Graphics g = Graphics.FromImage(MainBitmap))
+            {
+                SizeF textSize = g.MeasureString(textBox.Text, textBox.Font);
+
+                // Adjust the x-coordinate based on the alignment
+                switch (textBox.TextAlign)
+                {
+                    case HorizontalAlignment.Center:
+                        x += textSize.Width / 2;
+                        break;
+                    case HorizontalAlignment.Right:
+                        x += textSize.Width;
+                        break;
+                }
+            }
+
+            return new PointF(x, y);
+        }
 
         private void pictureBoxCanvas_Click(object sender, EventArgs e)
         {
@@ -1762,6 +1798,21 @@ namespace _222303026_proje3
                             Font = new Font(fontsComboBox.Text, textSize, fontStyle), // Yazý tipi ayarý  
                             BorderStyle = BorderStyle.FixedSingle // Kenarlýk stili 
                         };
+                        switch (textToolAlign)
+                        {
+                            case TextToolAlign.Left:
+                                textBox.TextAlign = HorizontalAlignment.Left; 
+                                break;
+                            case TextToolAlign.Middle:
+                                textBox.TextAlign = HorizontalAlignment.Center;
+                                break;
+                            case TextToolAlign.Right:
+                                textBox.TextAlign = HorizontalAlignment.Right;
+                                break;
+                            default:
+                                textBox.TextAlign = HorizontalAlignment.Left;
+                                break;
+                        }
                         if (backgroundFilling == true)
                         {
                             textBox.BackColor = color2;
@@ -1827,9 +1878,17 @@ namespace _222303026_proje3
                                     }
 
                                     // Draw the text
-                                    graphics.DrawString(textBox.Text, textBox.Font, new SolidBrush(color1),
-                                        (int)Math.Round(textBox.Location.X / zoom) - SelectionRectangle.X,
-                                        (int)Math.Round(textBox.Location.Y / zoom) - SelectionRectangle.Y);
+                                    graphics.DrawString(
+                                    textBox.Text,
+                                    textBox.Font,
+                                    new SolidBrush(color1),
+                                    GetAlignedTextPosition(textBox, zoom, SelectionRectangle),
+                                    new StringFormat
+                                    {
+                                        Alignment = GetHorizontalAlignment(textBox.TextAlign),
+                                        LineAlignment = StringAlignment.Near // Adjust for vertical alignment if needed
+                                    });
+
                                 }
                                 MergeMainBitmapWithSelected();
                             }
@@ -1854,8 +1913,17 @@ namespace _222303026_proje3
                                     }
 
                                     // Draw the text
-                                    graphics.DrawString(textBox.Text, textBox.Font, new SolidBrush(color1),
-                                        (int)Math.Round(textBox.Location.X / zoom), (int)Math.Round(textBox.Location.Y / zoom));
+                                    graphics.DrawString(
+                                    textBox.Text,
+                                    textBox.Font,
+                                    new SolidBrush(color1),
+                                    GetAlignedTextPosition(textBox, zoom, SelectionRectangle),
+                                    new StringFormat
+                                    {
+                                        Alignment = GetHorizontalAlignment(textBox.TextAlign),
+                                        LineAlignment = StringAlignment.Near // Adjust for vertical alignment if needed
+                                    });
+
                                 }
                             }
 

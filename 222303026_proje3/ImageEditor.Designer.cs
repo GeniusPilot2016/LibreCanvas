@@ -238,7 +238,7 @@
             // toolStripContainer1.ContentPanel
             // 
             toolStripContainer1.ContentPanel.Controls.Add(UIPanel);
-            toolStripContainer1.ContentPanel.Size = new Size(1250, 759);
+            toolStripContainer1.ContentPanel.Size = new Size(1250, 731);
             toolStripContainer1.Dock = DockStyle.Fill;
             // 
             // toolStripContainer1.LeftToolStripPanel
@@ -253,11 +253,11 @@
             // toolStripContainer1.TopToolStripPanel
             // 
             toolStripContainer1.TopToolStripPanel.Controls.Add(menuStrip1);
+            toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripShapes);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripPen);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripText);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripBrush);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripEraser);
-            toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripShapes);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripSpray);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripAirBrush);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripBucketTool);
@@ -365,7 +365,7 @@
             UIPanel.Dock = DockStyle.Fill;
             UIPanel.Location = new Point(0, 0);
             UIPanel.Name = "UIPanel";
-            UIPanel.Size = new Size(1250, 759);
+            UIPanel.Size = new Size(1250, 731);
             UIPanel.TabIndex = 3;
             UIPanel.Click += panel1_Click;
             UIPanel.Paint += panel1_Paint;
@@ -384,7 +384,7 @@
             canvasPanel.Controls.Add(resize_top);
             canvasPanel.Controls.Add(pictureBoxCanvas);
             canvasPanel.Controls.Add(panelResizer);
-            canvasPanel.Location = new Point(228, 88);
+            canvasPanel.Location = new Point(228, 74);
             canvasPanel.Name = "canvasPanel";
             canvasPanel.Size = new Size(820, 620);
             canvasPanel.TabIndex = 2;
@@ -546,7 +546,7 @@
             toolStripTools.Items.AddRange(new ToolStripItem[] { mouseTool, toolStripSeparator11, selectTool, magicSelectTool, toolStripSeparator10, brushTool, penTool, eraserTool, bucketTool, sprayTool, addTextTool, drawShapeTool, toolStripSeparator6, createWithAITool, colorDropTool, zoomTool, toolStripSeparator9, foregroundColorButton, backgroundColorButton, toolStripSeparator7, pasteTool, copyTool, cutTool, toolStripButton9 });
             toolStripTools.Location = new Point(0, 0);
             toolStripTools.Name = "toolStripTools";
-            toolStripTools.Size = new Size(39, 759);
+            toolStripTools.Size = new Size(39, 731);
             toolStripTools.Stretch = true;
             toolStripTools.TabIndex = 0;
             // 
@@ -1035,7 +1035,7 @@
             geriAlToolStripMenuItem.Image = Properties.Resources.icons8_undo_48;
             geriAlToolStripMenuItem.Name = "geriAlToolStripMenuItem";
             geriAlToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Z;
-            geriAlToolStripMenuItem.Size = new Size(183, 26);
+            geriAlToolStripMenuItem.Size = new Size(224, 26);
             geriAlToolStripMenuItem.Text = "&Undo";
             geriAlToolStripMenuItem.Click += geriAlToolStripMenuItem_Click;
             // 
@@ -1045,14 +1045,14 @@
             yineleToolStripMenuItem.Image = Properties.Resources.icons8_redo_48;
             yineleToolStripMenuItem.Name = "yineleToolStripMenuItem";
             yineleToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Y;
-            yineleToolStripMenuItem.Size = new Size(183, 26);
+            yineleToolStripMenuItem.Size = new Size(224, 26);
             yineleToolStripMenuItem.Text = "&Redo";
             yineleToolStripMenuItem.Click += yineleToolStripMenuItem_Click;
             // 
             // toolStripSeparator3
             // 
             toolStripSeparator3.Name = "toolStripSeparator3";
-            toolStripSeparator3.Size = new Size(180, 6);
+            toolStripSeparator3.Size = new Size(221, 6);
             // 
             // kesToolStripMenuItem
             // 
@@ -1060,7 +1060,7 @@
             kesToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             kesToolStripMenuItem.Name = "kesToolStripMenuItem";
             kesToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.X;
-            kesToolStripMenuItem.Size = new Size(183, 26);
+            kesToolStripMenuItem.Size = new Size(224, 26);
             kesToolStripMenuItem.Text = "&Cut";
             kesToolStripMenuItem.Click += Cut_Click;
             // 
@@ -1070,7 +1070,7 @@
             kopyalaToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             kopyalaToolStripMenuItem.Name = "kopyalaToolStripMenuItem";
             kopyalaToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.C;
-            kopyalaToolStripMenuItem.Size = new Size(183, 26);
+            kopyalaToolStripMenuItem.Size = new Size(224, 26);
             kopyalaToolStripMenuItem.Text = "C&opy";
             kopyalaToolStripMenuItem.Click += Copy_Click;
             // 
@@ -1080,14 +1080,14 @@
             yapıştırToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             yapıştırToolStripMenuItem.Name = "yapıştırToolStripMenuItem";
             yapıştırToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.V;
-            yapıştırToolStripMenuItem.Size = new Size(183, 26);
+            yapıştırToolStripMenuItem.Size = new Size(224, 26);
             yapıştırToolStripMenuItem.Text = "&Paste";
             yapıştırToolStripMenuItem.Click += Paste_Click;
             // 
             // toolStripSeparator4
             // 
             toolStripSeparator4.Name = "toolStripSeparator4";
-            toolStripSeparator4.Size = new Size(180, 6);
+            toolStripSeparator4.Size = new Size(221, 6);
             // 
             // araçlarToolStripMenuItem
             // 
@@ -1101,7 +1101,7 @@
             filtersToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { mirrorToolStripMenuItem, flashToolStripMenuItem, frozenToolStripMenuItem, winterToolStripMenuItem, blackAndWhiteToolStripMenuItem, oldPictureToolStripMenuItem, cherryToolStripMenuItem, lightAddToolStripMenuItem, purpleToolStripMenuItem, fogToolStripMenuItem });
             filtersToolStripMenuItem.Image = Properties.Resources.icons8_photo_gallery_48;
             filtersToolStripMenuItem.Name = "filtersToolStripMenuItem";
-            filtersToolStripMenuItem.Size = new Size(198, 26);
+            filtersToolStripMenuItem.Size = new Size(224, 26);
             filtersToolStripMenuItem.Text = "Basic Filters";
             // 
             // mirrorToolStripMenuItem
@@ -1189,7 +1189,7 @@
             artisticFiltersToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { cartoonToolStripMenuItem, oilPaintingToolStripMenuItem });
             artisticFiltersToolStripMenuItem.Image = Properties.Resources.icons8_art_48;
             artisticFiltersToolStripMenuItem.Name = "artisticFiltersToolStripMenuItem";
-            artisticFiltersToolStripMenuItem.Size = new Size(198, 26);
+            artisticFiltersToolStripMenuItem.Size = new Size(224, 26);
             artisticFiltersToolStripMenuItem.Text = "Artistic Filters";
             // 
             // cartoonToolStripMenuItem
@@ -1213,7 +1213,7 @@
             ambientFiltersToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { chloeToolStripMenuItem });
             ambientFiltersToolStripMenuItem.Image = Properties.Resources.icons8_spa_candle_48;
             ambientFiltersToolStripMenuItem.Name = "ambientFiltersToolStripMenuItem";
-            ambientFiltersToolStripMenuItem.Size = new Size(198, 26);
+            ambientFiltersToolStripMenuItem.Size = new Size(224, 26);
             ambientFiltersToolStripMenuItem.Text = "Ambient Filters";
             // 
             // chloeToolStripMenuItem
@@ -1313,7 +1313,7 @@
             toolStripText.Items.AddRange(new ToolStripItem[] { toolStripLabel3, fontSizeComboBox, toolStripSeparator8, toolStripLabel1, fontsComboBox, toolStripSample, toolStripSeparator18, buttonBold, buttonItalic, buttonUnderline, buttonStrikeout, toolStripSeparator19, buttonAlignLeft, buttonAlignMiddle, buttonAlignRight, toolStripSeparator20, buttonBackgroundFilling });
             toolStripText.Location = new Point(0, 28);
             toolStripText.Name = "toolStripText";
-            toolStripText.Size = new Size(1289, 28);
+            toolStripText.Size = new Size(834, 28);
             toolStripText.Stretch = true;
             toolStripText.TabIndex = 11;
             toolStripText.Visible = false;
@@ -1548,7 +1548,7 @@
             toolStripShapes.Items.AddRange(new ToolStripItem[] { toolStripLabel13, comboBoxShapeThickness, toolStripSeparator24, labelRadius, textBoxRadius, toolStripSeparator26, labelPoint, textBoxPoints });
             toolStripShapes.Location = new Point(0, 28);
             toolStripShapes.Name = "toolStripShapes";
-            toolStripShapes.Size = new Size(342, 28);
+            toolStripShapes.Size = new Size(1289, 28);
             toolStripShapes.Stretch = true;
             toolStripShapes.TabIndex = 6;
             toolStripShapes.Visible = false;
@@ -1621,7 +1621,7 @@
             toolStripSpray.Items.AddRange(new ToolStripItem[] { spraySizeLabel, comboBoxSpraySize, toolStripSeparator25 });
             toolStripSpray.Location = new Point(0, 28);
             toolStripSpray.Name = "toolStripSpray";
-            toolStripSpray.Size = new Size(123, 28);
+            toolStripSpray.Size = new Size(1289, 28);
             toolStripSpray.Stretch = true;
             toolStripSpray.TabIndex = 7;
             toolStripSpray.Visible = false;
