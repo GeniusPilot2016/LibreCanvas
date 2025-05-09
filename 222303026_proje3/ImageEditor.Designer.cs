@@ -44,8 +44,8 @@
             toolStripSeparator14 = new ToolStripSeparator();
             labelZoom = new ToolStripLabel();
             toolStripSeparator29 = new ToolStripSeparator();
-            toolStripLabel15 = new ToolStripLabel();
-            toolStripProgressBar1 = new ToolStripProgressBar();
+            labelCreatingImage = new ToolStripLabel();
+            progressBarAIImageCreation = new ToolStripProgressBar();
             UIPanel = new Panel();
             canvasPanel = new Panel();
             resize_bottom_left = new Panel();
@@ -204,7 +204,7 @@
             comboBoxSpraySize = new ToolStripComboBox();
             toolStripSeparator25 = new ToolStripSeparator();
             toolStripAICreateImage = new ToolStrip();
-            toolStripLabel14 = new ToolStripLabel();
+            labelPrompt = new ToolStripLabel();
             textBoxPrompt = new ToolStripTextBox();
             buttonCreate = new ToolStripButton();
             buttonClose = new ToolStripButton();
@@ -247,7 +247,7 @@
             // toolStripContainer1.ContentPanel
             // 
             toolStripContainer1.ContentPanel.Controls.Add(UIPanel);
-            toolStripContainer1.ContentPanel.Size = new Size(1250, 732);
+            toolStripContainer1.ContentPanel.Size = new Size(1250, 759);
             toolStripContainer1.Dock = DockStyle.Fill;
             // 
             // toolStripContainer1.LeftToolStripPanel
@@ -279,7 +279,7 @@
             toolStripBase.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             toolStripBase.GripStyle = ToolStripGripStyle.Hidden;
             toolStripBase.ImageScalingSize = new Size(20, 20);
-            toolStripBase.Items.AddRange(new ToolStripItem[] { labelFileName, toolStripSeparator12, labelSaving, progressBarSaving, toolStripSeparator13, labelCanvasPositon, toolStripSeparator15, toolStripResize, toolStripSeparator16, labelSize, toolStripSeparator14, labelZoom, toolStripSeparator29, toolStripLabel15, toolStripProgressBar1 });
+            toolStripBase.Items.AddRange(new ToolStripItem[] { labelFileName, toolStripSeparator12, labelSaving, progressBarSaving, toolStripSeparator13, labelCanvasPositon, toolStripSeparator15, toolStripResize, toolStripSeparator16, labelSize, toolStripSeparator14, labelZoom, toolStripSeparator29, labelCreatingImage, progressBarAIImageCreation });
             toolStripBase.Location = new Point(0, 0);
             toolStripBase.Name = "toolStripBase";
             toolStripBase.Size = new Size(1289, 25);
@@ -371,19 +371,19 @@
             toolStripSeparator29.Size = new Size(6, 25);
             toolStripSeparator29.Visible = false;
             // 
-            // toolStripLabel15
+            // labelCreatingImage
             // 
-            toolStripLabel15.Image = Properties.Resources.icons8_artificial_intelligence_481;
-            toolStripLabel15.Name = "toolStripLabel15";
-            toolStripLabel15.Size = new Size(185, 22);
-            toolStripLabel15.Text = "Image is creating by AI";
-            toolStripLabel15.Visible = false;
+            labelCreatingImage.Image = Properties.Resources.icons8_artificial_intelligence_481;
+            labelCreatingImage.Name = "labelCreatingImage";
+            labelCreatingImage.Size = new Size(185, 22);
+            labelCreatingImage.Text = "Image is creating by AI";
+            labelCreatingImage.Visible = false;
             // 
-            // toolStripProgressBar1
+            // progressBarAIImageCreation
             // 
-            toolStripProgressBar1.Name = "toolStripProgressBar1";
-            toolStripProgressBar1.Size = new Size(400, 22);
-            toolStripProgressBar1.Visible = false;
+            progressBarAIImageCreation.Name = "progressBarAIImageCreation";
+            progressBarAIImageCreation.Size = new Size(400, 22);
+            progressBarAIImageCreation.Visible = false;
             // 
             // UIPanel
             // 
@@ -395,7 +395,7 @@
             UIPanel.Dock = DockStyle.Fill;
             UIPanel.Location = new Point(0, 0);
             UIPanel.Name = "UIPanel";
-            UIPanel.Size = new Size(1250, 732);
+            UIPanel.Size = new Size(1250, 759);
             UIPanel.TabIndex = 3;
             UIPanel.Click += panel1_Click;
             UIPanel.Paint += panel1_Paint;
@@ -414,7 +414,7 @@
             canvasPanel.Controls.Add(resize_top);
             canvasPanel.Controls.Add(pictureBoxCanvas);
             canvasPanel.Controls.Add(panelResizer);
-            canvasPanel.Location = new Point(228, 75);
+            canvasPanel.Location = new Point(228, 88);
             canvasPanel.Name = "canvasPanel";
             canvasPanel.Size = new Size(820, 620);
             canvasPanel.TabIndex = 2;
@@ -576,7 +576,7 @@
             toolStripTools.Items.AddRange(new ToolStripItem[] { mouseTool, toolStripSeparator11, selectTool, magicSelectTool, toolStripSeparator10, brushTool, penTool, eraserTool, bucketTool, sprayTool, addTextTool, drawShapeTool, toolStripSeparator6, createWithAITool, colorDropTool, zoomTool, toolStripSeparator9, foregroundColorButton, backgroundColorButton, toolStripSeparator7, pasteTool, copyTool, cutTool, toolStripButton9 });
             toolStripTools.Location = new Point(0, 0);
             toolStripTools.Name = "toolStripTools";
-            toolStripTools.Size = new Size(39, 732);
+            toolStripTools.Size = new Size(39, 759);
             toolStripTools.Stretch = true;
             toolStripTools.TabIndex = 0;
             // 
@@ -1830,29 +1830,32 @@
             // 
             toolStripAICreateImage.Dock = DockStyle.None;
             toolStripAICreateImage.ImageScalingSize = new Size(20, 20);
-            toolStripAICreateImage.Items.AddRange(new ToolStripItem[] { toolStripLabel14, textBoxPrompt, buttonCreate, buttonClose });
+            toolStripAICreateImage.Items.AddRange(new ToolStripItem[] { labelPrompt, textBoxPrompt, buttonCreate, buttonClose });
             toolStripAICreateImage.Location = new Point(0, 28);
             toolStripAICreateImage.Name = "toolStripAICreateImage";
             toolStripAICreateImage.Size = new Size(1289, 27);
             toolStripAICreateImage.Stretch = true;
             toolStripAICreateImage.TabIndex = 14;
+            toolStripAICreateImage.Visible = false;
             // 
-            // toolStripLabel14
+            // labelPrompt
             // 
-            toolStripLabel14.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            toolStripLabel14.Name = "toolStripLabel14";
-            toolStripLabel14.Size = new Size(61, 24);
-            toolStripLabel14.Text = "Prompt";
+            labelPrompt.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            labelPrompt.Name = "labelPrompt";
+            labelPrompt.Size = new Size(61, 24);
+            labelPrompt.Text = "Prompt";
             // 
             // textBoxPrompt
             // 
             textBoxPrompt.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             textBoxPrompt.Name = "textBoxPrompt";
             textBoxPrompt.Size = new Size(500, 27);
+            textBoxPrompt.TextChanged += textBoxPrompt_TextChanged;
             // 
             // buttonCreate
             // 
             buttonCreate.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            buttonCreate.Enabled = false;
             buttonCreate.Image = Properties.Resources.icons8_done_481;
             buttonCreate.ImageTransparentColor = Color.Magenta;
             buttonCreate.Name = "buttonCreate";
@@ -2125,12 +2128,12 @@
         private ToolStripSeparator toolStripSeparator20;
         private ToolStripButton buttonBackgroundFilling;
         private ToolStrip toolStripAICreateImage;
-        private ToolStripLabel toolStripLabel14;
+        private ToolStripLabel labelPrompt;
         private ToolStripTextBox textBoxPrompt;
         private ToolStripButton buttonCreate;
         private ToolStripButton buttonClose;
         private ToolStripSeparator toolStripSeparator29;
-        private ToolStripLabel toolStripLabel15;
-        private ToolStripProgressBar toolStripProgressBar1;
+        private ToolStripLabel labelCreatingImage;
+        private ToolStripProgressBar progressBarAIImageCreation;
     }
 }

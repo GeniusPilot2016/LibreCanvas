@@ -3652,9 +3652,61 @@ namespace _222303026_proje3
 
         private void buttonCreate_Click(object sender, EventArgs e)
         {
-            if(isSelected && SelectionRectangle.Width>0 && SelectionRectangle.Height > 0)
+            if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
             {
+                if (SelectedBitmap == null)
+                {
+                    SelectedBitmap = new Bitmap(
+                        (int)(SelectionRectangle.Width / zoom),
+                        (int)(SelectionRectangle.Height / zoom));
+                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                    {
+                        g.Clear(Color.Transparent);
+                        Rectangle sourceRect = new Rectangle(
+                            (int)(originalSelectionRectangleLocation.X),
+                            (int)(originalSelectionRectangleLocation.Y),
+                            (int)(originalSelectionRectangleSize.Width),
+                            (int)(originalSelectionRectangleSize.Height));
+                        g.DrawImage(MainBitmap,
+                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                            sourceRect,
+                            GraphicsUnit.Pixel);
+                    }
+                }
+                toolStripSeparator29.Visible = true;
+                labelCreatingImage.Visible = true;
+                progressBarAIImageCreation.Visible = true;
+                buttonCreate.Enabled = false;
+                textBoxPrompt.Enabled = false;
+                labelPrompt.Enabled = false;
+                buttonClose.Enabled = false;
+                CreateAIImages.GenerateImagesFromExistingImage(SelectedBitmap, textBoxPrompt.Text,
+                    SelectedBitmap.Width, SelectedBitmap.Height);
+                MergeMainBitmapWithSelected();
+                pictureBoxCanvas.Invalidate();
+                toolStripSeparator29.Visible = false;
+                labelCreatingImage.Visible = false;
+                if (!string.IsNullOrEmpty(textBoxPrompt.Text))
+                {
+                    buttonCreate.Enabled = true;
+                }
+                textBoxPrompt.Enabled = true;
+                labelPrompt.Enabled = true;
+                buttonClose.Enabled = true;
+                progressBarAIImageCreation.Visible = false;
+                toolStripAICreateImage.Visible = false;
+            }
+        }
 
+        private void textBoxPrompt_TextChanged(object sender, EventArgs e)
+        {
+            if(!string.IsNullOrEmpty(textBoxPrompt.Text))
+            {
+                buttonCreate.Enabled = true;
+            }
+            else
+            {
+                buttonCreate.Enabled = false;
             }
         }
     }

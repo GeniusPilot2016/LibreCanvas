@@ -13,12 +13,11 @@ namespace _222303026_proje3
 {
     public partial class CreateWithAIForm : Form
     {
-        private static readonly HttpClient client = new HttpClient();
-        private readonly string apiKey = Environment.GetEnvironmentVariable("APIKey"); // API anahtarınızı buraya ekleyin
         Image image;
         public CreateWithAIForm()
         {
-            InitializeComponent();
+            InitializeComponent(); 
+            //CreateAIImages.ListAvailableModels(); // Call the ListModels API
             numericUpDownWidth.Value = Settings1.Default.DefaultAIGeneratedImageSize.Width;
             numericUpDownHeight.Value = Settings1.Default.DefaultAIGeneratedImageSize.Height;
         }
@@ -30,80 +29,14 @@ namespace _222303026_proje3
             }
         }
 
-        private async Task<Image[]> GenerateImages(string prompt, int width, int height)
-        {
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey); // API anahtarını ekleyin
-
-            var requestData = new
-            {
-                inputs = prompt,
-                width = width,
-                height = height
-            };
-
-            var json = JsonConvert.SerializeObject(requestData);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var response = await client.PostAsync("https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-dev", content);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var contentType = response.Content.Headers.ContentType.MediaType;
-                if (contentType == "image/jpeg" || contentType == "image/png")
-                {
-                    var imageBytes = await response.Content.ReadAsByteArrayAsync();
-                    using (MemoryStream ms = new MemoryStream(imageBytes))
-                    {
-                        Image image = Image.FromStream(ms);
-                        return new Image[] { image };
-                    }
-                }
-                else if (contentType == "application/json")
-                {
-                    var responseJson = await response.Content.ReadAsStringAsync();
-                    dynamic responseObject = JsonConvert.DeserializeObject(responseJson);
-                    // JSON yanıtını işleyin ve görüntü dizisine dönüştürün
-                    // Bu kısım, yanıtın gerçek yapısına göre uygulanmalıdır
-                    return new Image[0]; // Yer tutucu, gerçek görüntü dizisi ile değiştirin
-                }
-                else
-                {
-                    Debug.WriteLine($"Unexpected content type: {contentType}");
-                    return null;
-                }
-            }
-            else
-            {
-                Debug.WriteLine($"Error: {response.StatusCode}");
-                return null;
-            }
-            /*
-var googleAi = new GoogleAi(apiKey);
-
-// 2. Create the Imagen model instance with your chosen model name.  
-var imageModel = googleAi.CreateImageModel("gemini-2.0-flash-exp-image-generation");
-
-// 3. Generate images by providing a text prompt.  
-var response = await imageModel.GenerateImagesAsync(textBox1.Text);
-
-// Assuming the response contains image data in BytesBase64Encoded property  
-if (response.Predictions != null && response.Predictions.Count > 0)
-{
-    var imageBytes = Convert.FromBase64String(response.BytesBase64Encoded); // Corrected property name  
-
-    return new Image[]
-    {
-       Image.FromStream(new MemoryStream(imageBytes))
-    };
-}*/
-        }
+        
         private async void button1_Click(object sender, EventArgs e)
         {
             EnableDisableControls(false);
             string prompt = textBox1.Text;
             int width = (int)numericUpDownWidth.Value;
             int height = (int)numericUpDownHeight.Value;
-            Image[] generatedImages = await GenerateImages(prompt, width, height);
+            Image[] generatedImages = await CreateAIImages.GenerateImagesWithSize(prompt, width, height);
 
             if (generatedImages != null && generatedImages.Length > 0)
             {
