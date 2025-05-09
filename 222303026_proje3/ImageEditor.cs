@@ -441,7 +441,10 @@ namespace _222303026_proje3
 
         private void createImageToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-
+            if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
+            {
+                toolStripAICreateImage.Visible = true;
+            }
         }
 
         private void generativeEraserToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1801,7 +1804,7 @@ namespace _222303026_proje3
                         switch (textToolAlign)
                         {
                             case TextToolAlign.Left:
-                                textBox.TextAlign = HorizontalAlignment.Left; 
+                                textBox.TextAlign = HorizontalAlignment.Left;
                                 break;
                             case TextToolAlign.Middle:
                                 textBox.TextAlign = HorizontalAlignment.Center;
@@ -3640,6 +3643,19 @@ namespace _222303026_proje3
         private void buttonBackgroundFilling_CheckedChanged(object sender, EventArgs e)
         {
             backgroundFilling = buttonBackgroundFilling.Checked;
+        }
+
+        private void buttonClose_Click(object sender, EventArgs e)
+        {
+            toolStripAICreateImage.Visible = false;
+        }
+
+        private void buttonCreate_Click(object sender, EventArgs e)
+        {
+            if(isSelected && SelectionRectangle.Width>0 && SelectionRectangle.Height > 0)
+            {
+
+            }
         }
     }
     public partial class CreateWithAIForm : Form
