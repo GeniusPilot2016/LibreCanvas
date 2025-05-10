@@ -14,7 +14,7 @@ namespace _222303026_proje3
     public static class CreateAIImages
     {
         private static readonly HttpClient client = new HttpClient();
-        private static readonly string apiKey = Environment.GetEnvironmentVariable("GeminiAPIKey"); // API anahtarınızı buraya ekleyin
+        private static readonly string apiKey = Environment.GetEnvironmentVariable("APIKey"); // API anahtarınızı buraya ekleyin
         public static async Task<Image[]> GenerateImagesWithSize(string prompt, int width, int height)
         {
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey); // API anahtarını ekleyin
@@ -124,7 +124,7 @@ namespace _222303026_proje3
             var json = JsonConvert.SerializeObject(requestData);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await client.PostAsync("https://api-inference.huggingface.co/models/sanaka87/ICEdit-MoE-LoRA", content);
+            var response = await client.PostAsync("https://api-inference.huggingface.co/models/mit-han-lab/svdq-int4-flux.1-fill-dev", content);
 
             if (response.IsSuccessStatusCode)
             {

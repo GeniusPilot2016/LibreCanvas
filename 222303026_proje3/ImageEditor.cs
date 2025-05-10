@@ -447,9 +447,58 @@ namespace _222303026_proje3
             }
         }
 
-        private void generativeEraserToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void generativeEraserToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
+            try
+            {
+                if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
+                {
+                    if (SelectedBitmap == null)
+                    {
+                        SelectedBitmap = new Bitmap(
+                            (int)(SelectionRectangle.Width / zoom),
+                            (int)(SelectionRectangle.Height / zoom));
+                        using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                        {
+                            g.Clear(Color.Transparent);
+                            Rectangle sourceRect = new Rectangle(
+                                (int)(originalSelectionRectangleLocation.X),
+                                (int)(originalSelectionRectangleLocation.Y),
+                                (int)(originalSelectionRectangleSize.Width),
+                                (int)(originalSelectionRectangleSize.Height));
+                            g.DrawImage(MainBitmap,
+                                new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                                sourceRect,
+                                GraphicsUnit.Pixel);
+                        }
+                        toolStripTools.Enabled = false;
+                        toolStripSeparator29.Visible = true;
+                        labelAIImageErasing.Visible = true;
+                        progressBarAIImageCreation.Visible = true;
+                        SelectedBitmap = (Bitmap)(await CreateAIImages.GenerateImagesFromExistingImage(SelectedBitmap, "Erase the object in this area",
+                            SelectedBitmap.Width, SelectedBitmap.Height))[0];
+                        MergeMainBitmapWithSelected();
+                        pictureBoxCanvas.Invalidate();
+                        toolStripTools.Enabled = true;
+                        toolStripSeparator29.Visible = false;
+                        labelAIImageErasing.Visible = false;
+                        progressBarAIImageCreation.Visible = false;
+                    }
+                }
+                else
+                {
+                    SystemSounds.Beep.Play(); // Play a beep sound when the image is not selected
+                }
+            }
+            catch (NullReferenceException)
+            {
+                MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void removeBackgroundToolStripMenuItem2_Click(object sender, EventArgs e)
@@ -3517,7 +3566,7 @@ namespace _222303026_proje3
             else
             {
                 zoom = 5;
-                SystemSounds.Beep.Play();
+                SystemSounds.Beep.Play(); // Play a beep sound when the zoom limit is reached
             }
         }
 
@@ -3532,7 +3581,7 @@ namespace _222303026_proje3
             else
             {
                 zoom = 0.05f;
-                SystemSounds.Beep.Play();
+                SystemSounds.Beep.Play(); // Play a beep sound when the zoom limit is reached
             }
         }
         private void ScaleSelection()
@@ -3650,51 +3699,68 @@ namespace _222303026_proje3
             toolStripAICreateImage.Visible = false;
         }
 
-        private void buttonCreate_Click(object sender, EventArgs e)
+        private async void buttonCreate_Click(object sender, EventArgs e)
         {
-            if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
+            try
             {
-                if (SelectedBitmap == null)
+                if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
                 {
-                    SelectedBitmap = new Bitmap(
-                        (int)(SelectionRectangle.Width / zoom),
-                        (int)(SelectionRectangle.Height / zoom));
-                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                    if (SelectedBitmap == null)
                     {
-                        g.Clear(Color.Transparent);
-                        Rectangle sourceRect = new Rectangle(
-                            (int)(originalSelectionRectangleLocation.X),
-                            (int)(originalSelectionRectangleLocation.Y),
-                            (int)(originalSelectionRectangleSize.Width),
-                            (int)(originalSelectionRectangleSize.Height));
-                        g.DrawImage(MainBitmap,
-                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                            sourceRect,
-                            GraphicsUnit.Pixel);
+                        SelectedBitmap = new Bitmap(
+                            (int)(SelectionRectangle.Width / zoom),
+                            (int)(SelectionRectangle.Height / zoom));
+                        using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                        {
+                            g.Clear(Color.Transparent);
+                            Rectangle sourceRect = new Rectangle(
+                                (int)(originalSelectionRectangleLocation.X),
+                                (int)(originalSelectionRectangleLocation.Y),
+                                (int)(originalSelectionRectangleSize.Width),
+                                (int)(originalSelectionRectangleSize.Height));
+                            g.DrawImage(MainBitmap,
+                                new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                                sourceRect,
+                                GraphicsUnit.Pixel);
+                        }
                     }
+                    toolStripTools.Enabled = false;
+                    toolStripSeparator29.Visible = true;
+                    labelCreatingImage.Visible = true;
+                    progressBarAIImageCreation.Visible = true;
+                    buttonCreate.Enabled = false;
+                    textBoxPrompt.Enabled = false;
+                    labelPrompt.Enabled = false;
+                    buttonClose.Enabled = false;
+                    SelectedBitmap = (Bitmap)(await CreateAIImages.GenerateImagesFromExistingImage(SelectedBitmap, textBoxPrompt.Text,
+        SelectedBitmap.Width, SelectedBitmap.Height))[0];
+                    MergeMainBitmapWithSelected();
+                    pictureBoxCanvas.Invalidate();
+                    toolStripTools.Enabled = true;
+                    toolStripSeparator29.Visible = false;
+                    labelCreatingImage.Visible = false;
+                    if (!string.IsNullOrEmpty(textBoxPrompt.Text))
+                    {
+                        buttonCreate.Enabled = true;
+                    }
+                    textBoxPrompt.Enabled = true;
+                    labelPrompt.Enabled = true;
+                    buttonClose.Enabled = true;
+                    progressBarAIImageCreation.Visible = false;
+                    toolStripAICreateImage.Visible = false;
                 }
-                toolStripSeparator29.Visible = true;
-                labelCreatingImage.Visible = true;
-                progressBarAIImageCreation.Visible = true;
-                buttonCreate.Enabled = false;
-                textBoxPrompt.Enabled = false;
-                labelPrompt.Enabled = false;
-                buttonClose.Enabled = false;
-                CreateAIImages.GenerateImagesFromExistingImage(SelectedBitmap, textBoxPrompt.Text,
-                    SelectedBitmap.Width, SelectedBitmap.Height);
-                MergeMainBitmapWithSelected();
-                pictureBoxCanvas.Invalidate();
-                toolStripSeparator29.Visible = false;
-                labelCreatingImage.Visible = false;
-                if (!string.IsNullOrEmpty(textBoxPrompt.Text))
+                else
                 {
-                    buttonCreate.Enabled = true;
+                    SystemSounds.Beep.Play(); // Play a beep sound when the image is not selected
                 }
-                textBoxPrompt.Enabled = true;
-                labelPrompt.Enabled = true;
-                buttonClose.Enabled = true;
-                progressBarAIImageCreation.Visible = false;
-                toolStripAICreateImage.Visible = false;
+            }
+            catch (NullReferenceException)
+            {
+                MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
