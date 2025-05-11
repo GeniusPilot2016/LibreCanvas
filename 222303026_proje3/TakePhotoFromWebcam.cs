@@ -18,13 +18,56 @@ namespace _222303026_proje3
         SoundPlayer sound = new SoundPlayer();
         VideoCapture videoSource;
         Image<Bgr, Byte> takenPicture;
-
+        int previousIndex = -1;
         public TakePhotoFromWebcam()
         {
             InitializeComponent();
             LoadVideoDevices();
+            SetTheme();
+            if (comboBox1.Items.Count == 0)
+            {
+                this.Close();
+                MessageBox.Show("No webcams found. Please connect a webcam and try again.", "No Webcam Found", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
-
+        private void SetTheme()
+        {
+            switch (Settings1.Default.PreferredTheme)
+            {
+                case 0: // System theme
+                    if (CheckSystemTheme.IsDarkTheme())
+                    {
+                        DarkTheme();
+                    }
+                    else
+                    {
+                        LightTheme();
+                    }
+                    break;
+                case 1: // Light theme
+                    LightTheme();
+                    break;
+                case 2: // Dark theme
+                    DarkTheme();
+                    break;
+            }
+        }
+        private void LightTheme()
+        {
+            this.BackColor = Form.DefaultBackColor;
+            this.ForeColor = Form.DefaultForeColor;
+            comboBox1.BackColor = ComboBox.DefaultBackColor;
+            comboBox1.ForeColor = ComboBox.DefaultForeColor;
+            button1.BackColor = Color.Transparent;
+        }
+        private void DarkTheme()
+        {
+            this.BackColor = Color.FromArgb(32, 32, 32);
+            this.ForeColor = Color.White;
+            comboBox1.BackColor = Color.Black;
+            comboBox1.ForeColor = Color.White;
+            button1.BackColor = Color.FromArgb(32, 32, 32);
+        }
         private void LoadVideoDevices()
         {
             DsDevice[] systemCameras = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
@@ -36,6 +79,7 @@ namespace _222303026_proje3
 
             if (comboBox1.Items.Count > 0)
             {
+                previousIndex = 0;
                 comboBox1.SelectedIndex = 0;
                 StartVideoCapture(comboBox1.SelectedIndex);
             }
@@ -111,6 +155,16 @@ namespace _222303026_proje3
         private void TakePhotoFromWebcam_FormClosed(object sender, FormClosedEventArgs e)
         {
             StopVideoCapture();
+        }
+
+        private void comboBox1_SelectedIndexChanged_1(object sender, EventArgs e)
+        {
+            if (comboBox1.SelectedIndex != previousIndex)
+            {
+                previousIndex = comboBox1.SelectedIndex;
+                StopVideoCapture();
+                StartVideoCapture(comboBox1.SelectedIndex);
+            }
         }
     }
 

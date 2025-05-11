@@ -19,11 +19,12 @@ namespace _222303026_proje3
         {
             InitializeComponent();
             InitializeVariables();
+            SetTheme();
         }
         private void InitializeVariables()
         {
             // Initialize variables or settings here if needed
-            
+
             // General settings
             comboBoxTheme.SelectedIndex = Settings1.Default.PreferredTheme;
             if (!string.IsNullOrEmpty(Settings1.Default.HashedGeminiAIAPIKey))
@@ -36,7 +37,7 @@ namespace _222303026_proje3
                 textBoxHuggingFaceAPIKey.Text = EncryptionHelper.DecryptString2(Settings1.Default.HashedHuggingFaceAPIKey);
                 buttonResetHuggingFaceAPIKey.Enabled = true;
             }
-            switch(Settings1.Default.PreferredAI)
+            switch (Settings1.Default.PreferredAI)
             {
                 case 0: // Google Gemini
                     radioButtonGeminiAI.Checked = true;
@@ -62,7 +63,7 @@ namespace _222303026_proje3
             }
             numericUpDownDefaultAIGeneratedImageWidth.Value = Settings1.Default.DefaultAIGeneratedImageSize.Width;
             numericUpDownDefaultAIGeneratedImageHeight.Value = Settings1.Default.DefaultAIGeneratedImageSize.Height;
-            switch(Settings1.Default.ShowRecentFiles)
+            switch (Settings1.Default.ShowRecentFiles)
             {
                 case true:
                     radioButtonShowStartup.Checked = true;
@@ -71,11 +72,11 @@ namespace _222303026_proje3
                     radioButtonDontShowStartup.Checked = true;
                     break;
             }
-            
+
             // Canvas settings
             numericUpDownDefaultCanvasWidth.Value = Settings1.Default.DefaultCanvasSize.Width;
             numericUpDownDefaultCanvasHeight.Value = Settings1.Default.DefaultCanvasSize.Height;
-            
+
             // Tools/Brushes settings
             // Brush size and style
             numericUpDownDefaultBrushSize.Value = Settings1.Default.DefaultBrushSize;
@@ -155,7 +156,7 @@ namespace _222303026_proje3
                         }
                         foreach (GroupBox subGroupBox in groupBox.Controls.OfType<GroupBox>())
                         {
-                            foreach(GroupBox subGrupboxOfSubGroupBoxes in subGroupBox.Controls.OfType<GroupBox>())
+                            foreach (GroupBox subGrupboxOfSubGroupBoxes in subGroupBox.Controls.OfType<GroupBox>())
                             {
                                 subGrupboxOfSubGroupBoxes.ForeColor = SystemColors.ControlText;
                                 foreach (TextBox textBoxes in subGrupboxOfSubGroupBoxes.Controls.OfType<TextBox>())
@@ -163,7 +164,7 @@ namespace _222303026_proje3
                                     textBoxes.BackColor = SystemColors.Window;
                                     textBoxes.ForeColor = SystemColors.WindowText;
                                 }
-                                foreach(Button buttons in subGrupboxOfSubGroupBoxes.Controls.OfType<Button>())
+                                foreach (Button buttons in subGrupboxOfSubGroupBoxes.Controls.OfType<Button>())
                                 {
                                     buttons.BackColor = Color.Transparent;
                                 }
@@ -480,14 +481,14 @@ namespace _222303026_proje3
 
         private void textBoxHuggingFaceAPIKey_TextChanged(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(textBoxGeminiAPIKey.Text) ||
-                textBoxGeminiAPIKey.Text == EncryptionHelper.DecryptString2(Settings1.Default.HashedGeminiAIAPIKey))
+            if (string.IsNullOrEmpty(textBoxHuggingFaceAPIKey.Text) ||
+                textBoxHuggingFaceAPIKey.Text == EncryptionHelper.DecryptString2(Settings1.Default.HashedHuggingFaceAPIKey))
             {
-                buttonUpdateGeminiAPIKey.Enabled = false;
+                buttonUpdateHuggingFaceAPIKey.Enabled = false;
             }
             else
             {
-                buttonUpdateGeminiAPIKey.Enabled = true;
+                buttonUpdateHuggingFaceAPIKey.Enabled = true;
             }
         }
 
@@ -499,7 +500,7 @@ namespace _222303026_proje3
                 Settings1.Default.Save(); // Save the settings to persist the changes
                 buttonUpdateHuggingFaceAPIKey.Enabled = false;
                 buttonUpdateHuggingFaceAPIKey.Enabled = true;
-                MessageBox.Show("HuggingFace API key is saved successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Hugging Face API key is saved successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
@@ -516,7 +517,7 @@ namespace _222303026_proje3
                 buttonUpdateHuggingFaceAPIKey.Enabled = false;
                 buttonUpdateHuggingFaceAPIKey.Enabled = false; // Disable the button after clearing the key  
                 textBoxHuggingFaceAPIKey.Clear(); // Clear the text box
-                MessageBox.Show("HuggingFace API key has been cleared successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Hugging Face API key has been cleared successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
@@ -592,7 +593,7 @@ namespace _222303026_proje3
         {
             Settings1.Default.PreferredHuggingFaceCreatingModel = textBoxHuggingFaceCreatingModel.Text;
             Settings1.Default.Save();
-            MessageBox.Show("HuggingFace image creation model has been updated successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Hugging Face image creation model has been updated successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
             if (Settings1.Default.PreferredHuggingFaceCreatingModel != DefaultHuggingFaceModel)
             {
                 buttonResetHuggingFaceCreatingImageModel.Enabled = true;
@@ -607,7 +608,7 @@ namespace _222303026_proje3
         {
             Settings1.Default.PreferredHuggingFaceEditingModel = textBoxHuggingFaceEditingModel.Text;
             Settings1.Default.Save();
-            MessageBox.Show("HuggingFace image editing model has been updated successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Hugging Face image editing model has been updated successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
             if (Settings1.Default.PreferredHuggingFaceEditingModel != DefaultHuggingFaceModel2)
             {
                 buttonResetHuggingFaceEditingImageModel.Enabled = true;
@@ -625,7 +626,7 @@ namespace _222303026_proje3
             textBoxGeminiModel.Text = DefaultHuggingFaceModel;
             buttonUpdateHuggingFaceCreatingImageModel.Enabled = false;
             buttonResetHuggingFaceCreatingImageModel.Enabled = false;
-            MessageBox.Show("HuggingFace image creation model has been reset to default.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Hugging Face image creation model has been reset to default.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void buttonResetHuggingFaceEditingImageModel_Click(object sender, EventArgs e)
@@ -635,7 +636,23 @@ namespace _222303026_proje3
             textBoxGeminiModel.Text = DefaultHuggingFaceModel2;
             buttonUpdateHuggingFaceEditingImageModel.Enabled = false;
             buttonResetHuggingFaceEditingImageModel.Enabled = false;
-            MessageBox.Show("HuggingFace image editing model has been reset to default.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Hugging Face image editing model has been reset to default.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void buttonUpdateHuggingFaceAPIKey_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Settings1.Default.HashedHuggingFaceAPIKey = EncryptionHelper.EncryptString2(textBoxHuggingFaceAPIKey.Text);
+                Settings1.Default.Save(); // Save the settings to persist the changes
+                buttonUpdateHuggingFaceAPIKey.Enabled = false;
+                buttonResetHuggingFaceAPIKey.Enabled = true;
+                MessageBox.Show("Hugging Face API key is saved successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

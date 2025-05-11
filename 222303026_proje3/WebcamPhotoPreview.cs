@@ -19,8 +19,44 @@ namespace _222303026_proje3
         {
             InitializeComponent();
             pictureBox1.Image = image;
+            SetTheme();
         }
-
+        private void SetTheme()
+        {
+            switch (Settings1.Default.PreferredTheme)
+            {
+                case 0: // System theme
+                    if (CheckSystemTheme.IsDarkTheme())
+                    {
+                        DarkTheme();
+                    }
+                    else
+                    {
+                        LightTheme();
+                    }
+                    break;
+                case 1: // Light theme
+                    LightTheme();
+                    break;
+                case 2: // Dark theme
+                    DarkTheme();
+                    break;
+            }
+        }
+        private void LightTheme()
+        {
+            this.BackColor = Form.DefaultBackColor;
+            this.ForeColor = Form.DefaultForeColor;
+            buttonAccept.BackColor = Color.Transparent;
+            buttonDiscard.BackColor = Color.Transparent;
+        }
+        private void DarkTheme()
+        {
+            this.BackColor = Color.FromArgb(32, 32, 32);
+            this.ForeColor = Color.White;
+            buttonAccept.BackColor = Color.FromArgb(32, 32, 32);
+            buttonDiscard.BackColor = Color.FromArgb(32, 32, 32);
+        }
         private void buttonAccept_Click(object sender, EventArgs e)
         {
             PhotoAccepted?.Invoke(this, EventArgs.Empty);

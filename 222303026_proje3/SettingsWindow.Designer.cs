@@ -295,10 +295,10 @@
             radioButtonHuggingFace.Checked = true;
             radioButtonHuggingFace.Location = new Point(351, 26);
             radioButtonHuggingFace.Name = "radioButtonHuggingFace";
-            radioButtonHuggingFace.Size = new Size(120, 24);
+            radioButtonHuggingFace.Size = new Size(124, 24);
             radioButtonHuggingFace.TabIndex = 0;
             radioButtonHuggingFace.TabStop = true;
-            radioButtonHuggingFace.Text = "HuggingFace";
+            radioButtonHuggingFace.Text = "Hugging Face";
             radioButtonHuggingFace.UseVisualStyleBackColor = true;
             radioButtonHuggingFace.CheckedChanged += radioButton1_CheckedChanged;
             // 
@@ -326,7 +326,7 @@
             groupBoxHuggingFace.Size = new Size(659, 210);
             groupBoxHuggingFace.TabIndex = 6;
             groupBoxHuggingFace.TabStop = false;
-            groupBoxHuggingFace.Text = "HuggingFace Settings";
+            groupBoxHuggingFace.Text = "Hugging Face Settings";
             // 
             // groupBox25
             // 
@@ -504,7 +504,7 @@
             buttonResetHuggingFaceAPIKey.Name = "buttonResetHuggingFaceAPIKey";
             buttonResetHuggingFaceAPIKey.Size = new Size(284, 34);
             buttonResetHuggingFaceAPIKey.TabIndex = 4;
-            buttonResetHuggingFaceAPIKey.Text = "Reset HuggingFace API Key";
+            buttonResetHuggingFaceAPIKey.Text = "Reset Hugging Face API Key";
             buttonResetHuggingFaceAPIKey.TextAlign = ContentAlignment.MiddleRight;
             buttonResetHuggingFaceAPIKey.TextImageRelation = TextImageRelation.ImageBeforeText;
             buttonResetHuggingFaceAPIKey.UseVisualStyleBackColor = true;
@@ -537,10 +537,11 @@
             buttonUpdateHuggingFaceAPIKey.Name = "buttonUpdateHuggingFaceAPIKey";
             buttonUpdateHuggingFaceAPIKey.Size = new Size(290, 34);
             buttonUpdateHuggingFaceAPIKey.TabIndex = 4;
-            buttonUpdateHuggingFaceAPIKey.Text = "Update HuggingFace API Key";
+            buttonUpdateHuggingFaceAPIKey.Text = "Update Hugging Face API Key";
             buttonUpdateHuggingFaceAPIKey.TextAlign = ContentAlignment.MiddleRight;
             buttonUpdateHuggingFaceAPIKey.TextImageRelation = TextImageRelation.ImageBeforeText;
             buttonUpdateHuggingFaceAPIKey.UseVisualStyleBackColor = true;
+            buttonUpdateHuggingFaceAPIKey.Click += buttonUpdateHuggingFaceAPIKey_Click;
             buttonUpdateHuggingFaceAPIKey.ChangeUICues += buttonUpdateHuggingFaceAPIKey_ChangeUICues;
             // 
             // groupBoxGemini
@@ -799,9 +800,9 @@
             label14.Margin = new Padding(4, 0, 4, 0);
             label14.MaximumSize = new Size(675, 0);
             label14.Name = "label14";
-            label14.Size = new Size(647, 40);
+            label14.Size = new Size(651, 40);
             label14.TabIndex = 3;
-            label14.Text = "        Warning: For your security, do not share your Google Gemini™ or HuggingFace API keys with anyone else.";
+            label14.Text = "        Warning: For your security, do not share your Google Gemini™ or Hugging Face API keys with anyone else.";
             label14.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // groupBox1

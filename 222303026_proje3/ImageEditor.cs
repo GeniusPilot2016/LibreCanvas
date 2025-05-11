@@ -576,6 +576,10 @@ namespace _222303026_proje3
             {
                 toolStripAICreateImage.Visible = true;
             }
+            else
+            {
+                SystemSounds.Beep.Play(); // Play a beep sound when the image is not selected
+            }
         }
 
         private async void generativeEraserToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2258,17 +2262,28 @@ namespace _222303026_proje3
 
         private void açToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            openFileDialog1.Filter = "PNG Files|*.png|JPEG Files|*.jpg|Bitmap Files|*.bmp";
-            DialogResult dialogResult = openFileDialog1.ShowDialog();
-            if (dialogResult == DialogResult.OK)
+            try
             {
-                string file = openFileDialog1.FileName;
-                openAFile(file);
-                if (Settings1.Default.RecentFiles.Contains(file) == false)
+                openFileDialog1.Filter = "PNG Files|*.png|JPEG Files|*.jpg|Bitmap Files|*.bmp";
+                DialogResult dialogResult = openFileDialog1.ShowDialog();
+                if (dialogResult == DialogResult.OK)
                 {
-                    Settings1.Default.RecentFiles.Add(file);
-                    Settings1.Default.Save();
+                    string file = openFileDialog1.FileName;
+                    openAFile(file);
+                    if (Settings1.Default.RecentFiles.Contains(file) == false)
+                    {
+                        Settings1.Default.RecentFiles.Add(file);
+                        Settings1.Default.Save();
+                    }
                 }
+            }
+            catch (FileNotFoundException)
+            {
+                MessageBox.Show("The selected file was not found. Please check the file path.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error occurred while opening the file: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

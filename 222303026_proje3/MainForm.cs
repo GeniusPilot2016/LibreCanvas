@@ -15,6 +15,7 @@ namespace _222303026_proje3
         public MainForm()
         {
             InitializeComponent();
+            SetTheme();
             if (Settings1.Default.RecentFiles == null)
             {
                 Settings1.Default.RecentFiles = new System.Collections.Specialized.StringCollection();
@@ -29,7 +30,52 @@ namespace _222303026_proje3
                 listBox1.Enabled = true;
             }
         }
-
+        private void SetTheme()
+        {
+            switch (Settings1.Default.PreferredTheme)
+            {
+                case 0: // System theme
+                    if (CheckSystemTheme.IsDarkTheme())
+                    {
+                        DarkTheme();
+                    }
+                    else
+                    {
+                        LightTheme();
+                    }
+                    break;
+                case 1: // Light theme
+                    LightTheme();
+                    break;
+                case 2: // Dark theme
+                    DarkTheme();
+                    break;
+            }
+        }
+        private void LightTheme()
+        {
+            this.BackColor = Form.DefaultBackColor;
+            foreach(Button buttons in this.Controls.OfType<Button>())
+            {
+                buttons.BackColor = Color.Transparent;
+                buttons.ForeColor = Button.DefaultForeColor;
+            }
+            label1.ForeColor = Form.DefaultForeColor;
+            listBox1.BackColor = ListBox.DefaultBackColor;
+            listBox1.ForeColor = ListBox.DefaultForeColor;
+        }
+        private void DarkTheme()
+        {
+            this.BackColor = Color.FromArgb(32, 32, 32);
+            foreach (Button buttons in this.Controls.OfType<Button>())
+            {
+                buttons.BackColor = Color.FromArgb(32, 32, 32);
+                buttons.ForeColor = Color.White;
+            }
+            label1.ForeColor = Color.White;
+            listBox1.BackColor = Color.Black;
+            listBox1.ForeColor = Color.White;
+        }
         private void pictureBox1_Click(object sender, EventArgs e)
         {
 
@@ -42,18 +88,30 @@ namespace _222303026_proje3
 
         private void button2_Click(object sender, EventArgs e)
         {
-            DialogResult dialogResult = openFileDialog1.ShowDialog();
-            if (dialogResult == DialogResult.OK)
+            try
             {
-                string file = openFileDialog1.FileName;
-                ImageEditor imageEditor = new ImageEditor(file);
-                if (Settings1.Default.RecentFiles.Contains(file) == false)
+                openFileDialog1.Filter = "PNG Files|*.png|JPEG Files|*.jpg|Bitmap Files|*.bmp";
+                DialogResult dialogResult = openFileDialog1.ShowDialog();
+                if (dialogResult == DialogResult.OK)
                 {
-                    Settings1.Default.RecentFiles.Add(file);
-                    Settings1.Default.Save();
+                    string file = openFileDialog1.FileName;
+                    ImageEditor imageEditor = new ImageEditor(file);
+                    if (Settings1.Default.RecentFiles.Contains(file) == false)
+                    {
+                        Settings1.Default.RecentFiles.Add(file);
+                        Settings1.Default.Save();
+                    }
+                    this.Hide();
+                    imageEditor.Show();
                 }
-                this.Hide();
-                imageEditor.Show();
+            }
+            catch (FileNotFoundException)
+            {
+                MessageBox.Show("The selected file was not found. Please check the file path.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error occurred while opening the file: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
