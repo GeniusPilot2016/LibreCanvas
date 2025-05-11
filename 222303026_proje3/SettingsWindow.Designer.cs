@@ -37,26 +37,52 @@
             radioButtonDontShowStartup = new RadioButton();
             radioButtonShowStartup = new RadioButton();
             groupBox2 = new GroupBox();
+            groupBox23 = new GroupBox();
+            radioButtonHuggingFace = new RadioButton();
+            radioButtonGeminiAI = new RadioButton();
+            groupBoxHuggingFace = new GroupBox();
+            groupBox25 = new GroupBox();
+            buttonResetHuggingFaceEditingImageModel = new Button();
+            icons = new ImageList(components);
+            buttonUpdateHuggingFaceEditingImageModel = new Button();
+            buttonResetHuggingFaceCreatingImageModel = new Button();
+            buttonUpdateHuggingFaceCreatingImageModel = new Button();
+            textBoxHuggingFaceEditingModel = new TextBox();
+            textBoxHuggingFaceCreatingModel = new TextBox();
+            label25 = new Label();
+            label24 = new Label();
+            label22 = new Label();
+            textBoxHuggingFaceAPIKey = new TextBox();
+            buttonResetHuggingFaceAPIKey = new Button();
+            buttonShowHideHuggingFaceAPIKey = new Button();
+            buttonUpdateHuggingFaceAPIKey = new Button();
+            groupBoxGemini = new GroupBox();
+            groupBox24 = new GroupBox();
+            buttonResetPreferredGeminiModel = new Button();
+            buttonUpdateGeminiModel = new Button();
+            textBoxGeminiModel = new TextBox();
+            label23 = new Label();
+            label13 = new Label();
+            textBoxGeminiAPIKey = new TextBox();
+            buttonResetGeminiAPIKey = new Button();
+            buttonShowHideGeminiAPIKey = new Button();
+            buttonUpdateGeminiAPIKey = new Button();
             groupBox18 = new GroupBox();
             numericUpDownDefaultAIGeneratedImageHeight = new NumericUpDown();
             numericUpDownDefaultAIGeneratedImageWidth = new NumericUpDown();
             label19 = new Label();
+            label27 = new Label();
+            label26 = new Label();
             label18 = new Label();
-            buttonResetGeminiAPIKey = new Button();
-            icons = new ImageList(components);
-            buttonUpdateGeminiAPIKey = new Button();
             label14 = new Label();
-            buttonShowHideGeminiAPIKey = new Button();
-            textBoxGeminiAPIKey = new TextBox();
-            label13 = new Label();
             groupBox1 = new GroupBox();
             label1 = new Label();
             comboBoxTheme = new ComboBox();
             tabPage2 = new TabPage();
             groupBox5 = new GroupBox();
             groupBox7 = new GroupBox();
-            numericUpDown2 = new NumericUpDown();
-            numericUpDown1 = new NumericUpDown();
+            numericUpDownDefaultCanvasHeight = new NumericUpDown();
+            numericUpDownDefaultCanvasWidth = new NumericUpDown();
             label5 = new Label();
             label3 = new Label();
             label4 = new Label();
@@ -108,6 +134,11 @@
             groupBox3.SuspendLayout();
             groupBox4.SuspendLayout();
             groupBox2.SuspendLayout();
+            groupBox23.SuspendLayout();
+            groupBoxHuggingFace.SuspendLayout();
+            groupBox25.SuspendLayout();
+            groupBoxGemini.SuspendLayout();
+            groupBox24.SuspendLayout();
             groupBox18.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultAIGeneratedImageHeight).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultAIGeneratedImageWidth).BeginInit();
@@ -115,8 +146,8 @@
             tabPage2.SuspendLayout();
             groupBox5.SuspendLayout();
             groupBox7.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)numericUpDown2).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)numericUpDown1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultCanvasHeight).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultCanvasWidth).BeginInit();
             tabPage3.SuspendLayout();
             groupBox19.SuspendLayout();
             groupBox20.SuspendLayout();
@@ -178,25 +209,25 @@
             // 
             groupBox3.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupBox3.Controls.Add(groupBox4);
-            groupBox3.Location = new Point(8, 401);
+            groupBox3.Location = new Point(8, 723);
             groupBox3.Margin = new Padding(4);
             groupBox3.Name = "groupBox3";
             groupBox3.Padding = new Padding(4);
-            groupBox3.Size = new Size(674, 130);
+            groupBox3.Size = new Size(674, 120);
             groupBox3.TabIndex = 2;
             groupBox3.TabStop = false;
             groupBox3.Text = "Startup Behaviors";
             // 
             // groupBox4
             // 
-            groupBox4.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox4.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             groupBox4.Controls.Add(radioButtonDontShowStartup);
             groupBox4.Controls.Add(radioButtonShowStartup);
             groupBox4.Location = new Point(8, 28);
             groupBox4.Margin = new Padding(4);
             groupBox4.Name = "groupBox4";
             groupBox4.Padding = new Padding(4);
-            groupBox4.Size = new Size(659, 95);
+            groupBox4.Size = new Size(659, 85);
             groupBox4.TabIndex = 1;
             groupBox4.TabStop = false;
             groupBox4.Text = "Show Startup Window";
@@ -205,7 +236,7 @@
             // 
             radioButtonDontShowStartup.Anchor = AnchorStyles.Left;
             radioButtonDontShowStartup.AutoSize = true;
-            radioButtonDontShowStartup.Location = new Point(8, 59);
+            radioButtonDontShowStartup.Location = new Point(8, 54);
             radioButtonDontShowStartup.Margin = new Padding(4);
             radioButtonDontShowStartup.Name = "radioButtonDontShowStartup";
             radioButtonDontShowStartup.Size = new Size(336, 24);
@@ -219,7 +250,7 @@
             radioButtonShowStartup.Anchor = AnchorStyles.Left;
             radioButtonShowStartup.AutoSize = true;
             radioButtonShowStartup.Checked = true;
-            radioButtonShowStartup.Location = new Point(8, 26);
+            radioButtonShowStartup.Location = new Point(8, 24);
             radioButtonShowStartup.Margin = new Padding(4);
             radioButtonShowStartup.Name = "radioButtonShowStartup";
             radioButtonShowStartup.Size = new Size(297, 24);
@@ -232,99 +263,104 @@
             // groupBox2
             // 
             groupBox2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox2.Controls.Add(groupBox23);
+            groupBox2.Controls.Add(groupBoxHuggingFace);
+            groupBox2.Controls.Add(groupBoxGemini);
             groupBox2.Controls.Add(groupBox18);
-            groupBox2.Controls.Add(buttonResetGeminiAPIKey);
-            groupBox2.Controls.Add(buttonUpdateGeminiAPIKey);
             groupBox2.Controls.Add(label14);
-            groupBox2.Controls.Add(buttonShowHideGeminiAPIKey);
-            groupBox2.Controls.Add(textBoxGeminiAPIKey);
-            groupBox2.Controls.Add(label13);
-            groupBox2.Location = new Point(8, 125);
+            groupBox2.Location = new Point(8, 92);
             groupBox2.Margin = new Padding(4);
             groupBox2.Name = "groupBox2";
             groupBox2.Padding = new Padding(4);
-            groupBox2.Size = new Size(674, 269);
+            groupBox2.Size = new Size(674, 623);
             groupBox2.TabIndex = 2;
             groupBox2.TabStop = false;
             groupBox2.Text = "AI Settings";
             groupBox2.Enter += groupBox2_Enter;
             // 
-            // groupBox18
+            // groupBox23
             // 
-            groupBox18.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            groupBox18.Controls.Add(numericUpDownDefaultAIGeneratedImageHeight);
-            groupBox18.Controls.Add(numericUpDownDefaultAIGeneratedImageWidth);
-            groupBox18.Controls.Add(label19);
-            groupBox18.Controls.Add(label18);
-            groupBox18.Location = new Point(8, 169);
-            groupBox18.Margin = new Padding(4);
-            groupBox18.Name = "groupBox18";
-            groupBox18.Padding = new Padding(4);
-            groupBox18.Size = new Size(659, 92);
-            groupBox18.TabIndex = 5;
-            groupBox18.TabStop = false;
-            groupBox18.Text = "Default Generated Image Sizes";
+            groupBox23.Controls.Add(radioButtonHuggingFace);
+            groupBox23.Controls.Add(radioButtonGeminiAI);
+            groupBox23.Location = new Point(8, 27);
+            groupBox23.Name = "groupBox23";
+            groupBox23.Size = new Size(659, 65);
+            groupBox23.TabIndex = 7;
+            groupBox23.TabStop = false;
+            groupBox23.Text = "Preferred AI";
             // 
-            // numericUpDownDefaultAIGeneratedImageHeight
+            // radioButtonHuggingFace
             // 
-            numericUpDownDefaultAIGeneratedImageHeight.Location = new Point(269, 41);
-            numericUpDownDefaultAIGeneratedImageHeight.Margin = new Padding(4);
-            numericUpDownDefaultAIGeneratedImageHeight.Maximum = new decimal(new int[] { 1080, 0, 0, 0 });
-            numericUpDownDefaultAIGeneratedImageHeight.Minimum = new decimal(new int[] { 64, 0, 0, 0 });
-            numericUpDownDefaultAIGeneratedImageHeight.Name = "numericUpDownDefaultAIGeneratedImageHeight";
-            numericUpDownDefaultAIGeneratedImageHeight.Size = new Size(105, 27);
-            numericUpDownDefaultAIGeneratedImageHeight.TabIndex = 1;
-            numericUpDownDefaultAIGeneratedImageHeight.Value = new decimal(new int[] { 1024, 0, 0, 0 });
-            numericUpDownDefaultAIGeneratedImageHeight.ValueChanged += numericUpDownDefaultAIGeneratedImageHeight_ValueChanged;
+            radioButtonHuggingFace.AutoSize = true;
+            radioButtonHuggingFace.Checked = true;
+            radioButtonHuggingFace.Location = new Point(351, 26);
+            radioButtonHuggingFace.Name = "radioButtonHuggingFace";
+            radioButtonHuggingFace.Size = new Size(120, 24);
+            radioButtonHuggingFace.TabIndex = 0;
+            radioButtonHuggingFace.TabStop = true;
+            radioButtonHuggingFace.Text = "HuggingFace";
+            radioButtonHuggingFace.UseVisualStyleBackColor = true;
+            radioButtonHuggingFace.CheckedChanged += radioButton1_CheckedChanged;
             // 
-            // numericUpDownDefaultAIGeneratedImageWidth
+            // radioButtonGeminiAI
             // 
-            numericUpDownDefaultAIGeneratedImageWidth.Location = new Point(80, 41);
-            numericUpDownDefaultAIGeneratedImageWidth.Margin = new Padding(4);
-            numericUpDownDefaultAIGeneratedImageWidth.Maximum = new decimal(new int[] { 1920, 0, 0, 0 });
-            numericUpDownDefaultAIGeneratedImageWidth.Minimum = new decimal(new int[] { 64, 0, 0, 0 });
-            numericUpDownDefaultAIGeneratedImageWidth.Name = "numericUpDownDefaultAIGeneratedImageWidth";
-            numericUpDownDefaultAIGeneratedImageWidth.Size = new Size(105, 27);
-            numericUpDownDefaultAIGeneratedImageWidth.TabIndex = 1;
-            numericUpDownDefaultAIGeneratedImageWidth.Value = new decimal(new int[] { 1024, 0, 0, 0 });
-            numericUpDownDefaultAIGeneratedImageWidth.ValueChanged += numericUpDownDefaultAIGeneratedImageHeight_ValueChanged;
+            radioButtonGeminiAI.AutoSize = true;
+            radioButtonGeminiAI.Location = new Point(92, 26);
+            radioButtonGeminiAI.Name = "radioButtonGeminiAI";
+            radioButtonGeminiAI.Size = new Size(143, 24);
+            radioButtonGeminiAI.TabIndex = 0;
+            radioButtonGeminiAI.Text = "Google Gemini™";
+            radioButtonGeminiAI.UseVisualStyleBackColor = true;
+            radioButtonGeminiAI.CheckedChanged += radioButton1_CheckedChanged;
             // 
-            // label19
+            // groupBoxHuggingFace
             // 
-            label19.AutoSize = true;
-            label19.Location = new Point(206, 44);
-            label19.Margin = new Padding(4, 0, 4, 0);
-            label19.Name = "label19";
-            label19.Size = new Size(56, 20);
-            label19.TabIndex = 0;
-            label19.Text = "Height";
+            groupBoxHuggingFace.Controls.Add(groupBox25);
+            groupBoxHuggingFace.Controls.Add(label22);
+            groupBoxHuggingFace.Controls.Add(textBoxHuggingFaceAPIKey);
+            groupBoxHuggingFace.Controls.Add(buttonResetHuggingFaceAPIKey);
+            groupBoxHuggingFace.Controls.Add(buttonShowHideHuggingFaceAPIKey);
+            groupBoxHuggingFace.Controls.Add(buttonUpdateHuggingFaceAPIKey);
+            groupBoxHuggingFace.Location = new Point(8, 284);
+            groupBoxHuggingFace.Name = "groupBoxHuggingFace";
+            groupBoxHuggingFace.Size = new Size(659, 210);
+            groupBoxHuggingFace.TabIndex = 6;
+            groupBoxHuggingFace.TabStop = false;
+            groupBoxHuggingFace.Text = "HuggingFace Settings";
             // 
-            // label18
+            // groupBox25
             // 
-            label18.AutoSize = true;
-            label18.Location = new Point(22, 44);
-            label18.Margin = new Padding(4, 0, 4, 0);
-            label18.Name = "label18";
-            label18.Size = new Size(51, 20);
-            label18.TabIndex = 0;
-            label18.Text = "Width";
+            groupBox25.Anchor = AnchorStyles.Bottom;
+            groupBox25.Controls.Add(buttonResetHuggingFaceEditingImageModel);
+            groupBox25.Controls.Add(buttonUpdateHuggingFaceEditingImageModel);
+            groupBox25.Controls.Add(buttonResetHuggingFaceCreatingImageModel);
+            groupBox25.Controls.Add(buttonUpdateHuggingFaceCreatingImageModel);
+            groupBox25.Controls.Add(textBoxHuggingFaceEditingModel);
+            groupBox25.Controls.Add(textBoxHuggingFaceCreatingModel);
+            groupBox25.Controls.Add(label25);
+            groupBox25.Controls.Add(label24);
+            groupBox25.Location = new Point(8, 101);
+            groupBox25.Name = "groupBox25";
+            groupBox25.Size = new Size(643, 103);
+            groupBox25.TabIndex = 5;
+            groupBox25.TabStop = false;
+            groupBox25.Text = "Preferred Model";
             // 
-            // buttonResetGeminiAPIKey
+            // buttonResetHuggingFaceEditingImageModel
             // 
-            buttonResetGeminiAPIKey.Anchor = AnchorStyles.Top;
-            buttonResetGeminiAPIKey.Enabled = false;
-            buttonResetGeminiAPIKey.ImageIndex = 9;
-            buttonResetGeminiAPIKey.ImageList = icons;
-            buttonResetGeminiAPIKey.Location = new Point(350, 90);
-            buttonResetGeminiAPIKey.Margin = new Padding(4);
-            buttonResetGeminiAPIKey.Name = "buttonResetGeminiAPIKey";
-            buttonResetGeminiAPIKey.Size = new Size(284, 34);
-            buttonResetGeminiAPIKey.TabIndex = 4;
-            buttonResetGeminiAPIKey.Text = "Reset Google Gemini™ API Key";
-            buttonResetGeminiAPIKey.TextAlign = ContentAlignment.MiddleRight;
-            buttonResetGeminiAPIKey.TextImageRelation = TextImageRelation.ImageBeforeText;
-            buttonResetGeminiAPIKey.UseVisualStyleBackColor = true;
-            buttonResetGeminiAPIKey.Click += button5_Click;
+            buttonResetHuggingFaceEditingImageModel.Anchor = AnchorStyles.None;
+            buttonResetHuggingFaceEditingImageModel.Enabled = false;
+            buttonResetHuggingFaceEditingImageModel.ImageIndex = 9;
+            buttonResetHuggingFaceEditingImageModel.ImageList = icons;
+            buttonResetHuggingFaceEditingImageModel.Location = new Point(537, 61);
+            buttonResetHuggingFaceEditingImageModel.Name = "buttonResetHuggingFaceEditingImageModel";
+            buttonResetHuggingFaceEditingImageModel.Size = new Size(94, 34);
+            buttonResetHuggingFaceEditingImageModel.TabIndex = 2;
+            buttonResetHuggingFaceEditingImageModel.Text = "Reset";
+            buttonResetHuggingFaceEditingImageModel.TextAlign = ContentAlignment.MiddleRight;
+            buttonResetHuggingFaceEditingImageModel.TextImageRelation = TextImageRelation.ImageBeforeText;
+            buttonResetHuggingFaceEditingImageModel.UseVisualStyleBackColor = true;
+            buttonResetHuggingFaceEditingImageModel.Click += buttonResetHuggingFaceEditingImageModel_Click;
             // 
             // icons
             // 
@@ -341,44 +377,302 @@
             icons.Images.SetKeyName(7, "icons8-warning-48.png");
             icons.Images.SetKeyName(8, "icons8-update-48 (1).png");
             icons.Images.SetKeyName(9, "icons8-reset-48.png");
+            icons.Images.SetKeyName(10, "icons8-bard-48.png");
+            icons.Images.SetKeyName(11, "icons8-hugging-face-48.png");
             // 
-            // buttonUpdateGeminiAPIKey
+            // buttonUpdateHuggingFaceEditingImageModel
             // 
-            buttonUpdateGeminiAPIKey.Anchor = AnchorStyles.Top;
-            buttonUpdateGeminiAPIKey.Enabled = false;
-            buttonUpdateGeminiAPIKey.ImageIndex = 8;
-            buttonUpdateGeminiAPIKey.ImageList = icons;
-            buttonUpdateGeminiAPIKey.Location = new Point(38, 90);
-            buttonUpdateGeminiAPIKey.Margin = new Padding(4);
-            buttonUpdateGeminiAPIKey.Name = "buttonUpdateGeminiAPIKey";
-            buttonUpdateGeminiAPIKey.Size = new Size(290, 34);
-            buttonUpdateGeminiAPIKey.TabIndex = 4;
-            buttonUpdateGeminiAPIKey.Text = "Update Google Gemini™ API Key";
-            buttonUpdateGeminiAPIKey.TextAlign = ContentAlignment.MiddleRight;
-            buttonUpdateGeminiAPIKey.TextImageRelation = TextImageRelation.ImageBeforeText;
-            buttonUpdateGeminiAPIKey.UseVisualStyleBackColor = true;
-            buttonUpdateGeminiAPIKey.Click += button4_Click;
+            buttonUpdateHuggingFaceEditingImageModel.Anchor = AnchorStyles.None;
+            buttonUpdateHuggingFaceEditingImageModel.Enabled = false;
+            buttonUpdateHuggingFaceEditingImageModel.ImageIndex = 8;
+            buttonUpdateHuggingFaceEditingImageModel.ImageList = icons;
+            buttonUpdateHuggingFaceEditingImageModel.Location = new Point(437, 61);
+            buttonUpdateHuggingFaceEditingImageModel.Name = "buttonUpdateHuggingFaceEditingImageModel";
+            buttonUpdateHuggingFaceEditingImageModel.Size = new Size(94, 34);
+            buttonUpdateHuggingFaceEditingImageModel.TabIndex = 2;
+            buttonUpdateHuggingFaceEditingImageModel.Text = "Update";
+            buttonUpdateHuggingFaceEditingImageModel.TextAlign = ContentAlignment.MiddleRight;
+            buttonUpdateHuggingFaceEditingImageModel.TextImageRelation = TextImageRelation.ImageBeforeText;
+            buttonUpdateHuggingFaceEditingImageModel.UseVisualStyleBackColor = true;
+            buttonUpdateHuggingFaceEditingImageModel.Click += buttonUpdateHuggingFaceEditingImageModel_Click;
             // 
-            // label14
+            // buttonResetHuggingFaceCreatingImageModel
             // 
-            label14.Anchor = AnchorStyles.Top;
-            label14.AutoSize = true;
-            label14.ImageAlign = ContentAlignment.MiddleLeft;
-            label14.ImageIndex = 7;
-            label14.ImageList = icons;
-            label14.Location = new Point(10, 138);
-            label14.Margin = new Padding(4, 0, 4, 0);
-            label14.Name = "label14";
-            label14.Size = new Size(652, 20);
-            label14.TabIndex = 3;
-            label14.Text = "        Warning: For your security, do not share your Google Gemini™ API key with anyone else.";
-            label14.TextAlign = ContentAlignment.MiddleRight;
+            buttonResetHuggingFaceCreatingImageModel.Anchor = AnchorStyles.None;
+            buttonResetHuggingFaceCreatingImageModel.Enabled = false;
+            buttonResetHuggingFaceCreatingImageModel.ImageIndex = 9;
+            buttonResetHuggingFaceCreatingImageModel.ImageList = icons;
+            buttonResetHuggingFaceCreatingImageModel.Location = new Point(537, 21);
+            buttonResetHuggingFaceCreatingImageModel.Name = "buttonResetHuggingFaceCreatingImageModel";
+            buttonResetHuggingFaceCreatingImageModel.Size = new Size(94, 34);
+            buttonResetHuggingFaceCreatingImageModel.TabIndex = 2;
+            buttonResetHuggingFaceCreatingImageModel.Text = "Reset";
+            buttonResetHuggingFaceCreatingImageModel.TextAlign = ContentAlignment.MiddleRight;
+            buttonResetHuggingFaceCreatingImageModel.TextImageRelation = TextImageRelation.ImageBeforeText;
+            buttonResetHuggingFaceCreatingImageModel.UseVisualStyleBackColor = true;
+            buttonResetHuggingFaceCreatingImageModel.Click += buttonResetHuggingFaceCreatingImageModel_Click;
+            // 
+            // buttonUpdateHuggingFaceCreatingImageModel
+            // 
+            buttonUpdateHuggingFaceCreatingImageModel.Anchor = AnchorStyles.None;
+            buttonUpdateHuggingFaceCreatingImageModel.Enabled = false;
+            buttonUpdateHuggingFaceCreatingImageModel.ImageIndex = 8;
+            buttonUpdateHuggingFaceCreatingImageModel.ImageList = icons;
+            buttonUpdateHuggingFaceCreatingImageModel.Location = new Point(437, 21);
+            buttonUpdateHuggingFaceCreatingImageModel.Name = "buttonUpdateHuggingFaceCreatingImageModel";
+            buttonUpdateHuggingFaceCreatingImageModel.Size = new Size(94, 34);
+            buttonUpdateHuggingFaceCreatingImageModel.TabIndex = 2;
+            buttonUpdateHuggingFaceCreatingImageModel.Text = "Update";
+            buttonUpdateHuggingFaceCreatingImageModel.TextAlign = ContentAlignment.MiddleRight;
+            buttonUpdateHuggingFaceCreatingImageModel.TextImageRelation = TextImageRelation.ImageBeforeText;
+            buttonUpdateHuggingFaceCreatingImageModel.UseVisualStyleBackColor = true;
+            buttonUpdateHuggingFaceCreatingImageModel.Click += buttonUpdateHuggingFaceCreatingImageModel_Click;
+            // 
+            // textBoxHuggingFaceEditingModel
+            // 
+            textBoxHuggingFaceEditingModel.Anchor = AnchorStyles.None;
+            textBoxHuggingFaceEditingModel.Location = new Point(135, 64);
+            textBoxHuggingFaceEditingModel.Name = "textBoxHuggingFaceEditingModel";
+            textBoxHuggingFaceEditingModel.Size = new Size(296, 27);
+            textBoxHuggingFaceEditingModel.TabIndex = 1;
+            textBoxHuggingFaceEditingModel.Text = "mit-han-lab/svdq-int4-flux.1-fill-dev";
+            textBoxHuggingFaceEditingModel.TextChanged += textBoxHuggingFaceEditingModel_TextChanged;
+            // 
+            // textBoxHuggingFaceCreatingModel
+            // 
+            textBoxHuggingFaceCreatingModel.Anchor = AnchorStyles.None;
+            textBoxHuggingFaceCreatingModel.Location = new Point(135, 25);
+            textBoxHuggingFaceCreatingModel.Name = "textBoxHuggingFaceCreatingModel";
+            textBoxHuggingFaceCreatingModel.Size = new Size(296, 27);
+            textBoxHuggingFaceCreatingModel.TabIndex = 1;
+            textBoxHuggingFaceCreatingModel.Text = "black-forest-labs/FLUX.1-dev";
+            textBoxHuggingFaceCreatingModel.TextChanged += textBoxHuggingFaceCreatingModel_TextChanged;
+            // 
+            // label25
+            // 
+            label25.Anchor = AnchorStyles.None;
+            label25.AutoSize = true;
+            label25.Location = new Point(23, 68);
+            label25.Name = "label25";
+            label25.Size = new Size(105, 20);
+            label25.TabIndex = 0;
+            label25.Text = "Editing Image";
+            // 
+            // label24
+            // 
+            label24.Anchor = AnchorStyles.None;
+            label24.AutoSize = true;
+            label24.Location = new Point(13, 28);
+            label24.Name = "label24";
+            label24.Size = new Size(115, 20);
+            label24.TabIndex = 0;
+            label24.Text = "Creating Image";
+            // 
+            // label22
+            // 
+            label22.Anchor = AnchorStyles.Top;
+            label22.AutoSize = true;
+            label22.ImageAlign = ContentAlignment.MiddleLeft;
+            label22.ImageIndex = 11;
+            label22.ImageList = icons;
+            label22.Location = new Point(9, 29);
+            label22.Margin = new Padding(4, 0, 4, 0);
+            label22.Name = "label22";
+            label22.Size = new Size(183, 20);
+            label22.TabIndex = 0;
+            label22.Text = "       HuggingFace API Key";
+            // 
+            // textBoxHuggingFaceAPIKey
+            // 
+            textBoxHuggingFaceAPIKey.Anchor = AnchorStyles.Top;
+            textBoxHuggingFaceAPIKey.Location = new Point(200, 25);
+            textBoxHuggingFaceAPIKey.Margin = new Padding(4);
+            textBoxHuggingFaceAPIKey.Name = "textBoxHuggingFaceAPIKey";
+            textBoxHuggingFaceAPIKey.Size = new Size(343, 27);
+            textBoxHuggingFaceAPIKey.TabIndex = 1;
+            textBoxHuggingFaceAPIKey.UseSystemPasswordChar = true;
+            textBoxHuggingFaceAPIKey.TextChanged += textBoxHuggingFaceAPIKey_TextChanged;
+            // 
+            // buttonResetHuggingFaceAPIKey
+            // 
+            buttonResetHuggingFaceAPIKey.Anchor = AnchorStyles.Top;
+            buttonResetHuggingFaceAPIKey.Enabled = false;
+            buttonResetHuggingFaceAPIKey.ImageIndex = 9;
+            buttonResetHuggingFaceAPIKey.ImageList = icons;
+            buttonResetHuggingFaceAPIKey.Location = new Point(341, 60);
+            buttonResetHuggingFaceAPIKey.Margin = new Padding(4);
+            buttonResetHuggingFaceAPIKey.Name = "buttonResetHuggingFaceAPIKey";
+            buttonResetHuggingFaceAPIKey.Size = new Size(284, 34);
+            buttonResetHuggingFaceAPIKey.TabIndex = 4;
+            buttonResetHuggingFaceAPIKey.Text = "Reset HuggingFace API Key";
+            buttonResetHuggingFaceAPIKey.TextAlign = ContentAlignment.MiddleRight;
+            buttonResetHuggingFaceAPIKey.TextImageRelation = TextImageRelation.ImageBeforeText;
+            buttonResetHuggingFaceAPIKey.UseVisualStyleBackColor = true;
+            buttonResetHuggingFaceAPIKey.Click += buttonResetHuggingFaceAPIKey_Click;
+            // 
+            // buttonShowHideHuggingFaceAPIKey
+            // 
+            buttonShowHideHuggingFaceAPIKey.Anchor = AnchorStyles.Top;
+            buttonShowHideHuggingFaceAPIKey.ImageIndex = 5;
+            buttonShowHideHuggingFaceAPIKey.ImageList = icons;
+            buttonShowHideHuggingFaceAPIKey.Location = new Point(551, 22);
+            buttonShowHideHuggingFaceAPIKey.Margin = new Padding(4);
+            buttonShowHideHuggingFaceAPIKey.Name = "buttonShowHideHuggingFaceAPIKey";
+            buttonShowHideHuggingFaceAPIKey.Size = new Size(94, 34);
+            buttonShowHideHuggingFaceAPIKey.TabIndex = 2;
+            buttonShowHideHuggingFaceAPIKey.Text = "Show";
+            buttonShowHideHuggingFaceAPIKey.TextAlign = ContentAlignment.MiddleRight;
+            buttonShowHideHuggingFaceAPIKey.TextImageRelation = TextImageRelation.ImageBeforeText;
+            buttonShowHideHuggingFaceAPIKey.UseVisualStyleBackColor = true;
+            buttonShowHideHuggingFaceAPIKey.Click += button4_Click_1;
+            // 
+            // buttonUpdateHuggingFaceAPIKey
+            // 
+            buttonUpdateHuggingFaceAPIKey.Anchor = AnchorStyles.Top;
+            buttonUpdateHuggingFaceAPIKey.Enabled = false;
+            buttonUpdateHuggingFaceAPIKey.ImageIndex = 8;
+            buttonUpdateHuggingFaceAPIKey.ImageList = icons;
+            buttonUpdateHuggingFaceAPIKey.Location = new Point(31, 60);
+            buttonUpdateHuggingFaceAPIKey.Margin = new Padding(4);
+            buttonUpdateHuggingFaceAPIKey.Name = "buttonUpdateHuggingFaceAPIKey";
+            buttonUpdateHuggingFaceAPIKey.Size = new Size(290, 34);
+            buttonUpdateHuggingFaceAPIKey.TabIndex = 4;
+            buttonUpdateHuggingFaceAPIKey.Text = "Update HuggingFace API Key";
+            buttonUpdateHuggingFaceAPIKey.TextAlign = ContentAlignment.MiddleRight;
+            buttonUpdateHuggingFaceAPIKey.TextImageRelation = TextImageRelation.ImageBeforeText;
+            buttonUpdateHuggingFaceAPIKey.UseVisualStyleBackColor = true;
+            buttonUpdateHuggingFaceAPIKey.ChangeUICues += buttonUpdateHuggingFaceAPIKey_ChangeUICues;
+            // 
+            // groupBoxGemini
+            // 
+            groupBoxGemini.Controls.Add(groupBox24);
+            groupBoxGemini.Controls.Add(label13);
+            groupBoxGemini.Controls.Add(textBoxGeminiAPIKey);
+            groupBoxGemini.Controls.Add(buttonResetGeminiAPIKey);
+            groupBoxGemini.Controls.Add(buttonShowHideGeminiAPIKey);
+            groupBoxGemini.Controls.Add(buttonUpdateGeminiAPIKey);
+            groupBoxGemini.Enabled = false;
+            groupBoxGemini.Location = new Point(8, 98);
+            groupBoxGemini.Name = "groupBoxGemini";
+            groupBoxGemini.Size = new Size(659, 180);
+            groupBoxGemini.TabIndex = 6;
+            groupBoxGemini.TabStop = false;
+            groupBoxGemini.Text = "Google Gemini™ Settings";
+            // 
+            // groupBox24
+            // 
+            groupBox24.Anchor = AnchorStyles.Bottom;
+            groupBox24.Controls.Add(buttonResetPreferredGeminiModel);
+            groupBox24.Controls.Add(buttonUpdateGeminiModel);
+            groupBox24.Controls.Add(textBoxGeminiModel);
+            groupBox24.Controls.Add(label23);
+            groupBox24.Location = new Point(8, 105);
+            groupBox24.Name = "groupBox24";
+            groupBox24.Size = new Size(643, 69);
+            groupBox24.TabIndex = 5;
+            groupBox24.TabStop = false;
+            groupBox24.Text = "Preferred Model";
+            // 
+            // buttonResetPreferredGeminiModel
+            // 
+            buttonResetPreferredGeminiModel.Anchor = AnchorStyles.None;
+            buttonResetPreferredGeminiModel.Enabled = false;
+            buttonResetPreferredGeminiModel.ImageIndex = 9;
+            buttonResetPreferredGeminiModel.ImageList = icons;
+            buttonResetPreferredGeminiModel.Location = new Point(537, 25);
+            buttonResetPreferredGeminiModel.Name = "buttonResetPreferredGeminiModel";
+            buttonResetPreferredGeminiModel.Size = new Size(94, 34);
+            buttonResetPreferredGeminiModel.TabIndex = 2;
+            buttonResetPreferredGeminiModel.Text = "Reset";
+            buttonResetPreferredGeminiModel.TextAlign = ContentAlignment.MiddleRight;
+            buttonResetPreferredGeminiModel.TextImageRelation = TextImageRelation.ImageBeforeText;
+            buttonResetPreferredGeminiModel.UseVisualStyleBackColor = true;
+            buttonResetPreferredGeminiModel.Click += button8_Click;
+            // 
+            // buttonUpdateGeminiModel
+            // 
+            buttonUpdateGeminiModel.Anchor = AnchorStyles.None;
+            buttonUpdateGeminiModel.Enabled = false;
+            buttonUpdateGeminiModel.ImageIndex = 8;
+            buttonUpdateGeminiModel.ImageList = icons;
+            buttonUpdateGeminiModel.Location = new Point(437, 25);
+            buttonUpdateGeminiModel.Name = "buttonUpdateGeminiModel";
+            buttonUpdateGeminiModel.Size = new Size(94, 34);
+            buttonUpdateGeminiModel.TabIndex = 2;
+            buttonUpdateGeminiModel.Text = "Update";
+            buttonUpdateGeminiModel.TextAlign = ContentAlignment.MiddleRight;
+            buttonUpdateGeminiModel.TextImageRelation = TextImageRelation.ImageBeforeText;
+            buttonUpdateGeminiModel.UseVisualStyleBackColor = true;
+            buttonUpdateGeminiModel.Click += updateGeminiModel_Click;
+            // 
+            // textBoxGeminiModel
+            // 
+            textBoxGeminiModel.Anchor = AnchorStyles.None;
+            textBoxGeminiModel.Location = new Point(190, 29);
+            textBoxGeminiModel.Name = "textBoxGeminiModel";
+            textBoxGeminiModel.Size = new Size(241, 27);
+            textBoxGeminiModel.TabIndex = 1;
+            textBoxGeminiModel.Text = "gemini-2.0-flash-preview-image-generation";
+            textBoxGeminiModel.TextChanged += textBoxGeminiModel_TextChanged;
+            // 
+            // label23
+            // 
+            label23.Anchor = AnchorStyles.None;
+            label23.AutoSize = true;
+            label23.Location = new Point(13, 32);
+            label23.Name = "label23";
+            label23.Size = new Size(171, 20);
+            label23.TabIndex = 0;
+            label23.Text = "Creating/Editing Image";
+            // 
+            // label13
+            // 
+            label13.Anchor = AnchorStyles.Top;
+            label13.AutoSize = true;
+            label13.ImageAlign = ContentAlignment.MiddleLeft;
+            label13.ImageIndex = 10;
+            label13.ImageList = icons;
+            label13.Location = new Point(8, 32);
+            label13.Margin = new Padding(4, 0, 4, 0);
+            label13.Name = "label13";
+            label13.Size = new Size(203, 20);
+            label13.TabIndex = 0;
+            label13.Text = "      Google Gemini™ API Key";
+            // 
+            // textBoxGeminiAPIKey
+            // 
+            textBoxGeminiAPIKey.Anchor = AnchorStyles.Top;
+            textBoxGeminiAPIKey.Location = new Point(220, 29);
+            textBoxGeminiAPIKey.Margin = new Padding(4);
+            textBoxGeminiAPIKey.Name = "textBoxGeminiAPIKey";
+            textBoxGeminiAPIKey.Size = new Size(325, 27);
+            textBoxGeminiAPIKey.TabIndex = 1;
+            textBoxGeminiAPIKey.UseSystemPasswordChar = true;
+            textBoxGeminiAPIKey.TextChanged += textBox1_TextChanged;
+            // 
+            // buttonResetGeminiAPIKey
+            // 
+            buttonResetGeminiAPIKey.Anchor = AnchorStyles.Top;
+            buttonResetGeminiAPIKey.Enabled = false;
+            buttonResetGeminiAPIKey.ImageIndex = 9;
+            buttonResetGeminiAPIKey.ImageList = icons;
+            buttonResetGeminiAPIKey.Location = new Point(341, 64);
+            buttonResetGeminiAPIKey.Margin = new Padding(4);
+            buttonResetGeminiAPIKey.Name = "buttonResetGeminiAPIKey";
+            buttonResetGeminiAPIKey.Size = new Size(284, 34);
+            buttonResetGeminiAPIKey.TabIndex = 4;
+            buttonResetGeminiAPIKey.Text = "Reset Google Gemini™ API Key";
+            buttonResetGeminiAPIKey.TextAlign = ContentAlignment.MiddleRight;
+            buttonResetGeminiAPIKey.TextImageRelation = TextImageRelation.ImageBeforeText;
+            buttonResetGeminiAPIKey.UseVisualStyleBackColor = true;
+            buttonResetGeminiAPIKey.Click += button5_Click;
             // 
             // buttonShowHideGeminiAPIKey
             // 
+            buttonShowHideGeminiAPIKey.Anchor = AnchorStyles.Top;
             buttonShowHideGeminiAPIKey.ImageIndex = 5;
             buttonShowHideGeminiAPIKey.ImageList = icons;
-            buttonShowHideGeminiAPIKey.Location = new Point(551, 37);
+            buttonShowHideGeminiAPIKey.Location = new Point(553, 25);
             buttonShowHideGeminiAPIKey.Margin = new Padding(4);
             buttonShowHideGeminiAPIKey.Name = "buttonShowHideGeminiAPIKey";
             buttonShowHideGeminiAPIKey.Size = new Size(94, 34);
@@ -389,25 +683,126 @@
             buttonShowHideGeminiAPIKey.UseVisualStyleBackColor = true;
             buttonShowHideGeminiAPIKey.Click += button3_Click;
             // 
-            // textBoxGeminiAPIKey
+            // buttonUpdateGeminiAPIKey
             // 
-            textBoxGeminiAPIKey.Location = new Point(200, 41);
-            textBoxGeminiAPIKey.Margin = new Padding(4);
-            textBoxGeminiAPIKey.Name = "textBoxGeminiAPIKey";
-            textBoxGeminiAPIKey.Size = new Size(343, 27);
-            textBoxGeminiAPIKey.TabIndex = 1;
-            textBoxGeminiAPIKey.UseSystemPasswordChar = true;
-            textBoxGeminiAPIKey.TextChanged += textBox1_TextChanged;
+            buttonUpdateGeminiAPIKey.Anchor = AnchorStyles.Top;
+            buttonUpdateGeminiAPIKey.Enabled = false;
+            buttonUpdateGeminiAPIKey.ImageIndex = 8;
+            buttonUpdateGeminiAPIKey.ImageList = icons;
+            buttonUpdateGeminiAPIKey.Location = new Point(31, 64);
+            buttonUpdateGeminiAPIKey.Margin = new Padding(4);
+            buttonUpdateGeminiAPIKey.Name = "buttonUpdateGeminiAPIKey";
+            buttonUpdateGeminiAPIKey.Size = new Size(290, 34);
+            buttonUpdateGeminiAPIKey.TabIndex = 4;
+            buttonUpdateGeminiAPIKey.Text = "Update Google Gemini™ API Key";
+            buttonUpdateGeminiAPIKey.TextAlign = ContentAlignment.MiddleRight;
+            buttonUpdateGeminiAPIKey.TextImageRelation = TextImageRelation.ImageBeforeText;
+            buttonUpdateGeminiAPIKey.UseVisualStyleBackColor = true;
+            buttonUpdateGeminiAPIKey.Click += button4_Click;
             // 
-            // label13
+            // groupBox18
             // 
-            label13.AutoSize = true;
-            label13.Location = new Point(15, 45);
-            label13.Margin = new Padding(4, 0, 4, 0);
-            label13.Name = "label13";
-            label13.Size = new Size(179, 20);
-            label13.TabIndex = 0;
-            label13.Text = "Google Gemini™ API Key";
+            groupBox18.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox18.Controls.Add(numericUpDownDefaultAIGeneratedImageHeight);
+            groupBox18.Controls.Add(numericUpDownDefaultAIGeneratedImageWidth);
+            groupBox18.Controls.Add(label19);
+            groupBox18.Controls.Add(label27);
+            groupBox18.Controls.Add(label26);
+            groupBox18.Controls.Add(label18);
+            groupBox18.Location = new Point(8, 541);
+            groupBox18.Margin = new Padding(4);
+            groupBox18.Name = "groupBox18";
+            groupBox18.Padding = new Padding(4);
+            groupBox18.Size = new Size(659, 70);
+            groupBox18.TabIndex = 5;
+            groupBox18.TabStop = false;
+            groupBox18.Text = "Default Generated Image Sizes";
+            // 
+            // numericUpDownDefaultAIGeneratedImageHeight
+            // 
+            numericUpDownDefaultAIGeneratedImageHeight.Anchor = AnchorStyles.None;
+            numericUpDownDefaultAIGeneratedImageHeight.Location = new Point(312, 32);
+            numericUpDownDefaultAIGeneratedImageHeight.Margin = new Padding(4);
+            numericUpDownDefaultAIGeneratedImageHeight.Maximum = new decimal(new int[] { 1080, 0, 0, 0 });
+            numericUpDownDefaultAIGeneratedImageHeight.Minimum = new decimal(new int[] { 64, 0, 0, 0 });
+            numericUpDownDefaultAIGeneratedImageHeight.Name = "numericUpDownDefaultAIGeneratedImageHeight";
+            numericUpDownDefaultAIGeneratedImageHeight.Size = new Size(105, 27);
+            numericUpDownDefaultAIGeneratedImageHeight.TabIndex = 1;
+            numericUpDownDefaultAIGeneratedImageHeight.Value = new decimal(new int[] { 1024, 0, 0, 0 });
+            numericUpDownDefaultAIGeneratedImageHeight.ValueChanged += numericUpDownDefaultAIGeneratedImageHeight_ValueChanged;
+            // 
+            // numericUpDownDefaultAIGeneratedImageWidth
+            // 
+            numericUpDownDefaultAIGeneratedImageWidth.Anchor = AnchorStyles.None;
+            numericUpDownDefaultAIGeneratedImageWidth.Location = new Point(79, 32);
+            numericUpDownDefaultAIGeneratedImageWidth.Margin = new Padding(4);
+            numericUpDownDefaultAIGeneratedImageWidth.Maximum = new decimal(new int[] { 1920, 0, 0, 0 });
+            numericUpDownDefaultAIGeneratedImageWidth.Minimum = new decimal(new int[] { 64, 0, 0, 0 });
+            numericUpDownDefaultAIGeneratedImageWidth.Name = "numericUpDownDefaultAIGeneratedImageWidth";
+            numericUpDownDefaultAIGeneratedImageWidth.Size = new Size(105, 27);
+            numericUpDownDefaultAIGeneratedImageWidth.TabIndex = 1;
+            numericUpDownDefaultAIGeneratedImageWidth.Value = new decimal(new int[] { 1024, 0, 0, 0 });
+            numericUpDownDefaultAIGeneratedImageWidth.ValueChanged += numericUpDownDefaultAIGeneratedImageHeight_ValueChanged;
+            // 
+            // label19
+            // 
+            label19.Anchor = AnchorStyles.None;
+            label19.AutoSize = true;
+            label19.Location = new Point(249, 35);
+            label19.Margin = new Padding(4, 0, 4, 0);
+            label19.Name = "label19";
+            label19.Size = new Size(56, 20);
+            label19.TabIndex = 0;
+            label19.Text = "Height";
+            // 
+            // label27
+            // 
+            label27.Anchor = AnchorStyles.None;
+            label27.AutoSize = true;
+            label27.Location = new Point(425, 35);
+            label27.Margin = new Padding(4, 0, 4, 0);
+            label27.Name = "label27";
+            label27.Size = new Size(25, 20);
+            label27.TabIndex = 0;
+            label27.Text = "px";
+            // 
+            // label26
+            // 
+            label26.Anchor = AnchorStyles.None;
+            label26.AutoSize = true;
+            label26.Location = new Point(192, 35);
+            label26.Margin = new Padding(4, 0, 4, 0);
+            label26.Name = "label26";
+            label26.Size = new Size(25, 20);
+            label26.TabIndex = 0;
+            label26.Text = "px";
+            // 
+            // label18
+            // 
+            label18.Anchor = AnchorStyles.None;
+            label18.AutoSize = true;
+            label18.Location = new Point(21, 35);
+            label18.Margin = new Padding(4, 0, 4, 0);
+            label18.Name = "label18";
+            label18.Size = new Size(51, 20);
+            label18.TabIndex = 0;
+            label18.Text = "Width";
+            // 
+            // label14
+            // 
+            label14.Anchor = AnchorStyles.Bottom;
+            label14.AutoSize = true;
+            label14.ImageAlign = ContentAlignment.TopLeft;
+            label14.ImageIndex = 7;
+            label14.ImageList = icons;
+            label14.Location = new Point(12, 497);
+            label14.Margin = new Padding(4, 0, 4, 0);
+            label14.MaximumSize = new Size(675, 0);
+            label14.Name = "label14";
+            label14.Size = new Size(647, 40);
+            label14.TabIndex = 3;
+            label14.Text = "        Warning: For your security, do not share your Google Gemini™ or HuggingFace API keys with anyone else.";
+            label14.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // groupBox1
             // 
@@ -418,15 +813,16 @@
             groupBox1.Margin = new Padding(4);
             groupBox1.Name = "groupBox1";
             groupBox1.Padding = new Padding(4);
-            groupBox1.Size = new Size(674, 108);
+            groupBox1.Size = new Size(674, 76);
             groupBox1.TabIndex = 2;
             groupBox1.TabStop = false;
             groupBox1.Text = "Appearance";
             // 
             // label1
             // 
+            label1.Anchor = AnchorStyles.None;
             label1.AutoSize = true;
-            label1.Location = new Point(24, 51);
+            label1.Location = new Point(24, 35);
             label1.Margin = new Padding(4, 0, 4, 0);
             label1.Name = "label1";
             label1.Size = new Size(56, 20);
@@ -435,11 +831,11 @@
             // 
             // comboBoxTheme
             // 
-            comboBoxTheme.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            comboBoxTheme.Anchor = AnchorStyles.None;
             comboBoxTheme.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBoxTheme.FormattingEnabled = true;
             comboBoxTheme.Items.AddRange(new object[] { "Use System Theme", "Light", "Dark" });
-            comboBoxTheme.Location = new Point(88, 48);
+            comboBoxTheme.Location = new Point(88, 32);
             comboBoxTheme.Margin = new Padding(4);
             comboBoxTheme.Name = "comboBoxTheme";
             comboBoxTheme.Size = new Size(557, 28);
@@ -475,8 +871,8 @@
             // groupBox7
             // 
             groupBox7.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            groupBox7.Controls.Add(numericUpDown2);
-            groupBox7.Controls.Add(numericUpDown1);
+            groupBox7.Controls.Add(numericUpDownDefaultCanvasHeight);
+            groupBox7.Controls.Add(numericUpDownDefaultCanvasWidth);
             groupBox7.Controls.Add(label5);
             groupBox7.Controls.Add(label3);
             groupBox7.Controls.Add(label4);
@@ -490,29 +886,29 @@
             groupBox7.TabStop = false;
             groupBox7.Text = "Default Canvas Size";
             // 
-            // numericUpDown2
+            // numericUpDownDefaultCanvasHeight
             // 
-            numericUpDown2.Anchor = AnchorStyles.Left;
-            numericUpDown2.Location = new Point(78, 76);
-            numericUpDown2.Margin = new Padding(4);
-            numericUpDown2.Maximum = new decimal(new int[] { -1, 0, 0, 0 });
-            numericUpDown2.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
-            numericUpDown2.Name = "numericUpDown2";
-            numericUpDown2.Size = new Size(119, 27);
-            numericUpDown2.TabIndex = 1;
-            numericUpDown2.Value = new decimal(new int[] { 600, 0, 0, 0 });
+            numericUpDownDefaultCanvasHeight.Anchor = AnchorStyles.Left;
+            numericUpDownDefaultCanvasHeight.Location = new Point(78, 76);
+            numericUpDownDefaultCanvasHeight.Margin = new Padding(4);
+            numericUpDownDefaultCanvasHeight.Maximum = new decimal(new int[] { -1, 0, 0, 0 });
+            numericUpDownDefaultCanvasHeight.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            numericUpDownDefaultCanvasHeight.Name = "numericUpDownDefaultCanvasHeight";
+            numericUpDownDefaultCanvasHeight.Size = new Size(119, 27);
+            numericUpDownDefaultCanvasHeight.TabIndex = 1;
+            numericUpDownDefaultCanvasHeight.Value = new decimal(new int[] { 600, 0, 0, 0 });
             // 
-            // numericUpDown1
+            // numericUpDownDefaultCanvasWidth
             // 
-            numericUpDown1.Anchor = AnchorStyles.Left;
-            numericUpDown1.Location = new Point(78, 34);
-            numericUpDown1.Margin = new Padding(4);
-            numericUpDown1.Maximum = new decimal(new int[] { -1, 0, 0, 0 });
-            numericUpDown1.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
-            numericUpDown1.Name = "numericUpDown1";
-            numericUpDown1.Size = new Size(119, 27);
-            numericUpDown1.TabIndex = 1;
-            numericUpDown1.Value = new decimal(new int[] { 800, 0, 0, 0 });
+            numericUpDownDefaultCanvasWidth.Anchor = AnchorStyles.Left;
+            numericUpDownDefaultCanvasWidth.Location = new Point(78, 34);
+            numericUpDownDefaultCanvasWidth.Margin = new Padding(4);
+            numericUpDownDefaultCanvasWidth.Maximum = new decimal(new int[] { -1, 0, 0, 0 });
+            numericUpDownDefaultCanvasWidth.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            numericUpDownDefaultCanvasWidth.Name = "numericUpDownDefaultCanvasWidth";
+            numericUpDownDefaultCanvasWidth.Size = new Size(119, 27);
+            numericUpDownDefaultCanvasWidth.TabIndex = 1;
+            numericUpDownDefaultCanvasWidth.Value = new decimal(new int[] { 800, 0, 0, 0 });
             // 
             // label5
             // 
@@ -864,7 +1260,7 @@
             comboBoxDefaultPenStyle.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             comboBoxDefaultPenStyle.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBoxDefaultPenStyle.FormattingEnabled = true;
-            comboBoxDefaultPenStyle.Items.AddRange(new object[] { "Brush", "Oil Paint Brush", "Calligraphy Brush", "Watercolor Brush" });
+            comboBoxDefaultPenStyle.Items.AddRange(new object[] { "Pencil", "Marker", "Crayon", "Calligraphy Pen" });
             comboBoxDefaultPenStyle.Location = new Point(108, 72);
             comboBoxDefaultPenStyle.Margin = new Padding(4);
             comboBoxDefaultPenStyle.Name = "comboBoxDefaultPenStyle";
@@ -1106,6 +1502,16 @@
             groupBox4.PerformLayout();
             groupBox2.ResumeLayout(false);
             groupBox2.PerformLayout();
+            groupBox23.ResumeLayout(false);
+            groupBox23.PerformLayout();
+            groupBoxHuggingFace.ResumeLayout(false);
+            groupBoxHuggingFace.PerformLayout();
+            groupBox25.ResumeLayout(false);
+            groupBox25.PerformLayout();
+            groupBoxGemini.ResumeLayout(false);
+            groupBoxGemini.PerformLayout();
+            groupBox24.ResumeLayout(false);
+            groupBox24.PerformLayout();
             groupBox18.ResumeLayout(false);
             groupBox18.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultAIGeneratedImageHeight).EndInit();
@@ -1116,8 +1522,8 @@
             groupBox5.ResumeLayout(false);
             groupBox7.ResumeLayout(false);
             groupBox7.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)numericUpDown2).EndInit();
-            ((System.ComponentModel.ISupportInitialize)numericUpDown1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultCanvasHeight).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultCanvasWidth).EndInit();
             tabPage3.ResumeLayout(false);
             groupBox19.ResumeLayout(false);
             groupBox20.ResumeLayout(false);
@@ -1169,10 +1575,10 @@
         private GroupBox groupBox5;
         private TabPage tabPage3;
         private GroupBox groupBox7;
-        private NumericUpDown numericUpDown1;
+        private NumericUpDown numericUpDownDefaultCanvasWidth;
         private Label label2;
         private Label label3;
-        private NumericUpDown numericUpDown2;
+        private NumericUpDown numericUpDownDefaultCanvasHeight;
         private Label label5;
         private Label label4;
         private TabPage tabPage4;
@@ -1227,5 +1633,31 @@
         private Label label21;
         private NumericUpDown numericUpDownDefaultRadius;
         private ColorDialog colorDialog1;
+        private GroupBox groupBoxGemini;
+        private GroupBox groupBoxHuggingFace;
+        private Label label22;
+        private TextBox textBoxHuggingFaceAPIKey;
+        private Button buttonResetHuggingFaceAPIKey;
+        private Button buttonShowHideHuggingFaceAPIKey;
+        private Button buttonUpdateHuggingFaceAPIKey;
+        private GroupBox groupBox23;
+        private RadioButton radioButtonGeminiAI;
+        private RadioButton radioButtonHuggingFace;
+        private GroupBox groupBox24;
+        private Button buttonUpdateGeminiModel;
+        private TextBox textBoxGeminiModel;
+        private Label label23;
+        private GroupBox groupBox25;
+        private Button buttonUpdateHuggingFaceEditingImageModel;
+        private Button buttonUpdateHuggingFaceCreatingImageModel;
+        private TextBox textBoxHuggingFaceEditingModel;
+        private TextBox textBoxHuggingFaceCreatingModel;
+        private Label label25;
+        private Label label24;
+        private Button buttonResetPreferredGeminiModel;
+        private Button buttonResetHuggingFaceEditingImageModel;
+        private Button buttonResetHuggingFaceCreatingImageModel;
+        private Label label27;
+        private Label label26;
     }
 }

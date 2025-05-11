@@ -44,7 +44,7 @@
     <Setting Name="SecondaryColor" Type="System.Drawing.Color" Scope="User">
       <Value Profile="(Default)">Black</Value>
     </Setting>
-    <Setting Name="HashedAIAPIKey" Type="System.String" Scope="User">
+    <Setting Name="HashedGeminiAIAPIKey" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="DefaultAIGeneratedImageSize" Type="System.Drawing.Size" Scope="User">
@@ -55,6 +55,21 @@
     </Setting>
     <Setting Name="DefaultBucketTolerance" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">50</Value>
+    </Setting>
+    <Setting Name="PreferredAI" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="HashedHuggingFaceAPIKey" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="PreferredGeminiModel" Type="System.String" Scope="User">
+      <Value Profile="(Default)">gemini-2.0-flash-preview-image-generation</Value>
+    </Setting>
+    <Setting Name="PreferredHuggingFaceCreatingModel" Type="System.String" Scope="User">
+      <Value Profile="(Default)">black-forest-labs/FLUX.1-dev</Value>
+    </Setting>
+    <Setting Name="PreferredHuggingFaceEditingModel" Type="System.String" Scope="User">
+      <Value Profile="(Default)">mit-han-lab/svdq-int4-flux.1-fill-dev</Value>
     </Setting>
   </Settings>
 </SettingsFile>

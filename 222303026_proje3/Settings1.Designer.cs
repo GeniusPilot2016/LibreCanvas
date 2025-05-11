@@ -193,12 +193,12 @@ namespace _222303026_proje3 {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string HashedAIAPIKey {
+        public string HashedGeminiAIAPIKey {
             get {
-                return ((string)(this["HashedAIAPIKey"]));
+                return ((string)(this["HashedGeminiAIAPIKey"]));
             }
             set {
-                this["HashedAIAPIKey"] = value;
+                this["HashedGeminiAIAPIKey"] = value;
             }
         }
         
@@ -235,6 +235,66 @@ namespace _222303026_proje3 {
             }
             set {
                 this["DefaultBucketTolerance"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int PreferredAI {
+            get {
+                return ((int)(this["PreferredAI"]));
+            }
+            set {
+                this["PreferredAI"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string HashedHuggingFaceAPIKey {
+            get {
+                return ((string)(this["HashedHuggingFaceAPIKey"]));
+            }
+            set {
+                this["HashedHuggingFaceAPIKey"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("gemini-2.0-flash-preview-image-generation")]
+        public string PreferredGeminiModel {
+            get {
+                return ((string)(this["PreferredGeminiModel"]));
+            }
+            set {
+                this["PreferredGeminiModel"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("black-forest-labs/FLUX.1-dev")]
+        public string PreferredHuggingFaceCreatingModel {
+            get {
+                return ((string)(this["PreferredHuggingFaceCreatingModel"]));
+            }
+            set {
+                this["PreferredHuggingFaceCreatingModel"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("mit-han-lab/svdq-int4-flux.1-fill-dev")]
+        public string PreferredHuggingFaceEditingModel {
+            get {
+                return ((string)(this["PreferredHuggingFaceEditingModel"]));
+            }
+            set {
+                this["PreferredHuggingFaceEditingModel"] = value;
             }
         }
     }

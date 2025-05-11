@@ -83,7 +83,7 @@
             label3.Name = "label3";
             label3.Size = new Size(146, 30);
             label3.TabIndex = 1;
-            label3.Text = "Version 0.8.0";
+            label3.Text = "Version 0.9.0";
             // 
             // label2
             // 
@@ -102,7 +102,7 @@
             label1.Anchor = AnchorStyles.Top;
             label1.AutoSize = true;
             label1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label1.Location = new Point(258, 450);
+            label1.Location = new Point(258, 470);
             label1.Name = "label1";
             label1.Size = new Size(99, 20);
             label1.TabIndex = 6;
@@ -114,7 +114,7 @@
             listView1.Columns.AddRange(new ColumnHeader[] { columnHeader1, columnHeader2 });
             listView1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             listView1.Items.AddRange(new ListViewItem[] { listViewItem1 });
-            listView1.Location = new Point(12, 473);
+            listView1.Location = new Point(12, 493);
             listView1.Name = "listView1";
             listView1.Size = new Size(609, 206);
             listView1.TabIndex = 8;
@@ -133,14 +133,14 @@
             // 
             // label4
             // 
-            label4.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
+            label4.Anchor = AnchorStyles.Top;
             label4.AutoSize = true;
             label4.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             label4.Location = new Point(91, 332);
             label4.Name = "label4";
-            label4.Size = new Size(449, 60);
+            label4.Size = new Size(449, 80);
             label4.TabIndex = 9;
-            label4.Text = "Designed and programmed by GeniusPilot2016 (Nisa Özdoğan)\r\nAll icons in this program are downloaded from icons8.com\r\nArtFusion is licensed under the GNU General Public License v3.0\r\n";
+            label4.Text = resources.GetString("label4.Text");
             // 
             // buttonVisitIcons8
             // 
@@ -148,7 +148,7 @@
             buttonVisitIcons8.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             buttonVisitIcons8.ImageIndex = 0;
             buttonVisitIcons8.ImageList = icons;
-            buttonVisitIcons8.Location = new Point(64, 408);
+            buttonVisitIcons8.Location = new Point(64, 428);
             buttonVisitIcons8.Name = "buttonVisitIcons8";
             buttonVisitIcons8.Size = new Size(151, 29);
             buttonVisitIcons8.TabIndex = 10;
@@ -173,7 +173,7 @@
             buttonViewLicenseText.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             buttonViewLicenseText.ImageIndex = 1;
             buttonViewLicenseText.ImageList = icons;
-            buttonViewLicenseText.Location = new Point(221, 408);
+            buttonViewLicenseText.Location = new Point(221, 428);
             buttonViewLicenseText.Name = "buttonViewLicenseText";
             buttonViewLicenseText.Size = new Size(161, 29);
             buttonViewLicenseText.TabIndex = 10;
@@ -188,7 +188,7 @@
             buttonForkMeOnGithub.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             buttonForkMeOnGithub.ImageIndex = 2;
             buttonForkMeOnGithub.ImageList = icons;
-            buttonForkMeOnGithub.Location = new Point(387, 408);
+            buttonForkMeOnGithub.Location = new Point(387, 428);
             buttonForkMeOnGithub.Name = "buttonForkMeOnGithub";
             buttonForkMeOnGithub.Size = new Size(172, 29);
             buttonForkMeOnGithub.TabIndex = 10;
@@ -202,7 +202,7 @@
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(633, 691);
+            ClientSize = new Size(633, 711);
             Controls.Add(buttonForkMeOnGithub);
             Controls.Add(listView1);
             Controls.Add(panel1);

@@ -26,24 +26,48 @@ namespace _222303026_proje3 {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("Ohf3aR688kaRYSTu7lMeXPoSVUTFcS+WgraFY3mxda0=")]
-        public string CipherKey {
+        public string CipherKey1 {
             get {
-                return ((string)(this["CipherKey"]));
+                return ((string)(this["CipherKey1"]));
             }
             set {
-                this["CipherKey"] = value;
+                this["CipherKey1"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("TZnoSs4H8yQZ8kQTgZ7xwg==")]
-        public string CipherIV {
+        public string CipherIV1 {
             get {
-                return ((string)(this["CipherIV"]));
+                return ((string)(this["CipherIV1"]));
             }
             set {
-                this["CipherIV"] = value;
+                this["CipherIV1"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Ohf3aR688kaRYSTu7lMeXPoSVUTFcS+WgraFY3mxda0=")]
+        public string CipherKey2 {
+            get {
+                return ((string)(this["CipherKey2"]));
+            }
+            set {
+                this["CipherKey2"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("TZnoSs4H8yQZ8kQTgZ7xwg==")]
+        public string CipherIV2 {
+            get {
+                return ((string)(this["CipherIV2"]));
+            }
+            set {
+                this["CipherIV2"] = value;
             }
         }
     }
