@@ -14,8 +14,15 @@ namespace _222303026_proje3
         int x = -1, y = -1;
         bool isdrawing = false;
         Color color1 = Color.Black, color2 = Color.White;
-        int brushSize = 11, penSize = 9, eraserSize = 11, sprayToolSize = 11, shapeThickness = 11, radius = 9, points = 6, tolerance = 50;
-        float textSize = 9;
+        int brushSize = Settings1.Default.DefaultBrushSize, 
+            penSize = Settings1.Default.DefaultPenSize, 
+            eraserSize = Settings1.Default.DefaultEraserSize, 
+            sprayToolSize = Settings1.Default.DefaultSpraySize, 
+            shapeThickness = Settings1.Default.DefaultShapeSize, 
+            radius = Settings1.Default.DefaultRadiusSize, 
+            points = Settings1.Default.DefaultPointsCount, 
+            tolerance = Settings1.Default.DefaultBucketTolerance;
+        float textSize = Settings1.Default.DefaultTextSize;
         float zoom = 1;
         bool isResizing = false, isSelected = false, backgroundFilling = false;
         private ResizeDirection resizeDirection;
@@ -114,6 +121,20 @@ namespace _222303026_proje3
         }
         private Pen SelectionPen;
 
+        private void SetInitialValues()
+        {
+            toolStripComboBoxAirBrushSize.SelectedItem = Settings1.Default.DefaultSpraySize;
+            comboBoxBrushSize.SelectedItem = Settings1.Default.DefaultBrushSize;
+            comboBoxBrushType.SelectedItem = Settings1.Default.DefaultBrushStyle;
+            comboBoxPenSize.SelectedItem = Settings1.Default.DefaultPenSize;
+            comboBoxPenType.SelectedItem = Settings1.Default.DefaultPenStyle;
+            comboBoxEraserSize.SelectedItem = Settings1.Default.DefaultEraserSize;
+            textBoxTolerance.Text = Settings1.Default.DefaultBucketTolerance.ToString();
+            comboBoxShapeThickness.SelectedItem = Settings1.Default.DefaultShapeSize;
+            textBoxRadius.Text = Settings1.Default.DefaultRadiusSize.ToString();
+            textBoxPoints.Text = Settings1.Default.DefaultPointsCount.ToString();
+            fontSizeComboBox.SelectedItem = Settings1.Default.DefaultTextSize;
+        }
         private void SetTheme()
         {
             switch (Settings1.Default.PreferredTheme)
@@ -2329,12 +2350,12 @@ namespace _222303026_proje3
             catch (FormatException)
             {
                 MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                sprayToolSize = 11;
+                sprayToolSize = Settings1.Default.DefaultSpraySize;
             }
             catch (OverflowException)
             {
                 MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                sprayToolSize = 11;
+                sprayToolSize = Settings1.Default.DefaultSpraySize;
             }
             finally
             {
@@ -2391,12 +2412,12 @@ namespace _222303026_proje3
             catch (FormatException)
             {
                 MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                eraserSize = 11;
+                eraserSize = Settings1.Default.DefaultEraserSize;
             }
             catch (OverflowException)
             {
                 MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                eraserSize = 11;
+                eraserSize = Settings1.Default.DefaultEraserSize;
             }
             finally
             {
@@ -2422,12 +2443,12 @@ namespace _222303026_proje3
             catch (FormatException)
             {
                 MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                penSize = 9;
+                penSize = Settings1.Default.DefaultPenSize;
             }
             catch (OverflowException)
             {
                 MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                penSize = 9;
+                penSize = Settings1.Default.DefaultPenSize;
             }
             finally
             {
@@ -2453,12 +2474,12 @@ namespace _222303026_proje3
             catch (FormatException)
             {
                 MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                shapeThickness = 11;
+                shapeThickness = Settings1.Default.DefaultShapeSize;
             }
             catch (OverflowException)
             {
                 MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                shapeThickness = 11;
+                shapeThickness = Settings1.Default.DefaultShapeSize;
             }
             finally
             {
@@ -2520,13 +2541,13 @@ namespace _222303026_proje3
             catch (FormatException)
             {
                 MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                radius = 9;
+                radius = Settings1.Default.DefaultRadiusSize;
                 textBoxRadius.Text = radius.ToString();
             }
             catch (OverflowException)
             {
                 MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                radius = 9;
+                radius = Settings1.Default.DefaultRadiusSize;
                 textBoxRadius.Text = radius.ToString();
             }
         }
@@ -2544,13 +2565,13 @@ namespace _222303026_proje3
             catch (FormatException)
             {
                 MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                points = 6;
+                points = Settings1.Default.DefaultPointsCount;
                 textBoxPoints.Text = points.ToString();
             }
             catch (OverflowException)
             {
                 MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                points = 6;
+                points = Settings1.Default.DefaultPointsCount;
                 textBoxPoints.Text = points.ToString();
             }
         }
@@ -2759,22 +2780,17 @@ namespace _222303026_proje3
             catch (FormatException)
             {
                 MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                tolerance = 50;
+                tolerance = Settings1.Default.DefaultBucketTolerance;
             }
             catch (OverflowException)
             {
                 MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                tolerance = 50;
+                tolerance = Settings1.Default.DefaultBucketTolerance;
             }
             finally
             {
                 textBoxTolerance.Text = tolerance.ToString();
             }
-        }
-
-        private void toolStripTextBox1_Click(object sender, EventArgs e)
-        {
-
         }
 
         private void mirrorToolStripMenuItem_Click(object sender, EventArgs e)
@@ -3311,11 +3327,6 @@ namespace _222303026_proje3
             }
         }
 
-        private void textBoxArtisticFilterSize_Leave(object sender, EventArgs e)
-        {
-
-        }
-
         private void textBoxArtisticFilterIntensity_Leave(object sender, EventArgs e)
         {
 
@@ -3335,7 +3346,7 @@ namespace _222303026_proje3
                     switch (artisticFilters)
                     {
                         case ArtisticFilters.OilPainting:
-                            if (Convert.ToInt32(textBoxArtisticFilterSize.Text) > 2 && Convert.ToInt32(textBoxArtisticFilterSize.Text) < 32)
+                            if (Convert.ToInt32(textBoxArtisticFilterSize.Text) > 1 && Convert.ToInt32(textBoxArtisticFilterSize.Text) < 33)
                             {
                                 FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize = Convert.ToInt32(textBoxArtisticFilterSize.Text);
                             }
@@ -3345,7 +3356,7 @@ namespace _222303026_proje3
                             }
                             break;
                         case ArtisticFilters.Cartoon:
-                            if (Convert.ToInt32(textBoxArtisticFilterSize.Text) > 2 && Convert.ToInt32(textBoxArtisticFilterSize.Text) < 32)
+                            if (Convert.ToInt32(textBoxArtisticFilterSize.Text) > 1 && Convert.ToInt32(textBoxArtisticFilterSize.Text) < 33)
                             {
                                 FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize = Convert.ToInt32(textBoxArtisticFilterSize.Text);
                             }

@@ -71,5 +71,26 @@
     <Setting Name="PreferredHuggingFaceEditingModel" Type="System.String" Scope="User">
       <Value Profile="(Default)">mit-han-lab/svdq-int4-flux.1-fill-dev</Value>
     </Setting>
+    <Setting Name="DefaultPointsCount" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">6</Value>
+    </Setting>
+    <Setting Name="DefaultCartoonFilterSize" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">5</Value>
+    </Setting>
+    <Setting Name="DefaultCartoonFilterIntensity" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="DefaultCartoonFilterThreshold" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">50</Value>
+    </Setting>
+    <Setting Name="DefaultOilPaintFilterSize" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">5</Value>
+    </Setting>
+    <Setting Name="DefaultOilPaintFilterIntensity" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="DefaultOilPaintFilterThreshold" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">50</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

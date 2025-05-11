@@ -16,14 +16,18 @@ namespace _222303026_proje3
         {
             public static class CartoonFilterValues
             {
-                static int filterSize = 10, intensity = 5, threshold = 50;
+                static int filterSize = Settings1.Default.DefaultCartoonFilterSize, 
+                    intensity = Settings1.Default.DefaultCartoonFilterIntensity, 
+                    threshold = Settings1.Default.DefaultCartoonFilterThreshold;
                 public static int FilterSize { get; set; } = filterSize;
                 public static int Intensity { get; set; } = intensity;
                 public static int Threshold { get; set; } = threshold;
             }
             public static class OilPaintFilterValues
             {
-                static int filterSize = 10, intensity = 5, threshold = 50;
+                static int filterSize = Settings1.Default.DefaultOilPaintFilterSize, 
+                    intensity = Settings1.Default.DefaultOilPaintFilterIntensity, 
+                    threshold = Settings1.Default.DefaultOilPaintFilterThreshold;
                 public static int FilterSize { get; set; } = filterSize;
                 public static int Intensity { get; set; } = intensity;
                 public static int Threshold { get; set; } = threshold;
