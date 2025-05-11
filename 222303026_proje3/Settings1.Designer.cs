@@ -297,5 +297,89 @@ namespace _222303026_proje3 {
                 this["PreferredHuggingFaceEditingModel"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("6")]
+        public int DefaultPointsCount {
+            get {
+                return ((int)(this["DefaultPointsCount"]));
+            }
+            set {
+                this["DefaultPointsCount"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public int DefaultCartoonFilterSize {
+            get {
+                return ((int)(this["DefaultCartoonFilterSize"]));
+            }
+            set {
+                this["DefaultCartoonFilterSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public int DefaultCartoonFilterIntensity {
+            get {
+                return ((int)(this["DefaultCartoonFilterIntensity"]));
+            }
+            set {
+                this["DefaultCartoonFilterIntensity"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("50")]
+        public int DefaultCartoonFilterThreshold {
+            get {
+                return ((int)(this["DefaultCartoonFilterThreshold"]));
+            }
+            set {
+                this["DefaultCartoonFilterThreshold"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public int DefaultOilPaintFilterSize {
+            get {
+                return ((int)(this["DefaultOilPaintFilterSize"]));
+            }
+            set {
+                this["DefaultOilPaintFilterSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public int DefaultOilPaintFilterIntensity {
+            get {
+                return ((int)(this["DefaultOilPaintFilterIntensity"]));
+            }
+            set {
+                this["DefaultOilPaintFilterIntensity"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("50")]
+        public int DefaultOilPaintFilterThreshold {
+            get {
+                return ((int)(this["DefaultOilPaintFilterThreshold"]));
+            }
+            set {
+                this["DefaultOilPaintFilterThreshold"] = value;
+            }
+        }
     }
 }

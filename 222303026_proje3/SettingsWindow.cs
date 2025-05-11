@@ -91,6 +91,7 @@ namespace _222303026_proje3
             // Shape size
             numericUpDownDefaultShapeSize.Value = Settings1.Default.DefaultShapeSize;
             numericUpDownDefaultRadius.Value = Settings1.Default.DefaultRadiusSize;
+            numericUpDownDefaultPoints.Value = Settings1.Default.DefaultPointsCount;
             // Text size
             numericUpDownDefaultTextSize.Value = Settings1.Default.DefaultTextSize;
             // Bucket tolerance
@@ -653,6 +654,54 @@ namespace _222303026_proje3
             {
                 MessageBox.Show("Error: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void numericUpDownDefaultPoints_ValueChanged(object sender, EventArgs e)
+        {
+            Settings1.Default.DefaultPointsCount = (int)numericUpDownDefaultPoints.Value;
+            Settings1.Default.Save();
+        }
+
+        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+        {
+            Settings1.Default.DefaultCartoonFilterSize = (int)numericUpDownDefaultCartoonFilterSize.Value;
+            Settings1.Default.Save();
+            FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize = (int)numericUpDownDefaultCartoonFilterSize.Value;
+        }
+
+        private void numericUpDown2_ValueChanged(object sender, EventArgs e)
+        {
+            Settings1.Default.DefaultCartoonFilterIntensity = (int)numericUpDownDefaultCartoonFilterIntensity.Value;
+            Settings1.Default.Save();
+            FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity = (int)numericUpDownDefaultCartoonFilterIntensity.Value;
+        }
+
+        private void numericUpDown3_ValueChanged(object sender, EventArgs e)
+        {
+            Settings1.Default.DefaultCartoonFilterThreshold = (int)numericUpDownDefaultCartoonFilterThreshold.Value;
+            Settings1.Default.Save();
+            FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold = (int)numericUpDownDefaultCartoonFilterThreshold.Value;
+        }
+
+        private void numericUpDown5_ValueChanged(object sender, EventArgs e)
+        {
+            Settings1.Default.DefaultOilPaintFilterSize = (int)numericUpDownDefaultOilPaintFilterSize.Value;
+            Settings1.Default.Save();
+            FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize = (int)numericUpDownDefaultOilPaintFilterSize.Value;
+        }
+
+        private void numericUpDown6_ValueChanged(object sender, EventArgs e)
+        {
+            Settings1.Default.DefaultOilPaintFilterIntensity = (int)numericUpDownDefaultOilPaintFilterIntensity.Value;
+            Settings1.Default.Save();
+            FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity = (int)numericUpDownDefaultOilPaintFilterIntensity.Value;
+        }
+
+        private void numericUpDown4_ValueChanged(object sender, EventArgs e)
+        {
+            Settings1.Default.DefaultOilPaintFilterThreshold = (int)numericUpDownDefaultOilPaintFilterThreshold.Value;
+            Settings1.Default.Save();
+            FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold = (int)numericUpDownDefaultOilPaintFilterThreshold.Value;
         }
     }
 }

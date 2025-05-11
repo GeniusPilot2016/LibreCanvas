@@ -98,6 +98,8 @@
             numericUpDownDefaultTextSize = new NumericUpDown();
             groupBox11 = new GroupBox();
             groupBox14 = new GroupBox();
+            label28 = new Label();
+            numericUpDownDefaultPoints = new NumericUpDown();
             label21 = new Label();
             numericUpDownDefaultRadius = new NumericUpDown();
             label15 = new Label();
@@ -119,6 +121,22 @@
             label7 = new Label();
             label6 = new Label();
             numericUpDownDefaultBrushSize = new NumericUpDown();
+            tabPage5 = new TabPage();
+            groupBox21 = new GroupBox();
+            groupBox26 = new GroupBox();
+            label32 = new Label();
+            label33 = new Label();
+            label34 = new Label();
+            numericUpDownDefaultOilPaintFilterThreshold = new NumericUpDown();
+            numericUpDownDefaultOilPaintFilterSize = new NumericUpDown();
+            numericUpDownDefaultOilPaintFilterIntensity = new NumericUpDown();
+            groupBox22 = new GroupBox();
+            label29 = new Label();
+            label31 = new Label();
+            label30 = new Label();
+            numericUpDownDefaultCartoonFilterThreshold = new NumericUpDown();
+            numericUpDownDefaultCartoonFilterSize = new NumericUpDown();
+            numericUpDownDefaultCartoonFilterIntensity = new NumericUpDown();
             tabPage4 = new TabPage();
             groupBox16 = new GroupBox();
             groupBox17 = new GroupBox();
@@ -157,6 +175,7 @@
             ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultTextSize).BeginInit();
             groupBox11.SuspendLayout();
             groupBox14.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultPoints).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultRadius).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultShapeSize).BeginInit();
             groupBox6.SuspendLayout();
@@ -168,6 +187,16 @@
             ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultPenSize).BeginInit();
             groupBox8.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultBrushSize).BeginInit();
+            tabPage5.SuspendLayout();
+            groupBox21.SuspendLayout();
+            groupBox26.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultOilPaintFilterThreshold).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultOilPaintFilterSize).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultOilPaintFilterIntensity).BeginInit();
+            groupBox22.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultCartoonFilterThreshold).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultCartoonFilterSize).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultCartoonFilterIntensity).BeginInit();
             tabPage4.SuspendLayout();
             groupBox16.SuspendLayout();
             groupBox17.SuspendLayout();
@@ -178,6 +207,7 @@
             tabControl1.Controls.Add(tabPage1);
             tabControl1.Controls.Add(tabPage2);
             tabControl1.Controls.Add(tabPage3);
+            tabControl1.Controls.Add(tabPage5);
             tabControl1.Controls.Add(tabPage4);
             tabControl1.Dock = DockStyle.Fill;
             tabControl1.Font = new Font("HarmonyOS Sans", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
@@ -379,6 +409,7 @@
             icons.Images.SetKeyName(9, "icons8-reset-48.png");
             icons.Images.SetKeyName(10, "icons8-bard-48.png");
             icons.Images.SetKeyName(11, "icons8-hugging-face-48.png");
+            icons.Images.SetKeyName(12, "icons8-photo-editor-48.png");
             // 
             // buttonUpdateHuggingFaceEditingImageModel
             // 
@@ -1087,6 +1118,8 @@
             // groupBox14
             // 
             groupBox14.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox14.Controls.Add(label28);
+            groupBox14.Controls.Add(numericUpDownDefaultPoints);
             groupBox14.Controls.Add(label21);
             groupBox14.Controls.Add(numericUpDownDefaultRadius);
             groupBox14.Controls.Add(label15);
@@ -1099,6 +1132,30 @@
             groupBox14.TabIndex = 0;
             groupBox14.TabStop = false;
             groupBox14.Text = "Default Shape Size";
+            // 
+            // label28
+            // 
+            label28.Anchor = AnchorStyles.Left;
+            label28.AutoSize = true;
+            label28.Location = new Point(365, 36);
+            label28.Margin = new Padding(4, 0, 4, 0);
+            label28.Name = "label28";
+            label28.Size = new Size(53, 20);
+            label28.TabIndex = 1;
+            label28.Text = "Points";
+            // 
+            // numericUpDownDefaultPoints
+            // 
+            numericUpDownDefaultPoints.Anchor = AnchorStyles.Left;
+            numericUpDownDefaultPoints.Location = new Point(426, 34);
+            numericUpDownDefaultPoints.Margin = new Padding(4);
+            numericUpDownDefaultPoints.Maximum = new decimal(new int[] { 255, 0, 0, 0 });
+            numericUpDownDefaultPoints.Minimum = new decimal(new int[] { 5, 0, 0, 0 });
+            numericUpDownDefaultPoints.Name = "numericUpDownDefaultPoints";
+            numericUpDownDefaultPoints.Size = new Size(72, 27);
+            numericUpDownDefaultPoints.TabIndex = 0;
+            numericUpDownDefaultPoints.Value = new decimal(new int[] { 6, 0, 0, 0 });
+            numericUpDownDefaultPoints.ValueChanged += numericUpDownDefaultPoints_ValueChanged;
             // 
             // label21
             // 
@@ -1368,6 +1425,208 @@
             numericUpDownDefaultBrushSize.Value = new decimal(new int[] { 11, 0, 0, 0 });
             numericUpDownDefaultBrushSize.ValueChanged += numericUpDownDefaultBrushSize_ValueChanged;
             // 
+            // tabPage5
+            // 
+            tabPage5.Controls.Add(groupBox21);
+            tabPage5.ImageIndex = 12;
+            tabPage5.Location = new Point(4, 29);
+            tabPage5.Margin = new Padding(4);
+            tabPage5.Name = "tabPage5";
+            tabPage5.Padding = new Padding(4);
+            tabPage5.Size = new Size(691, 851);
+            tabPage5.TabIndex = 4;
+            tabPage5.Text = "Filters";
+            tabPage5.UseVisualStyleBackColor = true;
+            // 
+            // groupBox21
+            // 
+            groupBox21.Controls.Add(groupBox26);
+            groupBox21.Controls.Add(groupBox22);
+            groupBox21.Location = new Point(7, 7);
+            groupBox21.Margin = new Padding(4);
+            groupBox21.Name = "groupBox21";
+            groupBox21.Padding = new Padding(4);
+            groupBox21.Size = new Size(677, 324);
+            groupBox21.TabIndex = 0;
+            groupBox21.TabStop = false;
+            groupBox21.Text = "Artistic Filters";
+            // 
+            // groupBox26
+            // 
+            groupBox26.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox26.Controls.Add(label32);
+            groupBox26.Controls.Add(label33);
+            groupBox26.Controls.Add(label34);
+            groupBox26.Controls.Add(numericUpDownDefaultOilPaintFilterThreshold);
+            groupBox26.Controls.Add(numericUpDownDefaultOilPaintFilterSize);
+            groupBox26.Controls.Add(numericUpDownDefaultOilPaintFilterIntensity);
+            groupBox26.Location = new Point(7, 176);
+            groupBox26.Name = "groupBox26";
+            groupBox26.Size = new Size(663, 140);
+            groupBox26.TabIndex = 4;
+            groupBox26.TabStop = false;
+            groupBox26.Text = "Oil Paint Filter";
+            // 
+            // label32
+            // 
+            label32.Anchor = AnchorStyles.Left;
+            label32.AutoSize = true;
+            label32.Location = new Point(23, 32);
+            label32.Margin = new Padding(4, 0, 4, 0);
+            label32.Name = "label32";
+            label32.Size = new Size(132, 20);
+            label32.TabIndex = 3;
+            label32.Text = "Default Filter Size";
+            // 
+            // label33
+            // 
+            label33.Anchor = AnchorStyles.Left;
+            label33.AutoSize = true;
+            label33.Location = new Point(19, 103);
+            label33.Margin = new Padding(4, 0, 4, 0);
+            label33.Name = "label33";
+            label33.Size = new Size(134, 20);
+            label33.TabIndex = 3;
+            label33.Text = "Default Threshold";
+            // 
+            // label34
+            // 
+            label34.Anchor = AnchorStyles.Left;
+            label34.AutoSize = true;
+            label34.Location = new Point(28, 67);
+            label34.Margin = new Padding(4, 0, 4, 0);
+            label34.Name = "label34";
+            label34.Size = new Size(125, 20);
+            label34.TabIndex = 3;
+            label34.Text = "Default Intensity";
+            // 
+            // numericUpDownDefaultOilPaintFilterThreshold
+            // 
+            numericUpDownDefaultOilPaintFilterThreshold.Anchor = AnchorStyles.Left;
+            numericUpDownDefaultOilPaintFilterThreshold.Location = new Point(161, 101);
+            numericUpDownDefaultOilPaintFilterThreshold.Margin = new Padding(4);
+            numericUpDownDefaultOilPaintFilterThreshold.Maximum = new decimal(new int[] { 255, 0, 0, 0 });
+            numericUpDownDefaultOilPaintFilterThreshold.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            numericUpDownDefaultOilPaintFilterThreshold.Name = "numericUpDownDefaultOilPaintFilterThreshold";
+            numericUpDownDefaultOilPaintFilterThreshold.Size = new Size(72, 27);
+            numericUpDownDefaultOilPaintFilterThreshold.TabIndex = 2;
+            numericUpDownDefaultOilPaintFilterThreshold.Value = new decimal(new int[] { 50, 0, 0, 0 });
+            numericUpDownDefaultOilPaintFilterThreshold.ValueChanged += numericUpDown4_ValueChanged;
+            // 
+            // numericUpDownDefaultOilPaintFilterSize
+            // 
+            numericUpDownDefaultOilPaintFilterSize.Anchor = AnchorStyles.Left;
+            numericUpDownDefaultOilPaintFilterSize.Location = new Point(161, 30);
+            numericUpDownDefaultOilPaintFilterSize.Margin = new Padding(4);
+            numericUpDownDefaultOilPaintFilterSize.Maximum = new decimal(new int[] { 32, 0, 0, 0 });
+            numericUpDownDefaultOilPaintFilterSize.Minimum = new decimal(new int[] { 2, 0, 0, 0 });
+            numericUpDownDefaultOilPaintFilterSize.Name = "numericUpDownDefaultOilPaintFilterSize";
+            numericUpDownDefaultOilPaintFilterSize.Size = new Size(72, 27);
+            numericUpDownDefaultOilPaintFilterSize.TabIndex = 2;
+            numericUpDownDefaultOilPaintFilterSize.Value = new decimal(new int[] { 5, 0, 0, 0 });
+            numericUpDownDefaultOilPaintFilterSize.ValueChanged += numericUpDown5_ValueChanged;
+            // 
+            // numericUpDownDefaultOilPaintFilterIntensity
+            // 
+            numericUpDownDefaultOilPaintFilterIntensity.Anchor = AnchorStyles.Left;
+            numericUpDownDefaultOilPaintFilterIntensity.Location = new Point(161, 65);
+            numericUpDownDefaultOilPaintFilterIntensity.Margin = new Padding(4);
+            numericUpDownDefaultOilPaintFilterIntensity.Maximum = new decimal(new int[] { 255, 0, 0, 0 });
+            numericUpDownDefaultOilPaintFilterIntensity.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            numericUpDownDefaultOilPaintFilterIntensity.Name = "numericUpDownDefaultOilPaintFilterIntensity";
+            numericUpDownDefaultOilPaintFilterIntensity.Size = new Size(72, 27);
+            numericUpDownDefaultOilPaintFilterIntensity.TabIndex = 2;
+            numericUpDownDefaultOilPaintFilterIntensity.Value = new decimal(new int[] { 10, 0, 0, 0 });
+            numericUpDownDefaultOilPaintFilterIntensity.ValueChanged += numericUpDown6_ValueChanged;
+            // 
+            // groupBox22
+            // 
+            groupBox22.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox22.Controls.Add(label29);
+            groupBox22.Controls.Add(label31);
+            groupBox22.Controls.Add(label30);
+            groupBox22.Controls.Add(numericUpDownDefaultCartoonFilterThreshold);
+            groupBox22.Controls.Add(numericUpDownDefaultCartoonFilterSize);
+            groupBox22.Controls.Add(numericUpDownDefaultCartoonFilterIntensity);
+            groupBox22.Location = new Point(7, 26);
+            groupBox22.Name = "groupBox22";
+            groupBox22.Size = new Size(663, 140);
+            groupBox22.TabIndex = 4;
+            groupBox22.TabStop = false;
+            groupBox22.Text = "Cartoon Filter";
+            // 
+            // label29
+            // 
+            label29.Anchor = AnchorStyles.Left;
+            label29.AutoSize = true;
+            label29.Location = new Point(23, 32);
+            label29.Margin = new Padding(4, 0, 4, 0);
+            label29.Name = "label29";
+            label29.Size = new Size(132, 20);
+            label29.TabIndex = 3;
+            label29.Text = "Default Filter Size";
+            // 
+            // label31
+            // 
+            label31.Anchor = AnchorStyles.Left;
+            label31.AutoSize = true;
+            label31.Location = new Point(21, 103);
+            label31.Margin = new Padding(4, 0, 4, 0);
+            label31.Name = "label31";
+            label31.Size = new Size(134, 20);
+            label31.TabIndex = 3;
+            label31.Text = "Default Threshold";
+            // 
+            // label30
+            // 
+            label30.Anchor = AnchorStyles.Left;
+            label30.AutoSize = true;
+            label30.Location = new Point(30, 67);
+            label30.Margin = new Padding(4, 0, 4, 0);
+            label30.Name = "label30";
+            label30.Size = new Size(125, 20);
+            label30.TabIndex = 3;
+            label30.Text = "Default Intensity";
+            // 
+            // numericUpDownDefaultCartoonFilterThreshold
+            // 
+            numericUpDownDefaultCartoonFilterThreshold.Anchor = AnchorStyles.Left;
+            numericUpDownDefaultCartoonFilterThreshold.Location = new Point(163, 101);
+            numericUpDownDefaultCartoonFilterThreshold.Margin = new Padding(4);
+            numericUpDownDefaultCartoonFilterThreshold.Maximum = new decimal(new int[] { 255, 0, 0, 0 });
+            numericUpDownDefaultCartoonFilterThreshold.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            numericUpDownDefaultCartoonFilterThreshold.Name = "numericUpDownDefaultCartoonFilterThreshold";
+            numericUpDownDefaultCartoonFilterThreshold.Size = new Size(72, 27);
+            numericUpDownDefaultCartoonFilterThreshold.TabIndex = 2;
+            numericUpDownDefaultCartoonFilterThreshold.Value = new decimal(new int[] { 50, 0, 0, 0 });
+            numericUpDownDefaultCartoonFilterThreshold.ValueChanged += numericUpDown3_ValueChanged;
+            // 
+            // numericUpDownDefaultCartoonFilterSize
+            // 
+            numericUpDownDefaultCartoonFilterSize.Anchor = AnchorStyles.Left;
+            numericUpDownDefaultCartoonFilterSize.Location = new Point(163, 30);
+            numericUpDownDefaultCartoonFilterSize.Margin = new Padding(4);
+            numericUpDownDefaultCartoonFilterSize.Maximum = new decimal(new int[] { 32, 0, 0, 0 });
+            numericUpDownDefaultCartoonFilterSize.Minimum = new decimal(new int[] { 2, 0, 0, 0 });
+            numericUpDownDefaultCartoonFilterSize.Name = "numericUpDownDefaultCartoonFilterSize";
+            numericUpDownDefaultCartoonFilterSize.Size = new Size(72, 27);
+            numericUpDownDefaultCartoonFilterSize.TabIndex = 2;
+            numericUpDownDefaultCartoonFilterSize.Value = new decimal(new int[] { 5, 0, 0, 0 });
+            numericUpDownDefaultCartoonFilterSize.ValueChanged += numericUpDown1_ValueChanged;
+            // 
+            // numericUpDownDefaultCartoonFilterIntensity
+            // 
+            numericUpDownDefaultCartoonFilterIntensity.Anchor = AnchorStyles.Left;
+            numericUpDownDefaultCartoonFilterIntensity.Location = new Point(163, 65);
+            numericUpDownDefaultCartoonFilterIntensity.Margin = new Padding(4);
+            numericUpDownDefaultCartoonFilterIntensity.Maximum = new decimal(new int[] { 255, 0, 0, 0 });
+            numericUpDownDefaultCartoonFilterIntensity.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            numericUpDownDefaultCartoonFilterIntensity.Name = "numericUpDownDefaultCartoonFilterIntensity";
+            numericUpDownDefaultCartoonFilterIntensity.Size = new Size(72, 27);
+            numericUpDownDefaultCartoonFilterIntensity.TabIndex = 2;
+            numericUpDownDefaultCartoonFilterIntensity.Value = new decimal(new int[] { 10, 0, 0, 0 });
+            numericUpDownDefaultCartoonFilterIntensity.ValueChanged += numericUpDown2_ValueChanged;
+            // 
             // tabPage4
             // 
             tabPage4.Controls.Add(groupBox16);
@@ -1537,6 +1796,7 @@
             groupBox11.ResumeLayout(false);
             groupBox14.ResumeLayout(false);
             groupBox14.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultPoints).EndInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultRadius).EndInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultShapeSize).EndInit();
             groupBox6.ResumeLayout(false);
@@ -1552,6 +1812,18 @@
             groupBox8.ResumeLayout(false);
             groupBox8.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultBrushSize).EndInit();
+            tabPage5.ResumeLayout(false);
+            groupBox21.ResumeLayout(false);
+            groupBox26.ResumeLayout(false);
+            groupBox26.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultOilPaintFilterThreshold).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultOilPaintFilterSize).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultOilPaintFilterIntensity).EndInit();
+            groupBox22.ResumeLayout(false);
+            groupBox22.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultCartoonFilterThreshold).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultCartoonFilterSize).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultCartoonFilterIntensity).EndInit();
             tabPage4.ResumeLayout(false);
             groupBox16.ResumeLayout(false);
             groupBox17.ResumeLayout(false);
@@ -1660,5 +1932,23 @@
         private Button buttonResetHuggingFaceCreatingImageModel;
         private Label label27;
         private Label label26;
+        private Label label28;
+        private NumericUpDown numericUpDownDefaultPoints;
+        private TabPage tabPage5;
+        private GroupBox groupBox21;
+        private Label label29;
+        private NumericUpDown numericUpDownDefaultCartoonFilterSize;
+        private Label label30;
+        private NumericUpDown numericUpDownDefaultCartoonFilterIntensity;
+        private GroupBox groupBox22;
+        private Label label31;
+        private NumericUpDown numericUpDownDefaultCartoonFilterThreshold;
+        private GroupBox groupBox26;
+        private Label label32;
+        private Label label33;
+        private Label label34;
+        private NumericUpDown numericUpDownDefaultOilPaintFilterThreshold;
+        private NumericUpDown numericUpDownDefaultOilPaintFilterSize;
+        private NumericUpDown numericUpDownDefaultOilPaintFilterIntensity;
     }
 }
