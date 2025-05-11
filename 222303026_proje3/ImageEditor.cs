@@ -114,6 +114,136 @@ namespace _222303026_proje3
         }
         private Pen SelectionPen;
 
+        private void SetTheme()
+        {
+            switch (Settings1.Default.PreferredTheme)
+            {
+                case 0: // System theme
+                    if (CheckSystemTheme.IsDarkTheme())
+                    {
+                        DarkTheme();
+                    }
+                    else
+                    {
+                        LightTheme();
+                    }
+                    break;
+                case 1: // Light theme
+                    LightTheme();
+                    break;
+                case 2: // Dark theme
+                    DarkTheme();
+                    break;
+            }
+        }
+        private void LightTheme()
+        {
+            this.BackColor = Form.DefaultBackColor;
+            this.ForeColor = Form.DefaultForeColor;
+            panelResizer.BackColor = Panel.DefaultBackColor;
+            canvasPanel.BackColor = Panel.DefaultBackColor;
+            menuStrip1.BackgroundImage = Resources.toolstrip_light;
+            menuStrip1.BackColor = Color.Transparent;
+            menuStrip1.ForeColor = MenuStrip.DefaultForeColor;
+            foreach (ToolStrip toolStrip in toolStripContainer1.LeftToolStripPanel.Controls.OfType<ToolStrip>())
+            {   toolStrip.BackgroundImage = Resources.toolstrip_light;
+                toolStrip.BackColor = ToolStrip.DefaultBackColor;
+                toolStrip.ForeColor = ToolStrip.DefaultForeColor;
+                foreach(ToolStripItem item in toolStrip.Items)
+                {
+                    if (item is ToolStripButton button && (item != foregroundColorButton)
+                        && (item != backgroundColorButton))
+                    {
+                        button.BackColor = Color.Transparent;
+                        button.ForeColor = ToolStrip.DefaultForeColor;
+                    }
+                }
+            }
+            foreach (ToolStrip toolStrip in toolStripContainer1.RightToolStripPanel.Controls.OfType<ToolStrip>())
+            {
+                toolStrip.BackgroundImage = Resources.toolstrip_light;
+                toolStrip.BackColor = Color.Transparent;
+                toolStrip.ForeColor = ToolStrip.DefaultForeColor;
+            }
+            foreach (ToolStrip toolStrip in toolStripContainer1.TopToolStripPanel.Controls.OfType<ToolStrip>())
+            {
+                toolStrip.BackgroundImage = Resources.toolstrip_light;
+                toolStrip.BackColor = Color.Transparent;
+                toolStrip.ForeColor = ToolStrip.DefaultForeColor;
+                foreach (ToolStripComboBox comboBoxes in toolStrip.Items)
+                {
+                    comboBoxes.BackColor = Color.Transparent;
+                    comboBoxes.ForeColor = ToolStrip.DefaultForeColor;
+                }
+                foreach (ToolStripTextBox textBoxes in toolStrip.Items)
+                {
+                    textBoxes.BackColor = Color.Transparent;
+                    textBoxes.ForeColor = ToolStrip.DefaultForeColor;
+                }
+            }
+            foreach (ToolStrip toolStrip in toolStripContainer1.BottomToolStripPanel.Controls.OfType<ToolStrip>())
+            {
+                toolStrip.BackgroundImage = Resources.toolstrip_light;
+                toolStrip.BackColor = Color.Transparent;
+                toolStrip.ForeColor = ToolStrip.DefaultForeColor;
+            }
+        }
+        private void DarkTheme()
+        {
+            this.BackColor = Color.FromArgb(32, 32, 32);
+            this.ForeColor = Color.White;
+            panelResizer.BackColor = Color.FromArgb(32, 32, 32);
+            canvasPanel.BackColor = Color.FromArgb(32, 32, 32);
+            menuStrip1.BackgroundImage = Resources.toolstrip_dark;
+            menuStrip1.BackColor = Color.Black;
+            menuStrip1.ForeColor = Color.White;
+            foreach (ToolStrip toolStrip in toolStripContainer1.LeftToolStripPanel.Controls.OfType<ToolStrip>())
+            {
+                toolStrip.BackgroundImage = Resources.toolstrip_dark;
+                toolStrip.BackColor = Color.Black;
+                toolStrip.ForeColor = Color.White;
+                foreach (ToolStripItem item in toolStrip.Items)
+                {
+                    if (item is ToolStripButton button && (item != foregroundColorButton)
+                        &&(item != backgroundColorButton))
+                    {
+                        button.BackColor = Color.Black;
+                        button.ForeColor = Color.White;
+                    }
+                }
+            }
+            foreach (ToolStrip toolStrip in toolStripContainer1.RightToolStripPanel.Controls.OfType<ToolStrip>())
+            {
+                toolStrip.BackgroundImage = Resources.toolstrip_dark;
+                toolStrip.BackColor = Color.Black;
+                toolStrip.ForeColor = Color.White;
+            }
+            foreach (ToolStrip toolStrip in toolStripContainer1.TopToolStripPanel.Controls.OfType<ToolStrip>())
+            {
+                toolStrip.BackgroundImage = Resources.toolstrip_dark;
+                toolStrip.BackColor = Color.Black;
+                toolStrip.ForeColor = Color.White;
+                foreach (ToolStripItem item in toolStrip.Items)
+                {
+                    if (item is ToolStripComboBox comboBox)
+                    {
+                        comboBox.BackColor = Color.Black;
+                        comboBox.ForeColor = Color.White;
+                    }
+                    if (item is ToolStripTextBox textBox)
+                    {
+                        textBox.BackColor = Color.Black;
+                        textBox.ForeColor = Color.White;
+                    }
+                }
+            }
+            foreach (ToolStrip toolStrip in toolStripContainer1.BottomToolStripPanel.Controls.OfType<ToolStrip>())
+            {
+                toolStrip.BackgroundImage = Resources.toolstrip_dark;
+                toolStrip.BackColor = Color.Black;
+                toolStrip.ForeColor = Color.White;
+            }
+        }
         private void InitializeSelectionPen()
         {
             // Create a black pen for the black dashes
@@ -152,6 +282,7 @@ namespace _222303026_proje3
             {
                 fontsComboBox.Items.Add(fontFamilies[i].Name);
             }
+            SetTheme();
         }
         private void createNewFile()
         {
