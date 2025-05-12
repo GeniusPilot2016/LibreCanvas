@@ -381,5 +381,53 @@ namespace _222303026_proje3 {
                 this["DefaultOilPaintFilterThreshold"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("16")]
+        public int DefaultPixelationSize {
+            get {
+                return ((int)(this["DefaultPixelationSize"]));
+            }
+            set {
+                this["DefaultPixelationSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int DefaultPixelationOffsetX {
+            get {
+                return ((int)(this["DefaultPixelationOffsetX"]));
+            }
+            set {
+                this["DefaultPixelationOffsetX"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int DefaultPixelationOffsetY {
+            get {
+                return ((int)(this["DefaultPixelationOffsetY"]));
+            }
+            set {
+                this["DefaultPixelationOffsetY"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public float DefaultGaussianBlurRadius {
+            get {
+                return ((float)(this["DefaultGaussianBlurRadius"]));
+            }
+            set {
+                this["DefaultGaussianBlurRadius"] = value;
+            }
+        }
     }
 }

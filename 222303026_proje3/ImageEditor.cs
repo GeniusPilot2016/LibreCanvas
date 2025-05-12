@@ -2,6 +2,7 @@ using _222303026_proje3.Properties;
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Drawing.Imaging.Effects;
 using System.Drawing.Text;
 using System.Media;
 using System.Media;
@@ -14,14 +15,17 @@ namespace _222303026_proje3
         int x = -1, y = -1;
         bool isdrawing = false;
         Color color1 = Color.Black, color2 = Color.White;
-        int brushSize = Settings1.Default.DefaultBrushSize, 
-            penSize = Settings1.Default.DefaultPenSize, 
-            eraserSize = Settings1.Default.DefaultEraserSize, 
-            sprayToolSize = Settings1.Default.DefaultSpraySize, 
-            shapeThickness = Settings1.Default.DefaultShapeSize, 
-            radius = Settings1.Default.DefaultRadiusSize, 
-            points = Settings1.Default.DefaultPointsCount, 
-            tolerance = Settings1.Default.DefaultBucketTolerance;
+        int brushSize = Settings1.Default.DefaultBrushSize,
+            penSize = Settings1.Default.DefaultPenSize,
+            eraserSize = Settings1.Default.DefaultEraserSize,
+            sprayToolSize = Settings1.Default.DefaultSpraySize,
+            shapeThickness = Settings1.Default.DefaultShapeSize,
+            radius = Settings1.Default.DefaultRadiusSize,
+            points = Settings1.Default.DefaultPointsCount,
+            tolerance = Settings1.Default.DefaultBucketTolerance,
+            pixelationSize = Settings1.Default.DefaultPixelationSize,
+            pixelationOffsetX = Settings1.Default.DefaultPixelationOffsetX,
+            pixelationOffsetY = Settings1.Default.DefaultPixelationOffsetY;
         float textSize = Settings1.Default.DefaultTextSize;
         float zoom = 1;
         bool isResizing = false, isSelected = false, backgroundFilling = false;
@@ -43,6 +47,13 @@ namespace _222303026_proje3
             Left,
             Middle,
             Right
+        }
+        private BlurEffect blurEffect = new BlurEffect();
+        enum BlurEffect
+        {
+            None,
+            Gaussian,
+            Pixelate,
         }
         enum BasicFilters
         {
@@ -103,6 +114,7 @@ namespace _222303026_proje3
         public ImageEditor()
         {
             InitializeComponentAndFont();
+            SetInitialValues();
             InitializeSelectionPen(); // Initialize the SelectionPen
             createNewFile();
             UpdateUndoRedoButtons(); // Baþlangýçta tuþlarý güncelle
@@ -110,12 +122,14 @@ namespace _222303026_proje3
         public ImageEditor(String fileName)
         {
             InitializeComponentAndFont();
+            SetInitialValues();
             InitializeSelectionPen(); // Initialize the SelectionPen
             openAFile(fileName);
         }
         public ImageEditor(Image image, bool AIGenerated)
         {
             InitializeComponentAndFont();
+            SetInitialValues();
             InitializeSelectionPen(); // Initialize the SelectionPen
             createFileWithAIorWebcam(image, AIGenerated);
         }
@@ -123,17 +137,20 @@ namespace _222303026_proje3
 
         private void SetInitialValues()
         {
-            toolStripComboBoxAirBrushSize.SelectedItem = Settings1.Default.DefaultSpraySize;
-            comboBoxBrushSize.SelectedItem = Settings1.Default.DefaultBrushSize;
-            comboBoxBrushType.SelectedItem = Settings1.Default.DefaultBrushStyle;
-            comboBoxPenSize.SelectedItem = Settings1.Default.DefaultPenSize;
-            comboBoxPenType.SelectedItem = Settings1.Default.DefaultPenStyle;
-            comboBoxEraserSize.SelectedItem = Settings1.Default.DefaultEraserSize;
-            textBoxTolerance.Text = Settings1.Default.DefaultBucketTolerance.ToString();
-            comboBoxShapeThickness.SelectedItem = Settings1.Default.DefaultShapeSize;
-            textBoxRadius.Text = Settings1.Default.DefaultRadiusSize.ToString();
-            textBoxPoints.Text = Settings1.Default.DefaultPointsCount.ToString();
-            fontSizeComboBox.SelectedItem = Settings1.Default.DefaultTextSize;
+            toolStripComboBoxAirBrushSize.SelectedItem = sprayToolSize;
+            comboBoxBrushSize.SelectedItem = brushSize.ToString();
+            comboBoxBrushType.SelectedIndex = Settings1.Default.DefaultBrushStyle;
+            comboBoxPenSize.SelectedItem = penSize.ToString();
+            comboBoxPenType.SelectedIndex = Settings1.Default.DefaultPenStyle;
+            comboBoxEraserSize.SelectedItem = eraserSize.ToString();
+            textBoxTolerance.Text = tolerance.ToString();
+            comboBoxShapeThickness.SelectedItem = shapeThickness.ToString();
+            textBoxRadius.Text = radius.ToString();
+            textBoxPoints.Text = points.ToString();
+            fontSizeComboBox.SelectedItem = textSize.ToString();
+            textBoxPixelationSize.Text = pixelationSize.ToString();
+            textBoxPixelationOffsetX.Text = pixelationOffsetX.ToString();
+            textBoxPixelationOffsetY.Text = pixelationOffsetY.ToString();
         }
         private void SetTheme()
         {
@@ -167,10 +184,11 @@ namespace _222303026_proje3
             menuStrip1.BackColor = Color.Transparent;
             menuStrip1.ForeColor = MenuStrip.DefaultForeColor;
             foreach (ToolStrip toolStrip in toolStripContainer1.LeftToolStripPanel.Controls.OfType<ToolStrip>())
-            {   toolStrip.BackgroundImage = Resources.toolstrip_light;
+            {
+                toolStrip.BackgroundImage = Resources.toolstrip_light;
                 toolStrip.BackColor = ToolStrip.DefaultBackColor;
                 toolStrip.ForeColor = ToolStrip.DefaultForeColor;
-                foreach(ToolStripItem item in toolStrip.Items)
+                foreach (ToolStripItem item in toolStrip.Items)
                 {
                     if (item is ToolStripButton button && (item != foregroundColorButton)
                         && (item != backgroundColorButton))
@@ -190,7 +208,7 @@ namespace _222303026_proje3
             {
                 toolStrip.BackgroundImage = Resources.toolstrip_light;
                 toolStrip.BackColor = Color.Transparent;
-                toolStrip.ForeColor = ToolStrip.DefaultForeColor; 
+                toolStrip.ForeColor = ToolStrip.DefaultForeColor;
                 foreach (ToolStripItem item in toolStrip.Items)
                 {
                     if (item is ToolStripComboBox comboBox)
@@ -229,7 +247,7 @@ namespace _222303026_proje3
                 foreach (ToolStripItem item in toolStrip.Items)
                 {
                     if (item is ToolStripButton button && (item != foregroundColorButton)
-                        &&(item != backgroundColorButton))
+                        && (item != backgroundColorButton))
                     {
                         button.BackColor = Color.Black;
                         button.ForeColor = Color.White;
@@ -1878,7 +1896,7 @@ namespace _222303026_proje3
             isdrawing = true;
             x = -1;
             y = -1;
-            CancelArtisticFilters();
+            CancelFilters();
 
             switch (selectedTool)
             {
@@ -2732,7 +2750,7 @@ namespace _222303026_proje3
             {
                 if (artisticFilters != ArtisticFilters.None)
                 {
-                    CancelArtisticFilters();
+                    CancelFilters();
                 }
 
                 using (Graphics g = Graphics.FromImage(MainBitmap))
@@ -3164,7 +3182,7 @@ namespace _222303026_proje3
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
         }
-        private void RefreshArtisticFiltersPreview()
+        private void RefreshFiltersPreview()
         {
             previewBitmap = new Bitmap(MainBitmap);
             if (isSelected)
@@ -3209,6 +3227,15 @@ namespace _222303026_proje3
                         break;
                     default:
                         filteredBitmap = new Bitmap(SelectedBitmap);
+                        switch (blurEffect)
+                        {
+                            case BlurEffect.Pixelate:
+                                filteredBitmap = Filters.BlurringFilters.Pixelate(filteredBitmap,
+                                    pixelationSize, pixelationOffsetX, pixelationOffsetY);
+                                break;
+                            case BlurEffect.Gaussian:
+                                break;
+                        }
                         break;
                 }
 
@@ -3261,13 +3288,12 @@ namespace _222303026_proje3
 
         private void buttonArtisticFiltersCancel_Click(object sender, EventArgs e)
         {
-            CancelArtisticFilters();
-        }
-        private void CancelArtisticFilters()
-        {
             toolStripArtisticFilters.Visible = false;
             artisticFilters = ArtisticFilters.None;
-
+            CancelFilters();
+        }
+        private void CancelFilters()
+        {
             if (previewBitmap != null && previewBitmap != MainBitmap)
             {
                 previewBitmap.Dispose();
@@ -3326,13 +3352,13 @@ namespace _222303026_proje3
                     textBoxArtisticFilterSize.Text = FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize.ToString();
                     textBoxArtisticFilterIntensity.Text = FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity.ToString();
                     textBoxArtisticFilterThreshold.Text = FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold.ToString();
-                    RefreshArtisticFiltersPreview();
+                    RefreshFiltersPreview();
                     break;
                 case ArtisticFilters.Cartoon:
                     textBoxArtisticFilterSize.Text = FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize.ToString();
                     textBoxArtisticFilterIntensity.Text = FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity.ToString();
                     textBoxArtisticFilterThreshold.Text = FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold.ToString();
-                    RefreshArtisticFiltersPreview();
+                    RefreshFiltersPreview();
                     break;
                 default:
                     break;
@@ -3410,7 +3436,7 @@ namespace _222303026_proje3
             }
             finally
             {
-                RefreshArtisticFiltersPreview();
+                RefreshFiltersPreview();
             }
         }
 
@@ -3475,7 +3501,7 @@ namespace _222303026_proje3
             }
             finally
             {
-                RefreshArtisticFiltersPreview();
+                RefreshFiltersPreview();
             }
         }
 
@@ -3540,7 +3566,7 @@ namespace _222303026_proje3
             }
             finally
             {
-                RefreshArtisticFiltersPreview();
+                RefreshFiltersPreview();
             }
         }
 
@@ -3944,7 +3970,7 @@ namespace _222303026_proje3
 
         private void textBoxPrompt_TextChanged(object sender, EventArgs e)
         {
-            if(!string.IsNullOrEmpty(textBoxPrompt.Text))
+            if (!string.IsNullOrEmpty(textBoxPrompt.Text))
             {
                 buttonCreate.Enabled = true;
             }
@@ -3953,6 +3979,119 @@ namespace _222303026_proje3
                 buttonCreate.Enabled = false;
             }
         }
+
+        private void buttonApplyPixelation_Click(object sender, EventArgs e)
+        {
+            SaveStateForUndo();
+            MainBitmap = previewBitmap;
+            pictureBoxCanvas.Image = MainBitmap;
+            pictureBoxCanvas.Invalidate();
+            toolStripPixelate.Visible = false;
+        }
+
+        private void buttonCancelPixelation_Click(object sender, EventArgs e)
+        {
+            toolStripPixelate.Visible = false;
+            blurEffect = BlurEffect.None;
+            CancelFilters();
+        }
+
+        private void pixellateToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            toolStripPixelate.Visible = true;
+            blurEffect = BlurEffect.Pixelate;
+            RefreshFiltersPreview();
+        }
+
+        private void blurToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            blurEffect = BlurEffect.Gaussian;
+            RefreshFiltersPreview();
+        }
+
+        private void textBoxPixelationSize_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if(Convert.ToInt32(textBoxPixelationSize.Text)<1 && Convert.ToInt32(textBoxPixelationSize.Text) > 9299)
+                {
+                    throw new OverflowException();
+                }
+                pixelationSize = Convert.ToInt32(textBoxPixelationSize.Text);
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                pixelationSize = Settings1.Default.DefaultPixelationSize;
+                textBoxPixelationSize.Text = pixelationSize.ToString();
+            }
+            catch (OverflowException)
+            {
+                MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                pixelationSize = Settings1.Default.DefaultPixelationSize;
+                textBoxPixelationSize.Text = pixelationSize.ToString();
+            }
+            finally
+            {
+                RefreshFiltersPreview();
+            }
+        }
+
+        private void textBoxPixelationOffsetX_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (Convert.ToInt32(textBoxPixelationOffsetX.Text) < -2944 && Convert.ToInt32(textBoxPixelationOffsetX.Text) > 10602)
+                {
+                    throw new OverflowException();
+                }
+                pixelationOffsetX = Convert.ToInt32(textBoxPixelationOffsetX.Text);
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                pixelationOffsetX = Settings1.Default.DefaultPixelationOffsetX;
+                textBoxPixelationOffsetX.Text = pixelationOffsetX.ToString();
+            }
+            catch (OverflowException)
+            {
+                MessageBox.Show("Size value is too big or too small", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                pixelationOffsetX = Settings1.Default.DefaultPixelationOffsetX;
+                textBoxPixelationOffsetX.Text = pixelationOffsetX.ToString();
+            }
+            finally
+            {
+                RefreshFiltersPreview();
+            }
+        }
+
+        private void textBoxPixelationOffsetY_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (Convert.ToInt32(textBoxPixelationOffsetY.Text) < -2944 && Convert.ToInt32(textBoxPixelationOffsetY.Text) > 10602)
+                {
+                    throw new OverflowException();
+                }
+                pixelationOffsetY = Convert.ToInt32(textBoxPixelationOffsetY.Text);
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                pixelationOffsetY = Settings1.Default.DefaultPixelationOffsetY;
+                textBoxPixelationOffsetY.Text = pixelationOffsetY.ToString();
+            }
+            catch (OverflowException)
+            {
+                MessageBox.Show("Size value is too big or too small", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                pixelationOffsetY = Settings1.Default.DefaultPixelationOffsetY;
+                textBoxPixelationOffsetY.Text = pixelationOffsetY.ToString();
+            }
+            finally
+            {
+                RefreshFiltersPreview();
+            }
+        }    
     }
     public partial class CreateWithAIForm : Form
     {

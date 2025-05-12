@@ -810,5 +810,31 @@ namespace _222303026_proje3
                 return resultBitmap;
             }
         }
+        public static class BlurringFilters
+        {
+            public static Bitmap Pixelate(Bitmap image, int pixelSize, int offsetX,
+                int offsetY)
+            {
+                Bitmap pixelatedImage = new Bitmap(image.Width, image.Height);
+                using (Graphics g = Graphics.FromImage(pixelatedImage))
+                {
+                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+                    g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.None;
+                    g.DrawImage(image, new Rectangle(offsetX, offsetY, image.Width, image.Height),
+                        new Rectangle(offsetX, offsetY, image.Width / pixelSize, image.Height / pixelSize),
+                        GraphicsUnit.Pixel);
+                }
+                return pixelatedImage;
+            }
+            public static Bitmap GaussianBlur(Bitmap image, int radius)
+            {
+                Bitmap blurredImage = new Bitmap(image.Width, image.Height);
+                using (Graphics g = Graphics.FromImage(blurredImage))
+                {
+                    g.DrawImage(image, new Rectangle(0, 0, image.Width, image.Height));
+                }
+                return blurredImage;
+            }
+        }
     }
 }

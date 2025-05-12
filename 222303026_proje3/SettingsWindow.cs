@@ -96,7 +96,16 @@ namespace _222303026_proje3
             numericUpDownDefaultTextSize.Value = Settings1.Default.DefaultTextSize;
             // Bucket tolerance
             numericUpDownDefaultBucketTolerance.Value = Settings1.Default.DefaultBucketTolerance;
-
+            // Filter settings
+            numericUpDownDefaultCartoonFilterSize.Value = Settings1.Default.DefaultCartoonFilterSize;
+            numericUpDownDefaultCartoonFilterIntensity.Value = Settings1.Default.DefaultCartoonFilterIntensity;
+            numericUpDownDefaultCartoonFilterThreshold.Value = Settings1.Default.DefaultCartoonFilterThreshold;
+            numericUpDownDefaultOilPaintFilterSize.Value = Settings1.Default.DefaultOilPaintFilterSize;
+            numericUpDownDefaultOilPaintFilterIntensity.Value = Settings1.Default.DefaultOilPaintFilterIntensity;
+            numericUpDownDefaultOilPaintFilterThreshold.Value = Settings1.Default.DefaultOilPaintFilterThreshold;
+            numericUpDownDefaultPixelationSize.Value = Settings1.Default.DefaultPixelationSize;
+            numericUpDownDefaultOffsetX.Value = Settings1.Default.DefaultPixelationOffsetX;
+            numericUpDownDefaultOffsetY.Value = Settings1.Default.DefaultPixelationOffsetY;
             // Color settings
             panelPrimaryColorPreview.BackColor = Settings1.Default.PrimaryColor;
             panelSecondaryColorPreview.BackColor = Settings1.Default.SecondaryColor;
@@ -702,6 +711,24 @@ namespace _222303026_proje3
             Settings1.Default.DefaultOilPaintFilterThreshold = (int)numericUpDownDefaultOilPaintFilterThreshold.Value;
             Settings1.Default.Save();
             FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold = (int)numericUpDownDefaultOilPaintFilterThreshold.Value;
+        }
+
+        private void numericUpDownDefaultPixelationSize_ValueChanged(object sender, EventArgs e)
+        {
+            Settings1.Default.DefaultPixelationSize = (int)numericUpDownDefaultPixelationSize.Value;
+            Settings1.Default.Save();
+        }
+
+        private void numericUpDownDefaultOffsetX_ValueChanged(object sender, EventArgs e)
+        {
+            Settings1.Default.DefaultPixelationOffsetX = (int)numericUpDownDefaultOffsetX.Value;
+            Settings1.Default.Save();
+        }
+
+        private void numericUpDownDefaultOffsetY_ValueChanged(object sender, EventArgs e)
+        {
+            Settings1.Default.DefaultPixelationOffsetY = (int)numericUpDownDefaultOffsetY.Value;
+            Settings1.Default.Save();
         }
     }
 }
