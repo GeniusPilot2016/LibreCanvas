@@ -49,11 +49,11 @@ namespace _222303026_proje3
                 buttons.BackColor = Color.Transparent;
                 buttons.ForeColor = Button.DefaultForeColor;
             }
-            listView1.BackColor = ListView.DefaultBackColor;
+            listView1.BackColor = SystemColors.Window;
             listView1.ForeColor = ListView.DefaultForeColor;
             foreach (ListViewItem item in listView1.Items)
             {
-                item.BackColor = ListView.DefaultBackColor;
+                item.BackColor = SystemColors.Window;
                 item.ForeColor = ListView.DefaultForeColor;
             }
         }

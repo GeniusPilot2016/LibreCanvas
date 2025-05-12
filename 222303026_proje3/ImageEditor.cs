@@ -190,16 +190,19 @@ namespace _222303026_proje3
             {
                 toolStrip.BackgroundImage = Resources.toolstrip_light;
                 toolStrip.BackColor = Color.Transparent;
-                toolStrip.ForeColor = ToolStrip.DefaultForeColor;
-                foreach (ToolStripComboBox comboBoxes in toolStrip.Items)
+                toolStrip.ForeColor = ToolStrip.DefaultForeColor; 
+                foreach (ToolStripItem item in toolStrip.Items)
                 {
-                    comboBoxes.BackColor = Color.Transparent;
-                    comboBoxes.ForeColor = ToolStrip.DefaultForeColor;
-                }
-                foreach (ToolStripTextBox textBoxes in toolStrip.Items)
-                {
-                    textBoxes.BackColor = Color.Transparent;
-                    textBoxes.ForeColor = ToolStrip.DefaultForeColor;
+                    if (item is ToolStripComboBox comboBox)
+                    {
+                        comboBox.BackColor = SystemColors.Window;
+                        comboBox.ForeColor = SystemColors.WindowText;
+                    }
+                    if (item is ToolStripTextBox textBox)
+                    {
+                        textBox.BackColor = SystemColors.Window;
+                        textBox.ForeColor = SystemColors.WindowText;
+                    }
                 }
             }
             foreach (ToolStrip toolStrip in toolStripContainer1.BottomToolStripPanel.Controls.OfType<ToolStrip>())

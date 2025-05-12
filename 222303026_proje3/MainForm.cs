@@ -61,7 +61,7 @@ namespace _222303026_proje3
                 buttons.ForeColor = Button.DefaultForeColor;
             }
             label1.ForeColor = Form.DefaultForeColor;
-            listBox1.BackColor = ListBox.DefaultBackColor;
+            listBox1.BackColor = SystemColors.Window;
             listBox1.ForeColor = ListBox.DefaultForeColor;
         }
         private void DarkTheme()
