@@ -27,7 +27,7 @@ namespace _222303026_proje3
                         var googleAi = new GoogleAi(geminiApiKey);
 
                         // 2. Create the Imagen model instance with your chosen model name.  
-                        var imageModel = googleAi.CreateImageModel("gemini-2.0-flash-exp-image-generation");
+                        var imageModel = googleAi.CreateImageModel(Settings1.Default.PreferredGeminiModel);
 
                         // 3. Generate images by providing a text prompt.  
                         var request = new GenerateImageRequest
