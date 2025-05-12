@@ -30,9 +30,9 @@
         {
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CreateWithAIForm));
-            textBox1 = new TextBox();
+            textBoxPrompt = new TextBox();
             label1 = new Label();
-            button1 = new Button();
+            buttonCreate = new Button();
             icons = new ImageList(components);
             label2 = new Label();
             numericUpDownWidth = new NumericUpDown();
@@ -43,14 +43,15 @@
             ((System.ComponentModel.ISupportInitialize)numericUpDownHeight).BeginInit();
             SuspendLayout();
             // 
-            // textBox1
+            // textBoxPrompt
             // 
-            textBox1.Anchor = AnchorStyles.Top;
-            textBox1.Font = new Font("HarmonyOS Sans", 8.999999F);
-            textBox1.Location = new Point(96, 29);
-            textBox1.Name = "textBox1";
-            textBox1.Size = new Size(400, 27);
-            textBox1.TabIndex = 0;
+            textBoxPrompt.Anchor = AnchorStyles.Top;
+            textBoxPrompt.Font = new Font("HarmonyOS Sans", 8.999999F);
+            textBoxPrompt.Location = new Point(96, 29);
+            textBoxPrompt.Name = "textBoxPrompt";
+            textBoxPrompt.Size = new Size(400, 27);
+            textBoxPrompt.TabIndex = 0;
+            textBoxPrompt.TextChanged += textBoxPrompt_TextChanged;
             // 
             // label1
             // 
@@ -63,21 +64,22 @@
             label1.TabIndex = 1;
             label1.Text = "Prompt";
             // 
-            // button1
+            // buttonCreate
             // 
-            button1.Anchor = AnchorStyles.Top;
-            button1.Font = new Font("HarmonyOS Sans", 8.999999F);
-            button1.ImageIndex = 0;
-            button1.ImageList = icons;
-            button1.Location = new Point(502, 24);
-            button1.Name = "button1";
-            button1.Size = new Size(145, 35);
-            button1.TabIndex = 2;
-            button1.Text = "Create Image";
-            button1.TextAlign = ContentAlignment.MiddleRight;
-            button1.TextImageRelation = TextImageRelation.ImageBeforeText;
-            button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click;
+            buttonCreate.Anchor = AnchorStyles.Top;
+            buttonCreate.Enabled = false;
+            buttonCreate.Font = new Font("HarmonyOS Sans", 8.999999F);
+            buttonCreate.ImageIndex = 0;
+            buttonCreate.ImageList = icons;
+            buttonCreate.Location = new Point(502, 24);
+            buttonCreate.Name = "buttonCreate";
+            buttonCreate.Size = new Size(145, 35);
+            buttonCreate.TabIndex = 2;
+            buttonCreate.Text = "Create Image";
+            buttonCreate.TextAlign = ContentAlignment.MiddleRight;
+            buttonCreate.TextImageRelation = TextImageRelation.ImageBeforeText;
+            buttonCreate.UseVisualStyleBackColor = true;
+            buttonCreate.Click += button1_Click;
             // 
             // icons
             // 
@@ -150,7 +152,7 @@
             // 
             // CreateWithAIForm
             // 
-            AcceptButton = button1;
+            AcceptButton = buttonCreate;
             AutoScaleDimensions = new SizeF(120F, 120F);
             AutoScaleMode = AutoScaleMode.Dpi;
             AutoSize = true;
@@ -159,10 +161,10 @@
             Controls.Add(numericUpDownHeight);
             Controls.Add(labelWidth);
             Controls.Add(numericUpDownWidth);
-            Controls.Add(button1);
+            Controls.Add(buttonCreate);
             Controls.Add(label2);
             Controls.Add(label1);
-            Controls.Add(textBox1);
+            Controls.Add(textBoxPrompt);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -177,9 +179,9 @@
 
         #endregion
 
-        private TextBox textBox1;
+        private TextBox textBoxPrompt;
         private Label label1;
-        private Button button1;
+        private Button buttonCreate;
         private ImageList icons;
         private Label label2;
         private NumericUpDown numericUpDownWidth;

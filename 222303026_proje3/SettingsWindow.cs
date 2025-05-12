@@ -466,7 +466,7 @@ namespace _222303026_proje3
 
         private void button4_Click_1(object sender, EventArgs e)
         {
-            if (textBoxGeminiAPIKey.UseSystemPasswordChar)
+            if (textBoxHuggingFaceAPIKey.UseSystemPasswordChar)
             {
                 textBoxHuggingFaceAPIKey.UseSystemPasswordChar = false;
                 buttonShowHideHuggingFaceAPIKey.ImageIndex = 6;

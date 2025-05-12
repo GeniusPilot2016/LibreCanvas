@@ -635,9 +635,18 @@ namespace _222303026_proje3
                         toolStripSeparator29.Visible = true;
                         labelAIImageErasing.Visible = true;
                         progressBarAIImageCreation.Visible = true;
-                        SelectedBitmap = (Bitmap)(await CreateAIImages.GenerateImagesFromExistingImage(SelectedBitmap, "Erase the object in this area",
-                            SelectedBitmap.Width, SelectedBitmap.Height))[0];
-                        MergeMainBitmapWithSelected();
+                        var images = await CreateAIImages.GenerateImagesFromExistingImage(
+    SelectedBitmap, "Erase the object in this area", SelectedBitmap.Width, SelectedBitmap.Height);
+
+                        if (images != null && images.Length > 0 && images[0] != null)
+                        {
+                            SelectedBitmap = (Bitmap)images[0];
+                            MergeMainBitmapWithSelected();
+                        }
+                        else
+                        {
+                            MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
                         pictureBoxCanvas.Invalidate();
                         toolStripTools.Enabled = true;
                         toolStripSeparator29.Visible = false;
@@ -3892,9 +3901,18 @@ namespace _222303026_proje3
                     textBoxPrompt.Enabled = false;
                     labelPrompt.Enabled = false;
                     buttonClose.Enabled = false;
-                    SelectedBitmap = (Bitmap)(await CreateAIImages.GenerateImagesFromExistingImage(SelectedBitmap, textBoxPrompt.Text,
-        SelectedBitmap.Width, SelectedBitmap.Height))[0];
-                    MergeMainBitmapWithSelected();
+                    var images = await CreateAIImages.GenerateImagesFromExistingImage(
+    SelectedBitmap, textBoxPrompt.Text, SelectedBitmap.Width, SelectedBitmap.Height);
+
+                    if (images != null && images.Length > 0 && images[0] != null)
+                    {
+                        SelectedBitmap = (Bitmap)images[0];
+                        MergeMainBitmapWithSelected();
+                    }
+                    else
+                    {
+                        MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                     pictureBoxCanvas.Invalidate();
                     toolStripTools.Enabled = true;
                     toolStripSeparator29.Visible = false;

@@ -218,6 +218,17 @@
             printImageDialog = new PrintDialog();
             printImage = new System.Drawing.Printing.PrintDocument();
             printPreviewDialog1 = new PrintPreviewDialog();
+            toolStrip1 = new ToolStrip();
+            toolStripLabel14 = new ToolStripLabel();
+            toolStripTextBox1 = new ToolStripTextBox();
+            toolStripSeparator30 = new ToolStripSeparator();
+            toolStripLabel15 = new ToolStripLabel();
+            toolStripTextBox2 = new ToolStripTextBox();
+            toolStripLabel16 = new ToolStripLabel();
+            toolStripSeparator31 = new ToolStripSeparator();
+            toolStripTextBox3 = new ToolStripTextBox();
+            toolStripButton1 = new ToolStripButton();
+            toolStripButton2 = new ToolStripButton();
             toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             toolStripContainer1.ContentPanel.SuspendLayout();
             toolStripContainer1.LeftToolStripPanel.SuspendLayout();
@@ -239,6 +250,7 @@
             toolStripShapes.SuspendLayout();
             toolStripText.SuspendLayout();
             toolStripEraser.SuspendLayout();
+            toolStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // toolStripContainer1
@@ -276,6 +288,7 @@
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripShapes);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripText);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripEraser);
+            toolStripContainer1.TopToolStripPanel.Controls.Add(toolStrip1);
             // 
             // toolStripBase
             // 
@@ -832,6 +845,7 @@
             // 
             // removeBackgroundToolStripMenuItem2
             // 
+            removeBackgroundToolStripMenuItem2.Enabled = false;
             removeBackgroundToolStripMenuItem2.Image = Properties.Resources.icons8_background_remover_48;
             removeBackgroundToolStripMenuItem2.Name = "removeBackgroundToolStripMenuItem2";
             removeBackgroundToolStripMenuItem2.Size = new Size(236, 26);
@@ -1563,7 +1577,7 @@
             toolStripArtisticFilters.Items.AddRange(new ToolStripItem[] { toolStripLabel5, textBoxArtisticFilterSize, toolStripSeparator27, toolStripLabel7, textBoxArtisticFilterIntensity, toolStripSeparator28, toolStripLabel8, textBoxArtisticFilterThreshold, buttonArtisticFiltersOK, buttonArtisticFiltersCancel });
             toolStripArtisticFilters.Location = new Point(0, 28);
             toolStripArtisticFilters.Name = "toolStripArtisticFilters";
-            toolStripArtisticFilters.Size = new Size(1289, 27);
+            toolStripArtisticFilters.Size = new Size(455, 27);
             toolStripArtisticFilters.Stretch = true;
             toolStripArtisticFilters.TabIndex = 9;
             toolStripArtisticFilters.Visible = false;
@@ -1973,6 +1987,93 @@
             printPreviewDialog1.Name = "printPreviewDialog1";
             printPreviewDialog1.Visible = false;
             // 
+            // toolStrip1
+            // 
+            toolStrip1.BackgroundImage = Properties.Resources.toolstrip_light;
+            toolStrip1.BackgroundImageLayout = ImageLayout.Stretch;
+            toolStrip1.Dock = DockStyle.None;
+            toolStrip1.GripStyle = ToolStripGripStyle.Hidden;
+            toolStrip1.ImageScalingSize = new Size(20, 20);
+            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripLabel14, toolStripTextBox1, toolStripSeparator30, toolStripLabel15, toolStripTextBox2, toolStripSeparator31, toolStripLabel16, toolStripTextBox3, toolStripButton1, toolStripButton2 });
+            toolStrip1.Location = new Point(0, 28);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Size = new Size(1289, 27);
+            toolStrip1.Stretch = true;
+            toolStrip1.TabIndex = 15;
+            // 
+            // toolStripLabel14
+            // 
+            toolStripLabel14.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            toolStripLabel14.Name = "toolStripLabel14";
+            toolStripLabel14.Size = new Size(37, 24);
+            toolStripLabel14.Text = "Size";
+            // 
+            // toolStripTextBox1
+            // 
+            toolStripTextBox1.BorderStyle = BorderStyle.FixedSingle;
+            toolStripTextBox1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            toolStripTextBox1.Name = "toolStripTextBox1";
+            toolStripTextBox1.Size = new Size(75, 27);
+            toolStripTextBox1.Text = "16";
+            // 
+            // toolStripSeparator30
+            // 
+            toolStripSeparator30.Name = "toolStripSeparator30";
+            toolStripSeparator30.Size = new Size(6, 27);
+            // 
+            // toolStripLabel15
+            // 
+            toolStripLabel15.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            toolStripLabel15.Name = "toolStripLabel15";
+            toolStripLabel15.Size = new Size(65, 24);
+            toolStripLabel15.Text = "Offset X";
+            // 
+            // toolStripTextBox2
+            // 
+            toolStripTextBox2.BorderStyle = BorderStyle.FixedSingle;
+            toolStripTextBox2.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            toolStripTextBox2.Name = "toolStripTextBox2";
+            toolStripTextBox2.Size = new Size(50, 27);
+            toolStripTextBox2.Text = "0";
+            // 
+            // toolStripLabel16
+            // 
+            toolStripLabel16.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            toolStripLabel16.Name = "toolStripLabel16";
+            toolStripLabel16.Size = new Size(64, 24);
+            toolStripLabel16.Text = "Offset Y";
+            // 
+            // toolStripSeparator31
+            // 
+            toolStripSeparator31.Name = "toolStripSeparator31";
+            toolStripSeparator31.Size = new Size(6, 27);
+            // 
+            // toolStripTextBox3
+            // 
+            toolStripTextBox3.BorderStyle = BorderStyle.FixedSingle;
+            toolStripTextBox3.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            toolStripTextBox3.Name = "toolStripTextBox3";
+            toolStripTextBox3.Size = new Size(50, 27);
+            toolStripTextBox3.Text = "0";
+            // 
+            // toolStripButton1
+            // 
+            toolStripButton1.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            toolStripButton1.Image = Properties.Resources.icons8_done_48;
+            toolStripButton1.ImageTransparentColor = Color.Magenta;
+            toolStripButton1.Name = "toolStripButton1";
+            toolStripButton1.Size = new Size(29, 24);
+            toolStripButton1.Text = "toolStripButton1";
+            // 
+            // toolStripButton2
+            // 
+            toolStripButton2.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            toolStripButton2.Image = Properties.Resources.icons8_close_48;
+            toolStripButton2.ImageTransparentColor = Color.Magenta;
+            toolStripButton2.Name = "toolStripButton2";
+            toolStripButton2.Size = new Size(29, 24);
+            toolStripButton2.Text = "toolStripButton2";
+            // 
             // ImageEditor
             // 
             AutoScaleMode = AutoScaleMode.None;
@@ -2021,6 +2122,8 @@
             toolStripText.PerformLayout();
             toolStripEraser.ResumeLayout(false);
             toolStripEraser.PerformLayout();
+            toolStrip1.ResumeLayout(false);
+            toolStrip1.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -2216,5 +2319,16 @@
         private ToolStripMenuItem pixellateToolStripMenuItem;
         private ToolStripMenuItem blurToolStripMenuItem1;
         private ToolStripComboBox comboBoxSpraySize;
+        private ToolStrip toolStrip1;
+        private ToolStripLabel toolStripLabel14;
+        private ToolStripTextBox toolStripTextBox1;
+        private ToolStripSeparator toolStripSeparator30;
+        private ToolStripLabel toolStripLabel15;
+        private ToolStripTextBox toolStripTextBox2;
+        private ToolStripSeparator toolStripSeparator31;
+        private ToolStripLabel toolStripLabel16;
+        private ToolStripTextBox toolStripTextBox3;
+        private ToolStripButton toolStripButton1;
+        private ToolStripButton toolStripButton2;
     }
 }
