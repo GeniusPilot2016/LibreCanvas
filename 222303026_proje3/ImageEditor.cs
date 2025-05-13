@@ -2567,7 +2567,7 @@ namespace _222303026_proje3
 
         }
 
-        private void textBoxRadius_Leave(object sender, EventArgs e)
+        private void setShapeRadius()
         {
             try
             {
@@ -2590,8 +2590,7 @@ namespace _222303026_proje3
                 textBoxRadius.Text = radius.ToString();
             }
         }
-
-        private void textBoxPoints_Leave(object sender, EventArgs e)
+        private void setShapePoints()
         {
             try
             {
@@ -2613,6 +2612,15 @@ namespace _222303026_proje3
                 points = Settings1.Default.DefaultPointsCount;
                 textBoxPoints.Text = points.ToString();
             }
+        }
+        private void textBoxRadius_Leave(object sender, EventArgs e)
+        {
+            setShapeRadius();
+        }
+
+        private void textBoxPoints_Leave(object sender, EventArgs e)
+        {
+            setShapePoints();
         }
         private const int MaxStackSize = 20;
 
@@ -2805,7 +2813,7 @@ namespace _222303026_proje3
             pictureBoxCanvas.Invalidate();
         }
 
-        private void toolStripTextBox1_Leave(object sender, EventArgs e)
+        private void setBucketToolTolerance()
         {
             try
             {
@@ -2836,6 +2844,10 @@ namespace _222303026_proje3
             {
                 textBoxTolerance.Text = tolerance.ToString();
             }
+        }
+        private void toolStripTextBox1_Leave(object sender, EventArgs e)
+        {
+            setBucketToolTolerance();
         }
 
         private void mirrorToolStripMenuItem_Click(object sender, EventArgs e)
@@ -3438,8 +3450,7 @@ namespace _222303026_proje3
                     break;
             }
         }
-
-        private void textBoxArtisticFilterSize_Leave(object sender, EventArgs e)
+        private void setArtisticFilterSize()
         {
             try
             {
@@ -3505,8 +3516,7 @@ namespace _222303026_proje3
                 RefreshFiltersPreview();
             }
         }
-
-        private void textBoxArtisticFilterIntensity_Leave(object sender, EventArgs e)
+        private void setArtisticFilterIntensity()
         {
             try
             {
@@ -3572,8 +3582,7 @@ namespace _222303026_proje3
                 RefreshFiltersPreview();
             }
         }
-
-        private void textBoxArtisticFilterThreshold_Leave(object sender, EventArgs e)
+        private void setArtisticFilterThreshold()
         {
             try
             {
@@ -3638,6 +3647,20 @@ namespace _222303026_proje3
             {
                 RefreshFiltersPreview();
             }
+        }
+        private void textBoxArtisticFilterSize_Leave(object sender, EventArgs e)
+        {
+            setArtisticFilterSize();
+        }
+
+        private void textBoxArtisticFilterIntensity_Leave(object sender, EventArgs e)
+        {
+            setArtisticFilterIntensity();
+        }
+
+        private void textBoxArtisticFilterThreshold_Leave(object sender, EventArgs e)
+        {
+            setArtisticFilterThreshold();
         }
 
         private void printImage_PrintPage(object sender, System.Drawing.Printing.PrintPageEventArgs e)
@@ -4085,7 +4108,7 @@ namespace _222303026_proje3
             RefreshFiltersPreview();
         }
 
-        private void textBoxPixelationSize_Leave(object sender, EventArgs e)
+        private void setPixelationSize()
         {
             try
             {
@@ -4112,8 +4135,7 @@ namespace _222303026_proje3
                 RefreshFiltersPreview();
             }
         }
-
-        private void textBoxPixelationOffsetX_Leave(object sender, EventArgs e)
+        private void setPixelateOffsetX()
         {
             try
             {
@@ -4140,8 +4162,7 @@ namespace _222303026_proje3
                 RefreshFiltersPreview();
             }
         }
-
-        private void textBoxPixelationOffsetY_Leave(object sender, EventArgs e)
+        private void setPixelateOffsetY()
         {
             try
             {
@@ -4167,6 +4188,20 @@ namespace _222303026_proje3
             {
                 RefreshFiltersPreview();
             }
+        }
+        private void textBoxPixelationSize_Leave(object sender, EventArgs e)
+        {
+            setPixelationSize();
+        }
+
+        private void textBoxPixelationOffsetX_Leave(object sender, EventArgs e)
+        {
+            setPixelateOffsetX();
+        }
+
+        private void textBoxPixelationOffsetY_Leave(object sender, EventArgs e)
+        {
+            setPixelateOffsetY();
         }
 
         private void textboxGaussianBlurRadius_Leave(object sender, EventArgs e)
@@ -4219,9 +4254,81 @@ namespace _222303026_proje3
 
         private void textboxGaussianBlurRadius_KeyDown(object sender, KeyEventArgs e)
         {
-            if(e.KeyCode == Keys.Enter)
+            if (e.KeyCode == Keys.Enter)
             {
                 setGaussianBlurRadius();
+            }
+        }
+
+        private void textBoxArtisticFilterSize_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                setArtisticFilterSize();
+            }
+        }
+
+        private void textBoxArtisticFilterIntensity_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                setArtisticFilterIntensity();
+            }
+        }
+
+        private void textBoxArtisticFilterThreshold_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                setArtisticFilterThreshold();
+            }
+        }
+
+        private void textBoxTolerance_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                setBucketToolTolerance();
+            }
+        }
+
+        private void textBoxPixelationSize_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                setPixelationSize();
+            }
+        }
+
+        private void textBoxPixelationOffsetX_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                setPixelateOffsetX();
+            }
+        }
+
+        private void textBoxPixelationOffsetY_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                setPixelateOffsetY();
+            }
+        }
+
+        private void textBoxRadius_KeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.KeyCode == Keys.Enter)
+            {
+                setShapeRadius();
+            }
+        }
+
+        private void textBoxPoints_KeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.KeyCode == Keys.Enter)
+            {
+                setShapePoints();
             }
         }
     }
