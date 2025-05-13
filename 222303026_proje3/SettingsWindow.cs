@@ -106,6 +106,7 @@ namespace _222303026_proje3
             numericUpDownDefaultPixelationSize.Value = Settings1.Default.DefaultPixelationSize;
             numericUpDownDefaultOffsetX.Value = Settings1.Default.DefaultPixelationOffsetX;
             numericUpDownDefaultOffsetY.Value = Settings1.Default.DefaultPixelationOffsetY;
+            numericUpDownDefaultGaussianBlurRadius.Value = (decimal)Settings1.Default.DefaultGaussianBlurRadius;
             // Color settings
             panelPrimaryColorPreview.BackColor = Settings1.Default.PrimaryColor;
             panelSecondaryColorPreview.BackColor = Settings1.Default.SecondaryColor;
@@ -728,6 +729,12 @@ namespace _222303026_proje3
         private void numericUpDownDefaultOffsetY_ValueChanged(object sender, EventArgs e)
         {
             Settings1.Default.DefaultPixelationOffsetY = (int)numericUpDownDefaultOffsetY.Value;
+            Settings1.Default.Save();
+        }
+
+        private void numericUpDownDefaultGaussianBlurRadius_ValueChanged(object sender, EventArgs e)
+        {
+            Settings1.Default.DefaultGaussianBlurRadius = (float)numericUpDownDefaultGaussianBlurRadius.Value;
             Settings1.Default.Save();
         }
     }

@@ -27,11 +27,12 @@ namespace _222303026_proje3
             pixelationOffsetX = Settings1.Default.DefaultPixelationOffsetX,
             pixelationOffsetY = Settings1.Default.DefaultPixelationOffsetY;
         float textSize = Settings1.Default.DefaultTextSize;
-        float zoom = 1;
+        float zoom = 1,
+            gaussianBlurSize = Settings1.Default.DefaultGaussianBlurRadius;
         bool isResizing = false, isSelected = false, backgroundFilling = false;
         private ResizeDirection resizeDirection;
         private BasicFilters basicFilters;
-        private ArtisticFilters artisticFilters;
+        private ArtisticFilters artisticFilters = ArtisticFilters.None;
         private Point lastMousePos;
         Size originalSize; // Unzoomed size
         Size originalSelectionRectangleSize; // Unzoomed size
@@ -48,7 +49,7 @@ namespace _222303026_proje3
             Middle,
             Right
         }
-        private BlurEffect blurEffect = new BlurEffect();
+        private BlurEffect blurEffect = BlurEffect.None;
         enum BlurEffect
         {
             None,
@@ -151,6 +152,7 @@ namespace _222303026_proje3
             textBoxPixelationSize.Text = pixelationSize.ToString();
             textBoxPixelationOffsetX.Text = pixelationOffsetX.ToString();
             textBoxPixelationOffsetY.Text = pixelationOffsetY.ToString();
+            textboxGaussianBlurRadius.Text = gaussianBlurSize.ToString();
         }
         private void SetTheme()
         {
@@ -1458,6 +1460,10 @@ namespace _222303026_proje3
                             SelectedBitmap = newSelectedBitmap;
 
                             pictureBoxCanvas.Invalidate();
+                            if (blurEffect != BlurEffect.None && artisticFilters != ArtisticFilters.None)
+                            {
+                                RefreshFiltersPreview();
+                            }
                         }
                         else
                         {
@@ -2016,6 +2022,9 @@ namespace _222303026_proje3
 
         private void pictureBoxCanvas_Click(object sender, EventArgs e)
         {
+            toolStripArtisticFilters.Visible = false;
+            toolStripPixelate.Visible = false;
+            toolStripGaussianBlur.Visible = false;
             switch (selectedTool)
             {
                 case Tools.Text:
@@ -2558,7 +2567,7 @@ namespace _222303026_proje3
 
         }
 
-        private void textBoxRadius_TextChanged(object sender, EventArgs e)
+        private void textBoxRadius_Leave(object sender, EventArgs e)
         {
             try
             {
@@ -2582,7 +2591,7 @@ namespace _222303026_proje3
             }
         }
 
-        private void textBoxPoints_TextChanged(object sender, EventArgs e)
+        private void textBoxPoints_Leave(object sender, EventArgs e)
         {
             try
             {
@@ -2752,7 +2761,13 @@ namespace _222303026_proje3
                 {
                     CancelFilters();
                 }
-
+                if (blurEffect != BlurEffect.None)
+                {
+                    CancelFilters();
+                }
+                toolStripArtisticFilters.Visible = false;
+                toolStripPixelate.Visible = false;
+                toolStripGaussianBlur.Visible = false;
                 using (Graphics g = Graphics.FromImage(MainBitmap))
                 {
                     g.InterpolationMode = InterpolationMode.HighQualityBicubic;
@@ -2779,7 +2794,7 @@ namespace _222303026_proje3
             // Seçim durumunu sýfýrlayýn
             SelectionRectangle = Rectangle.Empty;
             isSelected = false;
-            if (artisticFilters == ArtisticFilters.None)
+            if (artisticFilters == ArtisticFilters.None || blurEffect == BlurEffect.None)
             {
                 pictureBoxCanvas.Image = MainBitmap;
             }
@@ -2790,7 +2805,7 @@ namespace _222303026_proje3
             pictureBoxCanvas.Invalidate();
         }
 
-        private void toolStripTextBox1_TextChanged(object sender, EventArgs e)
+        private void toolStripTextBox1_Leave(object sender, EventArgs e)
         {
             try
             {
@@ -2831,6 +2846,10 @@ namespace _222303026_proje3
             {
                 artisticFilters = ArtisticFilters.None;
             }
+            if (blurEffect != BlurEffect.None)
+            {
+                blurEffect = BlurEffect.None;
+            }
             basicFilters = BasicFilters.Mirror;
             MainBitmap = Filters.BasicFilters.MirrorEffect(MainBitmap);
             canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
@@ -2846,6 +2865,10 @@ namespace _222303026_proje3
             if (artisticFilters != ArtisticFilters.None)
             {
                 artisticFilters = ArtisticFilters.None;
+            }
+            if (blurEffect != BlurEffect.None)
+            {
+                blurEffect = BlurEffect.None;
             }
             if (isSelected)
             {
@@ -2886,6 +2909,10 @@ namespace _222303026_proje3
             {
                 artisticFilters = ArtisticFilters.None;
             }
+            if (blurEffect != BlurEffect.None)
+            {
+                blurEffect = BlurEffect.None;
+            }
             if (isSelected)
             {
                 if (SelectedBitmap == null)
@@ -2923,6 +2950,10 @@ namespace _222303026_proje3
             if (artisticFilters != ArtisticFilters.None)
             {
                 artisticFilters = ArtisticFilters.None;
+            }
+            if (blurEffect != BlurEffect.None)
+            {
+                blurEffect = BlurEffect.None;
             }
             if (isSelected)
             {
@@ -2962,6 +2993,10 @@ namespace _222303026_proje3
             {
                 artisticFilters = ArtisticFilters.None;
             }
+            if (blurEffect != BlurEffect.None)
+            {
+                blurEffect = BlurEffect.None;
+            }
             if (isSelected)
             {
                 if (SelectedBitmap == null)
@@ -2999,6 +3034,10 @@ namespace _222303026_proje3
             if (artisticFilters != ArtisticFilters.None)
             {
                 artisticFilters = ArtisticFilters.None;
+            }
+            if (blurEffect != BlurEffect.None)
+            {
+                blurEffect = BlurEffect.None;
             }
             if (isSelected)
             {
@@ -3038,6 +3077,10 @@ namespace _222303026_proje3
             {
                 artisticFilters = ArtisticFilters.None;
             }
+            if (blurEffect != BlurEffect.None)
+            {
+                blurEffect = BlurEffect.None;
+            }
             if (isSelected)
             {
                 if (SelectedBitmap == null)
@@ -3075,6 +3118,10 @@ namespace _222303026_proje3
             if (artisticFilters != ArtisticFilters.None)
             {
                 artisticFilters = ArtisticFilters.None;
+            }
+            if (blurEffect != BlurEffect.None)
+            {
+                blurEffect = BlurEffect.None;
             }
             if (isSelected)
             {
@@ -3114,6 +3161,10 @@ namespace _222303026_proje3
             {
                 artisticFilters = ArtisticFilters.None;
             }
+            if (blurEffect != BlurEffect.None)
+            {
+                blurEffect = BlurEffect.None;
+            }
             if (isSelected)
             {
                 if (SelectedBitmap == null)
@@ -3151,6 +3202,10 @@ namespace _222303026_proje3
             if (artisticFilters != ArtisticFilters.None)
             {
                 artisticFilters = ArtisticFilters.None;
+            }
+            if (blurEffect != BlurEffect.None)
+            {
+                blurEffect = BlurEffect.None;
             }
             if (isSelected)
             {
@@ -3234,6 +3289,8 @@ namespace _222303026_proje3
                                     pixelationSize, pixelationOffsetX, pixelationOffsetY);
                                 break;
                             case BlurEffect.Gaussian:
+                                filteredBitmap = Filters.BlurringFilters.GaussianBlur(filteredBitmap,
+                                    gaussianBlurSize);
                                 break;
                         }
                         break;
@@ -3249,7 +3306,7 @@ namespace _222303026_proje3
             else
             {
                 // For the entire image
-                Bitmap filteredBitmap;
+                Bitmap filteredBitmap = null;
 
                 switch (artisticFilters)
                 {
@@ -3266,7 +3323,20 @@ namespace _222303026_proje3
                             (byte)FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold);
                         break;
                     default:
-                        filteredBitmap = new Bitmap(MainBitmap);
+                        switch (blurEffect)
+                        {
+                            case BlurEffect.Pixelate:
+                                filteredBitmap = Filters.BlurringFilters.Pixelate(MainBitmap,
+                                    pixelationSize, pixelationOffsetX, pixelationOffsetY);
+                                break;
+                            case BlurEffect.Gaussian:
+                                filteredBitmap = Filters.BlurringFilters.GaussianBlur(MainBitmap,
+                                    gaussianBlurSize);
+                                break;
+                            default:
+                                filteredBitmap = new Bitmap(MainBitmap);
+                                break;
+                        }
                         break;
                 }
 
@@ -3344,6 +3414,10 @@ namespace _222303026_proje3
         }
         private void InitializeArtisticFilters(Enum filterType)
         {
+            if (blurEffect != BlurEffect.None)
+            {
+                blurEffect = BlurEffect.None;
+            }
             toolStripArtisticFilters.Visible = true;
             artisticFilters = (ArtisticFilters)filterType;
             switch (artisticFilters)
@@ -3365,17 +3439,7 @@ namespace _222303026_proje3
             }
         }
 
-        private void textBoxArtisticFilterIntensity_Leave(object sender, EventArgs e)
-        {
-
-        }
-
-        private void textBoxArtisticFilterThreshold_Leave(object sender, EventArgs e)
-        {
-
-        }
-
-        private void textBoxArtisticFilterSize_TextChanged(object sender, EventArgs e)
+        private void textBoxArtisticFilterSize_Leave(object sender, EventArgs e)
         {
             try
             {
@@ -3412,13 +3476,14 @@ namespace _222303026_proje3
                 switch (artisticFilters)
                 {
                     case ArtisticFilters.OilPainting:
-                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize = 5;
+                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize = Settings1.Default.DefaultOilPaintFilterSize;
+                        textBoxArtisticFilterSize.Text = FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize.ToString();
                         break;
                     case ArtisticFilters.Cartoon:
-                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize = 5;
+                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize = Settings1.Default.DefaultCartoonFilterSize;
+                        textBoxArtisticFilterSize.Text = FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize.ToString();
                         break;
                 }
-                textBoxArtisticFilterSize.Text = "5";
             }
             catch (OverflowException)
             {
@@ -3426,13 +3491,14 @@ namespace _222303026_proje3
                 switch (artisticFilters)
                 {
                     case ArtisticFilters.OilPainting:
-                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize = 5;
+                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize = Settings1.Default.DefaultOilPaintFilterSize;
+                        textBoxArtisticFilterSize.Text = FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize.ToString();
                         break;
                     case ArtisticFilters.Cartoon:
-                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize = 5;
+                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize = Settings1.Default.DefaultCartoonFilterSize;
+                        textBoxArtisticFilterSize.Text = FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize.ToString();
                         break;
                 }
-                textBoxArtisticFilterSize.Text = "5";
             }
             finally
             {
@@ -3440,7 +3506,7 @@ namespace _222303026_proje3
             }
         }
 
-        private void textBoxArtisticFilterIntensity_TextChanged(object sender, EventArgs e)
+        private void textBoxArtisticFilterIntensity_Leave(object sender, EventArgs e)
         {
             try
             {
@@ -3473,31 +3539,33 @@ namespace _222303026_proje3
             }
             catch (FormatException)
             {
-                MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Invalid intensity value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 switch (artisticFilters)
                 {
                     case ArtisticFilters.OilPainting:
-                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity = 10;
+                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity = Settings1.Default.DefaultOilPaintFilterIntensity;
+                        textBoxArtisticFilterIntensity.Text = FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity.ToString();
                         break;
                     case ArtisticFilters.Cartoon:
-                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity = 10;
+                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity = Settings1.Default.DefaultCartoonFilterIntensity;
+                        textBoxArtisticFilterIntensity.Text = FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity.ToString();
                         break;
                 }
-                textBoxArtisticFilterIntensity.Text = "10";
             }
             catch (OverflowException)
             {
-                MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Intensity value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 switch (artisticFilters)
                 {
                     case ArtisticFilters.OilPainting:
-                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity = 10;
+                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity = Settings1.Default.DefaultOilPaintFilterIntensity;
+                        textBoxArtisticFilterIntensity.Text = FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity.ToString();
                         break;
                     case ArtisticFilters.Cartoon:
-                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity = 10;
+                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity = Settings1.Default.DefaultCartoonFilterIntensity;
+                        textBoxArtisticFilterIntensity.Text = FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity.ToString();
                         break;
                 }
-                textBoxArtisticFilterIntensity.Text = "10";
             }
             finally
             {
@@ -3505,7 +3573,7 @@ namespace _222303026_proje3
             }
         }
 
-        private void textBoxArtisticFilterThreshold_TextChanged(object sender, EventArgs e)
+        private void textBoxArtisticFilterThreshold_Leave(object sender, EventArgs e)
         {
             try
             {
@@ -3538,31 +3606,33 @@ namespace _222303026_proje3
             }
             catch (FormatException)
             {
-                MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Invalid threshold value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 switch (artisticFilters)
                 {
                     case ArtisticFilters.OilPainting:
-                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold = 50;
+                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold = Settings1.Default.DefaultOilPaintFilterThreshold;
+                        textBoxArtisticFilterThreshold.Text = FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold.ToString();
                         break;
                     case ArtisticFilters.Cartoon:
-                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold = 50;
+                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold = Settings1.Default.DefaultCartoonFilterThreshold;
+                        textBoxArtisticFilterThreshold.Text = FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold.ToString();
                         break;
                 }
-                textBoxArtisticFilterThreshold.Text = "10";
             }
             catch (OverflowException)
             {
-                MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Threshold value is too big or too small", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 switch (artisticFilters)
                 {
                     case ArtisticFilters.OilPainting:
-                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold = 50;
+                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold = Settings1.Default.DefaultOilPaintFilterThreshold;
+                        textBoxArtisticFilterThreshold.Text = FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold.ToString();
                         break;
                     case ArtisticFilters.Cartoon:
-                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold = 50;
+                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold = Settings1.Default.DefaultCartoonFilterThreshold;
+                        textBoxArtisticFilterThreshold.Text = FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold.ToString();
                         break;
                 }
-                textBoxArtisticFilterThreshold.Text = "10";
             }
             finally
             {
@@ -3718,6 +3788,10 @@ namespace _222303026_proje3
             if (artisticFilters != ArtisticFilters.None)
             {
                 artisticFilters = ArtisticFilters.None;
+            }
+            if (blurEffect != BlurEffect.None)
+            {
+                blurEffect = BlurEffect.None;
             }
             if (isSelected)
             {
@@ -3983,6 +4057,7 @@ namespace _222303026_proje3
         private void buttonApplyPixelation_Click(object sender, EventArgs e)
         {
             SaveStateForUndo();
+            blurEffect = BlurEffect.None;
             MainBitmap = previewBitmap;
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
@@ -4005,15 +4080,16 @@ namespace _222303026_proje3
 
         private void blurToolStripMenuItem1_Click(object sender, EventArgs e)
         {
+            toolStripGaussianBlur.Visible = true;
             blurEffect = BlurEffect.Gaussian;
             RefreshFiltersPreview();
         }
 
-        private void textBoxPixelationSize_TextChanged(object sender, EventArgs e)
+        private void textBoxPixelationSize_Leave(object sender, EventArgs e)
         {
             try
             {
-                if(Convert.ToInt32(textBoxPixelationSize.Text)<1 && Convert.ToInt32(textBoxPixelationSize.Text) > 9299)
+                if (Convert.ToInt32(textBoxPixelationSize.Text) < 1 && Convert.ToInt32(textBoxPixelationSize.Text) > 9299)
                 {
                     throw new OverflowException();
                 }
@@ -4037,7 +4113,7 @@ namespace _222303026_proje3
             }
         }
 
-        private void textBoxPixelationOffsetX_TextChanged(object sender, EventArgs e)
+        private void textBoxPixelationOffsetX_Leave(object sender, EventArgs e)
         {
             try
             {
@@ -4065,7 +4141,7 @@ namespace _222303026_proje3
             }
         }
 
-        private void textBoxPixelationOffsetY_TextChanged(object sender, EventArgs e)
+        private void textBoxPixelationOffsetY_Leave(object sender, EventArgs e)
         {
             try
             {
@@ -4091,7 +4167,63 @@ namespace _222303026_proje3
             {
                 RefreshFiltersPreview();
             }
-        }    
+        }
+
+        private void textboxGaussianBlurRadius_Leave(object sender, EventArgs e)
+        {
+            setGaussianBlurRadius();
+        }
+        private void setGaussianBlurRadius()
+        {
+            try
+            {
+                if (float.Parse(textboxGaussianBlurRadius.Text) < 0 || float.Parse(textboxGaussianBlurRadius.Text) > 564.37)
+                {
+                    throw new OverflowException();
+                }
+                gaussianBlurSize = float.Parse(textboxGaussianBlurRadius.Text);
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Invalid radius value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                gaussianBlurSize = Settings1.Default.DefaultGaussianBlurRadius;
+                textboxGaussianBlurRadius.Text = gaussianBlurSize.ToString();
+            }
+            catch (OverflowException)
+            {
+                MessageBox.Show("Radius value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                gaussianBlurSize = Settings1.Default.DefaultGaussianBlurRadius;
+                textboxGaussianBlurRadius.Text = gaussianBlurSize.ToString();
+            }
+            finally
+            {
+                RefreshFiltersPreview();
+            }
+        }
+        private void buttonApplyGaussianBlur_Click(object sender, EventArgs e)
+        {
+            SaveStateForUndo();
+            blurEffect = BlurEffect.None;
+            MainBitmap = previewBitmap;
+            pictureBoxCanvas.Image = MainBitmap;
+            pictureBoxCanvas.Invalidate();
+            toolStripGaussianBlur.Visible = false;
+        }
+
+        private void buttonCancelGaussianBlur_Click(object sender, EventArgs e)
+        {
+            toolStripGaussianBlur.Visible = false;
+            blurEffect = BlurEffect.None;
+            CancelFilters();
+        }
+
+        private void textboxGaussianBlurRadius_KeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.KeyCode == Keys.Enter)
+            {
+                setGaussianBlurRadius();
+            }
+        }
     }
     public partial class CreateWithAIForm : Form
     {

@@ -812,29 +812,174 @@ namespace _222303026_proje3
         }
         public static class BlurringFilters
         {
-            public static Bitmap Pixelate(Bitmap image, int pixelSize, int offsetX,
-                int offsetY)
+            public static Bitmap Pixelate(Bitmap image, int pixelSize, int offsetX = 0, int offsetY = 0)
             {
+                // Input validation
+                if (pixelSize <= 0)
+                    throw new ArgumentException("Pixel size must be greater than zero", nameof(pixelSize));
+
+                // Create a new bitmap with the same dimensions
                 Bitmap pixelatedImage = new Bitmap(image.Width, image.Height);
+
+                // Calculate positive offsets within the pixelSize range
+                offsetX = ((offsetX % pixelSize) + pixelSize) % pixelSize;
+                offsetY = ((offsetY % pixelSize) + pixelSize) % pixelSize;
+
+                // Process the image
                 using (Graphics g = Graphics.FromImage(pixelatedImage))
                 {
                     g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
                     g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.None;
-                    g.DrawImage(image, new Rectangle(offsetX, offsetY, image.Width, image.Height),
-                        new Rectangle(offsetX, offsetY, image.Width / pixelSize, image.Height / pixelSize),
-                        GraphicsUnit.Pixel);
+
+                    // Process with proper grid alignment accounting for offsets
+                    for (int y = -offsetY; y < image.Height; y += pixelSize)
+                    {
+                        for (int x = -offsetX; x < image.Width; x += pixelSize)
+                        {
+                            // Calculate actual sample coordinates, ensuring they're within bounds
+                            int sampleX = Math.Clamp(x + (pixelSize / 2), 0, image.Width - 1);
+                            int sampleY = Math.Clamp(y + (pixelSize / 2), 0, image.Height - 1);
+
+                            // Get the color from the source image at the sample point
+                            Color blockColor = image.GetPixel(sampleX, sampleY);
+
+                            // Calculate the area to fill
+                            int blockX = Math.Max(0, x);
+                            int blockY = Math.Max(0, y);
+                            int blockWidth = Math.Min(pixelSize, image.Width - blockX);
+                            int blockHeight = Math.Min(pixelSize, image.Height - blockY);
+
+                            // Only draw if there's a valid area
+                            if (blockWidth > 0 && blockHeight > 0)
+                            {
+                                using (Brush brush = new SolidBrush(blockColor))
+                                {
+                                    g.FillRectangle(brush, blockX, blockY, blockWidth, blockHeight);
+                                }
+                            }
+                        }
+                    }
                 }
+
                 return pixelatedImage;
             }
-            public static Bitmap GaussianBlur(Bitmap image, int radius)
+            public static Bitmap GaussianBlur(Bitmap image, float radius)
             {
-                Bitmap blurredImage = new Bitmap(image.Width, image.Height);
-                using (Graphics g = Graphics.FromImage(blurredImage))
+                if (radius < 0.5f)
+                    return (Bitmap)image.Clone();
+
+                int kernelSize = (int)Math.Ceiling(radius * 3) * 2 + 1;
+                float[] kernel = CreateGaussianKernel(kernelSize, radius);
+
+                Bitmap blurred = new Bitmap(image.Width, image.Height);
+
+                // Yatay blur
+                using (Bitmap temp = new Bitmap(image.Width, image.Height))
                 {
-                    g.DrawImage(image, new Rectangle(0, 0, image.Width, image.Height));
+                    BitmapData srcData = image.LockBits(new Rectangle(0, 0, image.Width, image.Height),
+                        ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                    BitmapData tempData = temp.LockBits(new Rectangle(0, 0, temp.Width, temp.Height),
+                        ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+
+                    int stride = srcData.Stride;
+                    int width = image.Width;
+                    int height = image.Height;
+                    int bytes = stride * height;
+                    byte[] srcBuffer = new byte[bytes];
+                    byte[] tempBuffer = new byte[bytes];
+
+                    Marshal.Copy(srcData.Scan0, srcBuffer, 0, bytes);
+
+                    int k = kernelSize / 2;
+                    for (int y = 0; y < height; y++)
+                    {
+                        for (int x = 0; x < width; x++)
+                        {
+                            float b = 0, g = 0, r = 0, a = 0, wSum = 0;
+                            for (int i = -k; i <= k; i++)
+                            {
+                                int ix = Math.Clamp(x + i, 0, width - 1);
+                                int offset = y * stride + ix * 4;
+                                float w = kernel[i + k];
+                                b += srcBuffer[offset] * w;
+                                g += srcBuffer[offset + 1] * w;
+                                r += srcBuffer[offset + 2] * w;
+                                a += srcBuffer[offset + 3] * w;
+                                wSum += w;
+                            }
+                            int dstOffset = y * stride + x * 4;
+                            tempBuffer[dstOffset] = (byte)(b / wSum);
+                            tempBuffer[dstOffset + 1] = (byte)(g / wSum);
+                            tempBuffer[dstOffset + 2] = (byte)(r / wSum);
+                            tempBuffer[dstOffset + 3] = (byte)(a / wSum);
+                        }
+                    }
+
+                    Marshal.Copy(tempBuffer, 0, tempData.Scan0, bytes);
+                    image.UnlockBits(srcData);
+                    temp.UnlockBits(tempData);
+
+                    // Dikey blur
+                    BitmapData tempData2 = temp.LockBits(new Rectangle(0, 0, temp.Width, temp.Height),
+                        ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                    BitmapData dstData = blurred.LockBits(new Rectangle(0, 0, blurred.Width, blurred.Height),
+                        ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+
+                    byte[] tempBuffer2 = new byte[bytes];
+                    byte[] dstBuffer = new byte[bytes];
+                    Marshal.Copy(tempData2.Scan0, tempBuffer2, 0, bytes);
+
+                    for (int y = 0; y < height; y++)
+                    {
+                        for (int x = 0; x < width; x++)
+                        {
+                            float b = 0, g = 0, r = 0, a = 0, wSum = 0;
+                            for (int i = -k; i <= k; i++)
+                            {
+                                int iy = Math.Clamp(y + i, 0, height - 1);
+                                int offset = iy * stride + x * 4;
+                                float w = kernel[i + k];
+                                b += tempBuffer2[offset] * w;
+                                g += tempBuffer2[offset + 1] * w;
+                                r += tempBuffer2[offset + 2] * w;
+                                a += tempBuffer2[offset + 3] * w;
+                                wSum += w;
+                            }
+                            int dstOffset = y * stride + x * 4;
+                            dstBuffer[dstOffset] = (byte)(b / wSum);
+                            dstBuffer[dstOffset + 1] = (byte)(g / wSum);
+                            dstBuffer[dstOffset + 2] = (byte)(r / wSum);
+                            dstBuffer[dstOffset + 3] = (byte)(a / wSum);
+                        }
+                    }
+
+                    Marshal.Copy(dstBuffer, 0, dstData.Scan0, bytes);
+                    temp.UnlockBits(tempData2);
+                    blurred.UnlockBits(dstData);
                 }
-                return blurredImage;
+
+                return blurred;
             }
+
+            // Gaussian kernel oluşturucu yardımcı fonksiyon
+            private static float[] CreateGaussianKernel(int size, float sigma)
+            {
+                float[] kernel = new float[size];
+                int k = size / 2;
+                float sum = 0;
+                float sigma2 = 2 * sigma * sigma;
+                for (int i = 0; i < size; i++)
+                {
+                    int x = i - k;
+                    kernel[i] = (float)Math.Exp(-(x * x) / sigma2);
+                    sum += kernel[i];
+                }
+                // Normalize et
+                for (int i = 0; i < size; i++)
+                    kernel[i] /= sum;
+                return kernel;
+            }
+
         }
     }
 }

@@ -123,6 +123,9 @@
             numericUpDownDefaultBrushSize = new NumericUpDown();
             tabPage5 = new TabPage();
             groupBox27 = new GroupBox();
+            groupBox29 = new GroupBox();
+            label38 = new Label();
+            numericUpDownDefaultGaussianBlurRadius = new NumericUpDown();
             groupBox28 = new GroupBox();
             label35 = new Label();
             label36 = new Label();
@@ -197,6 +200,8 @@
             ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultBrushSize).BeginInit();
             tabPage5.SuspendLayout();
             groupBox27.SuspendLayout();
+            groupBox29.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultGaussianBlurRadius).BeginInit();
             groupBox28.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultOffsetY).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultPixelationSize).BeginInit();
@@ -225,11 +230,10 @@
             tabControl1.Dock = DockStyle.Fill;
             tabControl1.Font = new Font("HarmonyOS Sans", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
             tabControl1.ImageList = icons;
-            tabControl1.Location = new Point(10, 10);
-            tabControl1.Margin = new Padding(4);
+            tabControl1.Location = new Point(8, 8);
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(699, 884);
+            tabControl1.Size = new Size(559, 707);
             tabControl1.TabIndex = 0;
             // 
             // tabPage1
@@ -238,11 +242,10 @@
             tabPage1.Controls.Add(groupBox2);
             tabPage1.Controls.Add(groupBox1);
             tabPage1.ImageIndex = 0;
-            tabPage1.Location = new Point(4, 29);
-            tabPage1.Margin = new Padding(4);
+            tabPage1.Location = new Point(4, 27);
             tabPage1.Name = "tabPage1";
-            tabPage1.Padding = new Padding(4);
-            tabPage1.Size = new Size(691, 851);
+            tabPage1.Padding = new Padding(3);
+            tabPage1.Size = new Size(551, 676);
             tabPage1.TabIndex = 0;
             tabPage1.Text = "General";
             tabPage1.UseVisualStyleBackColor = true;
@@ -252,11 +255,9 @@
             // 
             groupBox3.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupBox3.Controls.Add(groupBox4);
-            groupBox3.Location = new Point(8, 722);
-            groupBox3.Margin = new Padding(4);
+            groupBox3.Location = new Point(6, 578);
             groupBox3.Name = "groupBox3";
-            groupBox3.Padding = new Padding(4);
-            groupBox3.Size = new Size(674, 120);
+            groupBox3.Size = new Size(539, 96);
             groupBox3.TabIndex = 2;
             groupBox3.TabStop = false;
             groupBox3.Text = "Startup Behaviors";
@@ -266,11 +267,9 @@
             groupBox4.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             groupBox4.Controls.Add(radioButtonDontShowStartup);
             groupBox4.Controls.Add(radioButtonShowStartup);
-            groupBox4.Location = new Point(8, 28);
-            groupBox4.Margin = new Padding(4);
+            groupBox4.Location = new Point(6, 22);
             groupBox4.Name = "groupBox4";
-            groupBox4.Padding = new Padding(4);
-            groupBox4.Size = new Size(659, 85);
+            groupBox4.Size = new Size(527, 68);
             groupBox4.TabIndex = 1;
             groupBox4.TabStop = false;
             groupBox4.Text = "Show Startup Window";
@@ -279,10 +278,9 @@
             // 
             radioButtonDontShowStartup.Anchor = AnchorStyles.Left;
             radioButtonDontShowStartup.AutoSize = true;
-            radioButtonDontShowStartup.Location = new Point(8, 54);
-            radioButtonDontShowStartup.Margin = new Padding(4);
+            radioButtonDontShowStartup.Location = new Point(6, 43);
             radioButtonDontShowStartup.Name = "radioButtonDontShowStartup";
-            radioButtonDontShowStartup.Size = new Size(336, 24);
+            radioButtonDontShowStartup.Size = new Size(260, 20);
             radioButtonDontShowStartup.TabIndex = 0;
             radioButtonDontShowStartup.Text = "Don't show startup window with recent files";
             radioButtonDontShowStartup.UseVisualStyleBackColor = true;
@@ -293,10 +291,9 @@
             radioButtonShowStartup.Anchor = AnchorStyles.Left;
             radioButtonShowStartup.AutoSize = true;
             radioButtonShowStartup.Checked = true;
-            radioButtonShowStartup.Location = new Point(8, 24);
-            radioButtonShowStartup.Margin = new Padding(4);
+            radioButtonShowStartup.Location = new Point(6, 19);
             radioButtonShowStartup.Name = "radioButtonShowStartup";
-            radioButtonShowStartup.Size = new Size(297, 24);
+            radioButtonShowStartup.Size = new Size(231, 20);
             radioButtonShowStartup.TabIndex = 0;
             radioButtonShowStartup.TabStop = true;
             radioButtonShowStartup.Text = "Show startup window with recent files";
@@ -311,11 +308,9 @@
             groupBox2.Controls.Add(groupBoxGemini);
             groupBox2.Controls.Add(groupBox18);
             groupBox2.Controls.Add(label14);
-            groupBox2.Location = new Point(8, 92);
-            groupBox2.Margin = new Padding(4);
+            groupBox2.Location = new Point(6, 74);
             groupBox2.Name = "groupBox2";
-            groupBox2.Padding = new Padding(4);
-            groupBox2.Size = new Size(674, 622);
+            groupBox2.Size = new Size(539, 498);
             groupBox2.TabIndex = 2;
             groupBox2.TabStop = false;
             groupBox2.Text = "AI Settings";
@@ -323,13 +318,14 @@
             // 
             // groupBox23
             // 
+            groupBox23.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupBox23.Controls.Add(radioButtonHuggingFace);
             groupBox23.Controls.Add(radioButtonGeminiAI);
-            groupBox23.Location = new Point(8, 28);
+            groupBox23.Location = new Point(6, 22);
             groupBox23.Margin = new Padding(2);
             groupBox23.Name = "groupBox23";
             groupBox23.Padding = new Padding(2);
-            groupBox23.Size = new Size(659, 65);
+            groupBox23.Size = new Size(527, 52);
             groupBox23.TabIndex = 7;
             groupBox23.TabStop = false;
             groupBox23.Text = "Preferred AI";
@@ -338,10 +334,10 @@
             // 
             radioButtonHuggingFace.AutoSize = true;
             radioButtonHuggingFace.Checked = true;
-            radioButtonHuggingFace.Location = new Point(375, 26);
+            radioButtonHuggingFace.Location = new Point(300, 21);
             radioButtonHuggingFace.Margin = new Padding(2);
             radioButtonHuggingFace.Name = "radioButtonHuggingFace";
-            radioButtonHuggingFace.Size = new Size(124, 24);
+            radioButtonHuggingFace.Size = new Size(101, 20);
             radioButtonHuggingFace.TabIndex = 0;
             radioButtonHuggingFace.TabStop = true;
             radioButtonHuggingFace.Text = "Hugging Face";
@@ -351,10 +347,10 @@
             // radioButtonGeminiAI
             // 
             radioButtonGeminiAI.AutoSize = true;
-            radioButtonGeminiAI.Location = new Point(143, 26);
+            radioButtonGeminiAI.Location = new Point(114, 21);
             radioButtonGeminiAI.Margin = new Padding(2);
             radioButtonGeminiAI.Name = "radioButtonGeminiAI";
-            radioButtonGeminiAI.Size = new Size(143, 24);
+            radioButtonGeminiAI.Size = new Size(115, 20);
             radioButtonGeminiAI.TabIndex = 0;
             radioButtonGeminiAI.Text = "Google Gemini™";
             radioButtonGeminiAI.UseVisualStyleBackColor = true;
@@ -362,17 +358,18 @@
             // 
             // groupBoxHuggingFace
             // 
+            groupBoxHuggingFace.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupBoxHuggingFace.Controls.Add(groupBox25);
             groupBoxHuggingFace.Controls.Add(label22);
             groupBoxHuggingFace.Controls.Add(textBoxHuggingFaceAPIKey);
             groupBoxHuggingFace.Controls.Add(buttonResetHuggingFaceAPIKey);
             groupBoxHuggingFace.Controls.Add(buttonShowHideHuggingFaceAPIKey);
             groupBoxHuggingFace.Controls.Add(buttonUpdateHuggingFaceAPIKey);
-            groupBoxHuggingFace.Location = new Point(8, 284);
+            groupBoxHuggingFace.Location = new Point(6, 227);
             groupBoxHuggingFace.Margin = new Padding(2);
             groupBoxHuggingFace.Name = "groupBoxHuggingFace";
             groupBoxHuggingFace.Padding = new Padding(2);
-            groupBoxHuggingFace.Size = new Size(659, 210);
+            groupBoxHuggingFace.Size = new Size(527, 168);
             groupBoxHuggingFace.TabIndex = 6;
             groupBoxHuggingFace.TabStop = false;
             groupBoxHuggingFace.Text = "Hugging Face Settings";
@@ -388,11 +385,11 @@
             groupBox25.Controls.Add(textBoxHuggingFaceCreatingModel);
             groupBox25.Controls.Add(label25);
             groupBox25.Controls.Add(label24);
-            groupBox25.Location = new Point(8, 101);
+            groupBox25.Location = new Point(6, 81);
             groupBox25.Margin = new Padding(2);
             groupBox25.Name = "groupBox25";
             groupBox25.Padding = new Padding(2);
-            groupBox25.Size = new Size(642, 102);
+            groupBox25.Size = new Size(514, 82);
             groupBox25.TabIndex = 5;
             groupBox25.TabStop = false;
             groupBox25.Text = "Preferred Model";
@@ -403,10 +400,10 @@
             buttonResetHuggingFaceEditingImageModel.Enabled = false;
             buttonResetHuggingFaceEditingImageModel.ImageIndex = 9;
             buttonResetHuggingFaceEditingImageModel.ImageList = icons;
-            buttonResetHuggingFaceEditingImageModel.Location = new Point(538, 61);
+            buttonResetHuggingFaceEditingImageModel.Location = new Point(430, 49);
             buttonResetHuggingFaceEditingImageModel.Margin = new Padding(2);
             buttonResetHuggingFaceEditingImageModel.Name = "buttonResetHuggingFaceEditingImageModel";
-            buttonResetHuggingFaceEditingImageModel.Size = new Size(94, 34);
+            buttonResetHuggingFaceEditingImageModel.Size = new Size(75, 27);
             buttonResetHuggingFaceEditingImageModel.TabIndex = 2;
             buttonResetHuggingFaceEditingImageModel.Text = "Reset";
             buttonResetHuggingFaceEditingImageModel.TextAlign = ContentAlignment.MiddleRight;
@@ -439,10 +436,10 @@
             buttonUpdateHuggingFaceEditingImageModel.Enabled = false;
             buttonUpdateHuggingFaceEditingImageModel.ImageIndex = 8;
             buttonUpdateHuggingFaceEditingImageModel.ImageList = icons;
-            buttonUpdateHuggingFaceEditingImageModel.Location = new Point(438, 61);
+            buttonUpdateHuggingFaceEditingImageModel.Location = new Point(340, 49);
             buttonUpdateHuggingFaceEditingImageModel.Margin = new Padding(2);
             buttonUpdateHuggingFaceEditingImageModel.Name = "buttonUpdateHuggingFaceEditingImageModel";
-            buttonUpdateHuggingFaceEditingImageModel.Size = new Size(94, 34);
+            buttonUpdateHuggingFaceEditingImageModel.Size = new Size(85, 27);
             buttonUpdateHuggingFaceEditingImageModel.TabIndex = 2;
             buttonUpdateHuggingFaceEditingImageModel.Text = "Update";
             buttonUpdateHuggingFaceEditingImageModel.TextAlign = ContentAlignment.MiddleRight;
@@ -456,10 +453,10 @@
             buttonResetHuggingFaceCreatingImageModel.Enabled = false;
             buttonResetHuggingFaceCreatingImageModel.ImageIndex = 9;
             buttonResetHuggingFaceCreatingImageModel.ImageList = icons;
-            buttonResetHuggingFaceCreatingImageModel.Location = new Point(538, 21);
+            buttonResetHuggingFaceCreatingImageModel.Location = new Point(430, 17);
             buttonResetHuggingFaceCreatingImageModel.Margin = new Padding(2);
             buttonResetHuggingFaceCreatingImageModel.Name = "buttonResetHuggingFaceCreatingImageModel";
-            buttonResetHuggingFaceCreatingImageModel.Size = new Size(94, 34);
+            buttonResetHuggingFaceCreatingImageModel.Size = new Size(75, 27);
             buttonResetHuggingFaceCreatingImageModel.TabIndex = 2;
             buttonResetHuggingFaceCreatingImageModel.Text = "Reset";
             buttonResetHuggingFaceCreatingImageModel.TextAlign = ContentAlignment.MiddleRight;
@@ -473,10 +470,10 @@
             buttonUpdateHuggingFaceCreatingImageModel.Enabled = false;
             buttonUpdateHuggingFaceCreatingImageModel.ImageIndex = 8;
             buttonUpdateHuggingFaceCreatingImageModel.ImageList = icons;
-            buttonUpdateHuggingFaceCreatingImageModel.Location = new Point(438, 21);
+            buttonUpdateHuggingFaceCreatingImageModel.Location = new Point(340, 17);
             buttonUpdateHuggingFaceCreatingImageModel.Margin = new Padding(2);
             buttonUpdateHuggingFaceCreatingImageModel.Name = "buttonUpdateHuggingFaceCreatingImageModel";
-            buttonUpdateHuggingFaceCreatingImageModel.Size = new Size(94, 34);
+            buttonUpdateHuggingFaceCreatingImageModel.Size = new Size(85, 27);
             buttonUpdateHuggingFaceCreatingImageModel.TabIndex = 2;
             buttonUpdateHuggingFaceCreatingImageModel.Text = "Update";
             buttonUpdateHuggingFaceCreatingImageModel.TextAlign = ContentAlignment.MiddleRight;
@@ -487,10 +484,10 @@
             // textBoxHuggingFaceEditingModel
             // 
             textBoxHuggingFaceEditingModel.Anchor = AnchorStyles.None;
-            textBoxHuggingFaceEditingModel.Location = new Point(135, 64);
+            textBoxHuggingFaceEditingModel.Location = new Point(108, 51);
             textBoxHuggingFaceEditingModel.Margin = new Padding(2);
             textBoxHuggingFaceEditingModel.Name = "textBoxHuggingFaceEditingModel";
-            textBoxHuggingFaceEditingModel.Size = new Size(296, 27);
+            textBoxHuggingFaceEditingModel.Size = new Size(228, 23);
             textBoxHuggingFaceEditingModel.TabIndex = 1;
             textBoxHuggingFaceEditingModel.Text = "mit-han-lab/svdq-int4-flux.1-fill-dev";
             textBoxHuggingFaceEditingModel.TextChanged += textBoxHuggingFaceEditingModel_TextChanged;
@@ -498,10 +495,10 @@
             // textBoxHuggingFaceCreatingModel
             // 
             textBoxHuggingFaceCreatingModel.Anchor = AnchorStyles.None;
-            textBoxHuggingFaceCreatingModel.Location = new Point(135, 25);
+            textBoxHuggingFaceCreatingModel.Location = new Point(108, 20);
             textBoxHuggingFaceCreatingModel.Margin = new Padding(2);
             textBoxHuggingFaceCreatingModel.Name = "textBoxHuggingFaceCreatingModel";
-            textBoxHuggingFaceCreatingModel.Size = new Size(296, 27);
+            textBoxHuggingFaceCreatingModel.Size = new Size(228, 23);
             textBoxHuggingFaceCreatingModel.TabIndex = 1;
             textBoxHuggingFaceCreatingModel.Text = "black-forest-labs/FLUX.1-dev";
             textBoxHuggingFaceCreatingModel.TextChanged += textBoxHuggingFaceCreatingModel_TextChanged;
@@ -510,10 +507,10 @@
             // 
             label25.Anchor = AnchorStyles.None;
             label25.AutoSize = true;
-            label25.Location = new Point(22, 68);
+            label25.Location = new Point(18, 54);
             label25.Margin = new Padding(2, 0, 2, 0);
             label25.Name = "label25";
-            label25.Size = new Size(105, 20);
+            label25.Size = new Size(82, 16);
             label25.TabIndex = 0;
             label25.Text = "Editing Image";
             // 
@@ -521,10 +518,10 @@
             // 
             label24.Anchor = AnchorStyles.None;
             label24.AutoSize = true;
-            label24.Location = new Point(12, 28);
+            label24.Location = new Point(10, 22);
             label24.Margin = new Padding(2, 0, 2, 0);
             label24.Name = "label24";
-            label24.Size = new Size(115, 20);
+            label24.Size = new Size(91, 16);
             label24.TabIndex = 0;
             label24.Text = "Creating Image";
             // 
@@ -535,20 +532,18 @@
             label22.ImageAlign = ContentAlignment.MiddleLeft;
             label22.ImageIndex = 11;
             label22.ImageList = icons;
-            label22.Location = new Point(9, 29);
-            label22.Margin = new Padding(4, 0, 4, 0);
+            label22.Location = new Point(7, 23);
             label22.Name = "label22";
-            label22.Size = new Size(183, 20);
+            label22.Size = new Size(146, 16);
             label22.TabIndex = 0;
             label22.Text = "       HuggingFace API Key";
             // 
             // textBoxHuggingFaceAPIKey
             // 
             textBoxHuggingFaceAPIKey.Anchor = AnchorStyles.Top;
-            textBoxHuggingFaceAPIKey.Location = new Point(200, 25);
-            textBoxHuggingFaceAPIKey.Margin = new Padding(4);
+            textBoxHuggingFaceAPIKey.Location = new Point(160, 20);
             textBoxHuggingFaceAPIKey.Name = "textBoxHuggingFaceAPIKey";
-            textBoxHuggingFaceAPIKey.Size = new Size(343, 27);
+            textBoxHuggingFaceAPIKey.Size = new Size(275, 23);
             textBoxHuggingFaceAPIKey.TabIndex = 1;
             textBoxHuggingFaceAPIKey.UseSystemPasswordChar = true;
             textBoxHuggingFaceAPIKey.TextChanged += textBoxHuggingFaceAPIKey_TextChanged;
@@ -559,10 +554,9 @@
             buttonResetHuggingFaceAPIKey.Enabled = false;
             buttonResetHuggingFaceAPIKey.ImageIndex = 9;
             buttonResetHuggingFaceAPIKey.ImageList = icons;
-            buttonResetHuggingFaceAPIKey.Location = new Point(341, 60);
-            buttonResetHuggingFaceAPIKey.Margin = new Padding(4);
+            buttonResetHuggingFaceAPIKey.Location = new Point(273, 48);
             buttonResetHuggingFaceAPIKey.Name = "buttonResetHuggingFaceAPIKey";
-            buttonResetHuggingFaceAPIKey.Size = new Size(284, 34);
+            buttonResetHuggingFaceAPIKey.Size = new Size(227, 27);
             buttonResetHuggingFaceAPIKey.TabIndex = 4;
             buttonResetHuggingFaceAPIKey.Text = "Reset Hugging Face API Key";
             buttonResetHuggingFaceAPIKey.TextAlign = ContentAlignment.MiddleRight;
@@ -575,10 +569,9 @@
             buttonShowHideHuggingFaceAPIKey.Anchor = AnchorStyles.Top;
             buttonShowHideHuggingFaceAPIKey.ImageIndex = 5;
             buttonShowHideHuggingFaceAPIKey.ImageList = icons;
-            buttonShowHideHuggingFaceAPIKey.Location = new Point(551, 22);
-            buttonShowHideHuggingFaceAPIKey.Margin = new Padding(4);
+            buttonShowHideHuggingFaceAPIKey.Location = new Point(441, 18);
             buttonShowHideHuggingFaceAPIKey.Name = "buttonShowHideHuggingFaceAPIKey";
-            buttonShowHideHuggingFaceAPIKey.Size = new Size(94, 34);
+            buttonShowHideHuggingFaceAPIKey.Size = new Size(75, 27);
             buttonShowHideHuggingFaceAPIKey.TabIndex = 2;
             buttonShowHideHuggingFaceAPIKey.Text = "Show";
             buttonShowHideHuggingFaceAPIKey.TextAlign = ContentAlignment.MiddleRight;
@@ -592,10 +585,9 @@
             buttonUpdateHuggingFaceAPIKey.Enabled = false;
             buttonUpdateHuggingFaceAPIKey.ImageIndex = 8;
             buttonUpdateHuggingFaceAPIKey.ImageList = icons;
-            buttonUpdateHuggingFaceAPIKey.Location = new Point(31, 60);
-            buttonUpdateHuggingFaceAPIKey.Margin = new Padding(4);
+            buttonUpdateHuggingFaceAPIKey.Location = new Point(25, 48);
             buttonUpdateHuggingFaceAPIKey.Name = "buttonUpdateHuggingFaceAPIKey";
-            buttonUpdateHuggingFaceAPIKey.Size = new Size(290, 34);
+            buttonUpdateHuggingFaceAPIKey.Size = new Size(232, 27);
             buttonUpdateHuggingFaceAPIKey.TabIndex = 4;
             buttonUpdateHuggingFaceAPIKey.Text = "Update Hugging Face API Key";
             buttonUpdateHuggingFaceAPIKey.TextAlign = ContentAlignment.MiddleRight;
@@ -606,6 +598,7 @@
             // 
             // groupBoxGemini
             // 
+            groupBoxGemini.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupBoxGemini.Controls.Add(groupBox24);
             groupBoxGemini.Controls.Add(label13);
             groupBoxGemini.Controls.Add(textBoxGeminiAPIKey);
@@ -613,11 +606,11 @@
             groupBoxGemini.Controls.Add(buttonShowHideGeminiAPIKey);
             groupBoxGemini.Controls.Add(buttonUpdateGeminiAPIKey);
             groupBoxGemini.Enabled = false;
-            groupBoxGemini.Location = new Point(8, 98);
+            groupBoxGemini.Location = new Point(6, 78);
             groupBoxGemini.Margin = new Padding(2);
             groupBoxGemini.Name = "groupBoxGemini";
             groupBoxGemini.Padding = new Padding(2);
-            groupBoxGemini.Size = new Size(659, 180);
+            groupBoxGemini.Size = new Size(527, 144);
             groupBoxGemini.TabIndex = 6;
             groupBoxGemini.TabStop = false;
             groupBoxGemini.Text = "Google Gemini™ Settings";
@@ -629,11 +622,11 @@
             groupBox24.Controls.Add(buttonUpdateGeminiModel);
             groupBox24.Controls.Add(textBoxGeminiModel);
             groupBox24.Controls.Add(label23);
-            groupBox24.Location = new Point(8, 105);
+            groupBox24.Location = new Point(6, 84);
             groupBox24.Margin = new Padding(2);
             groupBox24.Name = "groupBox24";
             groupBox24.Padding = new Padding(2);
-            groupBox24.Size = new Size(642, 69);
+            groupBox24.Size = new Size(514, 55);
             groupBox24.TabIndex = 5;
             groupBox24.TabStop = false;
             groupBox24.Text = "Preferred Model";
@@ -644,10 +637,10 @@
             buttonResetPreferredGeminiModel.Enabled = false;
             buttonResetPreferredGeminiModel.ImageIndex = 9;
             buttonResetPreferredGeminiModel.ImageList = icons;
-            buttonResetPreferredGeminiModel.Location = new Point(538, 25);
+            buttonResetPreferredGeminiModel.Location = new Point(430, 20);
             buttonResetPreferredGeminiModel.Margin = new Padding(2);
             buttonResetPreferredGeminiModel.Name = "buttonResetPreferredGeminiModel";
-            buttonResetPreferredGeminiModel.Size = new Size(94, 34);
+            buttonResetPreferredGeminiModel.Size = new Size(75, 27);
             buttonResetPreferredGeminiModel.TabIndex = 2;
             buttonResetPreferredGeminiModel.Text = "Reset";
             buttonResetPreferredGeminiModel.TextAlign = ContentAlignment.MiddleRight;
@@ -661,10 +654,10 @@
             buttonUpdateGeminiModel.Enabled = false;
             buttonUpdateGeminiModel.ImageIndex = 8;
             buttonUpdateGeminiModel.ImageList = icons;
-            buttonUpdateGeminiModel.Location = new Point(438, 25);
+            buttonUpdateGeminiModel.Location = new Point(340, 20);
             buttonUpdateGeminiModel.Margin = new Padding(2);
             buttonUpdateGeminiModel.Name = "buttonUpdateGeminiModel";
-            buttonUpdateGeminiModel.Size = new Size(94, 34);
+            buttonUpdateGeminiModel.Size = new Size(85, 27);
             buttonUpdateGeminiModel.TabIndex = 2;
             buttonUpdateGeminiModel.Text = "Update";
             buttonUpdateGeminiModel.TextAlign = ContentAlignment.MiddleRight;
@@ -675,10 +668,10 @@
             // textBoxGeminiModel
             // 
             textBoxGeminiModel.Anchor = AnchorStyles.None;
-            textBoxGeminiModel.Location = new Point(190, 29);
+            textBoxGeminiModel.Location = new Point(152, 23);
             textBoxGeminiModel.Margin = new Padding(2);
             textBoxGeminiModel.Name = "textBoxGeminiModel";
-            textBoxGeminiModel.Size = new Size(242, 27);
+            textBoxGeminiModel.Size = new Size(184, 23);
             textBoxGeminiModel.TabIndex = 1;
             textBoxGeminiModel.Text = "gemini-2.0-flash-preview-image-generation";
             textBoxGeminiModel.TextChanged += textBoxGeminiModel_TextChanged;
@@ -687,10 +680,10 @@
             // 
             label23.Anchor = AnchorStyles.None;
             label23.AutoSize = true;
-            label23.Location = new Point(12, 32);
+            label23.Location = new Point(10, 26);
             label23.Margin = new Padding(2, 0, 2, 0);
             label23.Name = "label23";
-            label23.Size = new Size(171, 20);
+            label23.Size = new Size(134, 16);
             label23.TabIndex = 0;
             label23.Text = "Creating/Editing Image";
             // 
@@ -701,20 +694,18 @@
             label13.ImageAlign = ContentAlignment.MiddleLeft;
             label13.ImageIndex = 10;
             label13.ImageList = icons;
-            label13.Location = new Point(8, 32);
-            label13.Margin = new Padding(4, 0, 4, 0);
+            label13.Location = new Point(6, 26);
             label13.Name = "label13";
-            label13.Size = new Size(203, 20);
+            label13.Size = new Size(160, 16);
             label13.TabIndex = 0;
             label13.Text = "      Google Gemini™ API Key";
             // 
             // textBoxGeminiAPIKey
             // 
             textBoxGeminiAPIKey.Anchor = AnchorStyles.Top;
-            textBoxGeminiAPIKey.Location = new Point(220, 29);
-            textBoxGeminiAPIKey.Margin = new Padding(4);
+            textBoxGeminiAPIKey.Location = new Point(176, 23);
             textBoxGeminiAPIKey.Name = "textBoxGeminiAPIKey";
-            textBoxGeminiAPIKey.Size = new Size(325, 27);
+            textBoxGeminiAPIKey.Size = new Size(261, 23);
             textBoxGeminiAPIKey.TabIndex = 1;
             textBoxGeminiAPIKey.UseSystemPasswordChar = true;
             textBoxGeminiAPIKey.TextChanged += textBox1_TextChanged;
@@ -725,10 +716,9 @@
             buttonResetGeminiAPIKey.Enabled = false;
             buttonResetGeminiAPIKey.ImageIndex = 9;
             buttonResetGeminiAPIKey.ImageList = icons;
-            buttonResetGeminiAPIKey.Location = new Point(341, 64);
-            buttonResetGeminiAPIKey.Margin = new Padding(4);
+            buttonResetGeminiAPIKey.Location = new Point(273, 51);
             buttonResetGeminiAPIKey.Name = "buttonResetGeminiAPIKey";
-            buttonResetGeminiAPIKey.Size = new Size(284, 34);
+            buttonResetGeminiAPIKey.Size = new Size(227, 27);
             buttonResetGeminiAPIKey.TabIndex = 4;
             buttonResetGeminiAPIKey.Text = "Reset Google Gemini™ API Key";
             buttonResetGeminiAPIKey.TextAlign = ContentAlignment.MiddleRight;
@@ -741,10 +731,9 @@
             buttonShowHideGeminiAPIKey.Anchor = AnchorStyles.Top;
             buttonShowHideGeminiAPIKey.ImageIndex = 5;
             buttonShowHideGeminiAPIKey.ImageList = icons;
-            buttonShowHideGeminiAPIKey.Location = new Point(552, 25);
-            buttonShowHideGeminiAPIKey.Margin = new Padding(4);
+            buttonShowHideGeminiAPIKey.Location = new Point(442, 20);
             buttonShowHideGeminiAPIKey.Name = "buttonShowHideGeminiAPIKey";
-            buttonShowHideGeminiAPIKey.Size = new Size(94, 34);
+            buttonShowHideGeminiAPIKey.Size = new Size(75, 27);
             buttonShowHideGeminiAPIKey.TabIndex = 2;
             buttonShowHideGeminiAPIKey.Text = "Show";
             buttonShowHideGeminiAPIKey.TextAlign = ContentAlignment.MiddleRight;
@@ -758,10 +747,9 @@
             buttonUpdateGeminiAPIKey.Enabled = false;
             buttonUpdateGeminiAPIKey.ImageIndex = 8;
             buttonUpdateGeminiAPIKey.ImageList = icons;
-            buttonUpdateGeminiAPIKey.Location = new Point(31, 64);
-            buttonUpdateGeminiAPIKey.Margin = new Padding(4);
+            buttonUpdateGeminiAPIKey.Location = new Point(25, 51);
             buttonUpdateGeminiAPIKey.Name = "buttonUpdateGeminiAPIKey";
-            buttonUpdateGeminiAPIKey.Size = new Size(290, 34);
+            buttonUpdateGeminiAPIKey.Size = new Size(232, 27);
             buttonUpdateGeminiAPIKey.TabIndex = 4;
             buttonUpdateGeminiAPIKey.Text = "Update Google Gemini™ API Key";
             buttonUpdateGeminiAPIKey.TextAlign = ContentAlignment.MiddleRight;
@@ -778,11 +766,9 @@
             groupBox18.Controls.Add(label27);
             groupBox18.Controls.Add(label26);
             groupBox18.Controls.Add(label18);
-            groupBox18.Location = new Point(8, 541);
-            groupBox18.Margin = new Padding(4);
+            groupBox18.Location = new Point(6, 433);
             groupBox18.Name = "groupBox18";
-            groupBox18.Padding = new Padding(4);
-            groupBox18.Size = new Size(659, 70);
+            groupBox18.Size = new Size(527, 56);
             groupBox18.TabIndex = 5;
             groupBox18.TabStop = false;
             groupBox18.Text = "Default Generated Image Sizes";
@@ -790,12 +776,11 @@
             // numericUpDownDefaultAIGeneratedImageHeight
             // 
             numericUpDownDefaultAIGeneratedImageHeight.Anchor = AnchorStyles.None;
-            numericUpDownDefaultAIGeneratedImageHeight.Location = new Point(312, 32);
-            numericUpDownDefaultAIGeneratedImageHeight.Margin = new Padding(4);
+            numericUpDownDefaultAIGeneratedImageHeight.Location = new Point(250, 26);
             numericUpDownDefaultAIGeneratedImageHeight.Maximum = new decimal(new int[] { 1080, 0, 0, 0 });
             numericUpDownDefaultAIGeneratedImageHeight.Minimum = new decimal(new int[] { 64, 0, 0, 0 });
             numericUpDownDefaultAIGeneratedImageHeight.Name = "numericUpDownDefaultAIGeneratedImageHeight";
-            numericUpDownDefaultAIGeneratedImageHeight.Size = new Size(105, 27);
+            numericUpDownDefaultAIGeneratedImageHeight.Size = new Size(84, 23);
             numericUpDownDefaultAIGeneratedImageHeight.TabIndex = 1;
             numericUpDownDefaultAIGeneratedImageHeight.Value = new decimal(new int[] { 1024, 0, 0, 0 });
             numericUpDownDefaultAIGeneratedImageHeight.ValueChanged += numericUpDownDefaultAIGeneratedImageHeight_ValueChanged;
@@ -803,12 +788,11 @@
             // numericUpDownDefaultAIGeneratedImageWidth
             // 
             numericUpDownDefaultAIGeneratedImageWidth.Anchor = AnchorStyles.None;
-            numericUpDownDefaultAIGeneratedImageWidth.Location = new Point(79, 32);
-            numericUpDownDefaultAIGeneratedImageWidth.Margin = new Padding(4);
+            numericUpDownDefaultAIGeneratedImageWidth.Location = new Point(63, 26);
             numericUpDownDefaultAIGeneratedImageWidth.Maximum = new decimal(new int[] { 1920, 0, 0, 0 });
             numericUpDownDefaultAIGeneratedImageWidth.Minimum = new decimal(new int[] { 64, 0, 0, 0 });
             numericUpDownDefaultAIGeneratedImageWidth.Name = "numericUpDownDefaultAIGeneratedImageWidth";
-            numericUpDownDefaultAIGeneratedImageWidth.Size = new Size(105, 27);
+            numericUpDownDefaultAIGeneratedImageWidth.Size = new Size(84, 23);
             numericUpDownDefaultAIGeneratedImageWidth.TabIndex = 1;
             numericUpDownDefaultAIGeneratedImageWidth.Value = new decimal(new int[] { 1024, 0, 0, 0 });
             numericUpDownDefaultAIGeneratedImageWidth.ValueChanged += numericUpDownDefaultAIGeneratedImageHeight_ValueChanged;
@@ -817,10 +801,9 @@
             // 
             label19.Anchor = AnchorStyles.None;
             label19.AutoSize = true;
-            label19.Location = new Point(249, 35);
-            label19.Margin = new Padding(4, 0, 4, 0);
+            label19.Location = new Point(199, 28);
             label19.Name = "label19";
-            label19.Size = new Size(56, 20);
+            label19.Size = new Size(44, 16);
             label19.TabIndex = 0;
             label19.Text = "Height";
             // 
@@ -828,10 +811,9 @@
             // 
             label27.Anchor = AnchorStyles.None;
             label27.AutoSize = true;
-            label27.Location = new Point(425, 35);
-            label27.Margin = new Padding(4, 0, 4, 0);
+            label27.Location = new Point(340, 28);
             label27.Name = "label27";
-            label27.Size = new Size(25, 20);
+            label27.Size = new Size(20, 16);
             label27.TabIndex = 0;
             label27.Text = "px";
             // 
@@ -839,10 +821,9 @@
             // 
             label26.Anchor = AnchorStyles.None;
             label26.AutoSize = true;
-            label26.Location = new Point(192, 35);
-            label26.Margin = new Padding(4, 0, 4, 0);
+            label26.Location = new Point(154, 28);
             label26.Name = "label26";
-            label26.Size = new Size(25, 20);
+            label26.Size = new Size(20, 16);
             label26.TabIndex = 0;
             label26.Text = "px";
             // 
@@ -850,10 +831,9 @@
             // 
             label18.Anchor = AnchorStyles.None;
             label18.AutoSize = true;
-            label18.Location = new Point(21, 35);
-            label18.Margin = new Padding(4, 0, 4, 0);
+            label18.Location = new Point(17, 28);
             label18.Name = "label18";
-            label18.Size = new Size(51, 20);
+            label18.Size = new Size(40, 16);
             label18.TabIndex = 0;
             label18.Text = "Width";
             // 
@@ -864,11 +844,10 @@
             label14.ImageAlign = ContentAlignment.TopLeft;
             label14.ImageIndex = 7;
             label14.ImageList = icons;
-            label14.Location = new Point(12, 498);
-            label14.Margin = new Padding(4, 0, 4, 0);
-            label14.MaximumSize = new Size(675, 0);
+            label14.Location = new Point(10, 398);
+            label14.MaximumSize = new Size(540, 0);
             label14.Name = "label14";
-            label14.Size = new Size(651, 40);
+            label14.Size = new Size(533, 32);
             label14.TabIndex = 3;
             label14.Text = "        Warning: For your security, do not share your Google Gemini™ or Hugging Face API keys with anyone else.";
             label14.TextAlign = ContentAlignment.MiddleCenter;
@@ -878,11 +857,9 @@
             groupBox1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupBox1.Controls.Add(label1);
             groupBox1.Controls.Add(comboBoxTheme);
-            groupBox1.Location = new Point(8, 8);
-            groupBox1.Margin = new Padding(4);
+            groupBox1.Location = new Point(6, 6);
             groupBox1.Name = "groupBox1";
-            groupBox1.Padding = new Padding(4);
-            groupBox1.Size = new Size(674, 76);
+            groupBox1.Size = new Size(539, 61);
             groupBox1.TabIndex = 2;
             groupBox1.TabStop = false;
             groupBox1.Text = "Appearance";
@@ -891,10 +868,9 @@
             // 
             label1.Anchor = AnchorStyles.None;
             label1.AutoSize = true;
-            label1.Location = new Point(24, 35);
-            label1.Margin = new Padding(4, 0, 4, 0);
+            label1.Location = new Point(19, 28);
             label1.Name = "label1";
-            label1.Size = new Size(56, 20);
+            label1.Size = new Size(45, 16);
             label1.TabIndex = 0;
             label1.Text = "Theme";
             // 
@@ -904,10 +880,9 @@
             comboBoxTheme.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBoxTheme.FormattingEnabled = true;
             comboBoxTheme.Items.AddRange(new object[] { "Use System Theme", "Light", "Dark" });
-            comboBoxTheme.Location = new Point(88, 32);
-            comboBoxTheme.Margin = new Padding(4);
+            comboBoxTheme.Location = new Point(70, 26);
             comboBoxTheme.Name = "comboBoxTheme";
-            comboBoxTheme.Size = new Size(556, 28);
+            comboBoxTheme.Size = new Size(446, 24);
             comboBoxTheme.TabIndex = 1;
             comboBoxTheme.SelectedIndexChanged += comboBoxTheme_SelectedIndexChanged;
             // 
@@ -915,11 +890,10 @@
             // 
             tabPage2.Controls.Add(groupBox5);
             tabPage2.ImageIndex = 1;
-            tabPage2.Location = new Point(4, 29);
-            tabPage2.Margin = new Padding(4);
+            tabPage2.Location = new Point(4, 27);
             tabPage2.Name = "tabPage2";
-            tabPage2.Padding = new Padding(4);
-            tabPage2.Size = new Size(691, 851);
+            tabPage2.Padding = new Padding(3);
+            tabPage2.Size = new Size(551, 676);
             tabPage2.TabIndex = 1;
             tabPage2.Text = "Canvas Settings";
             tabPage2.UseVisualStyleBackColor = true;
@@ -928,11 +902,9 @@
             // 
             groupBox5.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupBox5.Controls.Add(groupBox7);
-            groupBox5.Location = new Point(8, 8);
-            groupBox5.Margin = new Padding(4);
+            groupBox5.Location = new Point(6, 6);
             groupBox5.Name = "groupBox5";
-            groupBox5.Padding = new Padding(4);
-            groupBox5.Size = new Size(674, 156);
+            groupBox5.Size = new Size(539, 125);
             groupBox5.TabIndex = 3;
             groupBox5.TabStop = false;
             groupBox5.Text = "Canvas";
@@ -946,11 +918,9 @@
             groupBox7.Controls.Add(label3);
             groupBox7.Controls.Add(label4);
             groupBox7.Controls.Add(label2);
-            groupBox7.Location = new Point(8, 28);
-            groupBox7.Margin = new Padding(4);
+            groupBox7.Location = new Point(6, 22);
             groupBox7.Name = "groupBox7";
-            groupBox7.Padding = new Padding(4);
-            groupBox7.Size = new Size(659, 121);
+            groupBox7.Size = new Size(527, 97);
             groupBox7.TabIndex = 0;
             groupBox7.TabStop = false;
             groupBox7.Text = "Default Canvas Size";
@@ -958,24 +928,22 @@
             // numericUpDownDefaultCanvasHeight
             // 
             numericUpDownDefaultCanvasHeight.Anchor = AnchorStyles.Left;
-            numericUpDownDefaultCanvasHeight.Location = new Point(78, 76);
-            numericUpDownDefaultCanvasHeight.Margin = new Padding(4);
+            numericUpDownDefaultCanvasHeight.Location = new Point(62, 61);
             numericUpDownDefaultCanvasHeight.Maximum = new decimal(new int[] { -1, 0, 0, 0 });
             numericUpDownDefaultCanvasHeight.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             numericUpDownDefaultCanvasHeight.Name = "numericUpDownDefaultCanvasHeight";
-            numericUpDownDefaultCanvasHeight.Size = new Size(119, 27);
+            numericUpDownDefaultCanvasHeight.Size = new Size(95, 23);
             numericUpDownDefaultCanvasHeight.TabIndex = 1;
             numericUpDownDefaultCanvasHeight.Value = new decimal(new int[] { 600, 0, 0, 0 });
             // 
             // numericUpDownDefaultCanvasWidth
             // 
             numericUpDownDefaultCanvasWidth.Anchor = AnchorStyles.Left;
-            numericUpDownDefaultCanvasWidth.Location = new Point(78, 34);
-            numericUpDownDefaultCanvasWidth.Margin = new Padding(4);
+            numericUpDownDefaultCanvasWidth.Location = new Point(62, 27);
             numericUpDownDefaultCanvasWidth.Maximum = new decimal(new int[] { -1, 0, 0, 0 });
             numericUpDownDefaultCanvasWidth.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             numericUpDownDefaultCanvasWidth.Name = "numericUpDownDefaultCanvasWidth";
-            numericUpDownDefaultCanvasWidth.Size = new Size(119, 27);
+            numericUpDownDefaultCanvasWidth.Size = new Size(95, 23);
             numericUpDownDefaultCanvasWidth.TabIndex = 1;
             numericUpDownDefaultCanvasWidth.Value = new decimal(new int[] { 800, 0, 0, 0 });
             // 
@@ -983,10 +951,9 @@
             // 
             label5.Anchor = AnchorStyles.Left;
             label5.AutoSize = true;
-            label5.Location = new Point(200, 80);
-            label5.Margin = new Padding(4, 0, 4, 0);
+            label5.Location = new Point(160, 64);
             label5.Name = "label5";
-            label5.Size = new Size(25, 20);
+            label5.Size = new Size(20, 16);
             label5.TabIndex = 0;
             label5.Text = "px";
             // 
@@ -994,10 +961,9 @@
             // 
             label3.Anchor = AnchorStyles.Left;
             label3.AutoSize = true;
-            label3.Location = new Point(200, 38);
-            label3.Margin = new Padding(4, 0, 4, 0);
+            label3.Location = new Point(160, 30);
             label3.Name = "label3";
-            label3.Size = new Size(25, 20);
+            label3.Size = new Size(20, 16);
             label3.TabIndex = 0;
             label3.Text = "px";
             // 
@@ -1005,10 +971,9 @@
             // 
             label4.Anchor = AnchorStyles.Left;
             label4.AutoSize = true;
-            label4.Location = new Point(15, 79);
-            label4.Margin = new Padding(4, 0, 4, 0);
+            label4.Location = new Point(12, 63);
             label4.Name = "label4";
-            label4.Size = new Size(56, 20);
+            label4.Size = new Size(44, 16);
             label4.TabIndex = 0;
             label4.Text = "Height";
             // 
@@ -1016,10 +981,9 @@
             // 
             label2.Anchor = AnchorStyles.Left;
             label2.AutoSize = true;
-            label2.Location = new Point(20, 36);
-            label2.Margin = new Padding(4, 0, 4, 0);
+            label2.Location = new Point(16, 29);
             label2.Name = "label2";
-            label2.Size = new Size(51, 20);
+            label2.Size = new Size(40, 16);
             label2.TabIndex = 0;
             label2.Text = "Width";
             // 
@@ -1030,24 +994,21 @@
             tabPage3.Controls.Add(groupBox11);
             tabPage3.Controls.Add(groupBox6);
             tabPage3.ImageIndex = 2;
-            tabPage3.Location = new Point(4, 29);
-            tabPage3.Margin = new Padding(4);
+            tabPage3.Location = new Point(4, 27);
             tabPage3.Name = "tabPage3";
-            tabPage3.Padding = new Padding(4);
-            tabPage3.Size = new Size(691, 851);
+            tabPage3.Padding = new Padding(3);
+            tabPage3.Size = new Size(551, 676);
             tabPage3.TabIndex = 2;
             tabPage3.Text = "Tools & Brushes";
             tabPage3.UseVisualStyleBackColor = true;
             // 
             // groupBox19
             // 
-            groupBox19.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox19.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             groupBox19.Controls.Add(groupBox20);
-            groupBox19.Location = new Point(8, 726);
-            groupBox19.Margin = new Padding(4);
+            groupBox19.Location = new Point(6, 581);
             groupBox19.Name = "groupBox19";
-            groupBox19.Padding = new Padding(4);
-            groupBox19.Size = new Size(674, 116);
+            groupBox19.Size = new Size(539, 93);
             groupBox19.TabIndex = 5;
             groupBox19.TabStop = false;
             groupBox19.Text = "Bucket Tool Tolerance";
@@ -1057,11 +1018,9 @@
             groupBox20.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupBox20.Controls.Add(label20);
             groupBox20.Controls.Add(numericUpDownDefaultBucketTolerance);
-            groupBox20.Location = new Point(8, 28);
-            groupBox20.Margin = new Padding(4);
+            groupBox20.Location = new Point(6, 22);
             groupBox20.Name = "groupBox20";
-            groupBox20.Padding = new Padding(4);
-            groupBox20.Size = new Size(659, 81);
+            groupBox20.Size = new Size(527, 65);
             groupBox20.TabIndex = 0;
             groupBox20.TabStop = false;
             groupBox20.Text = "Default Bucket Tool Tolerance";
@@ -1070,20 +1029,18 @@
             // 
             label20.Anchor = AnchorStyles.Left;
             label20.AutoSize = true;
-            label20.Location = new Point(25, 36);
-            label20.Margin = new Padding(4, 0, 4, 0);
+            label20.Location = new Point(20, 29);
             label20.Name = "label20";
-            label20.Size = new Size(74, 20);
+            label20.Size = new Size(60, 16);
             label20.TabIndex = 1;
             label20.Text = "Tolerance";
             // 
             // numericUpDownDefaultBucketTolerance
             // 
             numericUpDownDefaultBucketTolerance.Anchor = AnchorStyles.Left;
-            numericUpDownDefaultBucketTolerance.Location = new Point(108, 34);
-            numericUpDownDefaultBucketTolerance.Margin = new Padding(4);
+            numericUpDownDefaultBucketTolerance.Location = new Point(86, 27);
             numericUpDownDefaultBucketTolerance.Name = "numericUpDownDefaultBucketTolerance";
-            numericUpDownDefaultBucketTolerance.Size = new Size(72, 27);
+            numericUpDownDefaultBucketTolerance.Size = new Size(58, 23);
             numericUpDownDefaultBucketTolerance.TabIndex = 0;
             numericUpDownDefaultBucketTolerance.Value = new decimal(new int[] { 50, 0, 0, 0 });
             numericUpDownDefaultBucketTolerance.ValueChanged += numericUpDownDefaultBucketTolerance_ValueChanged;
@@ -1092,11 +1049,9 @@
             // 
             groupBox13.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupBox13.Controls.Add(groupBox15);
-            groupBox13.Location = new Point(8, 602);
-            groupBox13.Margin = new Padding(4);
+            groupBox13.Location = new Point(6, 482);
             groupBox13.Name = "groupBox13";
-            groupBox13.Padding = new Padding(4);
-            groupBox13.Size = new Size(674, 116);
+            groupBox13.Size = new Size(539, 93);
             groupBox13.TabIndex = 5;
             groupBox13.TabStop = false;
             groupBox13.Text = "Text Size";
@@ -1106,11 +1061,9 @@
             groupBox15.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupBox15.Controls.Add(label12);
             groupBox15.Controls.Add(numericUpDownDefaultTextSize);
-            groupBox15.Location = new Point(8, 28);
-            groupBox15.Margin = new Padding(4);
+            groupBox15.Location = new Point(6, 22);
             groupBox15.Name = "groupBox15";
-            groupBox15.Padding = new Padding(4);
-            groupBox15.Size = new Size(659, 81);
+            groupBox15.Size = new Size(527, 65);
             groupBox15.TabIndex = 0;
             groupBox15.TabStop = false;
             groupBox15.Text = "Default Text Size";
@@ -1119,22 +1072,20 @@
             // 
             label12.Anchor = AnchorStyles.Left;
             label12.AutoSize = true;
-            label12.Location = new Point(30, 38);
-            label12.Margin = new Padding(4, 0, 4, 0);
+            label12.Location = new Point(24, 30);
             label12.Name = "label12";
-            label12.Size = new Size(69, 20);
+            label12.Size = new Size(56, 16);
             label12.TabIndex = 1;
             label12.Text = "Text Size";
             // 
             // numericUpDownDefaultTextSize
             // 
             numericUpDownDefaultTextSize.Anchor = AnchorStyles.Left;
-            numericUpDownDefaultTextSize.Location = new Point(108, 34);
-            numericUpDownDefaultTextSize.Margin = new Padding(4);
+            numericUpDownDefaultTextSize.Location = new Point(86, 27);
             numericUpDownDefaultTextSize.Maximum = new decimal(new int[] { 72, 0, 0, 0 });
             numericUpDownDefaultTextSize.Minimum = new decimal(new int[] { 8, 0, 0, 0 });
             numericUpDownDefaultTextSize.Name = "numericUpDownDefaultTextSize";
-            numericUpDownDefaultTextSize.Size = new Size(72, 27);
+            numericUpDownDefaultTextSize.Size = new Size(58, 23);
             numericUpDownDefaultTextSize.TabIndex = 0;
             numericUpDownDefaultTextSize.Value = new decimal(new int[] { 9, 0, 0, 0 });
             numericUpDownDefaultTextSize.ValueChanged += numericUpDownDefaultTextSize_ValueChanged;
@@ -1143,11 +1094,9 @@
             // 
             groupBox11.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupBox11.Controls.Add(groupBox14);
-            groupBox11.Location = new Point(8, 479);
-            groupBox11.Margin = new Padding(4);
+            groupBox11.Location = new Point(6, 383);
             groupBox11.Name = "groupBox11";
-            groupBox11.Padding = new Padding(4);
-            groupBox11.Size = new Size(674, 116);
+            groupBox11.Size = new Size(539, 93);
             groupBox11.TabIndex = 5;
             groupBox11.TabStop = false;
             groupBox11.Text = "Shape Size";
@@ -1161,11 +1110,9 @@
             groupBox14.Controls.Add(numericUpDownDefaultRadius);
             groupBox14.Controls.Add(label15);
             groupBox14.Controls.Add(numericUpDownDefaultShapeSize);
-            groupBox14.Location = new Point(8, 28);
-            groupBox14.Margin = new Padding(4);
+            groupBox14.Location = new Point(6, 22);
             groupBox14.Name = "groupBox14";
-            groupBox14.Padding = new Padding(4);
-            groupBox14.Size = new Size(659, 81);
+            groupBox14.Size = new Size(527, 65);
             groupBox14.TabIndex = 0;
             groupBox14.TabStop = false;
             groupBox14.Text = "Default Shape Size";
@@ -1174,22 +1121,20 @@
             // 
             label28.Anchor = AnchorStyles.Left;
             label28.AutoSize = true;
-            label28.Location = new Point(365, 36);
-            label28.Margin = new Padding(4, 0, 4, 0);
+            label28.Location = new Point(292, 29);
             label28.Name = "label28";
-            label28.Size = new Size(53, 20);
+            label28.Size = new Size(40, 16);
             label28.TabIndex = 1;
             label28.Text = "Points";
             // 
             // numericUpDownDefaultPoints
             // 
             numericUpDownDefaultPoints.Anchor = AnchorStyles.Left;
-            numericUpDownDefaultPoints.Location = new Point(426, 34);
-            numericUpDownDefaultPoints.Margin = new Padding(4);
+            numericUpDownDefaultPoints.Location = new Point(341, 27);
             numericUpDownDefaultPoints.Maximum = new decimal(new int[] { 255, 0, 0, 0 });
             numericUpDownDefaultPoints.Minimum = new decimal(new int[] { 5, 0, 0, 0 });
             numericUpDownDefaultPoints.Name = "numericUpDownDefaultPoints";
-            numericUpDownDefaultPoints.Size = new Size(72, 27);
+            numericUpDownDefaultPoints.Size = new Size(58, 23);
             numericUpDownDefaultPoints.TabIndex = 0;
             numericUpDownDefaultPoints.Value = new decimal(new int[] { 6, 0, 0, 0 });
             numericUpDownDefaultPoints.ValueChanged += numericUpDownDefaultPoints_ValueChanged;
@@ -1198,22 +1143,20 @@
             // 
             label21.Anchor = AnchorStyles.Left;
             label21.AutoSize = true;
-            label21.Location = new Point(202, 36);
-            label21.Margin = new Padding(4, 0, 4, 0);
+            label21.Location = new Point(162, 29);
             label21.Name = "label21";
-            label21.Size = new Size(56, 20);
+            label21.Size = new Size(44, 16);
             label21.TabIndex = 1;
             label21.Text = "Radius";
             // 
             // numericUpDownDefaultRadius
             // 
             numericUpDownDefaultRadius.Anchor = AnchorStyles.Left;
-            numericUpDownDefaultRadius.Location = new Point(266, 34);
-            numericUpDownDefaultRadius.Margin = new Padding(4);
+            numericUpDownDefaultRadius.Location = new Point(213, 27);
             numericUpDownDefaultRadius.Maximum = new decimal(new int[] { 255, 0, 0, 0 });
             numericUpDownDefaultRadius.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             numericUpDownDefaultRadius.Name = "numericUpDownDefaultRadius";
-            numericUpDownDefaultRadius.Size = new Size(72, 27);
+            numericUpDownDefaultRadius.Size = new Size(58, 23);
             numericUpDownDefaultRadius.TabIndex = 0;
             numericUpDownDefaultRadius.Value = new decimal(new int[] { 9, 0, 0, 0 });
             numericUpDownDefaultRadius.ValueChanged += numericUpDownDefaultRadius_ValueChanged;
@@ -1222,22 +1165,20 @@
             // 
             label15.Anchor = AnchorStyles.Left;
             label15.AutoSize = true;
-            label15.Location = new Point(15, 36);
-            label15.Margin = new Padding(4, 0, 4, 0);
+            label15.Location = new Point(12, 29);
             label15.Name = "label15";
-            label15.Size = new Size(84, 20);
+            label15.Size = new Size(68, 16);
             label15.TabIndex = 1;
             label15.Text = "Shape Size";
             // 
             // numericUpDownDefaultShapeSize
             // 
             numericUpDownDefaultShapeSize.Anchor = AnchorStyles.Left;
-            numericUpDownDefaultShapeSize.Location = new Point(108, 34);
-            numericUpDownDefaultShapeSize.Margin = new Padding(4);
+            numericUpDownDefaultShapeSize.Location = new Point(86, 27);
             numericUpDownDefaultShapeSize.Maximum = new decimal(new int[] { 72, 0, 0, 0 });
             numericUpDownDefaultShapeSize.Minimum = new decimal(new int[] { 8, 0, 0, 0 });
             numericUpDownDefaultShapeSize.Name = "numericUpDownDefaultShapeSize";
-            numericUpDownDefaultShapeSize.Size = new Size(72, 27);
+            numericUpDownDefaultShapeSize.Size = new Size(58, 23);
             numericUpDownDefaultShapeSize.TabIndex = 0;
             numericUpDownDefaultShapeSize.Value = new decimal(new int[] { 11, 0, 0, 0 });
             numericUpDownDefaultShapeSize.ValueChanged += numericUpDownDefaultShapeSize_ValueChanged;
@@ -1249,11 +1190,9 @@
             groupBox6.Controls.Add(groupBox10);
             groupBox6.Controls.Add(groupBox9);
             groupBox6.Controls.Add(groupBox8);
-            groupBox6.Location = new Point(8, 8);
-            groupBox6.Margin = new Padding(4);
+            groupBox6.Location = new Point(6, 6);
             groupBox6.Name = "groupBox6";
-            groupBox6.Padding = new Padding(4);
-            groupBox6.Size = new Size(674, 464);
+            groupBox6.Size = new Size(539, 371);
             groupBox6.TabIndex = 4;
             groupBox6.TabStop = false;
             groupBox6.Text = "Brush/Pen/Spray/Eraser Sizes and Styles";
@@ -1263,11 +1202,9 @@
             groupBox12.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupBox12.Controls.Add(label11);
             groupBox12.Controls.Add(numericUpDownDefaultEraserSize);
-            groupBox12.Location = new Point(8, 375);
-            groupBox12.Margin = new Padding(4);
+            groupBox12.Location = new Point(6, 300);
             groupBox12.Name = "groupBox12";
-            groupBox12.Padding = new Padding(4);
-            groupBox12.Size = new Size(659, 81);
+            groupBox12.Size = new Size(527, 65);
             groupBox12.TabIndex = 0;
             groupBox12.TabStop = false;
             groupBox12.Text = "Default Eraser Size";
@@ -1276,22 +1213,20 @@
             // 
             label11.Anchor = AnchorStyles.Left;
             label11.AutoSize = true;
-            label11.Location = new Point(18, 38);
-            label11.Margin = new Padding(4, 0, 4, 0);
+            label11.Location = new Point(14, 30);
             label11.Name = "label11";
-            label11.Size = new Size(84, 20);
+            label11.Size = new Size(66, 16);
             label11.TabIndex = 1;
             label11.Text = "Eraser Size";
             // 
             // numericUpDownDefaultEraserSize
             // 
             numericUpDownDefaultEraserSize.Anchor = AnchorStyles.Left;
-            numericUpDownDefaultEraserSize.Location = new Point(108, 34);
-            numericUpDownDefaultEraserSize.Margin = new Padding(4);
+            numericUpDownDefaultEraserSize.Location = new Point(86, 27);
             numericUpDownDefaultEraserSize.Maximum = new decimal(new int[] { 72, 0, 0, 0 });
             numericUpDownDefaultEraserSize.Minimum = new decimal(new int[] { 8, 0, 0, 0 });
             numericUpDownDefaultEraserSize.Name = "numericUpDownDefaultEraserSize";
-            numericUpDownDefaultEraserSize.Size = new Size(72, 27);
+            numericUpDownDefaultEraserSize.Size = new Size(58, 23);
             numericUpDownDefaultEraserSize.TabIndex = 0;
             numericUpDownDefaultEraserSize.Value = new decimal(new int[] { 11, 0, 0, 0 });
             numericUpDownDefaultEraserSize.ValueChanged += numericUpDownDefaultEraserSize_ValueChanged;
@@ -1301,11 +1236,9 @@
             groupBox10.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupBox10.Controls.Add(label10);
             groupBox10.Controls.Add(numericUpDownDefaultSpraySize);
-            groupBox10.Location = new Point(8, 285);
-            groupBox10.Margin = new Padding(4);
+            groupBox10.Location = new Point(6, 228);
             groupBox10.Name = "groupBox10";
-            groupBox10.Padding = new Padding(4);
-            groupBox10.Size = new Size(659, 81);
+            groupBox10.Size = new Size(527, 65);
             groupBox10.TabIndex = 0;
             groupBox10.TabStop = false;
             groupBox10.Text = "Default Spray Size";
@@ -1314,22 +1247,20 @@
             // 
             label10.Anchor = AnchorStyles.Left;
             label10.AutoSize = true;
-            label10.Location = new Point(21, 38);
-            label10.Margin = new Padding(4, 0, 4, 0);
+            label10.Location = new Point(17, 30);
             label10.Name = "label10";
-            label10.Size = new Size(80, 20);
+            label10.Size = new Size(63, 16);
             label10.TabIndex = 1;
             label10.Text = "Spray Size";
             // 
             // numericUpDownDefaultSpraySize
             // 
             numericUpDownDefaultSpraySize.Anchor = AnchorStyles.Left;
-            numericUpDownDefaultSpraySize.Location = new Point(108, 34);
-            numericUpDownDefaultSpraySize.Margin = new Padding(4);
+            numericUpDownDefaultSpraySize.Location = new Point(86, 27);
             numericUpDownDefaultSpraySize.Maximum = new decimal(new int[] { 72, 0, 0, 0 });
             numericUpDownDefaultSpraySize.Minimum = new decimal(new int[] { 8, 0, 0, 0 });
             numericUpDownDefaultSpraySize.Name = "numericUpDownDefaultSpraySize";
-            numericUpDownDefaultSpraySize.Size = new Size(72, 27);
+            numericUpDownDefaultSpraySize.Size = new Size(58, 23);
             numericUpDownDefaultSpraySize.TabIndex = 0;
             numericUpDownDefaultSpraySize.Value = new decimal(new int[] { 11, 0, 0, 0 });
             numericUpDownDefaultSpraySize.ValueChanged += numericUpDownDefaultSpraySize_ValueChanged;
@@ -1341,11 +1272,9 @@
             groupBox9.Controls.Add(label8);
             groupBox9.Controls.Add(label9);
             groupBox9.Controls.Add(numericUpDownDefaultPenSize);
-            groupBox9.Location = new Point(8, 156);
-            groupBox9.Margin = new Padding(4);
+            groupBox9.Location = new Point(6, 125);
             groupBox9.Name = "groupBox9";
-            groupBox9.Padding = new Padding(4);
-            groupBox9.Size = new Size(659, 121);
+            groupBox9.Size = new Size(527, 97);
             groupBox9.TabIndex = 0;
             groupBox9.TabStop = false;
             groupBox9.Text = "Default Pen Size and Style";
@@ -1356,10 +1285,9 @@
             comboBoxDefaultPenStyle.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBoxDefaultPenStyle.FormattingEnabled = true;
             comboBoxDefaultPenStyle.Items.AddRange(new object[] { "Pencil", "Marker", "Crayon", "Calligraphy Pen" });
-            comboBoxDefaultPenStyle.Location = new Point(108, 72);
-            comboBoxDefaultPenStyle.Margin = new Padding(4);
+            comboBoxDefaultPenStyle.Location = new Point(86, 58);
             comboBoxDefaultPenStyle.Name = "comboBoxDefaultPenStyle";
-            comboBoxDefaultPenStyle.Size = new Size(518, 28);
+            comboBoxDefaultPenStyle.Size = new Size(415, 24);
             comboBoxDefaultPenStyle.TabIndex = 2;
             comboBoxDefaultPenStyle.SelectedIndexChanged += comboBoxDefaultPenStyle_SelectedIndexChanged;
             // 
@@ -1367,10 +1295,9 @@
             // 
             label8.Anchor = AnchorStyles.Left;
             label8.AutoSize = true;
-            label8.Location = new Point(32, 39);
-            label8.Margin = new Padding(4, 0, 4, 0);
+            label8.Location = new Point(26, 31);
             label8.Name = "label8";
-            label8.Size = new Size(67, 20);
+            label8.Size = new Size(54, 16);
             label8.TabIndex = 1;
             label8.Text = "Pen Size";
             // 
@@ -1378,22 +1305,20 @@
             // 
             label9.Anchor = AnchorStyles.Left;
             label9.AutoSize = true;
-            label9.Location = new Point(28, 76);
-            label9.Margin = new Padding(4, 0, 4, 0);
+            label9.Location = new Point(22, 61);
             label9.Name = "label9";
-            label9.Size = new Size(74, 20);
+            label9.Size = new Size(58, 16);
             label9.TabIndex = 1;
             label9.Text = "Pen Style";
             // 
             // numericUpDownDefaultPenSize
             // 
             numericUpDownDefaultPenSize.Anchor = AnchorStyles.Left;
-            numericUpDownDefaultPenSize.Location = new Point(108, 36);
-            numericUpDownDefaultPenSize.Margin = new Padding(4);
+            numericUpDownDefaultPenSize.Location = new Point(86, 29);
             numericUpDownDefaultPenSize.Maximum = new decimal(new int[] { 72, 0, 0, 0 });
             numericUpDownDefaultPenSize.Minimum = new decimal(new int[] { 8, 0, 0, 0 });
             numericUpDownDefaultPenSize.Name = "numericUpDownDefaultPenSize";
-            numericUpDownDefaultPenSize.Size = new Size(72, 27);
+            numericUpDownDefaultPenSize.Size = new Size(58, 23);
             numericUpDownDefaultPenSize.TabIndex = 0;
             numericUpDownDefaultPenSize.Value = new decimal(new int[] { 11, 0, 0, 0 });
             numericUpDownDefaultPenSize.ValueChanged += numericUpDownDefaultPenSize_ValueChanged;
@@ -1405,11 +1330,9 @@
             groupBox8.Controls.Add(label7);
             groupBox8.Controls.Add(label6);
             groupBox8.Controls.Add(numericUpDownDefaultBrushSize);
-            groupBox8.Location = new Point(8, 28);
-            groupBox8.Margin = new Padding(4);
+            groupBox8.Location = new Point(6, 22);
             groupBox8.Name = "groupBox8";
-            groupBox8.Padding = new Padding(4);
-            groupBox8.Size = new Size(659, 121);
+            groupBox8.Size = new Size(527, 97);
             groupBox8.TabIndex = 0;
             groupBox8.TabStop = false;
             groupBox8.Text = "Default Brush Size and Style";
@@ -1420,10 +1343,9 @@
             comboBoxDefaultBrushStyle.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBoxDefaultBrushStyle.FormattingEnabled = true;
             comboBoxDefaultBrushStyle.Items.AddRange(new object[] { "Brush", "Oil Paint Brush", "Calligraphy Brush", "Watercolor Brush" });
-            comboBoxDefaultBrushStyle.Location = new Point(108, 71);
-            comboBoxDefaultBrushStyle.Margin = new Padding(4);
+            comboBoxDefaultBrushStyle.Location = new Point(86, 57);
             comboBoxDefaultBrushStyle.Name = "comboBoxDefaultBrushStyle";
-            comboBoxDefaultBrushStyle.Size = new Size(518, 28);
+            comboBoxDefaultBrushStyle.Size = new Size(415, 24);
             comboBoxDefaultBrushStyle.TabIndex = 2;
             comboBoxDefaultBrushStyle.SelectedIndexChanged += comboBoxDefaultBrushStyle_SelectedIndexChanged;
             // 
@@ -1431,10 +1353,9 @@
             // 
             label7.Anchor = AnchorStyles.Left;
             label7.AutoSize = true;
-            label7.Location = new Point(15, 75);
-            label7.Margin = new Padding(4, 0, 4, 0);
+            label7.Location = new Point(12, 60);
             label7.Name = "label7";
-            label7.Size = new Size(89, 20);
+            label7.Size = new Size(68, 16);
             label7.TabIndex = 1;
             label7.Text = "Brush Style";
             // 
@@ -1442,22 +1363,20 @@
             // 
             label6.Anchor = AnchorStyles.Left;
             label6.AutoSize = true;
-            label6.Location = new Point(20, 38);
-            label6.Margin = new Padding(4, 0, 4, 0);
+            label6.Location = new Point(16, 30);
             label6.Name = "label6";
-            label6.Size = new Size(82, 20);
+            label6.Size = new Size(64, 16);
             label6.TabIndex = 1;
             label6.Text = "Brush Size";
             // 
             // numericUpDownDefaultBrushSize
             // 
             numericUpDownDefaultBrushSize.Anchor = AnchorStyles.Left;
-            numericUpDownDefaultBrushSize.Location = new Point(108, 35);
-            numericUpDownDefaultBrushSize.Margin = new Padding(4);
+            numericUpDownDefaultBrushSize.Location = new Point(86, 28);
             numericUpDownDefaultBrushSize.Maximum = new decimal(new int[] { 72, 0, 0, 0 });
             numericUpDownDefaultBrushSize.Minimum = new decimal(new int[] { 8, 0, 0, 0 });
             numericUpDownDefaultBrushSize.Name = "numericUpDownDefaultBrushSize";
-            numericUpDownDefaultBrushSize.Size = new Size(72, 27);
+            numericUpDownDefaultBrushSize.Size = new Size(58, 23);
             numericUpDownDefaultBrushSize.TabIndex = 0;
             numericUpDownDefaultBrushSize.Value = new decimal(new int[] { 11, 0, 0, 0 });
             numericUpDownDefaultBrushSize.ValueChanged += numericUpDownDefaultBrushSize_ValueChanged;
@@ -1467,36 +1386,77 @@
             tabPage5.Controls.Add(groupBox27);
             tabPage5.Controls.Add(groupBox21);
             tabPage5.ImageIndex = 12;
-            tabPage5.Location = new Point(4, 29);
-            tabPage5.Margin = new Padding(4);
+            tabPage5.Location = new Point(4, 27);
             tabPage5.Name = "tabPage5";
-            tabPage5.Padding = new Padding(4);
-            tabPage5.Size = new Size(691, 851);
+            tabPage5.Padding = new Padding(3);
+            tabPage5.Size = new Size(551, 676);
             tabPage5.TabIndex = 4;
             tabPage5.Text = "Filters";
             tabPage5.UseVisualStyleBackColor = true;
             // 
             // groupBox27
             // 
+            groupBox27.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox27.Controls.Add(groupBox29);
             groupBox27.Controls.Add(groupBox28);
-            groupBox27.Location = new Point(8, 339);
+            groupBox27.Location = new Point(6, 271);
+            groupBox27.Margin = new Padding(2);
             groupBox27.Name = "groupBox27";
-            groupBox27.Size = new Size(675, 178);
+            groupBox27.Padding = new Padding(2);
+            groupBox27.Size = new Size(540, 204);
             groupBox27.TabIndex = 1;
             groupBox27.TabStop = false;
             groupBox27.Text = "Blurring Filters";
             // 
+            // groupBox29
+            // 
+            groupBox29.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox29.Controls.Add(label38);
+            groupBox29.Controls.Add(numericUpDownDefaultGaussianBlurRadius);
+            groupBox29.Location = new Point(6, 140);
+            groupBox29.Name = "groupBox29";
+            groupBox29.Size = new Size(527, 58);
+            groupBox29.TabIndex = 1;
+            groupBox29.TabStop = false;
+            groupBox29.Text = "Gaussian Blur";
+            // 
+            // label38
+            // 
+            label38.Anchor = AnchorStyles.Left;
+            label38.AutoSize = true;
+            label38.Location = new Point(32, 25);
+            label38.Name = "label38";
+            label38.Size = new Size(88, 16);
+            label38.TabIndex = 7;
+            label38.Text = "Default Radius";
+            // 
+            // numericUpDownDefaultGaussianBlurRadius
+            // 
+            numericUpDownDefaultGaussianBlurRadius.Anchor = AnchorStyles.Left;
+            numericUpDownDefaultGaussianBlurRadius.DecimalPlaces = 2;
+            numericUpDownDefaultGaussianBlurRadius.Increment = new decimal(new int[] { 1, 0, 0, 131072 });
+            numericUpDownDefaultGaussianBlurRadius.Location = new Point(126, 22);
+            numericUpDownDefaultGaussianBlurRadius.Maximum = new decimal(new int[] { 56437, 0, 0, 131072 });
+            numericUpDownDefaultGaussianBlurRadius.Name = "numericUpDownDefaultGaussianBlurRadius";
+            numericUpDownDefaultGaussianBlurRadius.Size = new Size(58, 23);
+            numericUpDownDefaultGaussianBlurRadius.TabIndex = 5;
+            numericUpDownDefaultGaussianBlurRadius.Value = new decimal(new int[] { 15, 0, 0, 65536 });
+            numericUpDownDefaultGaussianBlurRadius.ValueChanged += numericUpDownDefaultGaussianBlurRadius_ValueChanged;
+            // 
             // groupBox28
             // 
+            groupBox28.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupBox28.Controls.Add(label35);
             groupBox28.Controls.Add(label36);
             groupBox28.Controls.Add(label37);
             groupBox28.Controls.Add(numericUpDownDefaultOffsetY);
             groupBox28.Controls.Add(numericUpDownDefaultPixelationSize);
             groupBox28.Controls.Add(numericUpDownDefaultOffsetX);
-            groupBox28.Location = new Point(8, 26);
+            groupBox28.Location = new Point(6, 21);
+            groupBox28.Margin = new Padding(2);
             groupBox28.Name = "groupBox28";
-            groupBox28.Size = new Size(659, 143);
+            groupBox28.Padding = new Padding(2);
+            groupBox28.Size = new Size(527, 114);
             groupBox28.TabIndex = 0;
             groupBox28.TabStop = false;
             groupBox28.Text = "Pixelate";
@@ -1505,10 +1465,9 @@
             // 
             label35.Anchor = AnchorStyles.Left;
             label35.AutoSize = true;
-            label35.Location = new Point(19, 34);
-            label35.Margin = new Padding(4, 0, 4, 0);
+            label35.Location = new Point(15, 27);
             label35.Name = "label35";
-            label35.Size = new Size(132, 20);
+            label35.Size = new Size(105, 16);
             label35.TabIndex = 7;
             label35.Text = "Default Filter Size";
             // 
@@ -1516,10 +1475,9 @@
             // 
             label36.Anchor = AnchorStyles.Left;
             label36.AutoSize = true;
-            label36.Location = new Point(32, 105);
-            label36.Margin = new Padding(4, 0, 4, 0);
+            label36.Location = new Point(26, 84);
             label36.Name = "label36";
-            label36.Size = new Size(119, 20);
+            label36.Size = new Size(94, 16);
             label36.TabIndex = 8;
             label36.Text = "Default Offset Y";
             // 
@@ -1527,34 +1485,31 @@
             // 
             label37.Anchor = AnchorStyles.Left;
             label37.AutoSize = true;
-            label37.Location = new Point(31, 69);
-            label37.Margin = new Padding(4, 0, 4, 0);
+            label37.Location = new Point(25, 55);
             label37.Name = "label37";
-            label37.Size = new Size(120, 20);
+            label37.Size = new Size(95, 16);
             label37.TabIndex = 9;
             label37.Text = "Default Offset X";
             // 
             // numericUpDownDefaultOffsetY
             // 
             numericUpDownDefaultOffsetY.Anchor = AnchorStyles.Left;
-            numericUpDownDefaultOffsetY.Location = new Point(158, 103);
-            numericUpDownDefaultOffsetY.Margin = new Padding(4);
+            numericUpDownDefaultOffsetY.Location = new Point(126, 82);
             numericUpDownDefaultOffsetY.Maximum = new decimal(new int[] { 10602, 0, 0, 0 });
             numericUpDownDefaultOffsetY.Minimum = new decimal(new int[] { 2944, 0, 0, int.MinValue });
             numericUpDownDefaultOffsetY.Name = "numericUpDownDefaultOffsetY";
-            numericUpDownDefaultOffsetY.Size = new Size(72, 27);
+            numericUpDownDefaultOffsetY.Size = new Size(58, 23);
             numericUpDownDefaultOffsetY.TabIndex = 4;
             numericUpDownDefaultOffsetY.ValueChanged += numericUpDownDefaultOffsetY_ValueChanged;
             // 
             // numericUpDownDefaultPixelationSize
             // 
             numericUpDownDefaultPixelationSize.Anchor = AnchorStyles.Left;
-            numericUpDownDefaultPixelationSize.Location = new Point(158, 32);
-            numericUpDownDefaultPixelationSize.Margin = new Padding(4);
+            numericUpDownDefaultPixelationSize.Location = new Point(126, 26);
             numericUpDownDefaultPixelationSize.Maximum = new decimal(new int[] { 9299, 0, 0, 0 });
             numericUpDownDefaultPixelationSize.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             numericUpDownDefaultPixelationSize.Name = "numericUpDownDefaultPixelationSize";
-            numericUpDownDefaultPixelationSize.Size = new Size(72, 27);
+            numericUpDownDefaultPixelationSize.Size = new Size(58, 23);
             numericUpDownDefaultPixelationSize.TabIndex = 5;
             numericUpDownDefaultPixelationSize.Value = new decimal(new int[] { 16, 0, 0, 0 });
             numericUpDownDefaultPixelationSize.ValueChanged += numericUpDownDefaultPixelationSize_ValueChanged;
@@ -1562,24 +1517,22 @@
             // numericUpDownDefaultOffsetX
             // 
             numericUpDownDefaultOffsetX.Anchor = AnchorStyles.Left;
-            numericUpDownDefaultOffsetX.Location = new Point(158, 67);
-            numericUpDownDefaultOffsetX.Margin = new Padding(4);
+            numericUpDownDefaultOffsetX.Location = new Point(126, 54);
             numericUpDownDefaultOffsetX.Maximum = new decimal(new int[] { 10602, 0, 0, 0 });
             numericUpDownDefaultOffsetX.Minimum = new decimal(new int[] { 2944, 0, 0, int.MinValue });
             numericUpDownDefaultOffsetX.Name = "numericUpDownDefaultOffsetX";
-            numericUpDownDefaultOffsetX.Size = new Size(72, 27);
+            numericUpDownDefaultOffsetX.Size = new Size(58, 23);
             numericUpDownDefaultOffsetX.TabIndex = 6;
             numericUpDownDefaultOffsetX.ValueChanged += numericUpDownDefaultOffsetX_ValueChanged;
             // 
             // groupBox21
             // 
+            groupBox21.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupBox21.Controls.Add(groupBox26);
             groupBox21.Controls.Add(groupBox22);
-            groupBox21.Location = new Point(8, 8);
-            groupBox21.Margin = new Padding(4);
+            groupBox21.Location = new Point(6, 6);
             groupBox21.Name = "groupBox21";
-            groupBox21.Padding = new Padding(4);
-            groupBox21.Size = new Size(675, 324);
+            groupBox21.Size = new Size(540, 259);
             groupBox21.TabIndex = 0;
             groupBox21.TabStop = false;
             groupBox21.Text = "Artistic Filters";
@@ -1593,11 +1546,11 @@
             groupBox26.Controls.Add(numericUpDownDefaultOilPaintFilterThreshold);
             groupBox26.Controls.Add(numericUpDownDefaultOilPaintFilterSize);
             groupBox26.Controls.Add(numericUpDownDefaultOilPaintFilterIntensity);
-            groupBox26.Location = new Point(8, 176);
+            groupBox26.Location = new Point(6, 141);
             groupBox26.Margin = new Padding(2);
             groupBox26.Name = "groupBox26";
             groupBox26.Padding = new Padding(2);
-            groupBox26.Size = new Size(659, 140);
+            groupBox26.Size = new Size(527, 112);
             groupBox26.TabIndex = 4;
             groupBox26.TabStop = false;
             groupBox26.Text = "Oil Paint Filter";
@@ -1606,10 +1559,9 @@
             // 
             label32.Anchor = AnchorStyles.Left;
             label32.AutoSize = true;
-            label32.Location = new Point(22, 32);
-            label32.Margin = new Padding(4, 0, 4, 0);
+            label32.Location = new Point(18, 26);
             label32.Name = "label32";
-            label32.Size = new Size(132, 20);
+            label32.Size = new Size(105, 16);
             label32.TabIndex = 3;
             label32.Text = "Default Filter Size";
             // 
@@ -1617,10 +1569,9 @@
             // 
             label33.Anchor = AnchorStyles.Left;
             label33.AutoSize = true;
-            label33.Location = new Point(19, 102);
-            label33.Margin = new Padding(4, 0, 4, 0);
+            label33.Location = new Point(15, 82);
             label33.Name = "label33";
-            label33.Size = new Size(134, 20);
+            label33.Size = new Size(105, 16);
             label33.TabIndex = 3;
             label33.Text = "Default Threshold";
             // 
@@ -1628,22 +1579,20 @@
             // 
             label34.Anchor = AnchorStyles.Left;
             label34.AutoSize = true;
-            label34.Location = new Point(28, 68);
-            label34.Margin = new Padding(4, 0, 4, 0);
+            label34.Location = new Point(22, 54);
             label34.Name = "label34";
-            label34.Size = new Size(125, 20);
+            label34.Size = new Size(97, 16);
             label34.TabIndex = 3;
             label34.Text = "Default Intensity";
             // 
             // numericUpDownDefaultOilPaintFilterThreshold
             // 
             numericUpDownDefaultOilPaintFilterThreshold.Anchor = AnchorStyles.Left;
-            numericUpDownDefaultOilPaintFilterThreshold.Location = new Point(161, 101);
-            numericUpDownDefaultOilPaintFilterThreshold.Margin = new Padding(4);
+            numericUpDownDefaultOilPaintFilterThreshold.Location = new Point(129, 81);
             numericUpDownDefaultOilPaintFilterThreshold.Maximum = new decimal(new int[] { 255, 0, 0, 0 });
             numericUpDownDefaultOilPaintFilterThreshold.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             numericUpDownDefaultOilPaintFilterThreshold.Name = "numericUpDownDefaultOilPaintFilterThreshold";
-            numericUpDownDefaultOilPaintFilterThreshold.Size = new Size(72, 27);
+            numericUpDownDefaultOilPaintFilterThreshold.Size = new Size(58, 23);
             numericUpDownDefaultOilPaintFilterThreshold.TabIndex = 2;
             numericUpDownDefaultOilPaintFilterThreshold.Value = new decimal(new int[] { 50, 0, 0, 0 });
             numericUpDownDefaultOilPaintFilterThreshold.ValueChanged += numericUpDown4_ValueChanged;
@@ -1651,12 +1600,11 @@
             // numericUpDownDefaultOilPaintFilterSize
             // 
             numericUpDownDefaultOilPaintFilterSize.Anchor = AnchorStyles.Left;
-            numericUpDownDefaultOilPaintFilterSize.Location = new Point(161, 30);
-            numericUpDownDefaultOilPaintFilterSize.Margin = new Padding(4);
+            numericUpDownDefaultOilPaintFilterSize.Location = new Point(129, 24);
             numericUpDownDefaultOilPaintFilterSize.Maximum = new decimal(new int[] { 32, 0, 0, 0 });
             numericUpDownDefaultOilPaintFilterSize.Minimum = new decimal(new int[] { 2, 0, 0, 0 });
             numericUpDownDefaultOilPaintFilterSize.Name = "numericUpDownDefaultOilPaintFilterSize";
-            numericUpDownDefaultOilPaintFilterSize.Size = new Size(72, 27);
+            numericUpDownDefaultOilPaintFilterSize.Size = new Size(58, 23);
             numericUpDownDefaultOilPaintFilterSize.TabIndex = 2;
             numericUpDownDefaultOilPaintFilterSize.Value = new decimal(new int[] { 5, 0, 0, 0 });
             numericUpDownDefaultOilPaintFilterSize.ValueChanged += numericUpDown5_ValueChanged;
@@ -1664,12 +1612,11 @@
             // numericUpDownDefaultOilPaintFilterIntensity
             // 
             numericUpDownDefaultOilPaintFilterIntensity.Anchor = AnchorStyles.Left;
-            numericUpDownDefaultOilPaintFilterIntensity.Location = new Point(161, 65);
-            numericUpDownDefaultOilPaintFilterIntensity.Margin = new Padding(4);
+            numericUpDownDefaultOilPaintFilterIntensity.Location = new Point(129, 52);
             numericUpDownDefaultOilPaintFilterIntensity.Maximum = new decimal(new int[] { 255, 0, 0, 0 });
             numericUpDownDefaultOilPaintFilterIntensity.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             numericUpDownDefaultOilPaintFilterIntensity.Name = "numericUpDownDefaultOilPaintFilterIntensity";
-            numericUpDownDefaultOilPaintFilterIntensity.Size = new Size(72, 27);
+            numericUpDownDefaultOilPaintFilterIntensity.Size = new Size(58, 23);
             numericUpDownDefaultOilPaintFilterIntensity.TabIndex = 2;
             numericUpDownDefaultOilPaintFilterIntensity.Value = new decimal(new int[] { 10, 0, 0, 0 });
             numericUpDownDefaultOilPaintFilterIntensity.ValueChanged += numericUpDown6_ValueChanged;
@@ -1683,11 +1630,11 @@
             groupBox22.Controls.Add(numericUpDownDefaultCartoonFilterThreshold);
             groupBox22.Controls.Add(numericUpDownDefaultCartoonFilterSize);
             groupBox22.Controls.Add(numericUpDownDefaultCartoonFilterIntensity);
-            groupBox22.Location = new Point(8, 26);
+            groupBox22.Location = new Point(6, 21);
             groupBox22.Margin = new Padding(2);
             groupBox22.Name = "groupBox22";
             groupBox22.Padding = new Padding(2);
-            groupBox22.Size = new Size(659, 140);
+            groupBox22.Size = new Size(527, 112);
             groupBox22.TabIndex = 4;
             groupBox22.TabStop = false;
             groupBox22.Text = "Cartoon Filter";
@@ -1696,10 +1643,9 @@
             // 
             label29.Anchor = AnchorStyles.Left;
             label29.AutoSize = true;
-            label29.Location = new Point(22, 32);
-            label29.Margin = new Padding(4, 0, 4, 0);
+            label29.Location = new Point(18, 26);
             label29.Name = "label29";
-            label29.Size = new Size(132, 20);
+            label29.Size = new Size(105, 16);
             label29.TabIndex = 3;
             label29.Text = "Default Filter Size";
             // 
@@ -1707,10 +1653,9 @@
             // 
             label31.Anchor = AnchorStyles.Left;
             label31.AutoSize = true;
-            label31.Location = new Point(21, 102);
-            label31.Margin = new Padding(4, 0, 4, 0);
+            label31.Location = new Point(17, 82);
             label31.Name = "label31";
-            label31.Size = new Size(134, 20);
+            label31.Size = new Size(105, 16);
             label31.TabIndex = 3;
             label31.Text = "Default Threshold";
             // 
@@ -1718,22 +1663,20 @@
             // 
             label30.Anchor = AnchorStyles.Left;
             label30.AutoSize = true;
-            label30.Location = new Point(30, 68);
-            label30.Margin = new Padding(4, 0, 4, 0);
+            label30.Location = new Point(24, 54);
             label30.Name = "label30";
-            label30.Size = new Size(125, 20);
+            label30.Size = new Size(97, 16);
             label30.TabIndex = 3;
             label30.Text = "Default Intensity";
             // 
             // numericUpDownDefaultCartoonFilterThreshold
             // 
             numericUpDownDefaultCartoonFilterThreshold.Anchor = AnchorStyles.Left;
-            numericUpDownDefaultCartoonFilterThreshold.Location = new Point(162, 101);
-            numericUpDownDefaultCartoonFilterThreshold.Margin = new Padding(4);
+            numericUpDownDefaultCartoonFilterThreshold.Location = new Point(130, 81);
             numericUpDownDefaultCartoonFilterThreshold.Maximum = new decimal(new int[] { 255, 0, 0, 0 });
             numericUpDownDefaultCartoonFilterThreshold.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             numericUpDownDefaultCartoonFilterThreshold.Name = "numericUpDownDefaultCartoonFilterThreshold";
-            numericUpDownDefaultCartoonFilterThreshold.Size = new Size(72, 27);
+            numericUpDownDefaultCartoonFilterThreshold.Size = new Size(58, 23);
             numericUpDownDefaultCartoonFilterThreshold.TabIndex = 2;
             numericUpDownDefaultCartoonFilterThreshold.Value = new decimal(new int[] { 50, 0, 0, 0 });
             numericUpDownDefaultCartoonFilterThreshold.ValueChanged += numericUpDown3_ValueChanged;
@@ -1741,12 +1684,11 @@
             // numericUpDownDefaultCartoonFilterSize
             // 
             numericUpDownDefaultCartoonFilterSize.Anchor = AnchorStyles.Left;
-            numericUpDownDefaultCartoonFilterSize.Location = new Point(162, 30);
-            numericUpDownDefaultCartoonFilterSize.Margin = new Padding(4);
+            numericUpDownDefaultCartoonFilterSize.Location = new Point(130, 24);
             numericUpDownDefaultCartoonFilterSize.Maximum = new decimal(new int[] { 32, 0, 0, 0 });
             numericUpDownDefaultCartoonFilterSize.Minimum = new decimal(new int[] { 2, 0, 0, 0 });
             numericUpDownDefaultCartoonFilterSize.Name = "numericUpDownDefaultCartoonFilterSize";
-            numericUpDownDefaultCartoonFilterSize.Size = new Size(72, 27);
+            numericUpDownDefaultCartoonFilterSize.Size = new Size(58, 23);
             numericUpDownDefaultCartoonFilterSize.TabIndex = 2;
             numericUpDownDefaultCartoonFilterSize.Value = new decimal(new int[] { 5, 0, 0, 0 });
             numericUpDownDefaultCartoonFilterSize.ValueChanged += numericUpDown1_ValueChanged;
@@ -1754,12 +1696,11 @@
             // numericUpDownDefaultCartoonFilterIntensity
             // 
             numericUpDownDefaultCartoonFilterIntensity.Anchor = AnchorStyles.Left;
-            numericUpDownDefaultCartoonFilterIntensity.Location = new Point(162, 65);
-            numericUpDownDefaultCartoonFilterIntensity.Margin = new Padding(4);
+            numericUpDownDefaultCartoonFilterIntensity.Location = new Point(130, 52);
             numericUpDownDefaultCartoonFilterIntensity.Maximum = new decimal(new int[] { 255, 0, 0, 0 });
             numericUpDownDefaultCartoonFilterIntensity.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             numericUpDownDefaultCartoonFilterIntensity.Name = "numericUpDownDefaultCartoonFilterIntensity";
-            numericUpDownDefaultCartoonFilterIntensity.Size = new Size(72, 27);
+            numericUpDownDefaultCartoonFilterIntensity.Size = new Size(58, 23);
             numericUpDownDefaultCartoonFilterIntensity.TabIndex = 2;
             numericUpDownDefaultCartoonFilterIntensity.Value = new decimal(new int[] { 10, 0, 0, 0 });
             numericUpDownDefaultCartoonFilterIntensity.ValueChanged += numericUpDown2_ValueChanged;
@@ -1768,11 +1709,10 @@
             // 
             tabPage4.Controls.Add(groupBox16);
             tabPage4.ImageIndex = 3;
-            tabPage4.Location = new Point(4, 29);
-            tabPage4.Margin = new Padding(4);
+            tabPage4.Location = new Point(4, 27);
             tabPage4.Name = "tabPage4";
-            tabPage4.Padding = new Padding(4);
-            tabPage4.Size = new Size(691, 851);
+            tabPage4.Padding = new Padding(3);
+            tabPage4.Size = new Size(551, 676);
             tabPage4.TabIndex = 3;
             tabPage4.Text = "Colors";
             tabPage4.UseVisualStyleBackColor = true;
@@ -1781,11 +1721,9 @@
             // 
             groupBox16.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupBox16.Controls.Add(groupBox17);
-            groupBox16.Location = new Point(8, 8);
-            groupBox16.Margin = new Padding(4);
+            groupBox16.Location = new Point(6, 6);
             groupBox16.Name = "groupBox16";
-            groupBox16.Padding = new Padding(4);
-            groupBox16.Size = new Size(674, 156);
+            groupBox16.Size = new Size(539, 125);
             groupBox16.TabIndex = 4;
             groupBox16.TabStop = false;
             groupBox16.Text = "Colors";
@@ -1799,11 +1737,9 @@
             groupBox17.Controls.Add(panelPrimaryColorPreview);
             groupBox17.Controls.Add(label16);
             groupBox17.Controls.Add(label17);
-            groupBox17.Location = new Point(8, 28);
-            groupBox17.Margin = new Padding(4);
+            groupBox17.Location = new Point(6, 22);
             groupBox17.Name = "groupBox17";
-            groupBox17.Padding = new Padding(4);
-            groupBox17.Size = new Size(659, 121);
+            groupBox17.Size = new Size(527, 97);
             groupBox17.TabIndex = 0;
             groupBox17.TabStop = false;
             groupBox17.Text = "Default Colors";
@@ -1811,10 +1747,9 @@
             // button2
             // 
             button2.Anchor = AnchorStyles.Left;
-            button2.Location = new Point(384, 71);
-            button2.Margin = new Padding(4);
+            button2.Location = new Point(307, 57);
             button2.Name = "button2";
-            button2.Size = new Size(94, 31);
+            button2.Size = new Size(75, 25);
             button2.TabIndex = 2;
             button2.Text = "Change";
             button2.UseVisualStyleBackColor = true;
@@ -1823,10 +1758,9 @@
             // button1
             // 
             button1.Anchor = AnchorStyles.Left;
-            button1.Location = new Point(384, 31);
-            button1.Margin = new Padding(4);
+            button1.Location = new Point(307, 25);
             button1.Name = "button1";
-            button1.Size = new Size(94, 31);
+            button1.Size = new Size(75, 25);
             button1.TabIndex = 2;
             button1.Text = "Change";
             button1.UseVisualStyleBackColor = true;
@@ -1837,10 +1771,9 @@
             panelSecondaryColorPreview.Anchor = AnchorStyles.Left;
             panelSecondaryColorPreview.BackColor = Color.Black;
             panelSecondaryColorPreview.BorderStyle = BorderStyle.FixedSingle;
-            panelSecondaryColorPreview.Location = new Point(216, 76);
-            panelSecondaryColorPreview.Margin = new Padding(4);
+            panelSecondaryColorPreview.Location = new Point(173, 61);
             panelSecondaryColorPreview.Name = "panelSecondaryColorPreview";
-            panelSecondaryColorPreview.Size = new Size(96, 20);
+            panelSecondaryColorPreview.Size = new Size(77, 16);
             panelSecondaryColorPreview.TabIndex = 1;
             // 
             // panelPrimaryColorPreview
@@ -1848,20 +1781,18 @@
             panelPrimaryColorPreview.Anchor = AnchorStyles.Left;
             panelPrimaryColorPreview.BackColor = Color.White;
             panelPrimaryColorPreview.BorderStyle = BorderStyle.FixedSingle;
-            panelPrimaryColorPreview.Location = new Point(216, 36);
-            panelPrimaryColorPreview.Margin = new Padding(4);
+            panelPrimaryColorPreview.Location = new Point(173, 29);
             panelPrimaryColorPreview.Name = "panelPrimaryColorPreview";
-            panelPrimaryColorPreview.Size = new Size(96, 20);
+            panelPrimaryColorPreview.Size = new Size(77, 16);
             panelPrimaryColorPreview.TabIndex = 1;
             // 
             // label16
             // 
             label16.Anchor = AnchorStyles.Left;
             label16.AutoSize = true;
-            label16.Location = new Point(29, 76);
-            label16.Margin = new Padding(4, 0, 4, 0);
+            label16.Location = new Point(23, 61);
             label16.Name = "label16";
-            label16.Size = new Size(123, 20);
+            label16.Size = new Size(98, 16);
             label16.TabIndex = 0;
             label16.Text = "Secondary Color";
             // 
@@ -1869,25 +1800,23 @@
             // 
             label17.Anchor = AnchorStyles.Left;
             label17.AutoSize = true;
-            label17.Location = new Point(50, 36);
-            label17.Margin = new Padding(4, 0, 4, 0);
+            label17.Location = new Point(40, 29);
             label17.Name = "label17";
-            label17.Size = new Size(104, 20);
+            label17.Size = new Size(81, 16);
             label17.TabIndex = 0;
             label17.Text = "Primary Color";
             // 
             // SettingsWindow
             // 
-            AutoScaleDimensions = new SizeF(120F, 120F);
+            AutoScaleDimensions = new SizeF(96F, 96F);
             AutoScaleMode = AutoScaleMode.Dpi;
-            ClientSize = new Size(719, 904);
+            ClientSize = new Size(575, 723);
             Controls.Add(tabControl1);
             FormBorderStyle = FormBorderStyle.FixedSingle;
-            Margin = new Padding(4);
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "SettingsWindow";
-            Padding = new Padding(10);
+            Padding = new Padding(8);
             ShowIcon = false;
             ShowInTaskbar = false;
             Text = "Settings";
@@ -1950,6 +1879,9 @@
             ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultBrushSize).EndInit();
             tabPage5.ResumeLayout(false);
             groupBox27.ResumeLayout(false);
+            groupBox29.ResumeLayout(false);
+            groupBox29.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultGaussianBlurRadius).EndInit();
             groupBox28.ResumeLayout(false);
             groupBox28.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultOffsetY).EndInit();
@@ -2100,5 +2032,8 @@
         private NumericUpDown numericUpDownDefaultOffsetY;
         private NumericUpDown numericUpDownDefaultPixelationSize;
         private NumericUpDown numericUpDownDefaultOffsetX;
+        private GroupBox groupBox29;
+        private Label label38;
+        private NumericUpDown numericUpDownDefaultGaussianBlurRadius;
     }
 }

@@ -420,7 +420,7 @@ namespace _222303026_proje3 {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("1.5")]
         public float DefaultGaussianBlurRadius {
             get {
                 return ((float)(this["DefaultGaussianBlurRadius"]));
