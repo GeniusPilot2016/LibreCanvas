@@ -10,26 +10,37 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Media.Protection.PlayReady;
 using Python.Runtime;
+using System.Drawing;
+using System.IO;
 
 namespace _222303026_proje3
 {
     public static class CreateAIImages
     {
-        public static Image CreateImage(string prompt)
+        public static async Task<Image> CreateImage(string prompt)
         {
-            Application.DoEvents();
-            Runtime.PythonDLL = Application.StartupPath + @"\Python\python313.dll";
-            PythonEngine.Initialize();
-            using (Py.GIL())
-            {
-                var script = Py.Import("AIImageCreator.py");
-                var outputImagePyObject = script.InvokeMethod("create", new PyObject[] { new PyString(prompt) });
-                var outputImage = outputImagePyObject.As<Image>();
-                return outputImage;
-            }
             try
             {
-                
+                return await Task.Run(() =>
+                {
+                    Application.DoEvents();
+                    Runtime.PythonDLL = Application.StartupPath + @"\Python\python313.dll";
+                    PythonEngine.Initialize();
+                    using (Py.GIL())
+                    {
+                        var script = Py.Import("AIImageCreator");
+                        var inputText = new PyString(prompt);
+                        var apiKey = new PyString(EncryptionHelper.DecryptString1(Settings1.Default.HashedGeminiAIAPIKey));
+                        var outputImagePyObject = script.InvokeMethod("create", new PyObject[] { inputText, apiKey });
+                        var outputImageBytes = outputImagePyObject.As<byte[]>();
+                        PythonEngine.Shutdown();
+                        using (var ms = new MemoryStream(outputImageBytes))
+                        {
+                            Image img = Image.FromStream(ms);
+                            return img; 
+                        }
+                    }
+                });
             }
             catch (Exception ex)
             {
@@ -38,23 +49,32 @@ namespace _222303026_proje3
             }
         }
 
-        public static Image EditImage(Image inputImage, string prompt)
+        public static async Task<Image> EditImage(Image inputImage, string prompt)
         {
             try
             {
-                Application.DoEvents();
-                Runtime.PythonDLL = Application.ExecutablePath + @"\Python\python310.dll";
-                PythonEngine.PythonPath = Application.StartupPath + @"\Python";
-                PythonEngine.Initialize();
-                using (Py.GIL())
+                return await Task.Run(() =>
                 {
-                    var script = Py.Import("AIImageEditor.py");
-                    var inputImagePyObject = PyObject.FromManagedObject(inputImage);
-                    var promptPyObject = new PyString(prompt);
-                    var outputImagePyObject = script.InvokeMethod("edit", new PyObject[] { promptPyObject, inputImagePyObject });
-                    var outputImage = outputImagePyObject.As<Image>();
-                    return outputImage;
-                }
+                    Application.DoEvents();
+                    Runtime.PythonDLL = Application.ExecutablePath + @"\Python\python310.dll";
+                    PythonEngine.Initialize();
+                    using (Py.GIL())
+                    {
+                        var script = Py.Import("AIImageEditor");
+                        var apiKey = new PyString(EncryptionHelper.DecryptString1(Settings1.Default.HashedGeminiAIAPIKey));
+                        var inputText = new PyString(prompt);
+                        var inputImagePyObject = PyObject.FromManagedObject(inputText);
+                        var promptPyObject = new PyString(prompt);
+                        var outputImagePyObject = script.InvokeMethod("edit", new PyObject[] { promptPyObject, inputImagePyObject, apiKey });
+                        var outputImageBytes = outputImagePyObject.As<byte[]>();
+                        PythonEngine.Shutdown();
+                        using (var ms = new MemoryStream(outputImageBytes))
+                        {
+                            Image img = Image.FromStream(ms);
+                            return img;
+                        }
+                    }
+                });
             }
             catch (Exception ex)
             {

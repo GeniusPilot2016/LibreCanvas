@@ -655,7 +655,7 @@ namespace _222303026_proje3
                         toolStripSeparator29.Visible = true;
                         labelAIImageErasing.Visible = true;
                         progressBarAIImageCreation.Visible = true;
-                        var image = CreateAIImages.EditImage(
+                        var image = await CreateAIImages.EditImage(
     SelectedBitmap, "Erase the object in this area");
 
                         if (image != null)
@@ -4024,12 +4024,13 @@ namespace _222303026_proje3
                     textBoxPrompt.Enabled = false;
                     labelPrompt.Enabled = false;
                     buttonClose.Enabled = false;
-                    var image = CreateAIImages.EditImage(
-    SelectedBitmap, textBoxPrompt.Text);
+
+                    var imageTask = CreateAIImages.EditImage(SelectedBitmap, textBoxPrompt.Text);
+                    var image = await imageTask; // Await the task to get the result  
 
                     if (image != null)
                     {
-                        SelectedBitmap = (Bitmap)image;
+                        SelectedBitmap = new Bitmap(image); // Convert Image to Bitmap  
                         MergeMainBitmapWithSelected();
                     }
                     else
@@ -4052,7 +4053,7 @@ namespace _222303026_proje3
                 }
                 else
                 {
-                    SystemSounds.Beep.Play(); // Play a beep sound when the image is not selected
+                    SystemSounds.Beep.Play(); // Play a beep sound when the image is not selected  
                 }
             }
             catch (NullReferenceException)

@@ -450,12 +450,6 @@
   <ItemGroup>
 	<Content Include="Python\**\*">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	</Content>
-	<Content Include="AIImageCreator.py">
-	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	</Content>
-	<Content Include="AIImageEditor.py">
-	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	</Content>  
     <Content Include="artfusion_icon.ico" />
     <Content Include="Python\get-pip.py">

@@ -90,34 +90,39 @@ namespace _222303026_proje3
                 }
             }
         }
-        private void EnableDisableControls(bool enabled)
+        private async void button1_Click(object sender, EventArgs e)
         {
-            foreach (Control control in Controls)
-            {
-                control.Enabled = enabled;
-            }
-        }
-
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            EnableDisableControls(false);
+            setVisibilityOfProgressBar(true);
             string prompt = textBoxPrompt.Text;
             int width = (int)numericUpDownWidth.Value;
             int height = (int)numericUpDownHeight.Value;
-            Image generatedImage = CreateAIImages.CreateImage(prompt);
+            Image generatedImage = await CreateAIImages.CreateImage(prompt);
 
             if (generatedImage != null)
             {
                 // İlk resmi yeniden boyutlandırın
+                Application.DoEvents();
+                setVisibilityOfProgressBar(false);
                 image = ResizeImage(generatedImage, width, height);
-                EnableDisableControls(true);
                 this.Close();
             }
             else
             {
+                setVisibilityOfProgressBar(false);
                 MessageBox.Show("Image generation failed.");
-                EnableDisableControls(true);
+            }
+        }
+        private void setVisibilityOfProgressBar(bool isVisible)
+        {
+            if (isVisible)
+            {
+                labelImageCreating.Visible = true;
+                progressBarImageCreating.Visible = true;
+            }
+            else
+            {
+                labelImageCreating.Visible = false;
+                progressBarImageCreating.Visible = false;
             }
         }
         private Image ResizeImage(Image image, int width, int height)
@@ -147,7 +152,7 @@ namespace _222303026_proje3
 
         private void textBoxPrompt_TextChanged(object sender, EventArgs e)
         {
-            if(!string.IsNullOrEmpty(textBoxPrompt.Text))
+            if (!string.IsNullOrEmpty(textBoxPrompt.Text))
             {
                 buttonCreate.Enabled = true;
             }
@@ -155,6 +160,11 @@ namespace _222303026_proje3
             {
                 buttonCreate.Enabled = false;
             }
+        }
+
+        private void CreateWithAIForm_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
