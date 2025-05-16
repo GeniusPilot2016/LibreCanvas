@@ -655,12 +655,12 @@ namespace _222303026_proje3
                         toolStripSeparator29.Visible = true;
                         labelAIImageErasing.Visible = true;
                         progressBarAIImageCreation.Visible = true;
-                        var images = await CreateAIImages.GenerateImagesFromExistingImage(
-    SelectedBitmap, "Erase the object in this area", SelectedBitmap.Width, SelectedBitmap.Height);
+                        var image = CreateAIImages.EditImage(
+    SelectedBitmap, "Erase the object in this area");
 
-                        if (images != null && images.Length > 0 && images[0] != null)
+                        if (image != null)
                         {
-                            SelectedBitmap = (Bitmap)images[0];
+                            SelectedBitmap = (Bitmap)image;
                             MergeMainBitmapWithSelected();
                         }
                         else
@@ -4024,12 +4024,12 @@ namespace _222303026_proje3
                     textBoxPrompt.Enabled = false;
                     labelPrompt.Enabled = false;
                     buttonClose.Enabled = false;
-                    var images = await CreateAIImages.GenerateImagesFromExistingImage(
-    SelectedBitmap, textBoxPrompt.Text, SelectedBitmap.Width, SelectedBitmap.Height);
+                    var image = CreateAIImages.EditImage(
+    SelectedBitmap, textBoxPrompt.Text);
 
-                    if (images != null && images.Length > 0 && images[0] != null)
+                    if (image != null)
                     {
-                        SelectedBitmap = (Bitmap)images[0];
+                        SelectedBitmap = (Bitmap)image;
                         MergeMainBitmapWithSelected();
                     }
                     else

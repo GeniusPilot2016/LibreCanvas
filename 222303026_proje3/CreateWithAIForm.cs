@@ -99,18 +99,18 @@ namespace _222303026_proje3
         }
 
 
-        private async void button1_Click(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e)
         {
             EnableDisableControls(false);
             string prompt = textBoxPrompt.Text;
             int width = (int)numericUpDownWidth.Value;
             int height = (int)numericUpDownHeight.Value;
-            Image[] generatedImages = await CreateAIImages.GenerateImagesWithSize(prompt, width, height);
+            Image generatedImage = CreateAIImages.CreateImage(prompt);
 
-            if (generatedImages != null && generatedImages.Length > 0)
+            if (generatedImage != null)
             {
                 // İlk resmi yeniden boyutlandırın
-                image = ResizeImage(generatedImages[0], width, height);
+                image = ResizeImage(generatedImage, width, height);
                 EnableDisableControls(true);
                 this.Close();
             }
