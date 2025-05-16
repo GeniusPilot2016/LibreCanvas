@@ -9,8 +9,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Product>ArtFusion</Product>
     <Company></Company>
-    <Authors>Nisa Özdoğan</Authors>
-    <Version>0.9.0</Version>
+    <Authors>GeniusPilot2016 (Nisa Özdoğan)</Authors>
+    <Version>0.10.0</Version>
     <Title>ArtFusion</Title>
     <PackageId>artfusion</PackageId>
     <ApplicationIcon>artfusion_icon.ico</ApplicationIcon>
@@ -1296,10 +1296,7 @@
     <PackageReference Include="Emgu.CV.Bitmap" Version="4.10.0.5680" />
     <PackageReference Include="Emgu.CV.runtime.windows" Version="4.10.0.5680" />
     <PackageReference Include="Emgu.CV.UI" Version="4.10.0.5680" />
-    <PackageReference Include="Google_GenerativeAI" Version="2.5.10" />
-    <PackageReference Include="HuggingFace" Version="0.4.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="pythonnet" Version="3.0.5" />
     <PackageReference Include="System.Management" Version="9.0.5" />
   </ItemGroup>
 

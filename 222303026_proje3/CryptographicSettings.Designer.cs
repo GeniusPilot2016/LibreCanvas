@@ -12,7 +12,7 @@ namespace _222303026_proje3 {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.13.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.14.0.0")]
     internal sealed partial class CryptographicSettings : global::System.Configuration.ApplicationSettingsBase {
         
         private static CryptographicSettings defaultInstance = ((CryptographicSettings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new CryptographicSettings())));
@@ -26,48 +26,24 @@ namespace _222303026_proje3 {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("Ohf3aR688kaRYSTu7lMeXPoSVUTFcS+WgraFY3mxda0=")]
-        public string CipherKey1 {
+        public string CipherKey {
             get {
-                return ((string)(this["CipherKey1"]));
+                return ((string)(this["CipherKey"]));
             }
             set {
-                this["CipherKey1"] = value;
+                this["CipherKey"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("TZnoSs4H8yQZ8kQTgZ7xwg==")]
-        public string CipherIV1 {
+        public string CipherIV {
             get {
-                return ((string)(this["CipherIV1"]));
+                return ((string)(this["CipherIV"]));
             }
             set {
-                this["CipherIV1"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Ohf3aR688kaRYSTu7lMeXPoSVUTFcS+WgraFY3mxda0=")]
-        public string CipherKey2 {
-            get {
-                return ((string)(this["CipherKey2"]));
-            }
-            set {
-                this["CipherKey2"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("TZnoSs4H8yQZ8kQTgZ7xwg==")]
-        public string CipherIV2 {
-            get {
-                return ((string)(this["CipherIV2"]));
-            }
-            set {
-                this["CipherIV2"] = value;
+                this["CipherIV"] = value;
             }
         }
     }

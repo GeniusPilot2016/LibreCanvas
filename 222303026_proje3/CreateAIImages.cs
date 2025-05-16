@@ -1,6 +1,4 @@
-﻿using GenerativeAI;
-using GenerativeAI.Types;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,7 +7,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Media.Protection.PlayReady;
-using Python.Runtime;
 using System.Drawing;
 using System.IO;
 
@@ -17,27 +14,45 @@ namespace _222303026_proje3
 {
     public static class CreateAIImages
     {
-        public static async Task<Image> CreateImage(string prompt)
+        public static async Task<Image> CreateImage(string prompt, int width, int height)
         {
             try
             {
                 return await Task.Run(() =>
                 {
                     Application.DoEvents();
-                    Runtime.PythonDLL = Application.StartupPath + @"\Python\python313.dll";
-                    PythonEngine.Initialize();
-                    using (Py.GIL())
+                    string pythonExe = Path.Combine(Application.StartupPath, @"Python\python.exe");
+                    string scriptPath = Path.Combine(Application.StartupPath, @"Python\AIImageCreator.py");
+                    string apiKey = EncryptionHelper.DecryptString(Settings1.Default.HashedGeminiAIAPIKey);
+
+                    var psi = new ProcessStartInfo
                     {
-                        var script = Py.Import("AIImageCreator");
-                        var inputText = new PyString(prompt);
-                        var apiKey = new PyString(EncryptionHelper.DecryptString1(Settings1.Default.HashedGeminiAIAPIKey));
-                        var outputImagePyObject = script.InvokeMethod("create", new PyObject[] { inputText, apiKey });
-                        var outputImageBytes = outputImagePyObject.As<byte[]>();
-                        PythonEngine.Shutdown();
-                        using (var ms = new MemoryStream(outputImageBytes))
+                        FileName = pythonExe,
+                        Arguments = $"\"{scriptPath}\" \"{prompt}\" \"{apiKey}\" \"{width}\" \"{height}\"",
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        StandardOutputEncoding = Encoding.UTF8
+                    };
+
+                    using (var process = Process.Start(psi))
+                    {
+                        string output = process.StandardOutput.ReadToEnd();
+                        string error = process.StandardError.ReadToEnd();
+                        process.WaitForExit();
+
+                        if (process.ExitCode != 0)
                         {
-                            Image img = Image.FromStream(ms);
-                            return img; 
+                            MessageBox.Show("Python error: " + error, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return null;
+                        }
+
+                        // Çıktı base64 string ise:
+                        byte[] imageBytes = Convert.FromBase64String(output.Trim());
+                        using (var ms = new MemoryStream(imageBytes))
+                        {
+                            return Image.FromStream(ms);
                         }
                     }
                 });
@@ -51,34 +66,64 @@ namespace _222303026_proje3
 
         public static async Task<Image> EditImage(Image inputImage, string prompt)
         {
-            try
+            if (!string.IsNullOrEmpty(Settings1.Default.HashedGeminiAIAPIKey))
             {
-                return await Task.Run(() =>
+                try
                 {
-                    Application.DoEvents();
-                    Runtime.PythonDLL = Application.ExecutablePath + @"\Python\python310.dll";
-                    PythonEngine.Initialize();
-                    using (Py.GIL())
+                    return await Task.Run(() =>
                     {
-                        var script = Py.Import("AIImageEditor");
-                        var apiKey = new PyString(EncryptionHelper.DecryptString1(Settings1.Default.HashedGeminiAIAPIKey));
-                        var inputText = new PyString(prompt);
-                        var inputImagePyObject = PyObject.FromManagedObject(inputText);
-                        var promptPyObject = new PyString(prompt);
-                        var outputImagePyObject = script.InvokeMethod("edit", new PyObject[] { promptPyObject, inputImagePyObject, apiKey });
-                        var outputImageBytes = outputImagePyObject.As<byte[]>();
-                        PythonEngine.Shutdown();
-                        using (var ms = new MemoryStream(outputImageBytes))
+                        Application.DoEvents();
+                        string pythonExe = Path.Combine(Application.StartupPath, @"Python\python.exe");
+                        string scriptPath = Path.Combine(Application.StartupPath, @"Python\AIImageEditor.py");
+                        string apiKey = EncryptionHelper.DecryptString(Settings1.Default.HashedGeminiAIAPIKey);
+
+                        // inputImage'ı geçici bir dosyaya kaydet
+                        string tempImagePath = Path.GetTempFileName();
+                        inputImage.Save(tempImagePath);
+
+                        var psi = new ProcessStartInfo
                         {
-                            Image img = Image.FromStream(ms);
-                            return img;
+                            FileName = pythonExe,
+                            Arguments = $"\"{scriptPath}\" \"{tempImagePath}\" \"{prompt}\" \"{apiKey}\"",
+                            RedirectStandardOutput = true,
+                            RedirectStandardError = true,
+                            UseShellExecute = false,
+                            CreateNoWindow = true,
+                            StandardOutputEncoding = Encoding.UTF8
+                        };
+
+                        using (var process = Process.Start(psi))
+                        {
+                            string output = process.StandardOutput.ReadToEnd();
+                            string error = process.StandardError.ReadToEnd();
+                            process.WaitForExit();
+
+                            File.Delete(tempImagePath);
+
+                            if (process.ExitCode != 0)
+                            {
+                                MessageBox.Show("Python error: " + error, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                return null;
+                            }
+
+                            // Çıktı base64 string ise:
+                            byte[] imageBytes = Convert.FromBase64String(output.Trim());
+                            using (var ms = new MemoryStream(imageBytes))
+                            {
+                                return Image.FromStream(ms);
+                            }
                         }
-                    }
-                });
+                    });
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("An error occured: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return null;
+                }
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show("An error occured: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Google Gemini™ API key is not set. Please set it in the settings.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return null;
             }
         }

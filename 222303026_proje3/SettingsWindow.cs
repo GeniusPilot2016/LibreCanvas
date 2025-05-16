@@ -12,9 +12,6 @@ namespace _222303026_proje3
 {
     public partial class SettingsWindow : Form
     {
-        public readonly string DefaultGeminiAIModel = "gemini-2.0-flash-preview-image-generation";
-        public readonly string DefaultHuggingFaceModel = "black-forest-labs/FLUX.1-dev";
-        public readonly string DefaultHuggingFaceModel2 = "mit-han-lab/svdq-int4-flux.1-fill-dev";
         public SettingsWindow()
         {
             InitializeComponent();
@@ -29,37 +26,8 @@ namespace _222303026_proje3
             comboBoxTheme.SelectedIndex = Settings1.Default.PreferredTheme;
             if (!string.IsNullOrEmpty(Settings1.Default.HashedGeminiAIAPIKey))
             {
-                textBoxGeminiAPIKey.Text = EncryptionHelper.DecryptString1(Settings1.Default.HashedGeminiAIAPIKey);
+                textBoxGeminiAPIKey.Text = EncryptionHelper.DecryptString(Settings1.Default.HashedGeminiAIAPIKey);
                 buttonResetGeminiAPIKey.Enabled = true;
-            }
-            if (!string.IsNullOrEmpty(Settings1.Default.HashedHuggingFaceAPIKey))
-            {
-                textBoxHuggingFaceAPIKey.Text = EncryptionHelper.DecryptString2(Settings1.Default.HashedHuggingFaceAPIKey);
-                buttonResetHuggingFaceAPIKey.Enabled = true;
-            }
-            switch (Settings1.Default.PreferredAI)
-            {
-                case 0: // Google Gemini
-                    radioButtonGeminiAI.Checked = true;
-                    break;
-                case 1: // Hugging Face
-                    radioButtonHuggingFace.Checked = true;
-                    break;
-            }
-            textBoxGeminiModel.Text = Settings1.Default.PreferredGeminiModel;
-            textBoxHuggingFaceCreatingModel.Text = Settings1.Default.PreferredHuggingFaceCreatingModel;
-            textBoxHuggingFaceEditingModel.Text = Settings1.Default.PreferredHuggingFaceEditingModel;
-            if (Settings1.Default.PreferredGeminiModel != DefaultGeminiAIModel)
-            {
-                buttonResetPreferredGeminiModel.Enabled = true;
-            }
-            if (Settings1.Default.PreferredHuggingFaceCreatingModel != DefaultHuggingFaceModel)
-            {
-                buttonResetHuggingFaceCreatingImageModel.Enabled = true;
-            }
-            if (Settings1.Default.PreferredHuggingFaceEditingModel != DefaultHuggingFaceModel2)
-            {
-                buttonResetHuggingFaceEditingImageModel.Enabled = true;
             }
             numericUpDownDefaultAIGeneratedImageWidth.Value = Settings1.Default.DefaultAIGeneratedImageSize.Width;
             numericUpDownDefaultAIGeneratedImageHeight.Value = Settings1.Default.DefaultAIGeneratedImageSize.Height;
@@ -325,7 +293,7 @@ namespace _222303026_proje3
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(textBoxGeminiAPIKey.Text) ||
-                textBoxGeminiAPIKey.Text == EncryptionHelper.DecryptString1(Settings1.Default.HashedGeminiAIAPIKey))
+                textBoxGeminiAPIKey.Text == EncryptionHelper.DecryptString(Settings1.Default.HashedGeminiAIAPIKey))
             {
                 buttonUpdateGeminiAPIKey.Enabled = false;
             }
@@ -339,7 +307,9 @@ namespace _222303026_proje3
         {
             try
             {
-                Settings1.Default.HashedGeminiAIAPIKey = EncryptionHelper.EncryptString1(textBoxGeminiAPIKey.Text);
+                EncryptionHelper.ChangeKeyAndIV(); // Change the key and IV for encryption
+                
+                Settings1.Default.HashedGeminiAIAPIKey = EncryptionHelper.EncryptString(textBoxGeminiAPIKey.Text);
                 Settings1.Default.Save(); // Save the settings to persist the changes
                 buttonUpdateGeminiAPIKey.Enabled = false;
                 buttonResetGeminiAPIKey.Enabled = true;
@@ -355,6 +325,7 @@ namespace _222303026_proje3
         {
             try
             {
+                EncryptionHelper.ChangeKeyAndIV(); // Change the key and IV for encryption
                 Settings1.Default.HashedGeminiAIAPIKey = string.Empty; // Clear the API key by setting it to an empty string  
                 Settings1.Default.Save(); // Save the settings to persist the changes
                 buttonUpdateGeminiAPIKey.Enabled = false;
@@ -454,215 +425,6 @@ namespace _222303026_proje3
                 Settings1.Default.SecondaryColor = colorDialog1.Color;
                 panelSecondaryColorPreview.BackColor = colorDialog1.Color;
                 Settings1.Default.Save();
-            }
-        }
-
-        private void radioButton1_CheckedChanged(object sender, EventArgs e)
-        {
-            if (radioButtonGeminiAI.Checked)
-            {
-                Settings1.Default.PreferredAI = 0; // Google Gemini
-                groupBoxGemini.Enabled = true;
-                groupBoxHuggingFace.Enabled = false;
-            }
-            else if (radioButtonHuggingFace.Checked)
-            {
-                Settings1.Default.PreferredAI = 1; // Hugging Face
-                groupBoxGemini.Enabled = false;
-                groupBoxHuggingFace.Enabled = true;
-            }
-            Settings1.Default.Save(); // Save the settings to persist the changes
-        }
-
-        private void button4_Click_1(object sender, EventArgs e)
-        {
-            if (textBoxHuggingFaceAPIKey.UseSystemPasswordChar)
-            {
-                textBoxHuggingFaceAPIKey.UseSystemPasswordChar = false;
-                buttonShowHideHuggingFaceAPIKey.ImageIndex = 6;
-                buttonShowHideHuggingFaceAPIKey.Text = "Hide";
-            }
-            else
-            {
-                textBoxHuggingFaceAPIKey.UseSystemPasswordChar = true;
-                buttonShowHideHuggingFaceAPIKey.ImageIndex = 5;
-                buttonShowHideHuggingFaceAPIKey.Text = "Show";
-            }
-        }
-
-        private void textBoxHuggingFaceAPIKey_TextChanged(object sender, EventArgs e)
-        {
-            if (string.IsNullOrEmpty(textBoxHuggingFaceAPIKey.Text) ||
-                textBoxHuggingFaceAPIKey.Text == EncryptionHelper.DecryptString2(Settings1.Default.HashedHuggingFaceAPIKey))
-            {
-                buttonUpdateHuggingFaceAPIKey.Enabled = false;
-            }
-            else
-            {
-                buttonUpdateHuggingFaceAPIKey.Enabled = true;
-            }
-        }
-
-        private void buttonUpdateHuggingFaceAPIKey_ChangeUICues(object sender, UICuesEventArgs e)
-        {
-            try
-            {
-                Settings1.Default.HashedHuggingFaceAPIKey = EncryptionHelper.EncryptString2(textBoxHuggingFaceAPIKey.Text);
-                Settings1.Default.Save(); // Save the settings to persist the changes
-                buttonUpdateHuggingFaceAPIKey.Enabled = false;
-                buttonUpdateHuggingFaceAPIKey.Enabled = true;
-                MessageBox.Show("Hugging Face API key is saved successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void buttonResetHuggingFaceAPIKey_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                Settings1.Default.HashedHuggingFaceAPIKey = string.Empty; // Clear the API key by setting it to an empty string  
-                Settings1.Default.Save(); // Save the settings to persist the changes
-                buttonUpdateHuggingFaceAPIKey.Enabled = false;
-                buttonUpdateHuggingFaceAPIKey.Enabled = false; // Disable the button after clearing the key  
-                textBoxHuggingFaceAPIKey.Clear(); // Clear the text box
-                MessageBox.Show("Hugging Face API key has been cleared successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void button8_Click(object sender, EventArgs e)
-        {
-            Settings1.Default.PreferredGeminiModel = DefaultGeminiAIModel;
-            Settings1.Default.Save();
-            textBoxGeminiModel.Text = DefaultGeminiAIModel;
-            buttonUpdateGeminiModel.Enabled = false;
-            buttonResetPreferredGeminiModel.Enabled = false;
-            MessageBox.Show("Google Gemini™ model has been reset to default.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        private void updateGeminiModel_Click(object sender, EventArgs e)
-        {
-            Settings1.Default.PreferredGeminiModel = textBoxGeminiModel.Text;
-            Settings1.Default.Save();
-            MessageBox.Show("Google Gemini™ model has been updated successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
-            if (Settings1.Default.PreferredGeminiModel != DefaultGeminiAIModel)
-            {
-                buttonResetPreferredGeminiModel.Enabled = true;
-            }
-            else
-            {
-                buttonResetPreferredGeminiModel.Enabled = false;
-            }
-        }
-
-        private void textBoxGeminiModel_TextChanged(object sender, EventArgs e)
-        {
-            if (!string.IsNullOrEmpty(textBoxGeminiModel.Text) &&
-                textBoxGeminiModel.Text != Settings1.Default.PreferredGeminiModel)
-            {
-                buttonUpdateGeminiModel.Enabled = true;
-            }
-            else
-            {
-                buttonUpdateGeminiModel.Enabled = false;
-            }
-        }
-
-        private void textBoxHuggingFaceEditingModel_TextChanged(object sender, EventArgs e)
-        {
-            if (!string.IsNullOrEmpty(textBoxHuggingFaceEditingModel.Text) &&
-                textBoxHuggingFaceEditingModel.Text != Settings1.Default.PreferredHuggingFaceEditingModel)
-            {
-                buttonUpdateHuggingFaceEditingImageModel.Enabled = true;
-            }
-            else
-            {
-                buttonUpdateHuggingFaceEditingImageModel.Enabled = false;
-            }
-        }
-
-        private void textBoxHuggingFaceCreatingModel_TextChanged(object sender, EventArgs e)
-        {
-            if (!string.IsNullOrEmpty(textBoxHuggingFaceCreatingModel.Text) &&
-                textBoxHuggingFaceCreatingModel.Text != Settings1.Default.PreferredHuggingFaceCreatingModel)
-            {
-                buttonUpdateHuggingFaceCreatingImageModel.Enabled = true;
-            }
-            else
-            {
-                buttonUpdateHuggingFaceCreatingImageModel.Enabled = false;
-            }
-        }
-
-        private void buttonUpdateHuggingFaceCreatingImageModel_Click(object sender, EventArgs e)
-        {
-            Settings1.Default.PreferredHuggingFaceCreatingModel = textBoxHuggingFaceCreatingModel.Text;
-            Settings1.Default.Save();
-            MessageBox.Show("Hugging Face image creation model has been updated successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
-            if (Settings1.Default.PreferredHuggingFaceCreatingModel != DefaultHuggingFaceModel)
-            {
-                buttonResetHuggingFaceCreatingImageModel.Enabled = true;
-            }
-            else
-            {
-                buttonResetHuggingFaceCreatingImageModel.Enabled = false;
-            }
-        }
-
-        private void buttonUpdateHuggingFaceEditingImageModel_Click(object sender, EventArgs e)
-        {
-            Settings1.Default.PreferredHuggingFaceEditingModel = textBoxHuggingFaceEditingModel.Text;
-            Settings1.Default.Save();
-            MessageBox.Show("Hugging Face image editing model has been updated successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
-            if (Settings1.Default.PreferredHuggingFaceEditingModel != DefaultHuggingFaceModel2)
-            {
-                buttonResetHuggingFaceEditingImageModel.Enabled = true;
-            }
-            else
-            {
-                buttonResetHuggingFaceEditingImageModel.Enabled = false;
-            }
-        }
-
-        private void buttonResetHuggingFaceCreatingImageModel_Click(object sender, EventArgs e)
-        {
-            Settings1.Default.PreferredHuggingFaceCreatingModel = DefaultHuggingFaceModel;
-            Settings1.Default.Save();
-            textBoxGeminiModel.Text = DefaultHuggingFaceModel;
-            buttonUpdateHuggingFaceCreatingImageModel.Enabled = false;
-            buttonResetHuggingFaceCreatingImageModel.Enabled = false;
-            MessageBox.Show("Hugging Face image creation model has been reset to default.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        private void buttonResetHuggingFaceEditingImageModel_Click(object sender, EventArgs e)
-        {
-            Settings1.Default.PreferredHuggingFaceEditingModel = DefaultHuggingFaceModel2;
-            Settings1.Default.Save();
-            textBoxGeminiModel.Text = DefaultHuggingFaceModel2;
-            buttonUpdateHuggingFaceEditingImageModel.Enabled = false;
-            buttonResetHuggingFaceEditingImageModel.Enabled = false;
-            MessageBox.Show("Hugging Face image editing model has been reset to default.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        private void buttonUpdateHuggingFaceAPIKey_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                Settings1.Default.HashedHuggingFaceAPIKey = EncryptionHelper.EncryptString2(textBoxHuggingFaceAPIKey.Text);
-                Settings1.Default.Save(); // Save the settings to persist the changes
-                buttonUpdateHuggingFaceAPIKey.Enabled = false;
-                buttonResetHuggingFaceAPIKey.Enabled = true;
-                MessageBox.Show("Hugging Face API key is saved successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

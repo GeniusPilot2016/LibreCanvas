@@ -1,4 +1,6 @@
 ﻿import os
+import sys
+import base64
 from google import genai
 from google.genai import types
 from PIL import Image
@@ -27,4 +29,13 @@ def edit(inputImage, inputText, apiKey):
             # Save image as bytes
             output = BytesIO()
             image.save(output, format="PNG")
-            return output.getvalue()
+            img_bytes = output.getvalue()
+            # Print as base64 to stdout
+            print(base64.b64encode(img_bytes).decode())
+            return
+
+if __name__ == "__main__":
+    image = sys.argv[1]
+    prompt = sys.argv[2]
+    api_key = sys.argv[3]
+    edit(image, prompt, api_key)

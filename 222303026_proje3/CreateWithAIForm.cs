@@ -21,6 +21,11 @@ namespace _222303026_proje3
             //CreateAIImages.ListAvailableModels(); // Call the ListModels API
             numericUpDownWidth.Value = Settings1.Default.DefaultAIGeneratedImageSize.Width;
             numericUpDownHeight.Value = Settings1.Default.DefaultAIGeneratedImageSize.Height;
+            if(string.IsNullOrEmpty(Settings1.Default.HashedGeminiAIAPIKey))
+            {
+                MessageBox.Show("Please enter your Google Gemini™ API key in the settings before using this feature.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
+            }
         }
         private void SetTheme()
         {
@@ -92,38 +97,38 @@ namespace _222303026_proje3
         }
         private async void button1_Click(object sender, EventArgs e)
         {
-            setVisibilityOfProgressBar(true);
+            setVisibilityOfProgressBarAndSomeControls(true);
             string prompt = textBoxPrompt.Text;
             int width = (int)numericUpDownWidth.Value;
             int height = (int)numericUpDownHeight.Value;
-            Image generatedImage = await CreateAIImages.CreateImage(prompt);
+            Image generatedImage = await CreateAIImages.CreateImage(prompt, (int)numericUpDownWidth.Value,
+                (int)numericUpDownHeight.Value);
 
             if (generatedImage != null)
             {
                 // İlk resmi yeniden boyutlandırın
                 Application.DoEvents();
-                setVisibilityOfProgressBar(false);
+                setVisibilityOfProgressBarAndSomeControls(false);
                 image = ResizeImage(generatedImage, width, height);
                 this.Close();
             }
             else
             {
-                setVisibilityOfProgressBar(false);
+                setVisibilityOfProgressBarAndSomeControls(false);
                 MessageBox.Show("Image generation failed.");
             }
         }
-        private void setVisibilityOfProgressBar(bool isVisible)
+        private void setVisibilityOfProgressBarAndSomeControls(bool isVisible)
         {
-            if (isVisible)
-            {
-                labelImageCreating.Visible = true;
-                progressBarImageCreating.Visible = true;
-            }
-            else
-            {
-                labelImageCreating.Visible = false;
-                progressBarImageCreating.Visible = false;
-            }
+            labelImageCreating.Visible = isVisible;
+            progressBarImageCreating.Visible = isVisible;
+            labelPrompt.Enabled = !isVisible;
+            textBoxPrompt.Enabled = !isVisible;
+            buttonCreate.Enabled = !isVisible;
+            labelWidth.Enabled = !isVisible;
+            labelHeight.Enabled = !isVisible;
+            numericUpDownWidth.Enabled = !isVisible;
+            numericUpDownHeight.Enabled = !isVisible;
         }
         private Image ResizeImage(Image image, int width, int height)
         {
