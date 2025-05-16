@@ -17,18 +17,19 @@ namespace _222303026_proje3
     {
         public static Image CreateImage(string prompt)
         {
+            Application.DoEvents();
+            Runtime.PythonDLL = Application.StartupPath + @"\Python\python313.dll";
+            PythonEngine.Initialize();
+            using (Py.GIL())
+            {
+                var script = Py.Import("AIImageCreator.py");
+                var outputImagePyObject = script.InvokeMethod("create", new PyObject[] { new PyString(prompt) });
+                var outputImage = outputImagePyObject.As<Image>();
+                return outputImage;
+            }
             try
             {
-                Application.DoEvents();
-                Runtime.PythonDLL = Application.ExecutablePath + @"\Python\python310.dll";
-                PythonEngine.Initialize();
-                using (Py.GIL())
-                {
-                    var script = Py.Import("AIImageCreator");
-                    var outputImagePyObject = script.InvokeMethod("create", new PyObject[] { new PyString(prompt) });
-                    var outputImage = outputImagePyObject.As<Image>();
-                    return outputImage;
-                }
+                
             }
             catch (Exception ex)
             {
@@ -43,10 +44,11 @@ namespace _222303026_proje3
             {
                 Application.DoEvents();
                 Runtime.PythonDLL = Application.ExecutablePath + @"\Python\python310.dll";
+                PythonEngine.PythonPath = Application.StartupPath + @"\Python";
                 PythonEngine.Initialize();
                 using (Py.GIL())
                 {
-                    var script = Py.Import("AIImageEditor");
+                    var script = Py.Import("AIImageEditor.py");
                     var inputImagePyObject = PyObject.FromManagedObject(inputImage);
                     var promptPyObject = new PyString(prompt);
                     var outputImagePyObject = script.InvokeMethod("edit", new PyObject[] { promptPyObject, inputImagePyObject });
