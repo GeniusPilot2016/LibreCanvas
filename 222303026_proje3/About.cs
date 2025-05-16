@@ -89,5 +89,11 @@ namespace _222303026_proje3
         {
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://github.com/GeniusPilot2016/ArtFusion") { UseShellExecute = true });
         }
+
+        private void buttonViewLicenseText_Click(object sender, EventArgs e)
+        {
+            LicenseWindow licenseWindow = new LicenseWindow();
+            licenseWindow.ShowDialog();
+        }
     }
 }

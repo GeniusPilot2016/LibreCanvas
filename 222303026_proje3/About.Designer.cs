@@ -102,7 +102,7 @@
             label1.Anchor = AnchorStyles.Top;
             label1.AutoSize = true;
             label1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label1.Location = new Point(255, 492);
+            label1.Location = new Point(265, 492);
             label1.Name = "label1";
             label1.Size = new Size(99, 20);
             label1.TabIndex = 6;
@@ -148,7 +148,7 @@
             buttonVisitIcons8.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             buttonVisitIcons8.ImageIndex = 0;
             buttonVisitIcons8.ImageList = icons;
-            buttonVisitIcons8.Location = new Point(69, 442);
+            buttonVisitIcons8.Location = new Point(66, 442);
             buttonVisitIcons8.Name = "buttonVisitIcons8";
             buttonVisitIcons8.Size = new Size(151, 33);
             buttonVisitIcons8.TabIndex = 10;
@@ -173,7 +173,7 @@
             buttonViewLicenseText.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             buttonViewLicenseText.ImageIndex = 1;
             buttonViewLicenseText.ImageList = icons;
-            buttonViewLicenseText.Location = new Point(226, 442);
+            buttonViewLicenseText.Location = new Point(223, 442);
             buttonViewLicenseText.Name = "buttonViewLicenseText";
             buttonViewLicenseText.Size = new Size(161, 33);
             buttonViewLicenseText.TabIndex = 10;
@@ -181,6 +181,7 @@
             buttonViewLicenseText.TextAlign = ContentAlignment.MiddleRight;
             buttonViewLicenseText.TextImageRelation = TextImageRelation.ImageBeforeText;
             buttonViewLicenseText.UseVisualStyleBackColor = true;
+            buttonViewLicenseText.Click += buttonViewLicenseText_Click;
             // 
             // buttonForkMeOnGithub
             // 
@@ -188,7 +189,7 @@
             buttonForkMeOnGithub.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             buttonForkMeOnGithub.ImageIndex = 2;
             buttonForkMeOnGithub.ImageList = icons;
-            buttonForkMeOnGithub.Location = new Point(393, 442);
+            buttonForkMeOnGithub.Location = new Point(390, 442);
             buttonForkMeOnGithub.Name = "buttonForkMeOnGithub";
             buttonForkMeOnGithub.Size = new Size(171, 33);
             buttonForkMeOnGithub.TabIndex = 10;
