@@ -17,6 +17,7 @@ namespace _222303026_proje3
         public CreateWithAIForm()
         {
             InitializeComponent();
+            ThemeManager.RegisterForm(this); 
             SetTheme();
             SetFonts();
             numericUpDownWidth.Value = Settings1.Default.DefaultAIGeneratedImageSize.Width;
@@ -24,7 +25,7 @@ namespace _222303026_proje3
         }
         private void SetFonts()
         {
-            UIFonts uiFonts = new UIFonts();
+            UIFonts uiFonts = UIFonts.Instance;
             foreach (Control control in Controls)
             {
                 control.Font = uiFonts.SetUIFont(control.Font.Size, control.Font.Style);

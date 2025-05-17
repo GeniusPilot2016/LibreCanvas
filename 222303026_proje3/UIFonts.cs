@@ -8,11 +8,14 @@ namespace _222303026_proje3
 {
     public class UIFonts : IDisposable
     {
+        private static UIFonts instance;
+        private static readonly object lockObject = new object();
+
         private PrivateFontCollection privateFonts = new PrivateFontCollection();
         private string[] fontFiles;
         private bool disposed = false;
 
-        public UIFonts()
+        private UIFonts()
         {
             fontFiles = new string[]
             {
@@ -53,13 +56,34 @@ namespace _222303026_proje3
             privateFonts.AddFontFile(fontFiles[10]);
         }
 
+        public static UIFonts Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    lock (lockObject)
+                    {
+                        if (instance == null)
+                        {
+                            instance = new UIFonts();
+                        }
+                    }
+                }
+                return instance;
+            }
+        }
+
         public Font SetUIFont(float size, FontStyle style)
         {
+            if (disposed) throw new ObjectDisposedException(nameof(UIFonts));
             Font font = new Font(privateFonts.Families[0], size, style);
             return font;
         }
+
         public Font SetUIFont(float size)
         {
+            if (disposed) throw new ObjectDisposedException(nameof(UIFonts));
             Font font = new Font(privateFonts.Families[0], size);
             return font;
         }
@@ -91,6 +115,7 @@ namespace _222303026_proje3
                     }
                 }
 
+                instance = null;
                 disposed = true;
             }
         }

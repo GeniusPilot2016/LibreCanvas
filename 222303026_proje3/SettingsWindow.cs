@@ -21,7 +21,7 @@ namespace _222303026_proje3
         }
         private void SetFonts()
         {
-            UIFonts uiFonts = new UIFonts();
+            UIFonts uiFonts = UIFonts.Instance;
             foreach (TabPage tabpage in tabControl1.TabPages)
             {
                 tabpage.Font = uiFonts.SetUIFont(tabpage.Font.Size, tabpage.Font.Style);
@@ -271,7 +271,12 @@ namespace _222303026_proje3
         {
             Settings1.Default.PreferredTheme = comboBoxTheme.SelectedIndex;
             Settings1.Default.Save(); // Save the settings to persist the changes
+
+            // Apply theme to this form first
             SetTheme();
+
+            // Apply theme to all registered forms
+            ThemeManager.ApplyThemeToAllForms();
         }
 
         private void tabPage1_Click(object sender, EventArgs e)

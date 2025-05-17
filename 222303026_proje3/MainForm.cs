@@ -15,6 +15,7 @@ namespace _222303026_proje3
         public MainForm()
         {
             InitializeComponent();
+            ThemeManager.RegisterForm(this); 
             SetTheme();
             SetFonts();
             if (Settings1.Default.RecentFiles == null)
@@ -33,7 +34,7 @@ namespace _222303026_proje3
         }
         private void SetFonts()
         {
-            UIFonts uiFonts = new UIFonts();
+            UIFonts uiFonts = UIFonts.Instance;
             foreach (Control control in Controls)
             {
                 control.Font = uiFonts.SetUIFont(control.Font.Size, control.Font.Style);
@@ -42,6 +43,7 @@ namespace _222303026_proje3
                     logoParts.Font = uiFonts.SetUIFont(logoParts.Font.Size, logoParts.Font.Style);
                 }
             }
+            contextMenuStrip1.Font = uiFonts.SetUIFont(contextMenuStrip1.Font.Size, contextMenuStrip1.Font.Style);
         }
         private void SetTheme()
         {

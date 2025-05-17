@@ -312,6 +312,7 @@ namespace _222303026_proje3
         private void InitializeComponentAndFont()
         {
             InitializeComponent();
+            ThemeManager.RegisterForm(this); 
             if (fontsComboBox.Items.Count > 0)
             {
                 fontsComboBox.SelectedIndex = 0;
@@ -338,7 +339,7 @@ namespace _222303026_proje3
         }
         private void SetFonts()
         {
-            UIFonts uiFonts = new UIFonts();
+            UIFonts uiFonts = UIFonts.Instance;
             foreach (Control control in Controls)
             {
                 control.Font = uiFonts.SetUIFont(control.Font.Size, control.Font.Style);
