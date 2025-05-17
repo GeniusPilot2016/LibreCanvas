@@ -489,7 +489,7 @@
             // 
             label18.Anchor = AnchorStyles.None;
             label18.AutoSize = true;
-            label18.Font = new Font("HarmonyOS Sans", 8.999999F);
+            label18.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             label18.Location = new Point(21, 35);
             label18.Margin = new Padding(4, 0, 4, 0);
             label18.Name = "label18";
@@ -501,7 +501,7 @@
             // 
             label14.Anchor = AnchorStyles.Bottom;
             label14.AutoSize = true;
-            label14.Font = new Font("HarmonyOS Sans", 8.999999F);
+            label14.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             label14.ImageAlign = ContentAlignment.TopLeft;
             label14.ImageIndex = 7;
             label14.ImageList = icons;
