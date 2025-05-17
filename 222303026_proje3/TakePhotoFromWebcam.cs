@@ -4,6 +4,7 @@ using System.IO;
 using System.Management;
 using System.Media;
 using System.Windows.Forms;
+using _222303026_proje3.Properties;
 using DirectShowLib;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
@@ -113,7 +114,10 @@ namespace _222303026_proje3
 
         private void button1_Click(object sender, EventArgs e)
         {
-            sound.SoundLocation = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "webcam_take_photo.wav");
+            // Convert the byte[] to a temporary file path and use it as the SoundLocation
+            string tempFilePath = Path.GetTempFileName();
+            File.WriteAllBytes(tempFilePath, Resources.webcam_take_photo);
+            sound.SoundLocation = tempFilePath;
             sound.Play();
             if (pictureBox1.Image != null)
             {
@@ -141,9 +145,12 @@ namespace _222303026_proje3
             {
                 videoSource.ImageGrabbed -= ProcessFrame;
                 videoSource.Stop();
-                videoSource.Dispose();
-                videoSource = null;
-            }
+                if (videoSource != null && videoSource.IsOpened)
+                {
+                    videoSource.Dispose();
+                    videoSource = null;
+                }
+            }   
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)

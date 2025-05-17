@@ -444,7 +444,6 @@
     <None Remove="Python\_uuid.pyd" />
     <None Remove="Python\_wmi.pyd" />
     <None Remove="Python\_zoneinfo.pyd" />
-    <None Remove="Resources\webcam_take_photo.wav" />
   </ItemGroup>
 
   <ItemGroup>
@@ -1285,9 +1284,6 @@
     <Content Include="Python\_zoneinfo.pyd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\webcam_take_photo.wav">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -1329,6 +1325,9 @@
     <None Update="CryptographicSettings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>CryptographicSettings.Designer.cs</LastGenOutput>
+    </None>
+    <None Update="Resources\webcam_take_photo.wav">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
     <None Update="Settings1.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

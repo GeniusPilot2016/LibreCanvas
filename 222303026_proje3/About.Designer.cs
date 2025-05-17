@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            ListViewItem listViewItem1 = new ListViewItem(new string[] { "GeniusPilot2016 (Nisa Özdoğan)", "Designing and programming" }, -1);
+            ListViewItem listViewItem4 = new ListViewItem(new string[] { "GeniusPilot2016 (Nisa Özdoğan)", "Designing and programming" }, -1);
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(About));
             panel1 = new Panel();
             pictureBox1 = new PictureBox();
@@ -113,7 +113,7 @@
             listView1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             listView1.Columns.AddRange(new ColumnHeader[] { columnHeader1, columnHeader2 });
             listView1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            listView1.Items.AddRange(new ListViewItem[] { listViewItem1 });
+            listView1.Items.AddRange(new ListViewItem[] { listViewItem4 });
             listView1.Location = new Point(11, 515);
             listView1.Name = "listView1";
             listView1.Size = new Size(609, 249);
@@ -148,9 +148,9 @@
             buttonVisitIcons8.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             buttonVisitIcons8.ImageIndex = 0;
             buttonVisitIcons8.ImageList = icons;
-            buttonVisitIcons8.Location = new Point(66, 442);
+            buttonVisitIcons8.Location = new Point(65, 439);
             buttonVisitIcons8.Name = "buttonVisitIcons8";
-            buttonVisitIcons8.Size = new Size(151, 33);
+            buttonVisitIcons8.Size = new Size(155, 35);
             buttonVisitIcons8.TabIndex = 10;
             buttonVisitIcons8.Text = "Visit icons8.com";
             buttonVisitIcons8.TextAlign = ContentAlignment.MiddleRight;
@@ -173,9 +173,9 @@
             buttonViewLicenseText.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             buttonViewLicenseText.ImageIndex = 1;
             buttonViewLicenseText.ImageList = icons;
-            buttonViewLicenseText.Location = new Point(223, 442);
+            buttonViewLicenseText.Location = new Point(226, 439);
             buttonViewLicenseText.Name = "buttonViewLicenseText";
-            buttonViewLicenseText.Size = new Size(161, 33);
+            buttonViewLicenseText.Size = new Size(165, 35);
             buttonViewLicenseText.TabIndex = 10;
             buttonViewLicenseText.Text = "View License Text";
             buttonViewLicenseText.TextAlign = ContentAlignment.MiddleRight;
@@ -189,9 +189,9 @@
             buttonForkMeOnGithub.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             buttonForkMeOnGithub.ImageIndex = 2;
             buttonForkMeOnGithub.ImageList = icons;
-            buttonForkMeOnGithub.Location = new Point(390, 442);
+            buttonForkMeOnGithub.Location = new Point(397, 439);
             buttonForkMeOnGithub.Name = "buttonForkMeOnGithub";
-            buttonForkMeOnGithub.Size = new Size(171, 33);
+            buttonForkMeOnGithub.Size = new Size(175, 35);
             buttonForkMeOnGithub.TabIndex = 10;
             buttonForkMeOnGithub.Text = "Fork Me on GitHub";
             buttonForkMeOnGithub.TextAlign = ContentAlignment.MiddleRight;
@@ -212,8 +212,12 @@
             Controls.Add(label1);
             Controls.Add(label4);
             Controls.Add(buttonVisitIcons8);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
+            MaximizeBox = false;
+            MinimizeBox = false;
             Name = "About";
+            ShowInTaskbar = false;
             Text = "About";
             Load += About_Load;
             panel1.ResumeLayout(false);

@@ -54,9 +54,9 @@
             button1.Font = new Font("HarmonyOS Sans", 8.999999F);
             button1.ImageIndex = 0;
             button1.ImageList = icons;
-            button1.Location = new Point(454, 596);
+            button1.Location = new Point(429, 591);
             button1.Name = "button1";
-            button1.Size = new Size(119, 37);
+            button1.Size = new Size(153, 42);
             button1.TabIndex = 1;
             button1.Text = "Take Photo";
             button1.TextAlign = ContentAlignment.MiddleRight;

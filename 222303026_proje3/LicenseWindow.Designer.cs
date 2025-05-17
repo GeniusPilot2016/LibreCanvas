@@ -55,7 +55,7 @@
             button1.ImageList = icons;
             button1.Location = new Point(235, 612);
             button1.Name = "button1";
-            button1.Size = new Size(110, 29);
+            button1.Size = new Size(110, 34);
             button1.TabIndex = 1;
             button1.Text = "Close";
             button1.TextAlign = ContentAlignment.MiddleRight;

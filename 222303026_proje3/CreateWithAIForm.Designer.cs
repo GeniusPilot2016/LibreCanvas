@@ -164,7 +164,7 @@
             // 
             progressBarImageCreating.Anchor = AnchorStyles.Bottom;
             progressBarImageCreating.Location = new Point(148, 158);
-            progressBarImageCreating.Margin = new Padding(4, 4, 4, 4);
+            progressBarImageCreating.Margin = new Padding(4);
             progressBarImageCreating.MarqueeAnimationSpeed = 10;
             progressBarImageCreating.Name = "progressBarImageCreating";
             progressBarImageCreating.Size = new Size(510, 20);
