@@ -140,7 +140,8 @@ namespace _222303026_proje3
             if (generatedImage != null)
             {
                 ImageEditor imageEditor = new ImageEditor(generatedImage, true);
-                this.Hide(); imageEditor.Show();
+                this.Hide(); 
+                imageEditor.Show();
             }
         }
 

@@ -21,11 +21,6 @@ namespace _222303026_proje3
             //CreateAIImages.ListAvailableModels(); // Call the ListModels API
             numericUpDownWidth.Value = Settings1.Default.DefaultAIGeneratedImageSize.Width;
             numericUpDownHeight.Value = Settings1.Default.DefaultAIGeneratedImageSize.Height;
-            if(string.IsNullOrEmpty(Settings1.Default.HashedGeminiAIAPIKey))
-            {
-                MessageBox.Show("Please enter your Google Gemini™ API key in the settings before using this feature.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.Close();
-            }
         }
         private void SetTheme()
         {
@@ -132,6 +127,27 @@ namespace _222303026_proje3
         }
         private Image ResizeImage(Image image, int width, int height)
         {
+            // Orijinal ve hedef görüntülerin en-boy oranlarını hesapla
+            float sourceRatio = (float)image.Width / image.Height;
+            float targetRatio = (float)width / height;
+
+            // Kaynak görüntünün boyutlarını ve konumunu hesapla
+            int sourceX = 0, sourceY = 0;
+            int sourceWidth = image.Width, sourceHeight = image.Height;
+
+            // En-boy oranlarını karşılaştır ve uygun şekilde kırpma yap
+            if (sourceRatio > targetRatio) // Kaynak görüntü daha geniş, yatay kırpma yap
+            {
+                sourceWidth = (int)(image.Height * targetRatio);
+                sourceX = (image.Width - sourceWidth) / 2; // Yatay merkezleme
+            }
+            else if (sourceRatio < targetRatio) // Kaynak görüntü daha uzun, dikey kırpma yap
+            {
+                sourceHeight = (int)(image.Width / targetRatio);
+                sourceY = (image.Height - sourceHeight) / 2; // Dikey merkezleme
+            }
+
+            // Hedef görüntüyü oluştur
             var destRect = new Rectangle(0, 0, width, height);
             var destImage = new Bitmap(width, height);
 
@@ -148,7 +164,8 @@ namespace _222303026_proje3
                 using (var wrapMode = new System.Drawing.Imaging.ImageAttributes())
                 {
                     wrapMode.SetWrapMode(System.Drawing.Drawing2D.WrapMode.TileFlipXY);
-                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+                    // Kaynak görüntüyü, hesaplanmış kaynak koordinatlarını kullanarak hedef görüntüye çiz
+                    graphics.DrawImage(image, destRect, sourceX, sourceY, sourceWidth, sourceHeight, GraphicsUnit.Pixel, wrapMode);
                 }
             }
 
@@ -169,7 +186,11 @@ namespace _222303026_proje3
 
         private void CreateWithAIForm_Load(object sender, EventArgs e)
         {
-
+            if (string.IsNullOrEmpty(Settings1.Default.HashedGeminiAIAPIKey))
+            {
+                MessageBox.Show("Please enter your Google Gemini™ API key in the settings before using this feature.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
+            }
         }
     }
 }

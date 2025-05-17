@@ -102,12 +102,12 @@
             label2.ImageAlign = ContentAlignment.MiddleLeft;
             label2.ImageIndex = 1;
             label2.ImageList = icons;
-            label2.Location = new Point(59, 120);
+            label2.Location = new Point(52, 121);
             label2.Margin = new Padding(2, 0, 2, 0);
             label2.Name = "label2";
-            label2.Size = new Size(576, 20);
+            label2.Size = new Size(569, 20);
             label2.TabIndex = 1;
-            label2.Text = "     Warning: AI image generation may produce inaccurate or inappropriate images.";
+            label2.Text = "     Warning: AI image generator may produce inaccurate or inappropriate images.";
             label2.TextAlign = ContentAlignment.MiddleRight;
             // 
             // numericUpDownWidth
@@ -177,7 +177,7 @@
             labelImageCreating.Anchor = AnchorStyles.Bottom;
             labelImageCreating.AutoSize = true;
             labelImageCreating.Font = new Font("HarmonyOS Sans", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            labelImageCreating.Location = new Point(15, 158);
+            labelImageCreating.Location = new Point(13, 158);
             labelImageCreating.Margin = new Padding(4, 0, 4, 0);
             labelImageCreating.Name = "labelImageCreating";
             labelImageCreating.Size = new Size(127, 20);
