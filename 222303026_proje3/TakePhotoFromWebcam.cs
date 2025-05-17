@@ -26,11 +26,6 @@ namespace _222303026_proje3
             LoadVideoDevices();
             SetTheme();
             SetFonts();
-            if (comboBox1.Items.Count == 0)
-            {
-                this.Close();
-                MessageBox.Show("No webcams found. Please connect a webcam and try again.", "No Webcam Found", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
         }
         private void SetFonts()
         {
@@ -159,7 +154,7 @@ namespace _222303026_proje3
                     videoSource.Dispose();
                     videoSource = null;
                 }
-            }   
+            }
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -180,6 +175,15 @@ namespace _222303026_proje3
                 previousIndex = comboBox1.SelectedIndex;
                 StopVideoCapture();
                 StartVideoCapture(comboBox1.SelectedIndex);
+            }
+        }
+
+        private void TakePhotoFromWebcam_Load(object sender, EventArgs e)
+        {
+            if (comboBox1.Items.Count == 0)
+            {
+                MessageBox.Show("No webcams found. Please connect a webcam and try again.", "No Webcam Found", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                this.Close();
             }
         }
     }

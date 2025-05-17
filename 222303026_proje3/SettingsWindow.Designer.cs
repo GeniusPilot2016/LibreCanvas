@@ -1571,6 +1571,7 @@
             ClientSize = new Size(719, 904);
             Controls.Add(tabControl1);
             FormBorderStyle = FormBorderStyle.FixedSingle;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(4);
             MaximizeBox = false;
             MinimizeBox = false;

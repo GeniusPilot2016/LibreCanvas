@@ -103,10 +103,12 @@
             Controls.Add(label1);
             Controls.Add(button1);
             Controls.Add(pictureBox1);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "TakePhotoFromWebcam";
             ShowIcon = false;
             Text = "Take Photo From Webcam";
             FormClosed += TakePhotoFromWebcam_FormClosed;
+            Load += TakePhotoFromWebcam_Load;
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
             PerformLayout();

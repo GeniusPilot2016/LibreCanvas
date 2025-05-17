@@ -100,6 +100,7 @@
             Controls.Add(buttonDiscard);
             Controls.Add(buttonAccept);
             Controls.Add(pictureBox1);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "WebcamPhotoPreview";
             ShowIcon = false;
             Text = "Preview";

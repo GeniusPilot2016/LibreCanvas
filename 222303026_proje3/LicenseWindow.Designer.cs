@@ -79,6 +79,7 @@
             Controls.Add(button1);
             Controls.Add(richTextBox1);
             FormBorderStyle = FormBorderStyle.FixedSingle;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "LicenseWindow";

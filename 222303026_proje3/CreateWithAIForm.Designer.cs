@@ -203,6 +203,7 @@
             Controls.Add(labelPrompt);
             Controls.Add(textBoxPrompt);
             FormBorderStyle = FormBorderStyle.FixedSingle;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(2);
             MaximizeBox = false;
             MinimizeBox = false;
