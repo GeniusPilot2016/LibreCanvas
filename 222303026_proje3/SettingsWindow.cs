@@ -17,6 +17,29 @@ namespace _222303026_proje3
             InitializeComponent();
             InitializeVariables();
             SetTheme();
+            SetFonts();
+        }
+        private void SetFonts()
+        {
+            UIFonts uiFonts = new UIFonts();
+            foreach (TabPage tabpage in tabControl1.TabPages)
+            {
+                tabpage.Font = uiFonts.SetUIFont(tabpage.Font.Size, tabpage.Font.Style);
+                foreach (Control control in tabpage.Controls)
+                {
+                    if (control is GroupBox groupBox)
+                    {
+                        foreach (Control groupedControl in groupBox.Controls)
+                        {
+                            groupedControl.Font = uiFonts.SetUIFont(groupedControl.Font.Size, groupedControl.Font.Style);
+                            foreach(Control childGroupedControl in groupedControl.Controls)
+                            {
+                                childGroupedControl.Font = uiFonts.SetUIFont(childGroupedControl.Font.Size, childGroupedControl.Font.Style);
+                            }
+                        }
+                    }
+                }
+            }
         }
         private void InitializeVariables()
         {

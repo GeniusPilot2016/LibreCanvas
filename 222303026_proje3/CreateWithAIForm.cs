@@ -18,9 +18,17 @@ namespace _222303026_proje3
         {
             InitializeComponent();
             SetTheme();
-            //CreateAIImages.ListAvailableModels(); // Call the ListModels API
+            SetFonts();
             numericUpDownWidth.Value = Settings1.Default.DefaultAIGeneratedImageSize.Width;
             numericUpDownHeight.Value = Settings1.Default.DefaultAIGeneratedImageSize.Height;
+        }
+        private void SetFonts()
+        {
+            UIFonts uiFonts = new UIFonts();
+            foreach (Control control in Controls)
+            {
+                control.Font = uiFonts.SetUIFont(control.Font.Size, control.Font.Style);
+            }
         }
         private void SetTheme()
         {

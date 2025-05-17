@@ -16,6 +16,7 @@ namespace _222303026_proje3
         {
             InitializeComponent();
             SetTheme();
+            SetFonts();
             if (Settings1.Default.RecentFiles == null)
             {
                 Settings1.Default.RecentFiles = new System.Collections.Specialized.StringCollection();
@@ -28,6 +29,18 @@ namespace _222303026_proje3
                     listBox1.Items.Add(file);
                 }
                 listBox1.Enabled = true;
+            }
+        }
+        private void SetFonts()
+        {
+            UIFonts uiFonts = new UIFonts();
+            foreach (Control control in Controls)
+            {
+                control.Font = uiFonts.SetUIFont(control.Font.Size, control.Font.Style);
+                foreach(Control logoParts in panel1.Controls)
+                {
+                    logoParts.Font = uiFonts.SetUIFont(logoParts.Font.Size, logoParts.Font.Style);
+                }
             }
         }
         private void SetTheme()

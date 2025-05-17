@@ -305,11 +305,11 @@
             groupBoxGemini.Controls.Add(buttonResetGeminiAPIKey);
             groupBoxGemini.Controls.Add(buttonShowHideGeminiAPIKey);
             groupBoxGemini.Controls.Add(buttonUpdateGeminiAPIKey);
-            groupBoxGemini.Location = new Point(6, 26);
+            groupBoxGemini.Location = new Point(8, 26);
             groupBoxGemini.Margin = new Padding(2);
             groupBoxGemini.Name = "groupBoxGemini";
             groupBoxGemini.Padding = new Padding(2);
-            groupBoxGemini.Size = new Size(659, 119);
+            groupBoxGemini.Size = new Size(657, 119);
             groupBoxGemini.TabIndex = 6;
             groupBoxGemini.TabStop = false;
             groupBoxGemini.Text = "Google Gemini™ Settings";
@@ -321,7 +321,7 @@
             label13.ImageAlign = ContentAlignment.MiddleLeft;
             label13.ImageIndex = 10;
             label13.ImageList = icons;
-            label13.Location = new Point(8, 32);
+            label13.Location = new Point(7, 32);
             label13.Margin = new Padding(4, 0, 4, 0);
             label13.Name = "label13";
             label13.Size = new Size(203, 20);
@@ -350,7 +350,7 @@
             // textBoxGeminiAPIKey
             // 
             textBoxGeminiAPIKey.Anchor = AnchorStyles.Top;
-            textBoxGeminiAPIKey.Location = new Point(220, 29);
+            textBoxGeminiAPIKey.Location = new Point(219, 29);
             textBoxGeminiAPIKey.Margin = new Padding(4);
             textBoxGeminiAPIKey.Name = "textBoxGeminiAPIKey";
             textBoxGeminiAPIKey.Size = new Size(325, 27);
@@ -364,7 +364,7 @@
             buttonResetGeminiAPIKey.Enabled = false;
             buttonResetGeminiAPIKey.ImageIndex = 9;
             buttonResetGeminiAPIKey.ImageList = icons;
-            buttonResetGeminiAPIKey.Location = new Point(341, 64);
+            buttonResetGeminiAPIKey.Location = new Point(340, 64);
             buttonResetGeminiAPIKey.Margin = new Padding(4);
             buttonResetGeminiAPIKey.Name = "buttonResetGeminiAPIKey";
             buttonResetGeminiAPIKey.Size = new Size(284, 34);
@@ -380,7 +380,7 @@
             buttonShowHideGeminiAPIKey.Anchor = AnchorStyles.Top;
             buttonShowHideGeminiAPIKey.ImageIndex = 5;
             buttonShowHideGeminiAPIKey.ImageList = icons;
-            buttonShowHideGeminiAPIKey.Location = new Point(552, 25);
+            buttonShowHideGeminiAPIKey.Location = new Point(551, 25);
             buttonShowHideGeminiAPIKey.Margin = new Padding(4);
             buttonShowHideGeminiAPIKey.Name = "buttonShowHideGeminiAPIKey";
             buttonShowHideGeminiAPIKey.Size = new Size(94, 34);
@@ -397,7 +397,7 @@
             buttonUpdateGeminiAPIKey.Enabled = false;
             buttonUpdateGeminiAPIKey.ImageIndex = 8;
             buttonUpdateGeminiAPIKey.ImageList = icons;
-            buttonUpdateGeminiAPIKey.Location = new Point(31, 64);
+            buttonUpdateGeminiAPIKey.Location = new Point(30, 64);
             buttonUpdateGeminiAPIKey.Margin = new Padding(4);
             buttonUpdateGeminiAPIKey.Name = "buttonUpdateGeminiAPIKey";
             buttonUpdateGeminiAPIKey.Size = new Size(290, 34);
@@ -489,6 +489,7 @@
             // 
             label18.Anchor = AnchorStyles.None;
             label18.AutoSize = true;
+            label18.Font = new Font("HarmonyOS Sans", 8.999999F);
             label18.Location = new Point(21, 35);
             label18.Margin = new Padding(4, 0, 4, 0);
             label18.Name = "label18";
@@ -500,6 +501,7 @@
             // 
             label14.Anchor = AnchorStyles.Bottom;
             label14.AutoSize = true;
+            label14.Font = new Font("HarmonyOS Sans", 8.999999F);
             label14.ImageAlign = ContentAlignment.TopLeft;
             label14.ImageIndex = 7;
             label14.ImageList = icons;

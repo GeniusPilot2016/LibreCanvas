@@ -328,6 +328,72 @@ namespace _222303026_proje3
                 fontsComboBox.Items.Add(fontFamilies[i].Name);
             }
             SetTheme();
+            SetFonts();
+            // Set the default selected font to the first one in the list
+            if (fontsComboBox.Items.Count > 0)
+            {
+                fontsComboBox.SelectedIndex = 0;
+            }
+            toolStripSample.Font = new Font(fontFamilies[fontsComboBox.SelectedIndex], toolStripSample.Font.Size, toolStripSample.Font.Style);
+        }
+        private void SetFonts()
+        {
+            UIFonts uiFonts = new UIFonts();
+            foreach (Control control in Controls)
+            {
+                control.Font = uiFonts.SetUIFont(control.Font.Size, control.Font.Style);
+                foreach (Control topToolStripPanelControls in toolStripContainer1.TopToolStripPanel.Controls)
+                {
+                    topToolStripPanelControls.Font = uiFonts.SetUIFont(topToolStripPanelControls.Font.Size, topToolStripPanelControls.Font.Style);
+                    foreach (ToolStripItem item in menuStrip1.Items)
+                    {
+                        if (item is ToolStripMenuItem menuItem)
+                        {
+                            menuItem.Font = uiFonts.SetUIFont(menuItem.Font.Size, menuItem.Font.Style);
+                        }
+                    }
+                    foreach (ToolStrip toolStrip in toolStripContainer1.TopToolStripPanel.Controls.OfType<ToolStrip>())
+                    {
+                        foreach (ToolStripItem items in toolStrip.Items) // Fix: Use the correct instance of ToolStrip
+                        {
+                            items.Font = uiFonts.SetUIFont(items.Font.Size, items.Font.Style);
+                        }
+                    }
+                }
+                foreach (Control bottomToolStripPanelControls in toolStripContainer1.BottomToolStripPanel.Controls)
+                {
+                    bottomToolStripPanelControls.Font = uiFonts.SetUIFont(bottomToolStripPanelControls.Font.Size, bottomToolStripPanelControls.Font.Style);
+                    foreach (ToolStrip toolStrip in toolStripContainer1.BottomToolStripPanel.Controls.OfType<ToolStrip>())
+                    {
+                        foreach (ToolStripItem items in toolStrip.Items) // Fix: Use the correct instance of ToolStrip
+                        {
+                            items.Font = uiFonts.SetUIFont(items.Font.Size, items.Font.Style);
+                        }
+                    }
+                }
+                foreach (Control leftToolStripPanelControls in toolStripContainer1.LeftToolStripPanel.Controls)
+                {
+                    leftToolStripPanelControls.Font = uiFonts.SetUIFont(leftToolStripPanelControls.Font.Size, leftToolStripPanelControls.Font.Style);
+                    foreach (ToolStrip toolStrip in toolStripContainer1.LeftToolStripPanel.Controls.OfType<ToolStrip>())
+                    {
+                        foreach (ToolStripItem items in toolStrip.Items) // Fix: Use the correct instance of ToolStrip
+                        {
+                            items.Font = uiFonts.SetUIFont(items.Font.Size, items.Font.Style);
+                        }
+                    }
+                }
+                foreach (Control rightToolStripPanelControls in toolStripContainer1.RightToolStripPanel.Controls)
+                {
+                    rightToolStripPanelControls.Font = uiFonts.SetUIFont(rightToolStripPanelControls.Font.Size, rightToolStripPanelControls.Font.Style);
+                    foreach (ToolStrip toolStrip in toolStripContainer1.RightToolStripPanel.Controls.OfType<ToolStrip>())
+                    {
+                        foreach (ToolStripItem items in toolStrip.Items) // Fix: Use the correct instance of ToolStrip
+                        {
+                            items.Font = uiFonts.SetUIFont(items.Font.Size, items.Font.Style);
+                        }
+                    }
+                }
+            }
         }
         private void createNewFile()
         {

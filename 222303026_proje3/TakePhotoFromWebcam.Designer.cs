@@ -51,7 +51,7 @@
             // button1
             // 
             button1.Anchor = AnchorStyles.Bottom;
-            button1.Font = new Font("HarmonyOS Sans", 8.999999F);
+            button1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             button1.ImageIndex = 0;
             button1.ImageList = icons;
             button1.Location = new Point(429, 591);

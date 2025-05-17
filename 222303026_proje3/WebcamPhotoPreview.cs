@@ -20,6 +20,15 @@ namespace _222303026_proje3
             InitializeComponent();
             pictureBox1.Image = image;
             SetTheme();
+            SetFonts();
+        }
+        private void SetFonts()
+        {
+            UIFonts uiFonts = new UIFonts();
+            foreach (Control control in Controls)
+            {
+                control.Font = uiFonts.SetUIFont(control.Font.Size, control.Font.Style);
+            }
         }
         private void SetTheme()
         {

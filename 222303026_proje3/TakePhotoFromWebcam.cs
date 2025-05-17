@@ -25,10 +25,19 @@ namespace _222303026_proje3
             InitializeComponent();
             LoadVideoDevices();
             SetTheme();
+            SetFonts();
             if (comboBox1.Items.Count == 0)
             {
                 this.Close();
                 MessageBox.Show("No webcams found. Please connect a webcam and try again.", "No Webcam Found", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+        private void SetFonts()
+        {
+            UIFonts uiFonts = new UIFonts();
+            foreach (Control control in Controls)
+            {
+                control.Font = uiFonts.SetUIFont(control.Font.Size, control.Font.Style);
             }
         }
         private void SetTheme()

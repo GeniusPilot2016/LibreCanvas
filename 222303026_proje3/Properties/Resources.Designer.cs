@@ -71,6 +71,126 @@ namespace _222303026_proje3.Properties {
         }
         
         /// <summary>
+        ///   System.Byte[] türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static byte[] HarmonyOS_Sans_Black {
+            get {
+                object obj = ResourceManager.GetObject("HarmonyOS_Sans_Black", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Byte[] türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static byte[] HarmonyOS_Sans_Black_Italic {
+            get {
+                object obj = ResourceManager.GetObject("HarmonyOS_Sans_Black_Italic", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Byte[] türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static byte[] HarmonyOS_Sans_Bold {
+            get {
+                object obj = ResourceManager.GetObject("HarmonyOS_Sans_Bold", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Byte[] türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static byte[] HarmonyOS_Sans_Bold_Italic {
+            get {
+                object obj = ResourceManager.GetObject("HarmonyOS_Sans_Bold_Italic", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Byte[] türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static byte[] HarmonyOS_Sans_Light {
+            get {
+                object obj = ResourceManager.GetObject("HarmonyOS_Sans_Light", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Byte[] türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static byte[] HarmonyOS_Sans_Light_Italic {
+            get {
+                object obj = ResourceManager.GetObject("HarmonyOS_Sans_Light_Italic", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Byte[] türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static byte[] HarmonyOS_Sans_Medium {
+            get {
+                object obj = ResourceManager.GetObject("HarmonyOS_Sans_Medium", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Byte[] türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static byte[] HarmonyOS_Sans_Medium_Italic {
+            get {
+                object obj = ResourceManager.GetObject("HarmonyOS_Sans_Medium_Italic", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Byte[] türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static byte[] HarmonyOS_Sans_Regular {
+            get {
+                object obj = ResourceManager.GetObject("HarmonyOS_Sans_Regular", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Byte[] türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static byte[] HarmonyOS_Sans_Regular_Italic {
+            get {
+                object obj = ResourceManager.GetObject("HarmonyOS_Sans_Regular_Italic", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Byte[] türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static byte[] HarmonyOS_Sans_Thin {
+            get {
+                object obj = ResourceManager.GetObject("HarmonyOS_Sans_Thin", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Byte[] türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static byte[] HarmonyOS_Sans_Thin_Italic {
+            get {
+                object obj = ResourceManager.GetObject("HarmonyOS_Sans_Thin_Italic", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
         internal static System.Drawing.Bitmap icons8_about_48 {
