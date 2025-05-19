@@ -992,7 +992,7 @@ namespace _222303026_proje3
                     // Save directly to the target file if the temporary file is missing
                     await Task.Run(() =>
                     {
-                        string newFilePath = saveFileDialog1.FileName;
+                        string newFilePath = targetFilePath;
                         // Save the bitmap to the specified file
                         using (MemoryStream memoryStream = new MemoryStream())
                         {
