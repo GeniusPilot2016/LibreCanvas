@@ -6,6 +6,7 @@ using System.Drawing.Imaging.Effects;
 using System.Drawing.Text;
 using System.Media;
 using System.Media;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace _222303026_proje3
@@ -30,7 +31,7 @@ namespace _222303026_proje3
         float zoom = 1,
             gaussianBlurSize = Settings1.Default.DefaultGaussianBlurRadius;
         bool isResizing = false, isSelected = false, backgroundFilling = false,
-            isImageCurrentlyCreating = false;
+            isImageCurrentlyCreating = false, isSaved = false;
         private ResizeDirection resizeDirection;
         private BasicFilters basicFilters;
         private ArtisticFilters artisticFilters = ArtisticFilters.None;
@@ -44,6 +45,7 @@ namespace _222303026_proje3
         Point SelectionStartPoint;
         FontStyle fontStyle = FontStyle.Regular;
         private TextToolAlign textToolAlign = TextToolAlign.Left;
+        string openedFilePath = string.Empty;
         enum TextToolAlign
         {
             Left,
@@ -312,7 +314,7 @@ namespace _222303026_proje3
         private void InitializeComponentAndFont()
         {
             InitializeComponent();
-            ThemeManager.RegisterForm(this); 
+            ThemeManager.RegisterForm(this);
             if (fontsComboBox.Items.Count > 0)
             {
                 fontsComboBox.SelectedIndex = 0;
@@ -426,6 +428,9 @@ namespace _222303026_proje3
             redoStack.Clear();
             geriAlToolStripMenuItem.Enabled = false;
             yineleToolStripMenuItem.Enabled = false;
+            isSaved = false;
+            openedFilePath = string.Empty;
+            farklýKaydetToolStripMenuItem.Enabled = false;
         }
         private void openAFile(string fileName)
         {
@@ -461,6 +466,9 @@ namespace _222303026_proje3
             redoStack.Clear();
             geriAlToolStripMenuItem.Enabled = false;
             yineleToolStripMenuItem.Enabled = false;
+            isSaved = true;
+            openedFilePath = fileName;
+            farklýKaydetToolStripMenuItem.Enabled = true;
         }
         private void createFileWithAIorWebcam(Image generatedImage, bool isAIGenerated)
         {
@@ -499,6 +507,9 @@ namespace _222303026_proje3
             redoStack.Clear();
             geriAlToolStripMenuItem.Enabled = false;
             yineleToolStripMenuItem.Enabled = false;
+            isSaved = false;
+            openedFilePath = string.Empty;
+            farklýKaydetToolStripMenuItem.Enabled = false;
         }
         private void CenterCanvasPanel()
         {
@@ -689,172 +700,201 @@ namespace _222303026_proje3
 
         private async void generativeEraserToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            isImageCurrentlyCreating = true;
-            toolStripAICreateImage.Visible = false; 
-            SaveStateForUndo();
-            try
+            if (CheckIfInternetConnectionAvailable.IsInternetAvailable())
             {
-                if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
+                if (!string.IsNullOrEmpty(Settings1.Default.HashedGeminiAIAPIKey))
                 {
-                    if (SelectedBitmap == null)
+                    try
                     {
-                        SelectedBitmap = new Bitmap(
-                            (int)(SelectionRectangle.Width / zoom),
-                            (int)(SelectionRectangle.Height / zoom));
-                        using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                        if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
                         {
-                            g.Clear(Color.Transparent);
-                            Rectangle sourceRect = new Rectangle(
-                                (int)(originalSelectionRectangleLocation.X),
-                                (int)(originalSelectionRectangleLocation.Y),
-                                (int)(originalSelectionRectangleSize.Width),
-                                (int)(originalSelectionRectangleSize.Height));
-                            g.DrawImage(MainBitmap,
-                                new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                                sourceRect,
-                                GraphicsUnit.Pixel);
-                        }
-                        canvasPanel.Enabled = false;
-                        menuStrip1.Enabled = false;
-                        toolStripTools.Enabled = false;
-                        toolStripSeparator29.Visible = true;
-                        labelAIImageErasing.Visible = true;
-                        progressBarAIImageCreation.Visible = true;
-                        var image = await CreateAIImages.EditImage(
-    SelectedBitmap, "Remove the object or person in context of the image.");
+                            SaveStateForUndo();
+                            isImageCurrentlyCreating = true;
+                            toolStripAICreateImage.Visible = false;
+                            if (SelectedBitmap == null)
+                            {
+                                SelectedBitmap = new Bitmap(
+                                    (int)(SelectionRectangle.Width / zoom),
+                                    (int)(SelectionRectangle.Height / zoom));
+                                using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                                {
+                                    g.Clear(Color.Transparent);
+                                    Rectangle sourceRect = new Rectangle(
+                                        (int)(originalSelectionRectangleLocation.X),
+                                        (int)(originalSelectionRectangleLocation.Y),
+                                        (int)(originalSelectionRectangleSize.Width),
+                                        (int)(originalSelectionRectangleSize.Height));
+                                    g.DrawImage(MainBitmap,
+                                        new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                                        sourceRect,
+                                        GraphicsUnit.Pixel);
+                                }
+                                canvasPanel.Enabled = false;
+                                menuStrip1.Enabled = false;
+                                toolStripTools.Enabled = false;
+                                toolStripSeparator29.Visible = true;
+                                labelAIImageErasing.Visible = true;
+                                progressBarAIImageCreation.Visible = true;
+                                var image = await CreateAIImages.EditImage(
+            SelectedBitmap, "Remove the object or person in context of the image.");
 
-                        if (image != null)
-                        {
-                            SelectedBitmap = (Bitmap)image;
-                            MergeMainBitmapWithSelected();
+                                if (image != null)
+                                {
+                                    SelectedBitmap = (Bitmap)image;
+                                    MergeMainBitmapWithSelected();
+                                }
+                                else
+                                {
+                                    Undo();
+                                    ClearRedoStack();
+                                    MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                }
+                            }
                         }
                         else
                         {
-                            Undo();
-                            ClearRedoStack(); 
-                            MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            SystemSounds.Beep.Play(); // Play a beep sound when the image is not selected
                         }
+                    }
+                    catch (NullReferenceException)
+                    {
+                        Undo();
+                        ClearRedoStack();
+                        MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    catch (Exception ex)
+                    {
+                        Undo();
+                        ClearRedoStack();
+                        MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    finally
+                    {
+                        isImageCurrentlyCreating = false;
+                        pictureBoxCanvas.Invalidate();
+                        canvasPanel.Enabled = true;
+                        menuStrip1.Enabled = true;
+                        toolStripTools.Enabled = true;
+                        toolStripSeparator29.Visible = false;
+                        labelAIImageErasing.Visible = false;
+                        progressBarAIImageCreation.Visible = false;
                     }
                 }
                 else
                 {
-                    SystemSounds.Beep.Play(); // Play a beep sound when the image is not selected
+                    MessageBox.Show("Please enter your Google Gemini™ API key in the settings before using this feature.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-            catch (NullReferenceException)
+            else
             {
-                Undo();
-                ClearRedoStack();
-                MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            catch (Exception ex)
-            {
-                Undo();
-                ClearRedoStack();
-                MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                isImageCurrentlyCreating = false;
-                pictureBoxCanvas.Invalidate();
-                canvasPanel.Enabled = true;
-                menuStrip1.Enabled = true;
-                toolStripTools.Enabled = true;
-                toolStripSeparator29.Visible = false;
-                labelAIImageErasing.Visible = false;
-                progressBarAIImageCreation.Visible = false;
+                MessageBox.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private async void removeBackgroundToolStripMenuItem2_Click(object sender, EventArgs e)
         {
+
             toolStripAICreateImage.Visible = false;
-            try
+            if (CheckIfInternetConnectionAvailable.IsInternetAvailable())
             {
-                isImageCurrentlyCreating = true;
-                canvasPanel.Enabled = false;
-                menuStrip1.Enabled = false;
-                toolStripTools.Enabled = false;
-                toolStripSeparator29.Visible = true;
-                labelBackgroundRemoving.Visible = true;
-                progressBarAIImageCreation.Visible = true;
-                SaveStateForUndo();
-                if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
+                if (!string.IsNullOrEmpty(Settings1.Default.HashedGeminiAIAPIKey))
                 {
-                    if (SelectedBitmap == null)
+                    try
                     {
-                        SelectedBitmap = new Bitmap(
-                            (int)(SelectionRectangle.Width / zoom),
-                            (int)(SelectionRectangle.Height / zoom));
-                        using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                        isImageCurrentlyCreating = true;
+                        canvasPanel.Enabled = false;
+                        menuStrip1.Enabled = false;
+                        toolStripTools.Enabled = false;
+                        toolStripSeparator29.Visible = true;
+                        labelBackgroundRemoving.Visible = true;
+                        progressBarAIImageCreation.Visible = true;
+                        SaveStateForUndo();
+                        if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
                         {
-                            g.Clear(Color.Transparent);
-                            Rectangle sourceRect = new Rectangle(
-                                (int)(originalSelectionRectangleLocation.X),
-                                (int)(originalSelectionRectangleLocation.Y),
-                                (int)(originalSelectionRectangleSize.Width),
-                                (int)(originalSelectionRectangleSize.Height));
-                            g.DrawImage(MainBitmap,
-                                new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                                sourceRect,
-                                GraphicsUnit.Pixel);
+                            if (SelectedBitmap == null)
+                            {
+                                SelectedBitmap = new Bitmap(
+                                    (int)(SelectionRectangle.Width / zoom),
+                                    (int)(SelectionRectangle.Height / zoom));
+                                using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                                {
+                                    g.Clear(Color.Transparent);
+                                    Rectangle sourceRect = new Rectangle(
+                                        (int)(originalSelectionRectangleLocation.X),
+                                        (int)(originalSelectionRectangleLocation.Y),
+                                        (int)(originalSelectionRectangleSize.Width),
+                                        (int)(originalSelectionRectangleSize.Height));
+                                    g.DrawImage(MainBitmap,
+                                        new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                                        sourceRect,
+                                        GraphicsUnit.Pixel);
+                                }
+                            }
+                            var imageTask = CreateAIImages.EditImage(SelectedBitmap, "Isolate the object or person and make the background transparent.");
+                            var image = await imageTask; // Await the task to get the result
+                            if (image != null)
+                            {
+                                SelectedBitmap = new Bitmap(image); // Convert Image to Bitmap  
+                                MergeMainBitmapWithSelected();
+                            }
+                            else
+                            {
+                                Undo();
+                                ClearRedoStack();
+                                MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
                         }
+                        else
+                        {
+                            var imageTask = CreateAIImages.EditImage(MainBitmap, "Isolate the object or person and make the background transparent.");
+                            var image = await imageTask; // Await the task to get the result
+                            if (image != null)
+                            {
+                                MainBitmap = new Bitmap(image); // Convert Image to Bitmap  
+                                pictureBoxCanvas.Image = MainBitmap;
+                                pictureBoxCanvas.Invalidate();
+                            }
+                            else
+                            {
+                                Undo();
+                                ClearRedoStack();
+                                MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                        }
+
                     }
-                    var imageTask = CreateAIImages.EditImage(SelectedBitmap, "Isolate the object or person and make the background transparent.");
-                    var image = await imageTask; // Await the task to get the result
-                    if (image != null)
-                    {
-                        SelectedBitmap = new Bitmap(image); // Convert Image to Bitmap  
-                        MergeMainBitmapWithSelected();
-                    }
-                    else
+                    catch (NullReferenceException)
                     {
                         Undo();
                         ClearRedoStack();
                         MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    catch (Exception ex)
+                    {
+                        Undo();
+                        ClearRedoStack();
+                        MessageBox.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    finally
+                    {
+                        isImageCurrentlyCreating = false;
+                        pictureBoxCanvas.Invalidate();
+                        canvasPanel.Enabled = true;
+                        menuStrip1.Enabled = true;
+                        toolStripTools.Enabled = true;
+                        toolStripSeparator29.Visible = false;
+                        labelBackgroundRemoving.Visible = false;
+                        progressBarAIImageCreation.Visible = false;
                     }
                 }
                 else
                 {
-                    var imageTask = CreateAIImages.EditImage(MainBitmap, "Isolate the object or person and make the background transparent.");
-                    var image = await imageTask; // Await the task to get the result
-                    if (image != null)
-                    {
-                        MainBitmap = new Bitmap(image); // Convert Image to Bitmap  
-                        pictureBoxCanvas.Image = MainBitmap;
-                        pictureBoxCanvas.Invalidate();
-                    }
-                    else
-                    {
-                        Undo();
-                        ClearRedoStack();
-                        MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    MessageBox.Show("Please enter your Google Gemini™ API key in the settings before using this feature.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-                
             }
-            catch (NullReferenceException)
+            else
             {
-                Undo();
-                ClearRedoStack();
-                MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            catch (Exception ex)
-            {
-                Undo();
-                ClearRedoStack();
-                MessageBox.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                isImageCurrentlyCreating = false;
-                pictureBoxCanvas.Invalidate();
-                canvasPanel.Enabled = true;
-                menuStrip1.Enabled = true;
-                toolStripTools.Enabled = true;
-                toolStripSeparator29.Visible = false;
-                labelBackgroundRemoving.Visible = false;
-                progressBarAIImageCreation.Visible = false;
+                MessageBox.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -882,120 +922,136 @@ namespace _222303026_proje3
 
         private async void kaydetToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (!isSaved)
+            {
+                saveFileAs();
+            }
+            else
+            {
+                saveFile(openedFilePath);
+            }
+        }
+        private async void saveFile(string targetFilePath)
+        {
+            string tempFilePath = Path.Combine(Path.GetDirectoryName(targetFilePath), Path.GetRandomFileName());
+            string backupFilePath = Path.Combine(Path.GetDirectoryName(targetFilePath), Path.GetRandomFileName());
+
+            labelSaving.Visible = true;
+            progressBarSaving.Visible = true;
+            toolStripSeparator13.Visible = true;
+
+            progressBarSaving.Value = 0;
+
+            try
+            {
+                // Check if the temporary file exists
+                if (File.Exists(tempFilePath))
+                {   // Save the file to a temporary location in a background thread
+                    await Task.Run(() =>
+                    {
+                        using (MemoryStream memoryStream = new MemoryStream())
+                        {
+                            // Save the bitmap to memory
+                            MainBitmap.Save(memoryStream, ImageFormat.Png);
+                            byte[] imageData = memoryStream.ToArray();
+
+                            // Write the file in chunks to the temporary file
+                            using (FileStream fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                            {
+                                int totalBytes = imageData.Length;
+                                int chunkSize = 4096; // 4 KB
+                                int bytesWritten = 0;
+
+                                while (bytesWritten < totalBytes)
+                                {
+                                    int bytesToWrite = Math.Min(chunkSize, totalBytes - bytesWritten);
+                                    fileStream.Write(imageData, bytesWritten, bytesToWrite);
+                                    bytesWritten += bytesToWrite;
+
+                                    // Update the progress bar
+                                    int progress = (int)((bytesWritten / (float)totalBytes) * 100);
+                                    Invoke(new Action(() =>
+                                    {
+                                        progressBarSaving.Value = progress;
+                                    }));
+                                }
+                            }
+                        }
+                    });
+                    // Replace the target file with the temporary file
+                    File.Replace(tempFilePath, targetFilePath, backupFilePath);
+                }
+                else
+                {
+                    // Save directly to the target file if the temporary file is missing
+                    await Task.Run(() =>
+                    {
+                        string newFilePath = saveFileDialog1.FileName;
+                        // Save the bitmap to the specified file
+                        using (MemoryStream memoryStream = new MemoryStream())
+                        {
+                            // Save the bitmap to memory
+                            MainBitmap.Save(memoryStream, ImageFormat.Png);
+                            byte[] imageData = memoryStream.ToArray();
+
+                            // Write the file in chunks to the specified file
+                            using (FileStream fileStream = new FileStream(newFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                            {
+                                int totalBytes = imageData.Length;
+                                int chunkSize = 4096; // 4 KB
+                                int bytesWritten = 0;
+
+                                while (bytesWritten < totalBytes)
+                                {
+                                    int bytesToWrite = Math.Min(chunkSize, totalBytes - bytesWritten);
+                                    fileStream.Write(imageData, bytesWritten, bytesToWrite);
+                                    bytesWritten += bytesToWrite;
+
+                                    // Optionally, update a progress bar if needed
+                                    int progress = (int)((bytesWritten / (float)totalBytes) * 100);
+                                    Invoke(new Action(() =>
+                                    {
+                                        progressBarSaving.Value = progress;
+                                    }));
+                                }
+                            }
+                        }
+                    });
+                    MainBitmap.Save(targetFilePath, ImageFormat.Png);
+                }
+
+                // Clean up the temporary and backup files
+                if (File.Exists(tempFilePath))
+                {
+                    File.Delete(tempFilePath);
+                }
+                if (File.Exists(backupFilePath))
+                {
+                    File.Delete(backupFilePath);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred while saving the file: {ex.Message}",
+                                "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                // Hide saving indicators
+                labelSaving.Visible = false;
+                progressBarSaving.Visible = false;
+                toolStripSeparator13.Visible = false;
+            }
+        }
+        private void saveFileAs()
+        {
             saveFileDialog1.Filter = "PNG Files|*.png|JPEG Files|*.jpg|Bitmap Files|*.bmp";
             DialogResult dialogResult = saveFileDialog1.ShowDialog();
             if (dialogResult == DialogResult.OK)
             {
-                string targetFilePath = saveFileDialog1.FileName;
-                string tempFilePath = Path.Combine(Path.GetDirectoryName(targetFilePath), Path.GetRandomFileName());
-                string backupFilePath = Path.Combine(Path.GetDirectoryName(targetFilePath), Path.GetRandomFileName());
-
-                labelSaving.Visible = true;
-                progressBarSaving.Visible = true;
-                toolStripSeparator13.Visible = true;
-
-                progressBarSaving.Value = 0;
-
-                try
-                {
-                    // Check if the temporary file exists
-                    if (File.Exists(tempFilePath))
-                    {   // Save the file to a temporary location in a background thread
-                        await Task.Run(() =>
-                        {
-                            using (MemoryStream memoryStream = new MemoryStream())
-                            {
-                                // Save the bitmap to memory
-                                MainBitmap.Save(memoryStream, ImageFormat.Png);
-                                byte[] imageData = memoryStream.ToArray();
-
-                                // Write the file in chunks to the temporary file
-                                using (FileStream fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
-                                {
-                                    int totalBytes = imageData.Length;
-                                    int chunkSize = 4096; // 4 KB
-                                    int bytesWritten = 0;
-
-                                    while (bytesWritten < totalBytes)
-                                    {
-                                        int bytesToWrite = Math.Min(chunkSize, totalBytes - bytesWritten);
-                                        fileStream.Write(imageData, bytesWritten, bytesToWrite);
-                                        bytesWritten += bytesToWrite;
-
-                                        // Update the progress bar
-                                        int progress = (int)((bytesWritten / (float)totalBytes) * 100);
-                                        Invoke(new Action(() =>
-                                        {
-                                            progressBarSaving.Value = progress;
-                                        }));
-                                    }
-                                }
-                            }
-                        });
-                        // Replace the target file with the temporary file
-                        File.Replace(tempFilePath, targetFilePath, backupFilePath);
-                    }
-                    else
-                    {
-                        // Save directly to the target file if the temporary file is missing
-                        await Task.Run(() =>
-                        {
-                            string newFilePath = saveFileDialog1.FileName;
-                            // Save the bitmap to the specified file
-                            using (MemoryStream memoryStream = new MemoryStream())
-                            {
-                                // Save the bitmap to memory
-                                MainBitmap.Save(memoryStream, ImageFormat.Png);
-                                byte[] imageData = memoryStream.ToArray();
-
-                                // Write the file in chunks to the specified file
-                                using (FileStream fileStream = new FileStream(newFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
-                                {
-                                    int totalBytes = imageData.Length;
-                                    int chunkSize = 4096; // 4 KB
-                                    int bytesWritten = 0;
-
-                                    while (bytesWritten < totalBytes)
-                                    {
-                                        int bytesToWrite = Math.Min(chunkSize, totalBytes - bytesWritten);
-                                        fileStream.Write(imageData, bytesWritten, bytesToWrite);
-                                        bytesWritten += bytesToWrite;
-
-                                        // Optionally, update a progress bar if needed
-                                        int progress = (int)((bytesWritten / (float)totalBytes) * 100);
-                                        Invoke(new Action(() =>
-                                        {
-                                            progressBarSaving.Value = progress;
-                                        }));
-                                    }
-                                }
-                            }
-                        });
-                        MainBitmap.Save(targetFilePath, ImageFormat.Png);
-                    }
-
-                    // Clean up the temporary and backup files
-                    if (File.Exists(tempFilePath))
-                    {
-                        File.Delete(tempFilePath);
-                    }
-                    if (File.Exists(backupFilePath))
-                    {
-                        File.Delete(backupFilePath);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"An error occurred while saving the file: {ex.Message}",
-                                    "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                finally
-                {
-                    // Hide saving indicators
-                    labelSaving.Visible = false;
-                    progressBarSaving.Visible = false;
-                    toolStripSeparator13.Visible = false;
-                }
+                saveFile(saveFileDialog1.FileName);
+                isSaved = true;
+                farklýKaydetToolStripMenuItem.Enabled = true;
             }
         }
 
@@ -1207,11 +1263,6 @@ namespace _222303026_proje3
             {
                 toolStripPen.Visible = false;
             }
-        }
-
-        private void fontsComboBox_Click(object sender, EventArgs e)
-        {
-
         }
 
         private void fontsComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -2069,7 +2120,7 @@ namespace _222303026_proje3
         private Stack<CanvasState> redoStack = new Stack<CanvasState>();
         private void pictureBoxCanvas_MouseDown(object sender, MouseEventArgs e)
         {
-            if(!isImageCurrentlyCreating)
+            if (!isImageCurrentlyCreating)
             {
                 isdrawing = true;
                 x = -1;
@@ -2386,7 +2437,7 @@ namespace _222303026_proje3
                             int adjustedX = (int)(unzoomedLocation.X / zoom);
                             int adjustedY = (int)(unzoomedLocation.Y / zoom);
                             Point adjustedLocation = new Point(adjustedX, adjustedY);
-                            FloodFill(MainBitmap, adjustedLocation, MainBitmap.GetPixel(adjustedX, adjustedY), color1, tolerance);
+                            FloodFill(MainBitmap, adjustedLocation, color1, tolerance);
                         }
                         break;
                 }
@@ -2396,97 +2447,94 @@ namespace _222303026_proje3
                 SystemSounds.Beep.Play();
             }
         }
-        private void FloodFill(Bitmap bitmap, Point point, Color targetColor, Color replacementColor, int tolerance)
+        private void FloodFill(Bitmap bmp, Point pt, Color replacementColor, int tolerance)
         {
-            if (targetColor.ToArgb() == replacementColor.ToArgb()) return;
-
-            Rectangle rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
-            BitmapData data = bitmap.LockBits(rect, ImageLockMode.ReadWrite, bitmap.PixelFormat);
-
-            int bytesPerPixel = Image.GetPixelFormatSize(bitmap.PixelFormat) / 8;
-            int stride = data.Stride;
-            IntPtr scan0 = data.Scan0;
-
-            byte[] pixels = new byte[stride * bitmap.Height];
-            System.Runtime.InteropServices.Marshal.Copy(scan0, pixels, 0, pixels.Length);
-
-            Stack<Point> pixelsToCheck = new Stack<Point>();
-            pixelsToCheck.Push(point);
-
-            byte targetR = targetColor.R;
-            byte targetG = targetColor.G;
-            byte targetB = targetColor.B;
-
-            int replacementArgb = replacementColor.ToArgb();
-
-            while (pixelsToCheck.Count > 0)
+            // Validate input
+            if (bmp == null || pt.X < 0 || pt.X >= bmp.Width || pt.Y < 0 || pt.Y >= bmp.Height)
             {
-                Point pt = pixelsToCheck.Pop();
-                int x = pt.X;
-                int y = pt.Y;
+                return;
+            }
 
-                // Check bounds first
-                if (x < 0 || y < 0 || x >= bitmap.Width || y >= bitmap.Height)
-                    continue;
+            // Get the target color from the starting point
+            Color targetColor = bmp.GetPixel(pt.X, pt.Y);
 
-                // Check if the pixel is within the selection rectangle when isSelected is true
-                if (isSelected && !SelectionRectangle.IsEmpty && !SelectionRectangle.Contains(pt))
-                    continue;
+            // If the target color is the same as the replacement color, or the colors are too similar, do nothing
+            if (IsColorWithinTolerance(targetColor, replacementColor, tolerance))
+            {
+                return;
+            }
 
-                int index = (y * stride) + (x * bytesPerPixel);
+            // Use a Queue instead of a Stack to process pixels in a breadth-first manner
+            Queue<Point> pixels = new Queue<Point>();
+            pixels.Enqueue(pt);
 
-                byte currentB = pixels[index];
-                byte currentG = pixels[index + 1];
-                byte currentR = pixels[index + 2];
+            // Determine the bounds for the flood fill operation
+            Rectangle bounds;
+            if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
+            {
+                bounds = new Rectangle(
+                    (int)(originalSelectionRectangleLocation.X),
+                    (int)(originalSelectionRectangleLocation.Y),
+                    (int)(originalSelectionRectangleSize.Width),
+                    (int)(originalSelectionRectangleSize.Height));
+            }
+            else
+            {
+                bounds = new Rectangle(0, 0, bmp.Width, bmp.Height);
+            }
 
-                int pixelArgb = 0;
-                if (bytesPerPixel == 4)
+            // Use a HashSet to keep track of visited pixels
+            HashSet<Point> visited = new HashSet<Point>();
+
+            while (pixels.Count > 0)
+            {
+                Point a = pixels.Dequeue();
+
+                // Check if the pixel is within the bounds and has not been visited
+                if (a.X >= bounds.Left && a.X < bounds.Right &&
+                    a.Y >= bounds.Top && a.Y < bounds.Bottom &&
+                    !visited.Contains(a))
                 {
-                    pixelArgb = BitConverter.ToInt32(pixels, index);
-                }
-                else if (bytesPerPixel == 3)
-                {
-                    pixelArgb = (255 << 24) | (currentR << 16) | (currentG << 8) | currentB;
-                }
+                    Color pixelColor = bmp.GetPixel(a.X, a.Y);
 
-                if (pixelArgb == replacementArgb)
-                {
-                    continue;
-                }
-
-                int diffR = Math.Abs(currentR - targetR);
-                int diffG = Math.Abs(currentG - targetG);
-                int diffB = Math.Abs(currentB - targetB);
-
-                int colorDifferenceThreshold = (int)((tolerance / 100.0) * 765);
-
-                if ((diffR + diffG + diffB) <= colorDifferenceThreshold)
-                {
-                    if (bytesPerPixel == 4)
+                    // Apply tolerance check
+                    if (IsColorWithinTolerance(pixelColor, targetColor, tolerance))
                     {
-                        BitConverter.GetBytes(replacementArgb).CopyTo(pixels, index);
-                    }
-                    else if (bytesPerPixel == 3)
-                    {
-                        pixels[index] = (byte)(replacementArgb & 0xFF);
-                        pixels[index + 1] = (byte)((replacementArgb >> 8) & 0xFF);
-                        pixels[index + 2] = (byte)((replacementArgb >> 16) & 0xFF);
-                    }
+                        bmp.SetPixel(a.X, a.Y, replacementColor);
+                        visited.Add(a); // Mark the pixel as visited
 
-                    pixelsToCheck.Push(new Point(x + 1, y));
-                    pixelsToCheck.Push(new Point(x - 1, y));
-                    pixelsToCheck.Push(new Point(x, y + 1));
-                    pixelsToCheck.Push(new Point(x, y - 1));
+                        // Enqueue adjacent pixels
+                        pixels.Enqueue(new Point(a.X - 1, a.Y));
+                        pixels.Enqueue(new Point(a.X + 1, a.Y));
+                        pixels.Enqueue(new Point(a.X, a.Y - 1));
+                        pixels.Enqueue(new Point(a.X, a.Y + 1));
+                    }
                 }
             }
 
-            System.Runtime.InteropServices.Marshal.Copy(pixels, 0, scan0, pixels.Length);
-            bitmap.UnlockBits(data);
+            pictureBoxCanvas.Invalidate(); // Refresh the main picture box
+            return;
+        }
 
-            if (pictureBoxCanvas != null)
-            {
-                pictureBoxCanvas.Refresh();
-            }
+        private bool IsColorWithinTolerance(Color color1, Color color2, int tolerance)
+        {
+            // Calculate the color difference
+            int aDiff = Math.Abs(color1.A - color2.A);
+            int rDiff = Math.Abs(color1.R - color2.R);
+            int gDiff = Math.Abs(color1.G - color2.G);
+            int bDiff = Math.Abs(color1.B - color2.B);
+
+            // Calculate the overall difference
+            double difference = Math.Sqrt(aDiff * aDiff + rDiff * rDiff + gDiff * gDiff + bDiff * bDiff);
+
+            // The maximum difference between two colors
+            double maxDifference = Math.Sqrt(50000);
+
+            // Normalize the difference to a range between 0 and 1
+            double normalizedDifference = difference / maxDifference;
+
+            // Check if the normalized difference is within the tolerance
+            return normalizedDifference <= (tolerance / 100.0);
         }
 
         private void çýkýþToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2835,7 +2883,7 @@ namespace _222303026_proje3
                 redoStack.Push(new CanvasState(new Bitmap(MainBitmap), originalSize)); // Save current state to redo stack
                 var previousState = undoStack.Pop(); // Get the last state
                 MainBitmap = previousState.Bitmap;
-                canvasPanel.Size = new Size((int)Math.Round(previousState.MainBitmapSize.Width * zoom) + 20, (int)Math.Round(previousState.MainBitmapSize.Height * zoom) + 20);
+                canvasPanel.Size = new Size((int)Math.Round(MainBitmap.Width * zoom) + 20, (int)Math.Round(MainBitmap.Height * zoom) + 20);
                 pictureBoxCanvas.Size = panelResizer.Size;
                 pictureBoxCanvas.Image = MainBitmap;
                 pictureBoxCanvas.Invalidate();
@@ -2850,16 +2898,16 @@ namespace _222303026_proje3
             if (redoStack.Count > 0)
             {
                 SelectedBitmap = null; // Clear selected bitmap
-                undoStack.Push(new CanvasState(new Bitmap(MainBitmap), MainBitmap.Size)); // Save current state to undo stack
+                undoStack.Push(new CanvasState(new Bitmap(MainBitmap), originalSize)); // Save current state to undo stack
                 var nextState = redoStack.Pop(); // Get the next state
                 MainBitmap = nextState.Bitmap;
-                canvasPanel.Size = new Size((int)Math.Round(nextState.MainBitmapSize.Width * zoom) + 20, (int)Math.Round(nextState.MainBitmapSize.Height * zoom) + 20);
+                canvasPanel.Size = new Size((int)Math.Round(MainBitmap.Width * zoom) + 20, (int)Math.Round(MainBitmap.Height * zoom) + 20);
                 pictureBoxCanvas.Size = panelResizer.Size;
                 pictureBoxCanvas.Image = MainBitmap;
                 pictureBoxCanvas.Invalidate();
+                CenterCanvasPanel(); // Center the canvas panel
                 originalSize = MainBitmap.Size; // Update original size
                 labelSize.Text = $"{MainBitmap.Width} x {MainBitmap.Height} px"; // Update size label
-                CenterCanvasPanel(); // Center the canvas panel
             }
             UpdateUndoRedoButtons(); // Update buttons
         }
@@ -4186,104 +4234,118 @@ namespace _222303026_proje3
         }
         private async void buttonCreate_Click(object sender, EventArgs e)
         {
-            SaveStateForUndo();
-            try
+            if (CheckIfInternetConnectionAvailable.IsInternetAvailable())
             {
-                isImageCurrentlyCreating = true;
-                canvasPanel.Enabled = false;
-                menuStrip1.Enabled = false;
-                toolStripTools.Enabled = false;
-                toolStripSeparator29.Visible = true;
-                labelCreatingImage.Visible = true;
-                progressBarAIImageCreation.Visible = true;
-                buttonCreate.Enabled = false;
-                textBoxPrompt.Enabled = false;
-                labelPrompt.Enabled = false;
-                buttonClose.Enabled = false;
-                if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
+                if (!string.IsNullOrEmpty(Settings1.Default.HashedGeminiAIAPIKey))
                 {
-                    if (SelectedBitmap == null)
+                    try
                     {
-                        SelectedBitmap = new Bitmap(
-                            (int)(SelectionRectangle.Width / zoom),
-                            (int)(SelectionRectangle.Height / zoom));
-                        using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                        SaveStateForUndo();
+                        isImageCurrentlyCreating = true;
+                        canvasPanel.Enabled = false;
+                        menuStrip1.Enabled = false;
+                        toolStripTools.Enabled = false;
+                        toolStripSeparator29.Visible = true;
+                        labelCreatingImage.Visible = true;
+                        progressBarAIImageCreation.Visible = true;
+                        buttonCreate.Enabled = false;
+                        textBoxPrompt.Enabled = false;
+                        labelPrompt.Enabled = false;
+                        buttonClose.Enabled = false;
+                        if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
                         {
-                            g.Clear(Color.Transparent);
-                            Rectangle sourceRect = new Rectangle(
-                                (int)(originalSelectionRectangleLocation.X),
-                                (int)(originalSelectionRectangleLocation.Y),
-                                (int)(originalSelectionRectangleSize.Width),
-                                (int)(originalSelectionRectangleSize.Height));
-                            g.DrawImage(MainBitmap,
-                                new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                                sourceRect,
-                                GraphicsUnit.Pixel);
+                            if (SelectedBitmap == null)
+                            {
+                                SelectedBitmap = new Bitmap(
+                                    (int)(SelectionRectangle.Width / zoom),
+                                    (int)(SelectionRectangle.Height / zoom));
+                                using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                                {
+                                    g.Clear(Color.Transparent);
+                                    Rectangle sourceRect = new Rectangle(
+                                        (int)(originalSelectionRectangleLocation.X),
+                                        (int)(originalSelectionRectangleLocation.Y),
+                                        (int)(originalSelectionRectangleSize.Width),
+                                        (int)(originalSelectionRectangleSize.Height));
+                                    g.DrawImage(MainBitmap,
+                                        new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                                        sourceRect,
+                                        GraphicsUnit.Pixel);
+                                }
+                            }
+                            var imageTask = CreateAIImages.EditImage(SelectedBitmap, textBoxPrompt.Text);
+                            var image = await imageTask; // Await the task to get the result
+                            if (image != null)
+                            {
+                                SelectedBitmap = new Bitmap(image); // Convert Image to Bitmap  
+                                MergeMainBitmapWithSelected();
+                            }
+                            else
+                            {
+                                Undo();
+                                ClearRedoStack();
+                                MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
                         }
+                        else
+                        {
+                            var imageTask = CreateAIImages.EditImage(MainBitmap, textBoxPrompt.Text);
+                            var image = await imageTask; // Await the task to get the result
+                            if (image != null)
+                            {
+                                MainBitmap = new Bitmap(image); // Convert Image to Bitmap  
+                                pictureBoxCanvas.Invalidate();
+                            }
+                            else
+                            {
+                                Undo();
+                                ClearRedoStack();
+                                MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                        }
+
                     }
-                    var imageTask = CreateAIImages.EditImage(SelectedBitmap, textBoxPrompt.Text);
-                    var image = await imageTask; // Await the task to get the result
-                    if (image != null)
-                    {
-                        SelectedBitmap = new Bitmap(image); // Convert Image to Bitmap  
-                        MergeMainBitmapWithSelected();
-                    }
-                    else
+                    catch (NullReferenceException)
                     {
                         Undo();
-                        ClearRedoStack(); 
+                        ClearRedoStack();
                         MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    catch (Exception ex)
+                    {
+                        Undo();
+                        ClearRedoStack();
+                        MessageBox.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    finally
+                    {
+                        isImageCurrentlyCreating = false;
+                        pictureBoxCanvas.Invalidate();
+                        canvasPanel.Enabled = true;
+                        menuStrip1.Enabled = true;
+                        toolStripTools.Enabled = true;
+                        toolStripSeparator29.Visible = false;
+                        labelCreatingImage.Visible = false;
+                        if (!string.IsNullOrEmpty(textBoxPrompt.Text))
+                        {
+                            buttonCreate.Enabled = true;
+                        }
+                        textBoxPrompt.Enabled = true;
+                        labelPrompt.Enabled = true;
+                        buttonClose.Enabled = true;
+                        progressBarAIImageCreation.Visible = false;
+                        toolStripAICreateImage.Visible = false;
+                        textBoxPrompt.Clear();
                     }
                 }
                 else
                 {
-                    var imageTask = CreateAIImages.EditImage(MainBitmap, textBoxPrompt.Text);
-                    var image = await imageTask; // Await the task to get the result
-                    if (image != null)
-                    {
-                        MainBitmap = new Bitmap(image); // Convert Image to Bitmap  
-                        pictureBoxCanvas.Invalidate();
-                    }
-                    else
-                    {
-                        Undo();
-                        ClearRedoStack(); 
-                        MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }   
-                
-            }
-            catch (NullReferenceException)
-            {
-                Undo();
-                ClearRedoStack(); 
-                MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            catch (Exception ex)
-            {
-                Undo();
-                ClearRedoStack();
-                MessageBox.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                isImageCurrentlyCreating = false;
-                pictureBoxCanvas.Invalidate();
-                canvasPanel.Enabled = true;
-                menuStrip1.Enabled = true;
-                toolStripTools.Enabled = true;
-                toolStripSeparator29.Visible = false;
-                labelCreatingImage.Visible = false;
-                if (!string.IsNullOrEmpty(textBoxPrompt.Text))
-                {
-                    buttonCreate.Enabled = true;
+                    MessageBox.Show("Please enter your Google Gemini™ API key in the settings before using this feature.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-                textBoxPrompt.Enabled = true;
-                labelPrompt.Enabled = true;
-                buttonClose.Enabled = true;
-                progressBarAIImageCreation.Visible = false;
-                toolStripAICreateImage.Visible = false;
-                textBoxPrompt.Clear();
+            }
+            else
+            {
+                MessageBox.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -4540,7 +4602,7 @@ namespace _222303026_proje3
 
         private void textBoxRadius_KeyDown(object sender, KeyEventArgs e)
         {
-            if(e.KeyCode == Keys.Enter)
+            if (e.KeyCode == Keys.Enter)
             {
                 setShapeRadius();
             }
@@ -4548,10 +4610,15 @@ namespace _222303026_proje3
 
         private void textBoxPoints_KeyDown(object sender, KeyEventArgs e)
         {
-            if(e.KeyCode == Keys.Enter)
+            if (e.KeyCode == Keys.Enter)
             {
                 setShapePoints();
             }
+        }
+
+        private void farklýKaydetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            saveFileAs();
         }
     }
     public partial class CreateWithAIForm : Form

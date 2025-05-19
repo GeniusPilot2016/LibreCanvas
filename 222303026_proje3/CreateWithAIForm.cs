@@ -200,6 +200,11 @@ namespace _222303026_proje3
                 MessageBox.Show("Please enter your Google Gemini™ API key in the settings before using this feature.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 this.Close();
             }
+            if(!CheckIfInternetConnectionAvailable.IsInternetAvailable())
+            {
+                MessageBox.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
+            }
         }
     }
 }
