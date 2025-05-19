@@ -95,23 +95,20 @@ namespace _222303026_proje3
             }
             return bitmap;
         }
-        public static Image DrawTriangleOnCanvas(Bitmap bitmap, PictureBox canvas, Color color,
-            int thickness, Point startPoint, Point endPoint)
+        public static void DrawTriangleOnCanvas(Bitmap bitmap, PictureBox pictureBox, Color color, int thickness, Point start, Point end)
         {
-            if (bitmap == null)
+            using (Graphics g = Graphics.FromImage(bitmap))
+            using (Pen pen = new Pen(color, thickness))
             {
-                bitmap = new Bitmap(canvas.Width, canvas.Height);
+                Point[] points = new Point[]
+                {
+            new Point(start.X, end.Y),
+            new Point(end.X, end.Y),
+            new Point((start.X + end.X) / 2, start.Y)
+                };
+                g.DrawPolygon(pen, points);
             }
-            using (Graphics graphics = Graphics.FromImage(bitmap))
-            {
-                Pen pen = new Pen(color, thickness); // Color and thickness settings
-                Point[] points = new Point[3];
-                points[0] = startPoint;
-                points[1] = new Point(endPoint.X, startPoint.Y);
-                points[2] = endPoint;
-                graphics.DrawPolygon(pen, points);
-            }
-            return bitmap;
+            pictureBox.Invalidate();
         }
         public static Image DrawHexagonOnCanvas(Bitmap bitmap, PictureBox canvas, Color color,
             int thickness, int points, Point startPoint, Point endPoint)
