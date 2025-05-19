@@ -431,6 +431,8 @@ namespace _222303026_proje3
             isSaved = false;
             openedFilePath = string.Empty;
             farklýKaydetToolStripMenuItem.Enabled = false;
+            zoom = 1;
+            labelZoom.Text = "100%";
         }
         private void openAFile(string fileName)
         {
@@ -469,6 +471,8 @@ namespace _222303026_proje3
             isSaved = true;
             openedFilePath = fileName;
             farklýKaydetToolStripMenuItem.Enabled = true;
+            zoom = 1;
+            labelZoom.Text = "100%";
         }
         private void createFileWithAIorWebcam(Image generatedImage, bool isAIGenerated)
         {
@@ -510,6 +514,8 @@ namespace _222303026_proje3
             isSaved = false;
             openedFilePath = string.Empty;
             farklýKaydetToolStripMenuItem.Enabled = false;
+            zoom = 1;
+            labelZoom.Text = "100%";
         }
         private void CenterCanvasPanel()
         {
