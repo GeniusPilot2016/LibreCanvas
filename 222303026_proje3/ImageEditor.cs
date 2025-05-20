@@ -3106,6 +3106,7 @@ namespace _222303026_proje3
             canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
             pictureBoxCanvas.Size = panelResizer.Size;
             pictureBoxCanvas.Image = MainBitmap;
+            labelSize.Text = $"{MainBitmap.Width} x {MainBitmap.Height} px";
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
         }
