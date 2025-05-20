@@ -20,40 +20,48 @@ namespace _222303026_proje3
             {
                 return await Task.Run(() =>
                 {
-                    Application.DoEvents();
-                    string pythonExe = Path.Combine(Application.StartupPath, @"Python\python.exe");
-                    string scriptPath = Path.Combine(Application.StartupPath, @"Python\AIImageCreator.py");
-                    string apiKey = EncryptionHelper.DecryptString(Settings1.Default.HashedGeminiAIAPIKey);
-
-                    var psi = new ProcessStartInfo
+                    try
                     {
-                        FileName = pythonExe,
-                        Arguments = $"\"{scriptPath}\" \"{prompt}\" \"{apiKey}\" \"{width}\" \"{height}\"",
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true,
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        StandardOutputEncoding = Encoding.UTF8
-                    };
+                        Application.DoEvents();
+                        string pythonExe = Path.Combine(Application.StartupPath, @"Python\python.exe");
+                        string scriptPath = Path.Combine(Application.StartupPath, @"Python\AIImageCreator.py");
+                        string apiKey = EncryptionHelper.DecryptString(Settings1.Default.HashedGeminiAIAPIKey);
 
-                    using (var process = Process.Start(psi))
+                        var psi = new ProcessStartInfo
+                        {
+                            FileName = pythonExe,
+                            Arguments = $"\"{scriptPath}\" \"{prompt}\" \"{apiKey}\" \"{width}\" \"{height}\"",
+                            RedirectStandardOutput = true,
+                            RedirectStandardError = true,
+                            UseShellExecute = false,
+                            CreateNoWindow = true,
+                            StandardOutputEncoding = Encoding.UTF8
+                        };
+
+                        using (var process = Process.Start(psi))
+                        {
+                            string output = process.StandardOutput.ReadToEnd();
+                            string error = process.StandardError.ReadToEnd();
+                            process.WaitForExit();
+
+                            if (process.ExitCode != 0)
+                            {
+                                MessageBox.Show("Python error: " + error, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                return null;
+                            }
+
+                            // Çıktı base64 string ise:
+                            byte[] imageBytes = Convert.FromBase64String(output.Trim());
+                            using (var ms = new MemoryStream(imageBytes))
+                            {
+                                return Image.FromStream(ms);
+                            }
+                        }
+                    }
+                    catch(Exception ex)
                     {
-                        string output = process.StandardOutput.ReadToEnd();
-                        string error = process.StandardError.ReadToEnd();
-                        process.WaitForExit();
-
-                        if (process.ExitCode != 0)
-                        {
-                            MessageBox.Show("Python error: " + error, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return null;
-                        }
-
-                        // Çıktı base64 string ise:
-                        byte[] imageBytes = Convert.FromBase64String(output.Trim());
-                        using (var ms = new MemoryStream(imageBytes))
-                        {
-                            return Image.FromStream(ms);
-                        }
+                        MessageBox.Show("An error occured: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return null;
                     }
                 });
             }
@@ -72,46 +80,54 @@ namespace _222303026_proje3
                 {
                     return await Task.Run(() =>
                     {
-                        Application.DoEvents();
-                        string pythonExe = Path.Combine(Application.StartupPath, @"Python\python.exe");
-                        string scriptPath = Path.Combine(Application.StartupPath, @"Python\AIImageEditor.py");
-                        string apiKey = EncryptionHelper.DecryptString(Settings1.Default.HashedGeminiAIAPIKey);
-
-                        // inputImage'ı geçici bir dosyaya kaydet
-                        string tempImagePath = Path.GetTempFileName();
-                        inputImage.Save(tempImagePath);
-
-                        var psi = new ProcessStartInfo
+                        try
                         {
-                            FileName = pythonExe,
-                            Arguments = $"\"{scriptPath}\" \"{tempImagePath}\" \"{prompt}\" \"{apiKey}\"",
-                            RedirectStandardOutput = true,
-                            RedirectStandardError = true,
-                            UseShellExecute = false,
-                            CreateNoWindow = true,
-                            StandardOutputEncoding = Encoding.UTF8
-                        };
+                            Application.DoEvents();
+                            string pythonExe = Path.Combine(Application.StartupPath, @"Python\python.exe");
+                            string scriptPath = Path.Combine(Application.StartupPath, @"Python\AIImageEditor.py");
+                            string apiKey = EncryptionHelper.DecryptString(Settings1.Default.HashedGeminiAIAPIKey);
 
-                        using (var process = Process.Start(psi))
+                            // inputImage'ı geçici bir dosyaya kaydet
+                            string tempImagePath = Path.GetTempFileName();
+                            inputImage.Save(tempImagePath);
+
+                            var psi = new ProcessStartInfo
+                            {
+                                FileName = pythonExe,
+                                Arguments = $"\"{scriptPath}\" \"{tempImagePath}\" \"{prompt}\" \"{apiKey}\"",
+                                RedirectStandardOutput = true,
+                                RedirectStandardError = true,
+                                UseShellExecute = false,
+                                CreateNoWindow = true,
+                                StandardOutputEncoding = Encoding.UTF8
+                            };
+
+                            using (var process = Process.Start(psi))
+                            {
+                                string output = process.StandardOutput.ReadToEnd();
+                                string error = process.StandardError.ReadToEnd();
+                                process.WaitForExit();
+
+                                File.Delete(tempImagePath);
+
+                                if (process.ExitCode != 0)
+                                {
+                                    MessageBox.Show("Python error: " + error, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    return null;
+                                }
+
+                                // Çıktı base64 string ise:
+                                byte[] imageBytes = Convert.FromBase64String(output.Trim());
+                                using (var ms = new MemoryStream(imageBytes))
+                                {
+                                    return Image.FromStream(ms);
+                                }
+                            }
+                        }
+                        catch(Exception ex)
                         {
-                            string output = process.StandardOutput.ReadToEnd();
-                            string error = process.StandardError.ReadToEnd();
-                            process.WaitForExit();
-
-                            File.Delete(tempImagePath);
-
-                            if (process.ExitCode != 0)
-                            {
-                                MessageBox.Show("Python error: " + error, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                return null;
-                            }
-
-                            // Çıktı base64 string ise:
-                            byte[] imageBytes = Convert.FromBase64String(output.Trim());
-                            using (var ms = new MemoryStream(imageBytes))
-                            {
-                                return Image.FromStream(ms);
-                            }
+                            MessageBox.Show("An error occured: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return null;
                         }
                     });
                 }
