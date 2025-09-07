@@ -76,8 +76,7 @@
             // 
             // panel1
             // 
-            panel1.BackgroundImage = Properties.Resources.pexels_dreamypixel_547115;
-            panel1.BackgroundImageLayout = ImageLayout.Stretch;
+            panel1.BackgroundImage = Properties.Resources.artfusion_pattern;
             panel1.Controls.Add(pictureBox1);
             panel1.Controls.Add(label3);
             panel1.Controls.Add(label2);
@@ -107,7 +106,7 @@
             label3.Name = "label3";
             label3.Size = new Size(224, 30);
             label3.TabIndex = 1;
-            label3.Text = "Version 0.11.4 Alpha";
+            label3.Text = "Version 0.12.0 Alpha";
             // 
             // label2
             // 

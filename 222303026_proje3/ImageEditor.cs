@@ -234,6 +234,7 @@ namespace _222303026_proje3
                 toolStrip.BackColor = Color.Transparent;
                 toolStrip.ForeColor = ToolStrip.DefaultForeColor;
             }
+            TitleBarHelper.ApplyCustomTitleBar(this, false);
         }
         private void DarkTheme()
         {
@@ -290,6 +291,7 @@ namespace _222303026_proje3
                 toolStrip.BackColor = Color.Black;
                 toolStrip.ForeColor = Color.White;
             }
+            TitleBarHelper.ApplyCustomTitleBar(this, true);
         }
         private void InitializeSelectionPen()
         {

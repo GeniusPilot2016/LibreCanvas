@@ -71,6 +71,16 @@ namespace _222303026_proje3.Properties {
         }
         
         /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap artfusion_pattern {
+            get {
+                object obj = ResourceManager.GetObject("artfusion_pattern", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   System.Byte[] türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
         internal static byte[] HarmonyOS_Sans_Black {

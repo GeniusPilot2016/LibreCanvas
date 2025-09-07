@@ -195,6 +195,7 @@ namespace _222303026_proje3
                     }
                 }
             }
+            TitleBarHelper.ApplyCustomTitleBar(this, false);
         }
         public void DarkTheme()
         {
@@ -266,17 +267,21 @@ namespace _222303026_proje3
                     }
                 }
             }
+            TitleBarHelper.ApplyCustomTitleBar(this, true);
         }
         private void comboBoxTheme_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Settings1.Default.PreferredTheme = comboBoxTheme.SelectedIndex;
-            Settings1.Default.Save(); // Save the settings to persist the changes
+            if(comboBoxTheme.SelectedIndex != Settings1.Default.PreferredTheme)
+            {
+                Settings1.Default.PreferredTheme = comboBoxTheme.SelectedIndex;
+                Settings1.Default.Save(); // Save the settings to persist the changes
 
-            // Apply theme to this form first
-            SetTheme();
+                // Apply theme to this form first
+                SetTheme();
 
-            // Apply theme to all registered forms
-            ThemeManager.ApplyThemeToAllForms();
+                // Apply theme to all registered forms
+                ThemeManager.ApplyThemeToAllForms();
+            }
         }
 
         private void tabPage1_Click(object sender, EventArgs e)
