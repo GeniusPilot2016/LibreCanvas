@@ -59,6 +59,7 @@ namespace _222303026_proje3
             this.ForeColor = Form.DefaultForeColor;
             buttonAccept.BackColor = Color.Transparent;
             buttonDiscard.BackColor = Color.Transparent;
+            TitleBarHelper.ApplyCustomTitleBar(this, false);
         }
         private void DarkTheme()
         {
@@ -66,6 +67,7 @@ namespace _222303026_proje3
             this.ForeColor = Color.White;
             buttonAccept.BackColor = Color.FromArgb(32, 32, 32);
             buttonDiscard.BackColor = Color.FromArgb(32, 32, 32);
+            TitleBarHelper.ApplyCustomTitleBar(this, true);
         }
         private void buttonAccept_Click(object sender, EventArgs e)
         {

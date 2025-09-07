@@ -18,6 +18,8 @@ namespace _222303026_proje3
         {
             try
             {
+                string systemPrompt = "Do not create any NSFW, sexual, nude, or inappropriate content. Only generate safe-for-work, appropriate, and non-offensive images.";
+                string promptWithSystemPrompt = $"{systemPrompt} {prompt}.";
                 return await Task.Run(() =>
                 {
                     try
@@ -30,7 +32,7 @@ namespace _222303026_proje3
                         var psi = new ProcessStartInfo
                         {
                             FileName = pythonExe,
-                            Arguments = $"\"{scriptPath}\" \"{prompt}\" \"{apiKey}\" \"{width}\" \"{height}\"",
+                            Arguments = $"\"{scriptPath}\" \"{promptWithSystemPrompt}\" \"{apiKey}\" \"{width}\" \"{height}\"",
                             RedirectStandardOutput = true,
                             RedirectStandardError = true,
                             UseShellExecute = false,
@@ -74,6 +76,8 @@ namespace _222303026_proje3
 
         public static async Task<Image> EditImage(Image inputImage, string prompt)
         {
+            string systemPrompt = "Do not edit image to create any NSFW, sexual, nude, or inappropriate content. Only generate safe-for-work, appropriate, and non-offensive images.";
+            string promptWithSystemPrompt = $"{systemPrompt} {prompt}.";
             if (!string.IsNullOrEmpty(Settings1.Default.HashedGeminiAIAPIKey))
             {
                 try
@@ -94,7 +98,7 @@ namespace _222303026_proje3
                             var psi = new ProcessStartInfo
                             {
                                 FileName = pythonExe,
-                                Arguments = $"\"{scriptPath}\" \"{tempImagePath}\" \"{prompt}\" \"{apiKey}\"",
+                                Arguments = $"\"{scriptPath}\" \"{tempImagePath}\" \"{promptWithSystemPrompt}\" \"{apiKey}\"",
                                 RedirectStandardOutput = true,
                                 RedirectStandardError = true,
                                 UseShellExecute = false,

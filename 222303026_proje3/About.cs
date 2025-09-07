@@ -70,6 +70,7 @@ namespace _222303026_proje3
                 item.BackColor = SystemColors.Window;
                 item.ForeColor = ListView.DefaultForeColor;
             }
+            TitleBarHelper.ApplyCustomTitleBar(this, false);
         }
         private void DarkTheme()
         {
@@ -88,6 +89,7 @@ namespace _222303026_proje3
                 item.BackColor = Color.Black;
                 item.ForeColor = Color.White;
             }
+            TitleBarHelper.ApplyCustomTitleBar(this, true);
         }
         private void About_Load(object sender, EventArgs e)
         {

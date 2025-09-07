@@ -57,6 +57,7 @@ namespace _222303026_proje3
             richTextBox1.ForeColor = RichTextBox.DefaultForeColor;
             button1.BackColor = Color.Transparent;
             button1.ForeColor = Button.DefaultForeColor;
+            TitleBarHelper.ApplyCustomTitleBar(this, false);
         }
         private void DarkTheme()
         {
@@ -66,6 +67,7 @@ namespace _222303026_proje3
             richTextBox1.ForeColor = Color.White;
             button1.BackColor = Color.FromArgb(32, 32, 32);
             button1.ForeColor = Color.White;
+            TitleBarHelper.ApplyCustomTitleBar(this, true);
         }
 
         private void richTextBox1_LinkClicked(object sender, LinkClickedEventArgs e)

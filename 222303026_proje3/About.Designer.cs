@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            ListViewItem listViewItem1 = new ListViewItem(new string[] { "GeniusPilot2016 (Nisa Özdoğan)", "Designing and programming" }, -1);
+            ListViewItem listViewItem2 = new ListViewItem(new string[] { "GeniusPilot2016 (Nisa Özdoğan)", "Designing and programming" }, -1);
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(About));
             panel1 = new Panel();
             pictureBox1 = new PictureBox();
@@ -50,15 +50,14 @@
             // 
             // panel1
             // 
-            panel1.BackgroundImage = Properties.Resources.pexels_dreamypixel_547115;
-            panel1.BackgroundImageLayout = ImageLayout.Stretch;
+            panel1.BackgroundImage = Properties.Resources.artfusion_pattern;
             panel1.Controls.Add(pictureBox1);
             panel1.Controls.Add(label3);
             panel1.Controls.Add(label2);
             panel1.Dock = DockStyle.Top;
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
-            panel1.Size = new Size(633, 308);
+            panel1.Size = new Size(633, 225);
             panel1.TabIndex = 7;
             // 
             // pictureBox1
@@ -66,7 +65,7 @@
             pictureBox1.Anchor = AnchorStyles.None;
             pictureBox1.BackColor = Color.Transparent;
             pictureBox1.Image = Properties.Resources.artfusion_icon;
-            pictureBox1.Location = new Point(90, 29);
+            pictureBox1.Location = new Point(90, 44);
             pictureBox1.Name = "pictureBox1";
             pictureBox1.Size = new Size(142, 141);
             pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
@@ -79,11 +78,11 @@
             label3.AutoSize = true;
             label3.BackColor = Color.Transparent;
             label3.Font = new Font("HarmonyOS Sans", 13.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label3.Location = new Point(237, 117);
+            label3.Location = new Point(237, 132);
             label3.Name = "label3";
             label3.Size = new Size(224, 30);
             label3.TabIndex = 1;
-            label3.Text = "Version 0.11.4 Alpha";
+            label3.Text = "Version 0.12.0 Alpha";
             // 
             // label2
             // 
@@ -91,7 +90,7 @@
             label2.AutoSize = true;
             label2.BackColor = Color.Transparent;
             label2.Font = new Font("HarmonyOS Sans", 35.9999962F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label2.Location = new Point(221, 39);
+            label2.Location = new Point(221, 54);
             label2.Name = "label2";
             label2.Size = new Size(314, 79);
             label2.TabIndex = 0;
@@ -99,10 +98,10 @@
             // 
             // label1
             // 
-            label1.Anchor = AnchorStyles.Top;
+            label1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
             label1.AutoSize = true;
             label1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label1.Location = new Point(265, 492);
+            label1.Location = new Point(265, 396);
             label1.Name = "label1";
             label1.Size = new Size(99, 20);
             label1.TabIndex = 6;
@@ -113,10 +112,10 @@
             listView1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             listView1.Columns.AddRange(new ColumnHeader[] { columnHeader1, columnHeader2 });
             listView1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            listView1.Items.AddRange(new ListViewItem[] { listViewItem1 });
-            listView1.Location = new Point(11, 515);
+            listView1.Items.AddRange(new ListViewItem[] { listViewItem2 });
+            listView1.Location = new Point(11, 419);
             listView1.Name = "listView1";
-            listView1.Size = new Size(609, 249);
+            listView1.Size = new Size(609, 243);
             listView1.TabIndex = 8;
             listView1.UseCompatibleStateImageBehavior = false;
             listView1.View = View.Details;
@@ -136,7 +135,7 @@
             label4.Anchor = AnchorStyles.Top;
             label4.AutoSize = true;
             label4.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label4.Location = new Point(90, 340);
+            label4.Location = new Point(90, 244);
             label4.Name = "label4";
             label4.Size = new Size(449, 80);
             label4.TabIndex = 9;
@@ -148,7 +147,7 @@
             buttonVisitIcons8.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             buttonVisitIcons8.ImageIndex = 0;
             buttonVisitIcons8.ImageList = icons;
-            buttonVisitIcons8.Location = new Point(65, 439);
+            buttonVisitIcons8.Location = new Point(65, 343);
             buttonVisitIcons8.Name = "buttonVisitIcons8";
             buttonVisitIcons8.Size = new Size(155, 35);
             buttonVisitIcons8.TabIndex = 10;
@@ -173,7 +172,7 @@
             buttonViewLicenseText.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             buttonViewLicenseText.ImageIndex = 1;
             buttonViewLicenseText.ImageList = icons;
-            buttonViewLicenseText.Location = new Point(226, 439);
+            buttonViewLicenseText.Location = new Point(226, 343);
             buttonViewLicenseText.Name = "buttonViewLicenseText";
             buttonViewLicenseText.Size = new Size(165, 35);
             buttonViewLicenseText.TabIndex = 10;
@@ -189,7 +188,7 @@
             buttonForkMeOnGithub.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             buttonForkMeOnGithub.ImageIndex = 2;
             buttonForkMeOnGithub.ImageList = icons;
-            buttonForkMeOnGithub.Location = new Point(397, 439);
+            buttonForkMeOnGithub.Location = new Point(397, 343);
             buttonForkMeOnGithub.Name = "buttonForkMeOnGithub";
             buttonForkMeOnGithub.Size = new Size(175, 35);
             buttonForkMeOnGithub.TabIndex = 10;
@@ -204,7 +203,7 @@
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoSize = true;
-            ClientSize = new Size(633, 775);
+            ClientSize = new Size(633, 673);
             Controls.Add(buttonForkMeOnGithub);
             Controls.Add(listView1);
             Controls.Add(panel1);

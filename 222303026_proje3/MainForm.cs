@@ -78,6 +78,7 @@ namespace _222303026_proje3
             label1.ForeColor = Form.DefaultForeColor;
             listBox1.BackColor = SystemColors.Window;
             listBox1.ForeColor = ListBox.DefaultForeColor;
+            TitleBarHelper.ApplyCustomTitleBar(this, false);
         }
         private void DarkTheme()
         {
@@ -90,6 +91,7 @@ namespace _222303026_proje3
             label1.ForeColor = Color.White;
             listBox1.BackColor = Color.Black;
             listBox1.ForeColor = Color.White;
+            TitleBarHelper.ApplyCustomTitleBar(this, true);
         }
         private void pictureBox1_Click(object sender, EventArgs e)
         {

@@ -75,6 +75,7 @@ namespace _222303026_proje3
                     control.ForeColor = SystemColors.WindowText;
                 }
             }
+            TitleBarHelper.ApplyCustomTitleBar(this, false);
         }
         private void DarkTheme()
         {
@@ -98,6 +99,7 @@ namespace _222303026_proje3
                     control.ForeColor = Color.White;
                 }
             }
+            TitleBarHelper.ApplyCustomTitleBar(this, true);
         }
         private async void button1_Click(object sender, EventArgs e)
         {
