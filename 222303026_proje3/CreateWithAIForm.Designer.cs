@@ -49,10 +49,10 @@
             // 
             textBoxPrompt.Anchor = AnchorStyles.Top;
             textBoxPrompt.Font = new Font("HarmonyOS Sans", 8.999999F);
-            textBoxPrompt.Location = new Point(96, 29);
+            textBoxPrompt.Location = new Point(77, 23);
             textBoxPrompt.Margin = new Padding(2);
             textBoxPrompt.Name = "textBoxPrompt";
-            textBoxPrompt.Size = new Size(400, 27);
+            textBoxPrompt.Size = new Size(321, 23);
             textBoxPrompt.TabIndex = 0;
             textBoxPrompt.TextChanged += textBoxPrompt_TextChanged;
             // 
@@ -61,10 +61,10 @@
             labelPrompt.Anchor = AnchorStyles.Top;
             labelPrompt.AutoSize = true;
             labelPrompt.Font = new Font("HarmonyOS Sans", 8.999999F);
-            labelPrompt.Location = new Point(29, 32);
+            labelPrompt.Location = new Point(23, 26);
             labelPrompt.Margin = new Padding(2, 0, 2, 0);
             labelPrompt.Name = "labelPrompt";
-            labelPrompt.Size = new Size(61, 20);
+            labelPrompt.Size = new Size(46, 16);
             labelPrompt.TabIndex = 1;
             labelPrompt.Text = "Prompt";
             // 
@@ -75,10 +75,10 @@
             buttonCreate.Font = new Font("HarmonyOS Sans", 8.999999F);
             buttonCreate.ImageIndex = 0;
             buttonCreate.ImageList = icons;
-            buttonCreate.Location = new Point(502, 24);
+            buttonCreate.Location = new Point(402, 19);
             buttonCreate.Margin = new Padding(2);
             buttonCreate.Name = "buttonCreate";
-            buttonCreate.Size = new Size(145, 35);
+            buttonCreate.Size = new Size(116, 28);
             buttonCreate.TabIndex = 2;
             buttonCreate.Text = "Create Image";
             buttonCreate.TextAlign = ContentAlignment.MiddleRight;
@@ -102,24 +102,24 @@
             label2.ImageAlign = ContentAlignment.MiddleLeft;
             label2.ImageIndex = 1;
             label2.ImageList = icons;
-            label2.Location = new Point(52, 121);
+            label2.Location = new Point(42, 97);
             label2.Margin = new Padding(2, 0, 2, 0);
             label2.Name = "label2";
-            label2.Size = new Size(569, 20);
+            label2.Size = new Size(457, 16);
             label2.TabIndex = 1;
-            label2.Text = "     Warning: AI image generator may produce inaccurate or inappropriate images.";
+            label2.Text = "        Warning: AI image generator may produce inaccurate or inappropriate images.";
             label2.TextAlign = ContentAlignment.MiddleRight;
             // 
             // numericUpDownWidth
             // 
             numericUpDownWidth.Anchor = AnchorStyles.None;
             numericUpDownWidth.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            numericUpDownWidth.Location = new Point(222, 76);
+            numericUpDownWidth.Location = new Point(178, 61);
             numericUpDownWidth.Margin = new Padding(2);
             numericUpDownWidth.Maximum = new decimal(new int[] { 1920, 0, 0, 0 });
             numericUpDownWidth.Minimum = new decimal(new int[] { 64, 0, 0, 0 });
             numericUpDownWidth.Name = "numericUpDownWidth";
-            numericUpDownWidth.Size = new Size(69, 27);
+            numericUpDownWidth.Size = new Size(55, 23);
             numericUpDownWidth.TabIndex = 3;
             numericUpDownWidth.Value = new decimal(new int[] { 1024, 0, 0, 0 });
             // 
@@ -128,10 +128,10 @@
             labelWidth.Anchor = AnchorStyles.None;
             labelWidth.AutoSize = true;
             labelWidth.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            labelWidth.Location = new Point(165, 79);
+            labelWidth.Location = new Point(132, 63);
             labelWidth.Margin = new Padding(2, 0, 2, 0);
             labelWidth.Name = "labelWidth";
-            labelWidth.Size = new Size(51, 20);
+            labelWidth.Size = new Size(40, 16);
             labelWidth.TabIndex = 4;
             labelWidth.Text = "Width";
             // 
@@ -139,12 +139,12 @@
             // 
             numericUpDownHeight.Anchor = AnchorStyles.None;
             numericUpDownHeight.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            numericUpDownHeight.Location = new Point(378, 76);
+            numericUpDownHeight.Location = new Point(302, 61);
             numericUpDownHeight.Margin = new Padding(2);
             numericUpDownHeight.Maximum = new decimal(new int[] { 1920, 0, 0, 0 });
             numericUpDownHeight.Minimum = new decimal(new int[] { 64, 0, 0, 0 });
             numericUpDownHeight.Name = "numericUpDownHeight";
-            numericUpDownHeight.Size = new Size(69, 27);
+            numericUpDownHeight.Size = new Size(55, 23);
             numericUpDownHeight.TabIndex = 3;
             numericUpDownHeight.Value = new decimal(new int[] { 1024, 0, 0, 0 });
             // 
@@ -153,21 +153,20 @@
             labelHeight.Anchor = AnchorStyles.None;
             labelHeight.AutoSize = true;
             labelHeight.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            labelHeight.Location = new Point(315, 79);
+            labelHeight.Location = new Point(252, 63);
             labelHeight.Margin = new Padding(2, 0, 2, 0);
             labelHeight.Name = "labelHeight";
-            labelHeight.Size = new Size(56, 20);
+            labelHeight.Size = new Size(44, 16);
             labelHeight.TabIndex = 4;
             labelHeight.Text = "Height";
             // 
             // progressBarImageCreating
             // 
             progressBarImageCreating.Anchor = AnchorStyles.Bottom;
-            progressBarImageCreating.Location = new Point(148, 158);
-            progressBarImageCreating.Margin = new Padding(4);
+            progressBarImageCreating.Location = new Point(118, 126);
             progressBarImageCreating.MarqueeAnimationSpeed = 10;
             progressBarImageCreating.Name = "progressBarImageCreating";
-            progressBarImageCreating.Size = new Size(510, 20);
+            progressBarImageCreating.Size = new Size(408, 16);
             progressBarImageCreating.Style = ProgressBarStyle.Marquee;
             progressBarImageCreating.TabIndex = 5;
             progressBarImageCreating.Visible = false;
@@ -177,10 +176,9 @@
             labelImageCreating.Anchor = AnchorStyles.Bottom;
             labelImageCreating.AutoSize = true;
             labelImageCreating.Font = new Font("HarmonyOS Sans", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            labelImageCreating.Location = new Point(13, 158);
-            labelImageCreating.Margin = new Padding(4, 0, 4, 0);
+            labelImageCreating.Location = new Point(10, 126);
             labelImageCreating.Name = "labelImageCreating";
-            labelImageCreating.Size = new Size(127, 20);
+            labelImageCreating.Size = new Size(100, 16);
             labelImageCreating.TabIndex = 6;
             labelImageCreating.Text = "Image is creating";
             labelImageCreating.Visible = false;
@@ -188,10 +186,10 @@
             // CreateWithAIForm
             // 
             AcceptButton = buttonCreate;
-            AutoScaleDimensions = new SizeF(120F, 120F);
+            AutoScaleDimensions = new SizeF(96F, 96F);
             AutoScaleMode = AutoScaleMode.Dpi;
             AutoSize = true;
-            ClientSize = new Size(672, 189);
+            ClientSize = new Size(538, 151);
             Controls.Add(labelImageCreating);
             Controls.Add(progressBarImageCreating);
             Controls.Add(labelHeight);
