@@ -185,6 +185,7 @@ namespace _222303026_proje3
         {
             if (comboBox1.Items.Count == 0)
             {
+                Logger.Log("No webcams found. Please connect a webcam and try again.", Logger.LogTypes.Warning);
                 MessageBox.Show("No webcams found. Please connect a webcam and try again.", "No Webcam Found", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 this.Close();
             }

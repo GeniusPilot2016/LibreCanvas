@@ -104,16 +104,16 @@
             label3.Font = new Font("HarmonyOS Sans", 13.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
             label3.Location = new Point(216, 157);
             label3.Name = "label3";
-            label3.Size = new Size(224, 30);
+            label3.Size = new Size(146, 30);
             label3.TabIndex = 1;
-            label3.Text = "Version 0.12.0 Alpha";
+            label3.Text = "Version 0.0.0";
             // 
             // label2
             // 
             label2.AutoSize = true;
             label2.BackColor = Color.Transparent;
             label2.Font = new Font("HarmonyOS Sans", 35.9999962F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label2.Location = new Point(200, 79);
+            label2.Location = new Point(203, 78);
             label2.Name = "label2";
             label2.Size = new Size(314, 79);
             label2.TabIndex = 0;

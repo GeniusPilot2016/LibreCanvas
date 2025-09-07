@@ -755,6 +755,7 @@ namespace _222303026_proje3
                                 {
                                     Undo();
                                     ClearRedoStack();
+                                    Logger.Log("The generated image is null.", Logger.LogTypes.Error);
                                     MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                 }
                             }
@@ -768,12 +769,14 @@ namespace _222303026_proje3
                     {
                         Undo();
                         ClearRedoStack();
+                        Logger.Log("The generated image is null.", Logger.LogTypes.Error);
                         MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     catch (Exception ex)
                     {
                         Undo();
                         ClearRedoStack();
+                        Logger.Log("An error occurred: " + ex.Message, Logger.LogTypes.Error);
                         MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     finally
@@ -790,11 +793,13 @@ namespace _222303026_proje3
                 }
                 else
                 {
+                    Logger.Log("Google Gemini™ API key is missing.", Logger.LogTypes.Error);
                     MessageBox.Show("Please enter your Google Gemini™ API key in the settings before using this feature.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             else
             {
+                Logger.Log("No internet connection available.", Logger.LogTypes.Error);
                 MessageBox.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -849,6 +854,7 @@ namespace _222303026_proje3
                             {
                                 Undo();
                                 ClearRedoStack();
+                                Logger.Log("The generated image is null.", Logger.LogTypes.Error);
                                 MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             }
                         }
@@ -866,6 +872,7 @@ namespace _222303026_proje3
                             {
                                 Undo();
                                 ClearRedoStack();
+                                Logger.Log("The generated image is null.", Logger.LogTypes.Error);
                                 MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             }
                         }
@@ -875,12 +882,14 @@ namespace _222303026_proje3
                     {
                         Undo();
                         ClearRedoStack();
+                        Logger.Log("The generated image is null.", Logger.LogTypes.Error);
                         MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     catch (Exception ex)
                     {
                         Undo();
                         ClearRedoStack();
+                        Logger.Log("An error occurred: " + ex.Message, Logger.LogTypes.Error);
                         MessageBox.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     finally
@@ -897,11 +906,13 @@ namespace _222303026_proje3
                 }
                 else
                 {
+                    Logger.Log("Google Gemini™ API key is missing.", Logger.LogTypes.Error);
                     MessageBox.Show("Please enter your Google Gemini™ API key in the settings before using this feature.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             else
             {
+                Logger.Log("No internet connection available.", Logger.LogTypes.Error);
                 MessageBox.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -1040,6 +1051,7 @@ namespace _222303026_proje3
             }
             catch (Exception ex)
             {
+                Logger.Log("An error occurred while saving the file: " + ex.Message, Logger.LogTypes.Error);
                 MessageBox.Show($"An error occurred while saving the file: {ex.Message}",
                                 "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -2574,10 +2586,12 @@ namespace _222303026_proje3
             }
             catch (FileNotFoundException)
             {
+                Logger.Log("File not found: " + openFileDialog1.FileName, Logger.LogTypes.Error);
                 MessageBox.Show("The selected file was not found. Please check the file path.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
+                Logger.Log("Error opening file: " + ex.Message, Logger.LogTypes.Error);
                 MessageBox.Show("An error occurred while opening the file: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -2623,11 +2637,13 @@ namespace _222303026_proje3
             }
             catch (FormatException)
             {
+                Logger.Log("Invalid size value entered for spray tool: " + comboBoxSpraySize.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 sprayToolSize = Settings1.Default.DefaultSpraySize;
             }
             catch (OverflowException)
             {
+                Logger.Log("Size value too big or too small for spray tool: " + comboBoxSpraySize.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 sprayToolSize = Settings1.Default.DefaultSpraySize;
             }
@@ -2659,11 +2675,13 @@ namespace _222303026_proje3
             }
             catch (FormatException)
             {
+                Logger.Log("Invalid size value entered for brush: " + comboBoxBrushSize.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 brushSize = 11;
             }
             catch (OverflowException)
             {
+                Logger.Log("Size value too big or too small for brush: " + comboBoxBrushSize.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 brushSize = 11;
             }
@@ -2685,11 +2703,13 @@ namespace _222303026_proje3
             }
             catch (FormatException)
             {
+                Logger.Log("Invalid size value entered for eraser: " + comboBoxEraserSize.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 eraserSize = Settings1.Default.DefaultEraserSize;
             }
             catch (OverflowException)
             {
+                Logger.Log("Size value too big or too small for eraser: " + comboBoxEraserSize.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 eraserSize = Settings1.Default.DefaultEraserSize;
             }
@@ -2716,11 +2736,13 @@ namespace _222303026_proje3
             }
             catch (FormatException)
             {
+                Logger.Log("Invalid size value entered for pen: " + comboBoxPenSize.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 penSize = Settings1.Default.DefaultPenSize;
             }
             catch (OverflowException)
             {
+                Logger.Log("Size value too big or too small for pen: " + comboBoxPenSize.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 penSize = Settings1.Default.DefaultPenSize;
             }
@@ -2747,11 +2769,13 @@ namespace _222303026_proje3
             }
             catch (FormatException)
             {
+                Logger.Log("Invalid size value entered for shape thickness: " + comboBoxShapeThickness.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 shapeThickness = Settings1.Default.DefaultShapeSize;
             }
             catch (OverflowException)
             {
+                Logger.Log("Size value too big or too small for shape thickness: " + comboBoxShapeThickness.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 shapeThickness = Settings1.Default.DefaultShapeSize;
             }
@@ -2778,11 +2802,13 @@ namespace _222303026_proje3
             }
             catch (FormatException)
             {
+                Logger.Log("Invalid size value entered for text tool: " + fontSizeComboBox.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 textSize = Settings1.Default.DefaultTextSize;
             }
             catch (OverflowException)
             {
+                Logger.Log("Size value too big or too small for text tool: " + fontSizeComboBox.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 textSize = Settings1.Default.DefaultTextSize;
             }
@@ -2814,12 +2840,14 @@ namespace _222303026_proje3
             }
             catch (FormatException)
             {
+                Logger.Log("Invalid size value entered for shape radius: " + textBoxRadius.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 radius = Settings1.Default.DefaultRadiusSize;
                 textBoxRadius.Text = radius.ToString();
             }
             catch (OverflowException)
             {
+                Logger.Log("Size value too big or too small for shape radius: " + textBoxRadius.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 radius = Settings1.Default.DefaultRadiusSize;
                 textBoxRadius.Text = radius.ToString();
@@ -2837,12 +2865,14 @@ namespace _222303026_proje3
             }
             catch (FormatException)
             {
+                Logger.Log("Invalid size value entered for shape points: " + textBoxPoints.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 points = Settings1.Default.DefaultPointsCount;
                 textBoxPoints.Text = points.ToString();
             }
             catch (OverflowException)
             {
+                Logger.Log("Size value too big or too small for shape points: " + textBoxPoints.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 points = Settings1.Default.DefaultPointsCount;
                 textBoxPoints.Text = points.ToString();
@@ -2858,11 +2888,6 @@ namespace _222303026_proje3
             setShapePoints();
         }
         private const int MaxStackSize = 20;
-
-        // Fix for CS0118: 'ImageEditor.currentTool' bir tür öðesidir ancak deðiþken olarak kullanýlýr
-
-        // The issue occurs because `currentTool` is both an enum type and a variable name in the code.
-        // To resolve this, we need to rename the variable to avoid the conflict with the enum type.
 
         private Tools selectedTool; // Rename the variable from `currentTool` to `selectedTool`
 
@@ -3073,11 +3098,13 @@ namespace _222303026_proje3
             }
             catch (FormatException)
             {
+                Logger.Log("Invalid size value entered for bucket tool tolerance: " + textBoxTolerance.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 tolerance = Settings1.Default.DefaultBucketTolerance;
             }
             catch (OverflowException)
             {
+                Logger.Log("Size value too big or too small for bucket tool tolerance: " + textBoxTolerance.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 tolerance = Settings1.Default.DefaultBucketTolerance;
             }
@@ -3725,6 +3752,7 @@ namespace _222303026_proje3
             }
             catch (FormatException)
             {
+                Logger.Log("Invalid size value entered for artistic filter size: " + textBoxArtisticFilterSize.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 switch (artisticFilters)
                 {
@@ -3740,6 +3768,7 @@ namespace _222303026_proje3
             }
             catch (OverflowException)
             {
+                Logger.Log("Size value too big or too small for artistic filter size: " + textBoxArtisticFilterSize.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 switch (artisticFilters)
                 {
@@ -3791,6 +3820,7 @@ namespace _222303026_proje3
             }
             catch (FormatException)
             {
+                Logger.Log("Invalid intensity value entered for artistic filter intensity: " + textBoxArtisticFilterIntensity.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Invalid intensity value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 switch (artisticFilters)
                 {
@@ -3806,6 +3836,7 @@ namespace _222303026_proje3
             }
             catch (OverflowException)
             {
+                Logger.Log("Intensity value too big or too small for artistic filter intensity: " + textBoxArtisticFilterIntensity.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Intensity value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 switch (artisticFilters)
                 {
@@ -3857,6 +3888,7 @@ namespace _222303026_proje3
             }
             catch (FormatException)
             {
+                Logger.Log("Invalid threshold value entered for artistic filter threshold: " + textBoxArtisticFilterThreshold.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Invalid threshold value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 switch (artisticFilters)
                 {
@@ -3872,6 +3904,7 @@ namespace _222303026_proje3
             }
             catch (OverflowException)
             {
+                Logger.Log("Threshold value too big or too small for artistic filter threshold: " + textBoxArtisticFilterThreshold.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Threshold value is too big or too small", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 switch (artisticFilters)
                 {
@@ -3919,6 +3952,7 @@ namespace _222303026_proje3
             }
             else
             {
+                Logger.Log("No image to print.", Logger.LogTypes.Error);
                 MessageBox.Show("No image to print.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -3941,6 +3975,7 @@ namespace _222303026_proje3
             }
             else
             {
+                Logger.Log("No image to preview.", Logger.LogTypes.Error);
                 MessageBox.Show("No image to preview.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -3958,6 +3993,7 @@ namespace _222303026_proje3
             }
             else
             {
+                Logger.Log("No image in clipboard.", Logger.LogTypes.Error);
                 MessageBox.Show("No image in clipboard.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -3970,6 +4006,7 @@ namespace _222303026_proje3
             }
             catch (Exception ex)
             {
+                Logger.Log("Error copying image: " + ex.Message, Logger.LogTypes.Error);
                 MessageBox.Show("Error copying image: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -4043,6 +4080,7 @@ namespace _222303026_proje3
             }
             catch (Exception ex)
             {
+                Logger.Log("Error cutting image: " + ex.Message, Logger.LogTypes.Error);
                 MessageBox.Show("Error cutting image: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -4293,6 +4331,7 @@ namespace _222303026_proje3
                             {
                                 Undo();
                                 ClearRedoStack();
+                                Logger.Log("The generated image is null.", Logger.LogTypes.Error);
                                 MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             }
                         }
@@ -4309,6 +4348,7 @@ namespace _222303026_proje3
                             {
                                 Undo();
                                 ClearRedoStack();
+                                Logger.Log("The generated image is null.", Logger.LogTypes.Error);
                                 MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             }
                         }
@@ -4318,12 +4358,14 @@ namespace _222303026_proje3
                     {
                         Undo();
                         ClearRedoStack();
+                        Logger.Log("The generated image is null.", Logger.LogTypes.Error);
                         MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     catch (Exception ex)
                     {
                         Undo();
                         ClearRedoStack();
+                        Logger.Log("Error during AI image creation: " + ex.Message, Logger.LogTypes.Error);
                         MessageBox.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     finally
@@ -4349,11 +4391,13 @@ namespace _222303026_proje3
                 }
                 else
                 {
+                    Logger.Log("Please enter your Google Gemini™ API key in the settings before using this feature.", Logger.LogTypes.Error);
                     MessageBox.Show("Please enter your Google Gemini™ API key in the settings before using this feature.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             else
             {
+                Logger.Log("No internet connection available.", Logger.LogTypes.Error);
                 MessageBox.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -4413,12 +4457,14 @@ namespace _222303026_proje3
             }
             catch (FormatException)
             {
+                Logger.Log("Invalid size value entered for pixelation size: " + textBoxPixelationSize.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 pixelationSize = Settings1.Default.DefaultPixelationSize;
                 textBoxPixelationSize.Text = pixelationSize.ToString();
             }
             catch (OverflowException)
             {
+                Logger.Log("Size value too big or too small for pixelation size: " + textBoxPixelationSize.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 pixelationSize = Settings1.Default.DefaultPixelationSize;
                 textBoxPixelationSize.Text = pixelationSize.ToString();
@@ -4440,12 +4486,14 @@ namespace _222303026_proje3
             }
             catch (FormatException)
             {
+                Logger.Log("Invalid size value entered for pixelation offset X: " + textBoxPixelationOffsetX.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 pixelationOffsetX = Settings1.Default.DefaultPixelationOffsetX;
                 textBoxPixelationOffsetX.Text = pixelationOffsetX.ToString();
             }
             catch (OverflowException)
             {
+                Logger.Log("Size value too big or too small for pixelation offset X: " + textBoxPixelationOffsetX.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Size value is too big or too small", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 pixelationOffsetX = Settings1.Default.DefaultPixelationOffsetX;
                 textBoxPixelationOffsetX.Text = pixelationOffsetX.ToString();
@@ -4467,12 +4515,14 @@ namespace _222303026_proje3
             }
             catch (FormatException)
             {
+                Logger.Log("Invalid size value entered for pixelation offset Y: " + textBoxPixelationOffsetY.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 pixelationOffsetY = Settings1.Default.DefaultPixelationOffsetY;
                 textBoxPixelationOffsetY.Text = pixelationOffsetY.ToString();
             }
             catch (OverflowException)
             {
+                Logger.Log("Size value too big or too small for pixelation offset Y: " + textBoxPixelationOffsetY.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Size value is too big or too small", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 pixelationOffsetY = Settings1.Default.DefaultPixelationOffsetY;
                 textBoxPixelationOffsetY.Text = pixelationOffsetY.ToString();
@@ -4513,12 +4563,14 @@ namespace _222303026_proje3
             }
             catch (FormatException)
             {
+                Logger.Log("Invalid radius value entered for Gaussian blur radius: " + textboxGaussianBlurRadius.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Invalid radius value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 gaussianBlurSize = Settings1.Default.DefaultGaussianBlurRadius;
                 textboxGaussianBlurRadius.Text = gaussianBlurSize.ToString();
             }
             catch (OverflowException)
             {
+                Logger.Log("Radius value too big or too small for Gaussian blur radius: " + textboxGaussianBlurRadius.Text, Logger.LogTypes.Error);
                 MessageBox.Show("Radius value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 gaussianBlurSize = Settings1.Default.DefaultGaussianBlurRadius;
                 textboxGaussianBlurRadius.Text = gaussianBlurSize.ToString();

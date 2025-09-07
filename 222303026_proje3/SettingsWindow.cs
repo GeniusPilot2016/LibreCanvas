@@ -346,10 +346,12 @@ namespace _222303026_proje3
                 Settings1.Default.Save(); // Save the settings to persist the changes
                 buttonUpdateGeminiAPIKey.Enabled = false;
                 buttonResetGeminiAPIKey.Enabled = true;
+                Logger.Log("Google Gemini™ API key is saved.", Logger.LogTypes.Info);
                 MessageBox.Show("Google Gemini™ API key is saved successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
+                Logger.Log("Error saving Google Gemini™ API key: " + ex.Message, Logger.LogTypes.Error);
                 MessageBox.Show("Error: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -364,10 +366,12 @@ namespace _222303026_proje3
                 buttonUpdateGeminiAPIKey.Enabled = false;
                 buttonResetGeminiAPIKey.Enabled = false; // Disable the button after clearing the key  
                 textBoxGeminiAPIKey.Clear(); // Clear the text box
+                Logger.Log("Google Gemini™ API key has been cleared.", Logger.LogTypes.Info);
                 MessageBox.Show("Google Gemini™ API key has been cleared successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
+                Logger.Log("Error clearing Google Gemini™ API key: " + ex.Message, Logger.LogTypes.Error);
                 MessageBox.Show("Error: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }

@@ -48,6 +48,7 @@ namespace _222303026_proje3
 
                             if (process.ExitCode != 0)
                             {
+                                Logger.Log("Python script error: " + error, Logger.LogTypes.Error);
                                 MessageBox.Show("Python error: " + error, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                                 return null;
                             }
@@ -62,6 +63,7 @@ namespace _222303026_proje3
                     }
                     catch(Exception ex)
                     {
+                        Logger.Log("Error in CreateImage: " + ex.Message, Logger.LogTypes.Error);
                         MessageBox.Show("An error occured: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return null;
                     }
@@ -69,6 +71,7 @@ namespace _222303026_proje3
             }
             catch (Exception ex)
             {
+                Logger.Log("Error in CreateImage: " + ex.Message, Logger.LogTypes.Error);
                 MessageBox.Show("An error occured: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return null;
             }
@@ -116,6 +119,7 @@ namespace _222303026_proje3
 
                                 if (process.ExitCode != 0)
                                 {
+                                    Logger.Log("Python script error: " + error, Logger.LogTypes.Error);
                                     MessageBox.Show("Python error: " + error, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                                     return null;
                                 }
@@ -130,6 +134,7 @@ namespace _222303026_proje3
                         }
                         catch(Exception ex)
                         {
+                            Logger.Log("Error in EditImage: " + ex.Message, Logger.LogTypes.Error);
                             MessageBox.Show("An error occured: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return null;
                         }
@@ -137,12 +142,14 @@ namespace _222303026_proje3
                 }
                 catch (Exception ex)
                 {
+                    Logger.Log("Error in EditImage: " + ex.Message, Logger.LogTypes.Error);
                     MessageBox.Show("An error occured: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return null;
                 }
             }
             else
             {
+                Logger.Log("Google Gemini™ API key is not set.", Logger.LogTypes.Error);
                 MessageBox.Show("Google Gemini™ API key is not set. Please set it in the settings.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return null;
             }

@@ -1,3 +1,4 @@
+using _222303026_proje3;
 using System.Drawing;
 
 public class BitmapResizer
@@ -10,6 +11,7 @@ public class BitmapResizer
             graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
             graphics.DrawImage(originalBitmap, 0, 0, newWidth, newHeight);
         }
+        Logger.Log($"Resized bitmap from {originalBitmap.Width}x{originalBitmap.Height} to {newWidth}x{newHeight}", Logger.LogTypes.Info);
         return resizedBitmap;
     }
 }

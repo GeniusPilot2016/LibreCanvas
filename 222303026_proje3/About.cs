@@ -18,6 +18,7 @@ namespace _222303026_proje3
             ThemeManager.RegisterForm(this);
             SetTheme();
             SetFonts();
+            label3.Text = $"Version {GetInformations.GetVersionAndStatus().version} {GetInformations.GetVersionAndStatus().status}";
         }
         private void SetFonts()
         {

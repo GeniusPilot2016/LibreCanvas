@@ -85,7 +85,7 @@ public class EncryptionHelper
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine("Encryption 1 error: " + ex.Message);
+            Logger.Log("Encryption 1 error: " + ex.Message, Logger.LogTypes.Error);
             throw;
         }
     }
@@ -124,7 +124,7 @@ public class EncryptionHelper
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine("Decryption 1 error: " + ex.Message);
+            Logger.Log("Decryption 1 error: " + ex.Message, Logger.LogTypes.Error);
             throw;
         }
     }
@@ -151,13 +151,12 @@ public class EncryptionHelper
                 // Reset the static fields to force them to be reloaded
                 _key = null;
                 _iv = null;
-
-                System.Diagnostics.Debug.WriteLine("Generated new encryption key and IV 1");
+                Logger.Log("Encryption key and IV 1 changed successfully.", Logger.LogTypes.Info);
             }
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine("Error changing encryption key and IV 1: " + ex.Message);
+            Logger.Log("Error changing encryption key and IV 1: " + ex.Message, Logger.LogTypes.Error);
             throw;
         }
     }

@@ -121,6 +121,7 @@ namespace _222303026_proje3
             else
             {
                 setVisibilityOfProgressBarAndSomeControls(false);
+                Logger.Log("Image generation failed.", Logger.LogTypes.Error);
                 MessageBox.Show("Image generation failed.");
             }
         }
@@ -199,11 +200,13 @@ namespace _222303026_proje3
         {
             if (string.IsNullOrEmpty(Settings1.Default.HashedGeminiAIAPIKey))
             {
+                Logger.Log("Google Gemini™ API key is not set.", Logger.LogTypes.Error);
                 MessageBox.Show("Please enter your Google Gemini™ API key in the settings before using this feature.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 this.Close();
             }
             if(!CheckIfInternetConnectionAvailable.IsInternetAvailable())
             {
+                Logger.Log("No internet connection available.", Logger.LogTypes.Error);
                 MessageBox.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 this.Close();
             }

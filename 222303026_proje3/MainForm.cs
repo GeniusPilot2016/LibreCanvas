@@ -31,6 +31,7 @@ namespace _222303026_proje3
                 }
                 listBox1.Enabled = true;
             }
+            label3.Text = $"Version {GetInformations.GetVersionAndStatus().version} {GetInformations.GetVersionAndStatus().status}";
         }
         private void SetFonts()
         {
@@ -124,10 +125,12 @@ namespace _222303026_proje3
             }
             catch (FileNotFoundException)
             {
+                Logger.Log("The selected file was not found.", Logger.LogTypes.Error);
                 MessageBox.Show("The selected file was not found. Please check the file path.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
+                Logger.Log("An error occurred while opening the file: " + ex.Message, Logger.LogTypes.Error);
                 MessageBox.Show("An error occurred while opening the file: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -195,6 +198,7 @@ namespace _222303026_proje3
             }
             catch (FileNotFoundException)
             {
+                Logger.Log("The selected file was not found.", Logger.LogTypes.Error);
                 MessageBox.Show("The selected file was not found. Please check the file path.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Settings1.Default.RecentFiles.Remove(listBox1.SelectedItem.ToString());
                 if (Settings1.Default.RecentFiles.Count == 0)
@@ -206,6 +210,7 @@ namespace _222303026_proje3
             }
             catch (Exception ex)
             {
+                Logger.Log("An error occurred while opening the file: " + ex.Message, Logger.LogTypes.Error);
                 MessageBox.Show("An error occurred while opening the file: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
