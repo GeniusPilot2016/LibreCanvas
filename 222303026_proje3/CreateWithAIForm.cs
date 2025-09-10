@@ -14,10 +14,11 @@ namespace _222303026_proje3
     public partial class CreateWithAIForm : Form
     {
         Image image;
+        String filePath;
         public CreateWithAIForm()
         {
             InitializeComponent();
-            ThemeManager.RegisterForm(this); 
+            ThemeManager.RegisterForm(this);
             SetTheme();
             SetFonts();
             numericUpDownWidth.Value = Settings1.Default.DefaultAIGeneratedImageSize.Width;
@@ -108,22 +109,15 @@ namespace _222303026_proje3
             int width = (int)numericUpDownWidth.Value;
             int height = (int)numericUpDownHeight.Value;
             Image generatedImage = await CreateAIImages.CreateImage(prompt, (int)numericUpDownWidth.Value,
-                (int)numericUpDownHeight.Value);
-
+                (int)numericUpDownHeight.Value, filePath);
+            setVisibilityOfProgressBarAndSomeControls(false);
             if (generatedImage != null)
             {
                 // İlk resmi yeniden boyutlandırın
-                Application.DoEvents();
                 setVisibilityOfProgressBarAndSomeControls(false);
                 image = ResizeImage(generatedImage, width, height);
-                this.Close();
             }
-            else
-            {
-                setVisibilityOfProgressBarAndSomeControls(false);
-                Logger.Log("Image generation failed.", Logger.LogTypes.Error);
-                MessageBox.Show("Image generation failed.");
-            }
+            this.Close();
         }
         private void setVisibilityOfProgressBarAndSomeControls(bool isVisible)
         {
@@ -134,6 +128,8 @@ namespace _222303026_proje3
             buttonCreate.Enabled = !isVisible;
             labelWidth.Enabled = !isVisible;
             labelHeight.Enabled = !isVisible;
+            buttonUploadImage.Enabled = !isVisible;
+            labelUploadedImage.Enabled = !isVisible;
             numericUpDownWidth.Enabled = !isVisible;
             numericUpDownHeight.Enabled = !isVisible;
         }
@@ -204,11 +200,52 @@ namespace _222303026_proje3
                 MessageBox.Show("Please enter your Google Gemini™ API key in the settings before using this feature.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 this.Close();
             }
-            if(!CheckIfInternetConnectionAvailable.IsInternetAvailable())
+            if(CreateAIImages.isAPIKeyValidFormat(EncryptionHelper.DecryptString(Settings1.Default.HashedGeminiAIAPIKey)) == false)
+            {
+                Logger.Log("Google Gemini™ API key format is invalid.", Logger.LogTypes.Error);
+                MessageBox.Show("Your Google Gemini™ API key format is invalid. Please check your API key in the settings.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
+            }
+            if (!CheckIfInternetConnectionAvailable.IsInternetAvailable())
             {
                 Logger.Log("No internet connection available.", Logger.LogTypes.Error);
-                MessageBox.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); // Show message box if no internet connection
                 this.Close();
+            }
+            if (!CheckIfInternetConnectionAvailable.IsServerUp())
+            {
+                Logger.Log("Google API server is not reachable.", Logger.LogTypes.Error);
+                MessageBox.Show("Google API server is not reachable. Please try again later.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); // Show message box if server is down
+                this.Close();
+            }
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            fileBrowser.Filter = "PNG Image|*.png|JPEG Image|*.jpg;*.jpeg|Bitmap Image|*.bmp|GIF Image|*.gif|All Files|*.*";
+            if (fileBrowser.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    if(CreateAIImages.isImage(fileBrowser.FileName))
+                    {
+                        filePath = fileBrowser.FileName;
+                        labelUploadedImage.Text = Path.GetFileName(filePath);
+                        Logger.Log("Image uploaded: " + filePath, Logger.LogTypes.Info);
+                    }
+                    else
+                    {
+                        Logger.Log("Selected file is not a valid image.", Logger.LogTypes.Warning);
+                        MessageBox.Show("Selected file is not a valid image. Please select an image file.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    labelUploadedImage.Text = "No image is uploaded";
+                    filePath = null;
+                    Logger.Log("Error loading image: " + ex.Message, Logger.LogTypes.Error);
+                    MessageBox.Show("Error loading image. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
     }

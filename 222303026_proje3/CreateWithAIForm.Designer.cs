@@ -41,6 +41,9 @@
             labelHeight = new Label();
             progressBarImageCreating = new ProgressBar();
             labelImageCreating = new Label();
+            buttonUploadImage = new Button();
+            labelUploadedImage = new Label();
+            fileBrowser = new OpenFileDialog();
             ((System.ComponentModel.ISupportInitialize)numericUpDownWidth).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDownHeight).BeginInit();
             SuspendLayout();
@@ -93,6 +96,7 @@
             icons.TransparentColor = Color.Transparent;
             icons.Images.SetKeyName(0, "icons8-create-48.png");
             icons.Images.SetKeyName(1, "icons8-warning-48.png");
+            icons.Images.SetKeyName(2, "icons8-attachment-48.png");
             // 
             // label2
             // 
@@ -102,7 +106,7 @@
             label2.ImageAlign = ContentAlignment.MiddleLeft;
             label2.ImageIndex = 1;
             label2.ImageList = icons;
-            label2.Location = new Point(52, 121);
+            label2.Location = new Point(52, 166);
             label2.Margin = new Padding(2, 0, 2, 0);
             label2.Name = "label2";
             label2.Size = new Size(569, 20);
@@ -112,7 +116,7 @@
             // 
             // numericUpDownWidth
             // 
-            numericUpDownWidth.Anchor = AnchorStyles.None;
+            numericUpDownWidth.Anchor = AnchorStyles.Top;
             numericUpDownWidth.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             numericUpDownWidth.Location = new Point(222, 76);
             numericUpDownWidth.Margin = new Padding(2);
@@ -125,7 +129,7 @@
             // 
             // labelWidth
             // 
-            labelWidth.Anchor = AnchorStyles.None;
+            labelWidth.Anchor = AnchorStyles.Top;
             labelWidth.AutoSize = true;
             labelWidth.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             labelWidth.Location = new Point(165, 79);
@@ -137,7 +141,7 @@
             // 
             // numericUpDownHeight
             // 
-            numericUpDownHeight.Anchor = AnchorStyles.None;
+            numericUpDownHeight.Anchor = AnchorStyles.Top;
             numericUpDownHeight.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             numericUpDownHeight.Location = new Point(378, 76);
             numericUpDownHeight.Margin = new Padding(2);
@@ -150,7 +154,7 @@
             // 
             // labelHeight
             // 
-            labelHeight.Anchor = AnchorStyles.None;
+            labelHeight.Anchor = AnchorStyles.Top;
             labelHeight.AutoSize = true;
             labelHeight.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             labelHeight.Location = new Point(315, 79);
@@ -163,7 +167,7 @@
             // progressBarImageCreating
             // 
             progressBarImageCreating.Anchor = AnchorStyles.Bottom;
-            progressBarImageCreating.Location = new Point(148, 158);
+            progressBarImageCreating.Location = new Point(148, 203);
             progressBarImageCreating.Margin = new Padding(4);
             progressBarImageCreating.MarqueeAnimationSpeed = 10;
             progressBarImageCreating.Name = "progressBarImageCreating";
@@ -177,7 +181,7 @@
             labelImageCreating.Anchor = AnchorStyles.Bottom;
             labelImageCreating.AutoSize = true;
             labelImageCreating.Font = new Font("HarmonyOS Sans", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            labelImageCreating.Location = new Point(13, 158);
+            labelImageCreating.Location = new Point(13, 203);
             labelImageCreating.Margin = new Padding(4, 0, 4, 0);
             labelImageCreating.Name = "labelImageCreating";
             labelImageCreating.Size = new Size(127, 20);
@@ -185,13 +189,42 @@
             labelImageCreating.Text = "Image is creating";
             labelImageCreating.Visible = false;
             // 
+            // buttonUploadImage
+            // 
+            buttonUploadImage.Anchor = AnchorStyles.None;
+            buttonUploadImage.Font = new Font("HarmonyOS Sans", 8.999999F);
+            buttonUploadImage.ImageIndex = 2;
+            buttonUploadImage.ImageList = icons;
+            buttonUploadImage.Location = new Point(195, 124);
+            buttonUploadImage.Name = "buttonUploadImage";
+            buttonUploadImage.Size = new Size(108, 29);
+            buttonUploadImage.TabIndex = 7;
+            buttonUploadImage.Text = "Upload";
+            buttonUploadImage.TextAlign = ContentAlignment.MiddleRight;
+            buttonUploadImage.TextImageRelation = TextImageRelation.ImageBeforeText;
+            buttonUploadImage.UseVisualStyleBackColor = true;
+            buttonUploadImage.Click += button1_Click_1;
+            // 
+            // labelUploadedImage
+            // 
+            labelUploadedImage.Anchor = AnchorStyles.None;
+            labelUploadedImage.AutoSize = true;
+            labelUploadedImage.Font = new Font("HarmonyOS Sans", 8.999999F);
+            labelUploadedImage.Location = new Point(309, 128);
+            labelUploadedImage.Name = "labelUploadedImage";
+            labelUploadedImage.Size = new Size(159, 20);
+            labelUploadedImage.TabIndex = 8;
+            labelUploadedImage.Text = "No image is uploaded";
+            // 
             // CreateWithAIForm
             // 
             AcceptButton = buttonCreate;
             AutoScaleDimensions = new SizeF(120F, 120F);
             AutoScaleMode = AutoScaleMode.Dpi;
             AutoSize = true;
-            ClientSize = new Size(672, 189);
+            ClientSize = new Size(672, 234);
+            Controls.Add(labelUploadedImage);
+            Controls.Add(buttonUploadImage);
             Controls.Add(labelImageCreating);
             Controls.Add(progressBarImageCreating);
             Controls.Add(labelHeight);
@@ -230,5 +263,8 @@
         private Label labelHeight;
         private ProgressBar progressBarImageCreating;
         private Label labelImageCreating;
+        private Button buttonUploadImage;
+        private Label labelUploadedImage;
+        private OpenFileDialog fileBrowser;
     }
 }

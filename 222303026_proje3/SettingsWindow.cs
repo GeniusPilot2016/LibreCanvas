@@ -340,14 +340,22 @@ namespace _222303026_proje3
         {
             try
             {
-                EncryptionHelper.ChangeKeyAndIV(); // Change the key and IV for encryption
-                
-                Settings1.Default.HashedGeminiAIAPIKey = EncryptionHelper.EncryptString(textBoxGeminiAPIKey.Text);
-                Settings1.Default.Save(); // Save the settings to persist the changes
-                buttonUpdateGeminiAPIKey.Enabled = false;
-                buttonResetGeminiAPIKey.Enabled = true;
-                Logger.Log("Google Gemini™ API key is saved.", Logger.LogTypes.Info);
-                MessageBox.Show("Google Gemini™ API key is saved successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if(CreateAIImages.isAPIKeyValidFormat(textBoxGeminiAPIKey.Text))
+                {
+                    EncryptionHelper.ChangeKeyAndIV(); // Change the key and IV for encryption
+
+                    Settings1.Default.HashedGeminiAIAPIKey = EncryptionHelper.EncryptString(textBoxGeminiAPIKey.Text);
+                    Settings1.Default.Save(); // Save the settings to persist the changes
+                    buttonUpdateGeminiAPIKey.Enabled = false;
+                    buttonResetGeminiAPIKey.Enabled = true;
+                    Logger.Log("Google Gemini™ API key is saved.", Logger.LogTypes.Info);
+                    MessageBox.Show("Google Gemini™ API key is saved successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    Logger.Log("The provided Google Gemini™ API key format is invalid.", Logger.LogTypes.Error);
+                    MessageBox.Show("The provided Google Gemini™ API key format is invalid. Please check and try again.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
             catch (Exception ex)
             {
