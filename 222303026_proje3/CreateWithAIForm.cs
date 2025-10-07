@@ -13,6 +13,7 @@ namespace _222303026_proje3
 {
     public partial class CreateWithAIForm : Form
     {
+        // The feature to create images with AI that I struggled to implement because of the lack of free text-to-image AI models and I had to wait for Google to release their Gemini Image models.
         Image image;
         String filePath;
         public CreateWithAIForm()

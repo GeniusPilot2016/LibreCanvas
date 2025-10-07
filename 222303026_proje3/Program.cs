@@ -2,7 +2,7 @@ namespace _222303026_proje3
 {
     // The program that's my old school project, a simple image editor with AI features.
     // But my teacher prohibited to exhibit our projects until he grades them, so I didn't exhibit it on my school's end of year exhibition.
-    // So, I'm so sad and disappointed about that, and I was about to abandon this project until this update and I still don't want to share it with anyone until I exhibit it on my school's next end of year exhibition. (However, I don't know if I can exhibit it or not, because I'm graduated from that school.)
+    // So, I'm so sad and disappointed about that, and I was about to abandon this project until this update, after Gemini Nano Banana was released and I still don't want to share it with anyone until I exhibit it on my school's next end of year exhibition. (However, I don't know if I can exhibit it or not, because I'm graduated from that school.)
     internal static class Program
     {
         /// <summary>

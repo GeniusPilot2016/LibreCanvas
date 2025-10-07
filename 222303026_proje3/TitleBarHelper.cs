@@ -5,6 +5,7 @@ using System.Windows.Forms;
 
 public static class TitleBarHelper
 {
+    // The feauture that I added to change the title bar color of the form after graduated from my school.
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
 

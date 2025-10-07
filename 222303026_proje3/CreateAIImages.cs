@@ -17,6 +17,7 @@ namespace _222303026_proje3
 {
     public static class CreateAIImages
     {
+        // The core of the AI image generation and editing functionality, that I was implemented using Python scripts (because it didn't supported by Google.GenerativeAI package) to finish my project while I was in 3D modeling course, whille my friends were using 3D VR headsets to play VR games.
         public static async Task<Image> CreateImage(string prompt, int width, int height, string imagePath)
         {
             try

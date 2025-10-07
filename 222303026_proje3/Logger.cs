@@ -9,6 +9,9 @@ namespace _222303026_proje3
 {
     public static class Logger
     {
+        // Logger class to handle logging messages to console and file that I implemented after Gemini Nano Banana is released, that after nearly abandoning the project for 4 months I decided to continue working on it (but I'm struggling to continue the project due to decision of my teacher to not exhibit the projects in the exhibition, so I don't have much motivation to continue working on it, but I'll try my best to continue working on it and finish it as soon as possible)
+        // Also, I'm so sad when I see my program because of decision of my teacher and I want to exhibit it, even in the school's end of year exhibition in dream at night and it doesn't matter it's on dream or real life.
+
         static String LogText;
         static Logger()
         {
