@@ -1,17 +1,23 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
+﻿// ArtFusion - The AI-enabled simple image editor for everyone, born as a school project by GeniusPilot2016
+// Copyright (C) 2025 GeniusPilot2016
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 using System.Diagnostics;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Windows.Media.Protection.PlayReady;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace _222303026_proje3
 {
@@ -202,13 +208,13 @@ namespace _222303026_proje3
                             int start = errorMessage.IndexOf("'", idx + 9) + 1;
                             int end = errorMessage.IndexOf("'", start);
                             if (start > 0 && end > start)
-                                userMessage = errorMessage.Substring(start, end - start);
+                                userMessage = errorMessage.Substring(start, end - start).Replace("\\n", Environment.NewLine);
                             else
-                                userMessage = errorMessage;
+                                userMessage = errorMessage.Replace("\\n", Environment.NewLine);
                         }
                         else
                         {
-                            userMessage = errorMessage;
+                            userMessage = errorMessage.Replace("\\n", Environment.NewLine);
                         }
                     }
                 }

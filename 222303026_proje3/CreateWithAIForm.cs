@@ -200,24 +200,28 @@ namespace _222303026_proje3
                 Logger.Log("Google Gemini™ API key is not set.", Logger.LogTypes.Error);
                 MessageBox.Show("Please enter your Google Gemini™ API key in the settings before using this feature.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 this.Close();
+                return;
             }
             if(CreateAIImages.isAPIKeyValidFormat(EncryptionHelper.DecryptString(Settings1.Default.HashedGeminiAIAPIKey)) == false)
             {
                 Logger.Log("Google Gemini™ API key format is invalid.", Logger.LogTypes.Error);
                 MessageBox.Show("Your Google Gemini™ API key format is invalid. Please check your API key in the settings.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 this.Close();
+                return;
             }
             if (!CheckIfInternetConnectionAvailable.IsInternetAvailable())
             {
                 Logger.Log("No internet connection available.", Logger.LogTypes.Error);
                 MessageBox.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); // Show message box if no internet connection
                 this.Close();
+                return;
             }
             if (!CheckIfInternetConnectionAvailable.IsServerUp())
             {
                 Logger.Log("Google API server is not reachable.", Logger.LogTypes.Error);
                 MessageBox.Show("Google API server is not reachable. Please try again later.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); // Show message box if server is down
                 this.Close();
+                return;
             }
         }
 
