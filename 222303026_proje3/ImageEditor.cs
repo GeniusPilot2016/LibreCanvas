@@ -1,18 +1,31 @@
+// ArtFusion - The AI-enabled simple image editor for everyone, born as a school project by GeniusPilot2016
+// Copyright (C) 2025 GeniusPilot2016
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 using _222303026_proje3.Properties;
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using System.Drawing.Imaging.Effects;
 using System.Drawing.Text;
 using System.Media;
-using System.Media;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
 
 namespace _222303026_proje3
 {
     public partial class ImageEditor : Form
     {
+        bool isModified = false;
         int x = -1, y = -1;
         bool isdrawing = false;
         Color color1 = Color.Black, color2 = Color.White;
@@ -46,6 +59,7 @@ namespace _222303026_proje3
         FontStyle fontStyle = FontStyle.Regular;
         private TextToolAlign textToolAlign = TextToolAlign.Left;
         string openedFilePath = string.Empty;
+        bool fileSaved = false;
         enum TextToolAlign
         {
             Left,
@@ -402,6 +416,7 @@ namespace _222303026_proje3
         }
         private void createNewFile()
         {
+            isModified = false;
             SetAsUnselected();
             pictureBoxCanvas.Image = null;
             // panel1'in AutoScroll özelliðini true yaparak kaydýrma çubuklarýný etkinleþtiriyoruz
@@ -438,6 +453,7 @@ namespace _222303026_proje3
         }
         private void openAFile(string fileName)
         {
+            isModified = false;
             SetAsUnselected();
             pictureBoxCanvas.Image = null;
             Image image;
@@ -478,6 +494,7 @@ namespace _222303026_proje3
         }
         private void createFileWithAIorWebcam(Image generatedImage, bool isAIGenerated)
         {
+            isModified = false;
             SetAsUnselected();
             pictureBoxCanvas.Image = null;
             Image image = generatedImage;
@@ -750,6 +767,7 @@ namespace _222303026_proje3
                                 {
                                     SelectedBitmap = (Bitmap)image;
                                     MergeMainBitmapWithSelected();
+                                    isModified = true; // Mark the image as modified
                                 }
                                 else
                                 {
@@ -941,6 +959,10 @@ namespace _222303026_proje3
 
         private async void kaydetToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            save();
+        }
+        private void save()
+        {
             if (!isSaved)
             {
                 saveFileAs();
@@ -952,6 +974,7 @@ namespace _222303026_proje3
         }
         private async void saveFile(string targetFilePath)
         {
+            fileSaved = false; // Reset the fileSaved flag
             string tempFilePath = Path.Combine(Path.GetDirectoryName(targetFilePath), Path.GetRandomFileName());
             string backupFilePath = Path.Combine(Path.GetDirectoryName(targetFilePath), Path.GetRandomFileName());
 
@@ -1048,9 +1071,11 @@ namespace _222303026_proje3
                 {
                     File.Delete(backupFilePath);
                 }
+                fileSaved = true; // Set the fileSaved flag to true after successful save
             }
             catch (Exception ex)
             {
+                fileSaved = false; // Ensure the flag is false if an exception occurs
                 Logger.Log("An error occurred while saving the file: " + ex.Message, Logger.LogTypes.Error);
                 MessageBox.Show($"An error occurred while saving the file: {ex.Message}",
                                 "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -1065,13 +1090,22 @@ namespace _222303026_proje3
         }
         private void saveFileAs()
         {
-            saveFileDialog1.Filter = "PNG Files|*.png|JPEG Files|*.jpg|Bitmap Files|*.bmp";
-            DialogResult dialogResult = saveFileDialog1.ShowDialog();
-            if (dialogResult == DialogResult.OK)
+            try
             {
-                saveFile(saveFileDialog1.FileName);
-                isSaved = true;
-                farklýKaydetToolStripMenuItem.Enabled = true;
+                fileSaved = false; // Reset the fileSaved flag
+                saveFileDialog1.Filter = "PNG Files|*.png|JPEG Files|*.jpg|Bitmap Files|*.bmp";
+                DialogResult dialogResult = saveFileDialog1.ShowDialog();
+                if (dialogResult == DialogResult.OK)
+                {
+                    saveFile(saveFileDialog1.FileName);
+                    isSaved = true;
+                    farklýKaydetToolStripMenuItem.Enabled = true;
+                    fileSaved = true; // Set the fileSaved flag to true after successful save
+                }
+            }
+            catch
+            {
+                fileSaved = false; // Ensure the flag is false if an exception occurs
             }
         }
 
@@ -1463,36 +1497,42 @@ namespace _222303026_proje3
                                 {
                                     DrawShapes.DrawLineOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
                                 }
+                                isModified = true;
                                 break;
                             case Tools.Round:
                                 using (Graphics graphics = Graphics.FromImage(MainBitmap))
                                 {
                                     DrawShapes.DrawRoundOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
                                 }
+                                isModified = true;
                                 break;
                             case Tools.Rectangle:
                                 using (Graphics graphics = Graphics.FromImage(MainBitmap))
                                 {
                                     DrawShapes.DrawRectangleOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
                                 }
+                                isModified = true;
                                 break;
                             case Tools.RoundedRectangle:
                                 using (Graphics graphics = Graphics.FromImage(MainBitmap))
                                 {
                                     DrawShapes.DrawRoundedRectangleOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location, radius);
                                 }
+                                isModified = true;
                                 break;
                             case Tools.Triangle:
                                 using (Graphics graphics = Graphics.FromImage(MainBitmap))
                                 {
                                     DrawShapes.DrawTriangleOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
                                 }
+                                isModified = true;
                                 break;
                             case Tools.Hexagon:
                                 using (Graphics graphics = Graphics.FromImage(MainBitmap))
                                 {
                                     DrawShapes.DrawHexagonOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, points, startPoint, e.Location);
                                 }
+                                isModified = true;
                                 break;
                             default:
                                 drawIntoCanvas(e);
@@ -1898,19 +1938,23 @@ namespace _222303026_proje3
                                 {
                                     case 0: // Regular brush
                                         DrawBrush(graphics, BrushShapes.DrawCircleBrush, color1, brushSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
-                                            (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
+                                            (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom))); 
+                                        isModified = true;
                                         break;
                                     case 1: // Oil brush
                                         DrawBrush(graphics, BrushShapes.DrawOilBrush, color1, brushSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
+                                        isModified = true;
                                         break;
                                     case 2: // Calligraphy brush
                                         DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, color1, brushSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
+                                        isModified = true;
                                         break;
                                     case 3:
                                         DrawBrush(graphics, BrushShapes.DrawWatercolorBrush, color1, brushSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
+                                        isModified = true;
                                         break;
                                     default:
                                         break;
@@ -1922,18 +1966,22 @@ namespace _222303026_proje3
                                     case 0: // Regular pen
                                         DrawBrush(graphics, BrushShapes.DrawSquareBrush, color1, penSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
+                                        isModified = true;
                                         break;
                                     case 1:
                                         DrawBrush(graphics, BrushShapes.DrawMarkerBrush, color1, penSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
+                                        isModified = true;
                                         break;
                                     case 2:
                                         DrawBrush(graphics, BrushShapes.DrawCrayonBrush, color1, penSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
+                                        isModified = true;
                                         break;
                                     case 3: // Calligraphy pen
                                         DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, color1, penSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
+                                        isModified = true;
                                         break;
                                     default:
                                         break;
@@ -1943,10 +1991,12 @@ namespace _222303026_proje3
                                 graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
                                 DrawBrush(graphics, BrushShapes.DrawCircleBrush, Color.FromArgb(0, 0, 0, 0), eraserSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
+                                isModified = true;
                                 break;
                             case Tools.Spray:
                                 DrawBrush(graphics, BrushShapes.DrawSprayBrush, color1, sprayToolSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
+                                isModified = true;
                                 break;
                             case Tools.ColorDrop:
                                 Color pixelColor = MainBitmap.GetPixel((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
@@ -1976,15 +2026,19 @@ namespace _222303026_proje3
                                 {
                                     case 0: // Regular brush
                                         DrawBrush(graphics, BrushShapes.DrawCircleBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                        isModified = true;
                                         break;
                                     case 1: // Oil brush
                                         DrawBrush(graphics, BrushShapes.DrawOilBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                        isModified = true;
                                         break;
                                     case 2: // Calligraphy brush
                                         DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                        isModified = true;
                                         break;
                                     case 3:
                                         DrawBrush(graphics, BrushShapes.DrawWatercolorBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                        isModified = true;
                                         break;
                                     default:
                                         break;
@@ -1995,15 +2049,19 @@ namespace _222303026_proje3
                                 {
                                     case 0: // Regular pen
                                         DrawBrush(graphics, BrushShapes.DrawSquareBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                        isModified = true;
                                         break;
                                     case 1:
                                         DrawBrush(graphics, BrushShapes.DrawMarkerBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                        isModified = true;
                                         break;
                                     case 2:
                                         DrawBrush(graphics, BrushShapes.DrawCrayonBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                        isModified = true;
                                         break;
                                     case 3: // Calligraphy pen
                                         DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                        isModified = true;
                                         break;
                                     default:
                                         break;
@@ -2012,9 +2070,11 @@ namespace _222303026_proje3
                             case Tools.Eraser:
                                 graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
                                 DrawBrush(graphics, BrushShapes.DrawCircleBrush, Color.FromArgb(0, 0, 0, 0), eraserSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                isModified = true;
                                 break;
                             case Tools.Spray:
                                 DrawBrush(graphics, BrushShapes.DrawSprayBrush, color1, sprayToolSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                isModified = true;
                                 break;
                             case Tools.ColorDrop:
                                 Color pixelColor = MainBitmap.GetPixel((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom));
@@ -2383,6 +2443,7 @@ namespace _222303026_proje3
 
                                     }
                                     MergeMainBitmapWithSelected();
+                                    isModified = true;
                                 }
                                 else
                                 {
@@ -2425,6 +2486,7 @@ namespace _222303026_proje3
                                 // Update the PictureBox with the updated bitmap  
                                 pictureBoxCanvas.Image = MainBitmap;
                                 pictureBoxCanvas.Invalidate(); // Force a redraw  
+                                isModified = true;
                             };
                             textBox.TextChanged += (s, args) =>
                             {
@@ -2458,6 +2520,7 @@ namespace _222303026_proje3
                             int adjustedY = (int)(unzoomedLocation.Y / zoom);
                             Point adjustedLocation = new Point(adjustedX, adjustedY);
                             FloodFill(MainBitmap, adjustedLocation, color1, tolerance);
+                            isModified = true;
                         }
                         break;
                 }
@@ -2569,6 +2632,10 @@ namespace _222303026_proje3
 
         private void açToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            AskForSavingOrCancel(new Action(()=>openAFile()));
+        }
+        private void openAFile() 
+        {
             try
             {
                 openFileDialog1.Filter = "PNG Files|*.png|JPEG Files|*.jpg|Bitmap Files|*.bmp";
@@ -2595,10 +2662,71 @@ namespace _222303026_proje3
                 MessageBox.Show("An error occurred while opening the file: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
         private void yeniToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            createNewFile();
+            AskForSavingOrCancel(new Action(()=> createNewFile()));
+        }
+        private void AskForSavingOrCancel(Action action)
+        {
+            if (isModified)
+            {
+                DialogResult result = MessageBox.Show("Do you want to save changes to your image?", "Unsaved Changes", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                switch (result)
+                {
+                    case DialogResult.Yes:
+                        save();
+                        if (isSaved)
+                        {
+                            action();
+                        }
+                        break;
+                    case DialogResult.No:
+                        action();
+                        break;
+                    default:
+                        return;
+                }
+            }
+            else
+            {
+                action();
+            }
+        }
+        int retryCount = 0;
+        private void AskForSavingWithRetry(Action action)
+        {
+            if (isModified)
+            {
+                DialogResult result = MessageBox.Show("Do you want to save changes to your image?", "Unsaved Changes", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                switch (result)
+                {
+                    case DialogResult.Yes:
+                        save();
+                        if (isSaved)
+                        {
+                            retryCount = 0; // Reset the retry count
+                            action();
+                        }
+                        else
+                        {
+                            if(retryCount == 3)
+                            {
+                                Logger.Log("The action will be executed without saving after 3 attempts to save.", Logger.LogTypes.Warning);
+                                retryCount = 0; // Reset the retry count
+                                action();
+                            }
+                            else
+                            {
+                                retryCount++;
+                                AskForSavingOrCancel(action);
+                            }
+                        }
+                        break;
+                    case DialogResult.No:
+                        action();
+                        break;
+                }
+            }
         }
 
         private void createWithAIToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2608,7 +2736,7 @@ namespace _222303026_proje3
             var generatedImage = createWithAIForm.GetGeneratedImage();
             if (generatedImage != null)
             {
-                createFileWithAIorWebcam(generatedImage, true);
+                AskForSavingWithRetry(new Action(() => createFileWithAIorWebcam(generatedImage, true)));
             }
         }
 
@@ -2622,7 +2750,7 @@ namespace _222303026_proje3
         private void TakePhotoFromWebcam_PhotoAccepted(object sender, ImageAcceptedEventArgs e)
         {
             // Directly update the canvas with the accepted image
-            createFileWithAIorWebcam(e.AcceptedImage, false);
+            AskForSavingWithRetry(new Action(() => createFileWithAIorWebcam(e.AcceptedImage, false)));
         }
 
         private void comboBoxSpraySize_TextChanged(object sender, EventArgs e)
@@ -2923,6 +3051,10 @@ namespace _222303026_proje3
                 CenterCanvasPanel(); // Center the canvas panel
                 originalSize = MainBitmap.Size; // Update original size
                 labelSize.Text = $"{MainBitmap.Width} x {MainBitmap.Height} px"; // Update size label
+                if (undoStack.Count == 0)
+                {
+                    isModified = false; // If no more undo states, mark as unmodified
+                }
             }
             UpdateUndoRedoButtons(); // Update buttons
         }
@@ -2941,6 +3073,7 @@ namespace _222303026_proje3
                 CenterCanvasPanel(); // Center the canvas panel
                 originalSize = MainBitmap.Size; // Update original size
                 labelSize.Text = $"{MainBitmap.Width} x {MainBitmap.Height} px"; // Update size label
+                isModified = true; // Mark as modified on redo
             }
             UpdateUndoRedoButtons(); // Update buttons
         }
@@ -3138,6 +3271,7 @@ namespace _222303026_proje3
             labelSize.Text = $"{MainBitmap.Width} x {MainBitmap.Height} px";
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
+            isModified = true;
         }
 
         private void flashToolStripMenuItem_Click(object sender, EventArgs e)
@@ -3180,6 +3314,7 @@ namespace _222303026_proje3
             }
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
+            isModified = true;
         }
 
 
@@ -3223,6 +3358,7 @@ namespace _222303026_proje3
             }
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
+            isModified = true;
         }
 
         private void winterToolStripMenuItem_Click(object sender, EventArgs e)
@@ -3265,6 +3401,7 @@ namespace _222303026_proje3
             }
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
+            isModified = true;
         }
 
         private void blackAndWhiteToolStripMenuItem_Click(object sender, EventArgs e)
@@ -3307,6 +3444,7 @@ namespace _222303026_proje3
             }
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
+            isModified = true;
         }
 
         private void oldPictureToolStripMenuItem_Click(object sender, EventArgs e)
@@ -3349,6 +3487,7 @@ namespace _222303026_proje3
             }
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
+            isModified = true;
         }
 
         private void cherryToolStripMenuItem_Click(object sender, EventArgs e)
@@ -3391,6 +3530,7 @@ namespace _222303026_proje3
             }
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
+            isModified = true;
         }
 
         private void lightAddToolStripMenuItem_Click(object sender, EventArgs e)
@@ -3433,6 +3573,7 @@ namespace _222303026_proje3
             }
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
+            isModified = true;
         }
 
         private void purpleToolStripMenuItem_Click(object sender, EventArgs e)
@@ -3475,6 +3616,7 @@ namespace _222303026_proje3
             }
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
+            isModified = true;
         }
 
         private void fogToolStripMenuItem_Click(object sender, EventArgs e)
@@ -3517,6 +3659,7 @@ namespace _222303026_proje3
             }
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
+            isModified = true;
         }
         private void RefreshFiltersPreview()
         {
@@ -3635,6 +3778,7 @@ namespace _222303026_proje3
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             toolStripArtisticFilters.Visible = false;
+            isModified = true;
         }
 
         private void buttonArtisticFiltersCancel_Click(object sender, EventArgs e)
@@ -3990,6 +4134,7 @@ namespace _222303026_proje3
                 canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
                 pictureBoxCanvas.Invalidate();
                 CenterCanvasPanel();
+                isModified = true;
             }
             else
             {
@@ -4003,6 +4148,7 @@ namespace _222303026_proje3
             try
             {
                 CutOrCopy();
+                isModified = true;
             }
             catch (Exception ex)
             {
@@ -4074,9 +4220,11 @@ namespace _222303026_proje3
             {
                 SaveStateForUndo();
                 CutOrCopy();
+                isModified = true;
                 MainBitmap = new Bitmap(MainBitmap.Width, MainBitmap.Height);
                 pictureBoxCanvas.Image = MainBitmap;
                 pictureBoxCanvas.Invalidate();
+                isModified = true;
             }
             catch (Exception ex)
             {
@@ -4125,6 +4273,7 @@ namespace _222303026_proje3
             }
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
+            isModified = true;
         }
 
         private void zoomInToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4326,6 +4475,7 @@ namespace _222303026_proje3
                             {
                                 SelectedBitmap = new Bitmap(image); // Convert Image to Bitmap  
                                 MergeMainBitmapWithSelected();
+                                isModified = true;
                             }
                             else
                             {
@@ -4343,6 +4493,7 @@ namespace _222303026_proje3
                             {
                                 MainBitmap = new Bitmap(image); // Convert Image to Bitmap  
                                 pictureBoxCanvas.Invalidate();
+                                isModified = true;
                             }
                             else
                             {
@@ -4352,7 +4503,6 @@ namespace _222303026_proje3
                                 MessageBox.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             }
                         }
-
                     }
                     catch (NullReferenceException)
                     {
@@ -4422,6 +4572,7 @@ namespace _222303026_proje3
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             toolStripPixelate.Visible = false;
+            isModified = true;
         }
 
         private void buttonCancelPixelation_Click(object sender, EventArgs e)
@@ -4588,6 +4739,7 @@ namespace _222303026_proje3
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
             toolStripGaussianBlur.Visible = false;
+            isModified = true;
         }
 
         private void buttonCancelGaussianBlur_Click(object sender, EventArgs e)
@@ -4680,6 +4832,30 @@ namespace _222303026_proje3
         private void farklýKaydetToolStripMenuItem_Click(object sender, EventArgs e)
         {
             saveFileAs();
+        }
+
+        private void ImageEditor_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (isModified)
+            {
+                DialogResult result = MessageBox.Show("Do you want to save changes to your image?", "Unsaved Changes", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                switch (result)
+                {
+                    case DialogResult.Yes:
+                        save();
+                        if (!fileSaved)
+                        {
+                            e.Cancel = true;
+                        }
+                        break;
+                    case DialogResult.No:
+                        // Proceed with closing without saving
+                        break;
+                    case DialogResult.Cancel:
+                        e.Cancel = true; // Cancel closing
+                        break;
+                }
+            }
         }
     }
     public partial class CreateWithAIForm : Form
