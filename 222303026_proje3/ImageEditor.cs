@@ -18,8 +18,10 @@ using _222303026_proje3.Properties;
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.Media;
+using static System.Windows.Forms.DataFormats;
 
 namespace _222303026_proje3
 {
@@ -60,6 +62,8 @@ namespace _222303026_proje3
         private TextToolAlign textToolAlign = TextToolAlign.Left;
         string openedFilePath = string.Empty;
         bool fileSaved = false;
+        bool aiGenerated = false;
+        CancellationTokenSource cts = new CancellationTokenSource();
         enum TextToolAlign
         {
             Left,
@@ -354,6 +358,19 @@ namespace _222303026_proje3
                 fontsComboBox.SelectedIndex = 0;
             }
             toolStripSample.Font = new Font(fontFamilies[fontsComboBox.SelectedIndex], toolStripSample.Font.Size, toolStripSample.Font.Style);
+            Program.DisableControlsAfterDisconinuationOfLegacyModel(
+                new Control[] {
+                    toolStripAICreateImage,
+                },
+                new ToolStripItem[] {
+                    createWithAIToolStripMenuItem,
+                    createWithAITool
+                }
+            );
+            if(DateTime.Now >= new DateTime(2025, 11, 12))
+            {
+                discontinuedModelTimer.Stop(); // Stop the timer if the date has already passed
+            }
         }
         private void SetFonts()
         {
@@ -416,6 +433,7 @@ namespace _222303026_proje3
         }
         private void createNewFile()
         {
+            aiGenerated = false; // Reset AI generated flag
             isModified = false;
             SetAsUnselected();
             pictureBoxCanvas.Image = null;
@@ -453,6 +471,7 @@ namespace _222303026_proje3
         }
         private void openAFile(string fileName)
         {
+            aiGenerated = false; // Reset AI generated flag
             isModified = false;
             SetAsUnselected();
             pictureBoxCanvas.Image = null;
@@ -494,6 +513,7 @@ namespace _222303026_proje3
         }
         private void createFileWithAIorWebcam(Image generatedImage, bool isAIGenerated)
         {
+            aiGenerated = isAIGenerated;
             isModified = false;
             SetAsUnselected();
             pictureBoxCanvas.Image = null;
@@ -761,7 +781,7 @@ namespace _222303026_proje3
                                 labelAIImageErasing.Visible = true;
                                 progressBarAIImageCreation.Visible = true;
                                 var image = await CreateAIImages.EditImage(
-            SelectedBitmap, "Remove the object or person in context of the image.");
+            SelectedBitmap, "Remove the object or person in context of the image.", cts);
 
                                 if (image != null)
                                 {
@@ -861,7 +881,7 @@ namespace _222303026_proje3
                                         GraphicsUnit.Pixel);
                                 }
                             }
-                            var imageTask = CreateAIImages.EditImage(SelectedBitmap, "Isolate the object or person and make the background transparent.");
+                            var imageTask = CreateAIImages.EditImage(SelectedBitmap, "Isolate the object or person and make the background transparent.", cts);
                             var image = await imageTask; // Await the task to get the result
                             if (image != null)
                             {
@@ -878,7 +898,7 @@ namespace _222303026_proje3
                         }
                         else
                         {
-                            var imageTask = CreateAIImages.EditImage(MainBitmap, "Isolate the object or person and make the background transparent.");
+                            var imageTask = CreateAIImages.EditImage(MainBitmap, "Isolate the object or person and make the background transparent.", cts);
                             var image = await imageTask; // Await the task to get the result
                             if (image != null)
                             {
@@ -974,133 +994,215 @@ namespace _222303026_proje3
         }
         private async void saveFile(string targetFilePath)
         {
-            fileSaved = false; // Reset the fileSaved flag
+            fileSaved = false;
             string tempFilePath = Path.Combine(Path.GetDirectoryName(targetFilePath), Path.GetRandomFileName());
             string backupFilePath = Path.Combine(Path.GetDirectoryName(targetFilePath), Path.GetRandomFileName());
 
             labelSaving.Visible = true;
             progressBarSaving.Visible = true;
             toolStripSeparator13.Visible = true;
-
             progressBarSaving.Value = 0;
 
             try
             {
-                // Check if the temporary file exists
-                if (File.Exists(tempFilePath))
-                {   // Save the file to a temporary location in a background thread
-                    await Task.Run(() =>
-                    {
-                        using (MemoryStream memoryStream = new MemoryStream())
-                        {
-                            // Save the bitmap to memory
-                            MainBitmap.Save(memoryStream, ImageFormat.Png);
-                            byte[] imageData = memoryStream.ToArray();
+                ImageFormat format = ImageFormat.Png;
+                string ext = Path.GetExtension(targetFilePath).ToLower();
+                if (ext == ".jpg" || ext == ".jpeg")
+                    format = ImageFormat.Jpeg;
+                else if (ext == ".bmp")
+                    format = ImageFormat.Bmp;
 
-                            // Write the file in chunks to the temporary file
-                            using (FileStream fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
-                            {
-                                int totalBytes = imageData.Length;
-                                int chunkSize = 4096; // 4 KB
-                                int bytesWritten = 0;
-
-                                while (bytesWritten < totalBytes)
-                                {
-                                    int bytesToWrite = Math.Min(chunkSize, totalBytes - bytesWritten);
-                                    fileStream.Write(imageData, bytesWritten, bytesToWrite);
-                                    bytesWritten += bytesToWrite;
-
-                                    // Update the progress bar
-                                    int progress = (int)((bytesWritten / (float)totalBytes) * 100);
-                                    Invoke(new Action(() =>
-                                    {
-                                        progressBarSaving.Value = progress;
-                                    }));
-                                }
-                            }
-                        }
-                    });
-                    // Replace the target file with the temporary file
-                    File.Replace(tempFilePath, targetFilePath, backupFilePath);
-                }
-                else
+                await Task.Run(() =>
                 {
-                    // Save directly to the target file if the temporary file is missing
-                    await Task.Run(() =>
+                    try
                     {
-                        string newFilePath = targetFilePath;
-                        // Save the bitmap to the specified file
-                        using (MemoryStream memoryStream = new MemoryStream())
+                        if (format == ImageFormat.Jpeg)
                         {
-                            // Save the bitmap to memory
-                            MainBitmap.Save(memoryStream, ImageFormat.Png);
-                            byte[] imageData = memoryStream.ToArray();
-
-                            // Write the file in chunks to the specified file
-                            using (FileStream fileStream = new FileStream(newFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
-                            {
-                                int totalBytes = imageData.Length;
-                                int chunkSize = 4096; // 4 KB
-                                int bytesWritten = 0;
-
-                                while (bytesWritten < totalBytes)
-                                {
-                                    int bytesToWrite = Math.Min(chunkSize, totalBytes - bytesWritten);
-                                    fileStream.Write(imageData, bytesWritten, bytesToWrite);
-                                    bytesWritten += bytesToWrite;
-
-                                    // Optionally, update a progress bar if needed
-                                    int progress = (int)((bytesWritten / (float)totalBytes) * 100);
-                                    Invoke(new Action(() =>
-                                    {
-                                        progressBarSaving.Value = progress;
-                                    }));
-                                }
-                            }
+                            SaveJpegWithExif(tempFilePath);
                         }
-                    });
-                    MainBitmap.Save(targetFilePath, ImageFormat.Png);
-                }
+                        else
+                        {
+                            SaveImageWithoutExif(tempFilePath, format);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log($"Save operation error: {ex.Message}", Logger.LogTypes.Error);
+                        throw;
+                    }
+                });
 
-                // Clean up the temporary and backup files
                 if (File.Exists(tempFilePath))
                 {
-                    File.Delete(tempFilePath);
+                    File.Replace(tempFilePath, targetFilePath, backupFilePath, true);
+                    isSaved = true;
+                    fileSaved = true;
+                    Logger.Log($"File saved successfully: {targetFilePath}", Logger.LogTypes.Info);
                 }
-                if (File.Exists(backupFilePath))
-                {
-                    File.Delete(backupFilePath);
-                }
-                fileSaved = true; // Set the fileSaved flag to true after successful save
             }
             catch (Exception ex)
             {
-                fileSaved = false; // Ensure the flag is false if an exception occurs
-                Logger.Log("An error occurred while saving the file: " + ex.Message, Logger.LogTypes.Error);
+                fileSaved = false;
+                Logger.Log($"An error occurred while saving the file: {ex.Message}", Logger.LogTypes.Error);
                 MessageBox.Show($"An error occurred while saving the file: {ex.Message}",
                                 "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
-                // Hide saving indicators
                 labelSaving.Visible = false;
                 progressBarSaving.Visible = false;
                 toolStripSeparator13.Visible = false;
+
+                try
+                {
+                    if (File.Exists(tempFilePath))
+                        File.Delete(tempFilePath);
+                    if (File.Exists(backupFilePath))
+                        File.Delete(backupFilePath);
+                }
+                catch { }
             }
+        }
+
+        private void SaveJpegWithExif(string filePath)
+        {
+            // Bitmap kopyasýný oluþtur (EXIF yazma için)
+            Bitmap bitmapToSave = new Bitmap(MainBitmap);
+
+            try
+            {
+                // EXIF verilerini ekle
+                AddExifDataToJpeg(bitmapToSave);
+
+                // JPEG encoder ve parametreleri
+                ImageCodecInfo jpegCodec = GetEncoderInfo("image/jpeg");
+                EncoderParameters encoderParams = new EncoderParameters(1);
+                encoderParams.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 95L);
+
+                // Doðrudan dosyaya kaydet (MemoryStream KULLANMA!)
+                bitmapToSave.Save(filePath, jpegCodec, encoderParams);
+
+                encoderParams?.Dispose();
+                Logger.Log("JPEG with EXIF saved successfully", Logger.LogTypes.Info);
+            }
+            finally
+            {
+                bitmapToSave?.Dispose();
+            }
+        }
+
+        private void SaveImageWithoutExif(string filePath, ImageFormat format)
+        {
+            MainBitmap.Save(filePath, format);
+        }
+
+        private ImageCodecInfo GetEncoderInfo(string mimeType)
+        {
+            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageEncoders();
+            foreach (ImageCodecInfo codec in codecs)
+            {
+                if (codec.MimeType == mimeType)
+                    return codec;
+            }
+            return codecs.Length > 0 ? codecs[0] : null;
+        }
+
+        private void AddExifDataToJpeg(Bitmap bitmap)
+        {
+            const short PropertyTagTypeASCII = 2;
+            try
+            {
+                // Software tag (0x0131)
+                PropertyItem softwareItem = CreatePropertyItem(0x0131, PropertyTagTypeASCII,
+                    $"ArtFusion Version {GetInformations.GetVersionAndStatus}");
+                if (softwareItem != null)
+                    bitmap.SetPropertyItem(softwareItem);
+
+                // DateTime tag (0x0132)
+                PropertyItem dateTimeItem = CreatePropertyItem(0x0132, PropertyTagTypeASCII,
+                    DateTime.Now.ToString("yyyy:MM:dd HH:mm:ss"));
+                if (dateTimeItem != null)
+                    bitmap.SetPropertyItem(dateTimeItem);
+
+                // Artist tag (0x013B)
+                PropertyItem artistItem = CreatePropertyItem(0x013B, PropertyTagTypeASCII,
+                    Environment.UserName);
+                if (artistItem != null)
+                    bitmap.SetPropertyItem(artistItem);
+
+                // ImageDescription tag (0x010E)
+                string description = "Image created with ArtFusion";
+                if (aiGenerated)
+                    description += " (AI Generated)";
+
+                PropertyItem descriptionItem = CreatePropertyItem(0x010E, PropertyTagTypeASCII, description);
+                if (descriptionItem != null)
+                    bitmap.SetPropertyItem(descriptionItem);
+
+                Logger.Log("EXIF data added successfully", Logger.LogTypes.Info);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error adding EXIF data: {ex.Message}", Logger.LogTypes.Error);
+                // Kaydý devam ettir
+            }
+        }
+
+        private PropertyItem CreatePropertyItem(int id, short type, string value)
+        {
+            PropertyItem item = null;
+
+            try
+            {
+                if (MainBitmap != null && MainBitmap.PropertyItems.Length > 0)
+                {
+                    item = MainBitmap.PropertyItems[0];
+                }
+                else
+                {
+                    using (Bitmap tempBmp = new Bitmap(1, 1))
+                    {
+                        if (tempBmp.PropertyItems.Length > 0)
+                        {
+                            item = tempBmp.PropertyItems[0];
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                try
+                {
+                    item = (PropertyItem)Activator.CreateInstance(typeof(PropertyItem), true);
+                }
+                catch
+                {
+                    Logger.Log($"Failed to create PropertyItem for ID {id}", Logger.LogTypes.Warning);
+                    return null;
+                }
+            }
+
+            if (item != null)
+            {
+                item.Id = id;
+                item.Type = type;
+                byte[] bytes = System.Text.Encoding.ASCII.GetBytes(value + '\0');
+                item.Value = bytes;
+                item.Len = bytes.Length;
+            }
+
+            return item;
         }
         private void saveFileAs()
         {
             try
             {
-                fileSaved = false; // Reset the fileSaved flag
                 saveFileDialog1.Filter = "PNG Files|*.png|JPEG Files|*.jpg|Bitmap Files|*.bmp";
                 DialogResult dialogResult = saveFileDialog1.ShowDialog();
                 if (dialogResult == DialogResult.OK)
                 {
                     saveFile(saveFileDialog1.FileName);
-                    isSaved = true;
                     farklýKaydetToolStripMenuItem.Enabled = true;
-                    fileSaved = true; // Set the fileSaved flag to true after successful save
                 }
             }
             catch
@@ -1938,7 +2040,7 @@ namespace _222303026_proje3
                                 {
                                     case 0: // Regular brush
                                         DrawBrush(graphics, BrushShapes.DrawCircleBrush, color1, brushSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
-                                            (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom))); 
+                                            (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
                                         isModified = true;
                                         break;
                                     case 1: // Oil brush
@@ -2632,9 +2734,9 @@ namespace _222303026_proje3
 
         private void açToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            AskForSavingOrCancel(new Action(()=>openAFile()));
+            AskForSavingOrCancel(new Action(() => openAFile()));
         }
-        private void openAFile() 
+        private void openAFile()
         {
             try
             {
@@ -2664,7 +2766,7 @@ namespace _222303026_proje3
         }
         private void yeniToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            AskForSavingOrCancel(new Action(()=> createNewFile()));
+            AskForSavingOrCancel(new Action(() => createNewFile()));
         }
         private void AskForSavingOrCancel(Action action)
         {
@@ -2709,7 +2811,7 @@ namespace _222303026_proje3
                         }
                         else
                         {
-                            if(retryCount == 3)
+                            if (retryCount == 3)
                             {
                                 Logger.Log("The action will be executed without saving after 3 attempts to save.", Logger.LogTypes.Warning);
                                 retryCount = 0; // Reset the retry count
@@ -4469,7 +4571,7 @@ namespace _222303026_proje3
                                         GraphicsUnit.Pixel);
                                 }
                             }
-                            var imageTask = CreateAIImages.EditImage(SelectedBitmap, textBoxPrompt.Text);
+                            var imageTask = CreateAIImages.EditImage(SelectedBitmap, textBoxPrompt.Text, cts);
                             var image = await imageTask; // Await the task to get the result
                             if (image != null)
                             {
@@ -4487,7 +4589,7 @@ namespace _222303026_proje3
                         }
                         else
                         {
-                            var imageTask = CreateAIImages.EditImage(MainBitmap, textBoxPrompt.Text);
+                            var imageTask = CreateAIImages.EditImage(MainBitmap, textBoxPrompt.Text, cts);
                             var image = await imageTask; // Await the task to get the result
                             if (image != null)
                             {
@@ -4856,6 +4958,28 @@ namespace _222303026_proje3
                         break;
                 }
             }
+        }
+
+        private void discontinuedModelTimer_Tick(object sender, EventArgs e)
+        // Disable specific controls and tool strip items after the discontinuation date of Gemini Image Generation 2.0 model (November 12, 2025).
+        // Because Gemini Image Generation 2.5 (Nano Banana) has billing issues that caused to stuck out of quota errors frequently, until I release an update that uses Gemini Image Generation 2.5 after the issue is fixed.
+        // See related code in MainForm.cs and Program.cs.
+        {
+            if (!(DateTime.Now >= new DateTime(2025, 11, 12)))
+            {
+                return;
+            }
+            cts?.Cancel(); // Cancel any ongoing AI image creation tasks
+            Program.DisableControlsAfterDisconinuationOfLegacyModel(
+                new Control[] {
+                    toolStripAICreateImage,
+                },
+                new ToolStripItem[] {
+                    createWithAIToolStripMenuItem,
+                    createWithAITool
+                }
+            );
+            discontinuedModelTimer.Stop(); // Stop the timer after disabling the controls when the model is discontinued
         }
     }
     public partial class CreateWithAIForm : Form

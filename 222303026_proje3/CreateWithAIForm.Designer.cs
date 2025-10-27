@@ -44,6 +44,7 @@
             buttonUploadImage = new Button();
             labelUploadedImage = new Label();
             fileBrowser = new OpenFileDialog();
+            discontinuedModelTimer = new System.Windows.Forms.Timer(components);
             ((System.ComponentModel.ISupportInitialize)numericUpDownWidth).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDownHeight).BeginInit();
             SuspendLayout();
@@ -218,6 +219,11 @@
             labelUploadedImage.TabIndex = 8;
             labelUploadedImage.Text = "No image is uploaded";
             // 
+            // discontinuedModelTimer
+            // 
+            discontinuedModelTimer.Enabled = true;
+            discontinuedModelTimer.Tick += discontinuedModelTimer_Tick;
+            // 
             // CreateWithAIForm
             // 
             AcceptButton = buttonCreate;
@@ -245,6 +251,7 @@
             Name = "CreateWithAIForm";
             ShowIcon = false;
             Text = "Create Image With AI";
+            FormClosed += CreateWithAIForm_FormClosed;
             Load += CreateWithAIForm_Load;
             ((System.ComponentModel.ISupportInitialize)numericUpDownWidth).EndInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDownHeight).EndInit();
@@ -268,5 +275,6 @@
         private Button buttonUploadImage;
         private Label labelUploadedImage;
         private OpenFileDialog fileBrowser;
+        private System.Windows.Forms.Timer discontinuedModelTimer;
     }
 }

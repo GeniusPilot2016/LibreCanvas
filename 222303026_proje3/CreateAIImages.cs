@@ -24,7 +24,7 @@ namespace _222303026_proje3
     public static class CreateAIImages
     {
         // The core of the AI image generation and editing functionality, that I was implemented using Python scripts (because it didn't supported by Google.GenerativeAI package) to finish my project while I was in 3D modeling course, whille my friends were using 3D VR headsets to play VR games.
-        public static async Task<Image> CreateImage(string prompt, int width, int height, string imagePath)
+        public static async Task<Image> CreateImage(string prompt, int width, int height, string imagePath, CancellationTokenSource cancellationTokenSource = null)
         {
             try
             {
@@ -75,7 +75,7 @@ namespace _222303026_proje3
                         MessageBox.Show("An error occured: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return null;
                     }
-                });
+                }, cancellationTokenSource.Token); // Düzeltme: cancellationTokenSource yerine cancellationTokenSource.Token
             }
             catch (Exception ex)
             {
@@ -85,7 +85,7 @@ namespace _222303026_proje3
             }
         }
 
-        public static async Task<Image> EditImage(Image inputImage, string prompt)
+        public static async Task<Image> EditImage(Image inputImage, string prompt, CancellationTokenSource cancellationTokenSource = null)
         {
             string systemPrompt = "Do not edit image to create any NSFW, sexual, nude, or inappropriate content. Only generate safe-for-work, appropriate, and non-offensive images.";
             string promptWithSystemPrompt = $"{systemPrompt} {prompt}.";
@@ -144,7 +144,7 @@ namespace _222303026_proje3
                             MessageBox.Show("An error occured: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return null;
                         }
-                    });
+                    }, cancellationTokenSource.Token);
                 }
                 catch (Exception ex)
                 {

@@ -21,7 +21,7 @@ namespace _222303026_proje3
         public MainForm()
         {
             InitializeComponent();
-            ThemeManager.RegisterForm(this); 
+            ThemeManager.RegisterForm(this);
             SetTheme();
             SetFonts();
             if (Settings1.Default.RecentFiles == null)
@@ -38,6 +38,14 @@ namespace _222303026_proje3
                 listBox1.Enabled = true;
             }
             label3.Text = $"Version {GetInformations.GetVersionAndStatus().version} {GetInformations.GetVersionAndStatus().status}";
+            Program.DisableControlsAfterDisconinuationOfLegacyModel(
+                Array.Empty<Control>(),
+                new ToolStripItem[] { createWithAIToolStripMenuItem }
+            );
+            if (DateTime.Now >= new DateTime(2025, 11, 12))
+            {
+                discontinuedModelTimer.Stop(); // Stop the timer if the date has already passed
+            }
         }
         private void SetFonts()
         {
@@ -45,7 +53,7 @@ namespace _222303026_proje3
             foreach (Control control in Controls)
             {
                 control.Font = uiFonts.SetUIFont(control.Font.Size, control.Font.Style);
-                foreach(Control logoParts in panel1.Controls)
+                foreach (Control logoParts in panel1.Controls)
                 {
                     logoParts.Font = uiFonts.SetUIFont(logoParts.Font.Size, logoParts.Font.Style);
                 }
@@ -77,7 +85,7 @@ namespace _222303026_proje3
         private void LightTheme()
         {
             this.BackColor = Form.DefaultBackColor;
-            foreach(Button buttons in this.Controls.OfType<Button>())
+            foreach (Button buttons in this.Controls.OfType<Button>())
             {
                 buttons.BackColor = Color.Transparent;
                 buttons.ForeColor = Button.DefaultForeColor;
@@ -166,7 +174,7 @@ namespace _222303026_proje3
             if (generatedImage != null)
             {
                 ImageEditor imageEditor = new ImageEditor(generatedImage, true);
-                this.Hide(); 
+                this.Hide();
                 imageEditor.Show();
             }
         }
@@ -225,6 +233,24 @@ namespace _222303026_proje3
         {
             SettingsWindow settingsWindow = new SettingsWindow();
             settingsWindow.ShowDialog();
+        }
+
+        private void discontinuedModelTimer_Tick(object sender, EventArgs e)
+        // Disable specific controls and tool strip items after the discontinuation date of Gemini Image Generation 2.0 model (November 12, 2025).
+        // Because Gemini Image Generation 2.5 (Nano Banana) has billing issues that caused to stuck out of quota errors frequently, until I release an update that uses Gemini Image Generation 2.5 after the issue is fixed.
+        {
+            if (!(DateTime.Now >= new DateTime(2025, 11, 12)))
+            {
+                return;
+            }
+            else
+            {
+                Program.DisableControlsAfterDisconinuationOfLegacyModel(
+                    Array.Empty<Control>(),
+                    new ToolStripItem[] { createWithAIToolStripMenuItem }
+                );
+                discontinuedModelTimer.Stop(); // Stop the timer after disabling the controls when the model is discontinued
+            }
         }
     }
 }

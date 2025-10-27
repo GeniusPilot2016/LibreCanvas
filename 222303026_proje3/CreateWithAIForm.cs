@@ -15,6 +15,8 @@ namespace _222303026_proje3
     {
         // The feature to create images with AI that I struggled to implement because of the lack of free text-to-image AI models and I had to wait for Google to release their Gemini Image models.
         Image image;
+        CancellationTokenSource cts = new CancellationTokenSource();
+        bool imageIsCompleted = false; // To track if the image generation is completed
         String filePath;
         public CreateWithAIForm()
         {
@@ -110,13 +112,14 @@ namespace _222303026_proje3
             int width = (int)numericUpDownWidth.Value;
             int height = (int)numericUpDownHeight.Value;
             Image generatedImage = await CreateAIImages.CreateImage(prompt, (int)numericUpDownWidth.Value,
-                (int)numericUpDownHeight.Value, filePath);
+                (int)numericUpDownHeight.Value, filePath, cts);
             setVisibilityOfProgressBarAndSomeControls(false);
             if (generatedImage != null)
             {
                 // İlk resmi yeniden boyutlandırın
                 setVisibilityOfProgressBarAndSomeControls(false);
                 image = ResizeImage(generatedImage, width, height);
+                imageIsCompleted = true; // Mark the image generation as completed
             }
             this.Close();
         }
@@ -202,7 +205,7 @@ namespace _222303026_proje3
                 this.Close();
                 return;
             }
-            if(CreateAIImages.isAPIKeyValidFormat(EncryptionHelper.DecryptString(Settings1.Default.HashedGeminiAIAPIKey)) == false)
+            if (CreateAIImages.isAPIKeyValidFormat(EncryptionHelper.DecryptString(Settings1.Default.HashedGeminiAIAPIKey)) == false)
             {
                 Logger.Log("Google Gemini™ API key format is invalid.", Logger.LogTypes.Error);
                 MessageBox.Show("Your Google Gemini™ API key format is invalid. Please check your API key in the settings.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -232,7 +235,7 @@ namespace _222303026_proje3
             {
                 try
                 {
-                    if(CreateAIImages.isImage(fileBrowser.FileName))
+                    if (CreateAIImages.isImage(fileBrowser.FileName))
                     {
                         filePath = fileBrowser.FileName;
                         labelUploadedImage.Text = Path.GetFileName(filePath);
@@ -251,6 +254,33 @@ namespace _222303026_proje3
                     Logger.Log("Error loading image: " + ex.Message, Logger.LogTypes.Error);
                     MessageBox.Show("Error loading image. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+            }
+        }
+
+        private void discontinuedModelTimer_Tick(object sender, EventArgs e)
+        // Disable specific controls and tool strip items after the discontinuation date of Gemini Image Generation 2.0 model (November 12, 2025).
+        {
+            if (!(DateTime.Now == new DateTime(2025, 11, 12)))
+            {
+                return;
+            }
+            else
+            {
+                cts?.Cancel(); // Cancel any ongoing tasks
+                image = null; // Clear the image to prevent further use
+                imageIsCompleted = false; // Reset the image completion status
+                discontinuedModelTimer.Stop(); // Stop the timer after disabling the controls when the model is discontinued
+                MessageBox.Show("The Gemini Image Generation 2.0 model has been discontinued. This window will now close.", "Model Discontinued", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                this.Dispose(); // Close the form
+            }
+        }
+
+        private void CreateWithAIForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            if (!imageIsCompleted)
+            {
+                cts?.Cancel(); // Cancel any ongoing tasks if the form is closed
+                image = null;
             }
         }
     }

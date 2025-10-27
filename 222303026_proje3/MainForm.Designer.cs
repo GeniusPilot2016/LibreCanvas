@@ -45,6 +45,7 @@
             createWithAIToolStripMenuItem = new ToolStripMenuItem();
             createWithWebcamToolStripMenuItem = new ToolStripMenuItem();
             button3 = new Button();
+            discontinuedModelTimer = new System.Windows.Forms.Timer(components);
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             contextMenuStrip1.SuspendLayout();
@@ -211,6 +212,11 @@
             button3.UseVisualStyleBackColor = true;
             button3.Click += button3_Click;
             // 
+            // discontinuedModelTimer
+            // 
+            discontinuedModelTimer.Enabled = true;
+            discontinuedModelTimer.Tick += discontinuedModelTimer_Tick;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -252,5 +258,6 @@
         private ToolStripMenuItem createWithAIToolStripMenuItem;
         private ToolStripMenuItem createWithWebcamToolStripMenuItem;
         private Button button3;
+        private System.Windows.Forms.Timer discontinuedModelTimer;
     }
 }

@@ -66,5 +66,17 @@ namespace _222303026_proje3
                 Logger.Log("Application exited.", Logger.LogTypes.Info);
             }
         }
+        public static void DisableControlsAfterDisconinuationOfLegacyModel(Control[] controls, ToolStripItem[] toolStripItems)
+        // Disable specific controls and tool strip items after the discontinuation date of Gemini Image Generation 2.0 model (November 12, 2025).
+        {
+            if (DateTime.Now >= new DateTime(2025, 11, 12))
+            {
+                foreach (Control control in controls)
+                    control.Enabled = false;
+
+                foreach (ToolStripItem item in toolStripItems)
+                    item.Enabled = false;
+            }
+        }
     }
 }
