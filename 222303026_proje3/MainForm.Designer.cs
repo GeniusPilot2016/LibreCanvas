@@ -45,7 +45,6 @@
             createWithAIToolStripMenuItem = new ToolStripMenuItem();
             createWithWebcamToolStripMenuItem = new ToolStripMenuItem();
             button3 = new Button();
-            discontinuedModelTimer = new System.Windows.Forms.Timer(components);
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             contextMenuStrip1.SuspendLayout();
@@ -58,9 +57,10 @@
             listBox1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             listBox1.FormattingEnabled = true;
             listBox1.Items.AddRange(new object[] { "There's no recently opened file" });
-            listBox1.Location = new Point(11, 300);
+            listBox1.Location = new Point(10, 225);
+            listBox1.Margin = new Padding(3, 2, 3, 2);
             listBox1.Name = "listBox1";
-            listBox1.Size = new Size(555, 144);
+            listBox1.Size = new Size(486, 100);
             listBox1.TabIndex = 2;
             listBox1.Click += listBox1_Click;
             // 
@@ -69,9 +69,9 @@
             label1.Anchor = AnchorStyles.Top;
             label1.AutoSize = true;
             label1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label1.Location = new Point(203, 277);
+            label1.Location = new Point(178, 208);
             label1.Name = "label1";
-            label1.Size = new Size(166, 20);
+            label1.Size = new Size(135, 16);
             label1.TabIndex = 3;
             label1.Text = "Recently Opened Files";
             // 
@@ -83,17 +83,19 @@
             panel1.Controls.Add(label2);
             panel1.Dock = DockStyle.Top;
             panel1.Location = new Point(0, 0);
+            panel1.Margin = new Padding(3, 2, 3, 2);
             panel1.Name = "panel1";
-            panel1.Size = new Size(579, 261);
+            panel1.Size = new Size(507, 196);
             panel1.TabIndex = 4;
             // 
             // pictureBox1
             // 
             pictureBox1.BackColor = Color.Transparent;
             pictureBox1.Image = Properties.Resources.artfusion_icon;
-            pictureBox1.Location = new Point(69, 63);
+            pictureBox1.Location = new Point(60, 47);
+            pictureBox1.Margin = new Padding(3, 2, 3, 2);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(142, 141);
+            pictureBox1.Size = new Size(124, 106);
             pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
             pictureBox1.TabIndex = 2;
             pictureBox1.TabStop = false;
@@ -103,9 +105,9 @@
             label3.AutoSize = true;
             label3.BackColor = Color.Transparent;
             label3.Font = new Font("HarmonyOS Sans", 13.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label3.Location = new Point(216, 157);
+            label3.Location = new Point(189, 118);
             label3.Name = "label3";
-            label3.Size = new Size(146, 30);
+            label3.Size = new Size(123, 25);
             label3.TabIndex = 1;
             label3.Text = "Version 0.0.0";
             // 
@@ -114,9 +116,9 @@
             label2.AutoSize = true;
             label2.BackColor = Color.Transparent;
             label2.Font = new Font("HarmonyOS Sans", 35.9999962F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label2.Location = new Point(203, 78);
+            label2.Location = new Point(178, 58);
             label2.Name = "label2";
-            label2.Size = new Size(314, 79);
+            label2.Size = new Size(252, 64);
             label2.TabIndex = 0;
             label2.Text = "ArtFusion";
             // 
@@ -126,9 +128,10 @@
             button1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             button1.ImageIndex = 0;
             button1.ImageList = icons;
-            button1.Location = new Point(46, 467);
+            button1.Location = new Point(40, 350);
+            button1.Margin = new Padding(3, 2, 3, 2);
             button1.Name = "button1";
-            button1.Size = new Size(158, 43);
+            button1.Size = new Size(138, 32);
             button1.TabIndex = 5;
             button1.Text = "Create New File";
             button1.TextAlign = ContentAlignment.MiddleRight;
@@ -154,9 +157,10 @@
             button2.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             button2.ImageIndex = 1;
             button2.ImageList = icons;
-            button2.Location = new Point(210, 467);
+            button2.Location = new Point(184, 350);
+            button2.Margin = new Padding(3, 2, 3, 2);
             button2.Name = "button2";
-            button2.Size = new Size(158, 43);
+            button2.Size = new Size(138, 32);
             button2.TabIndex = 5;
             button2.Text = "Open File";
             button2.TextAlign = ContentAlignment.MiddleRight;
@@ -170,13 +174,13 @@
             contextMenuStrip1.ImageScalingSize = new Size(20, 20);
             contextMenuStrip1.Items.AddRange(new ToolStripItem[] { createFileFromScratchToolStripMenuItem, createWithAIToolStripMenuItem, createWithWebcamToolStripMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(252, 82);
+            contextMenuStrip1.Size = new Size(213, 82);
             // 
             // createFileFromScratchToolStripMenuItem
             // 
             createFileFromScratchToolStripMenuItem.Image = Properties.Resources.icons8_add_file_48;
             createFileFromScratchToolStripMenuItem.Name = "createFileFromScratchToolStripMenuItem";
-            createFileFromScratchToolStripMenuItem.Size = new Size(251, 26);
+            createFileFromScratchToolStripMenuItem.Size = new Size(212, 26);
             createFileFromScratchToolStripMenuItem.Text = "Create File From Scratch";
             createFileFromScratchToolStripMenuItem.Click += createFileFromScratchToolStripMenuItem_Click;
             // 
@@ -184,7 +188,7 @@
             // 
             createWithAIToolStripMenuItem.Image = Properties.Resources.icons8_artificial_intelligence_48;
             createWithAIToolStripMenuItem.Name = "createWithAIToolStripMenuItem";
-            createWithAIToolStripMenuItem.Size = new Size(251, 26);
+            createWithAIToolStripMenuItem.Size = new Size(212, 26);
             createWithAIToolStripMenuItem.Text = "Create With AI";
             createWithAIToolStripMenuItem.Click += createWithAIToolStripMenuItem_Click;
             // 
@@ -192,7 +196,7 @@
             // 
             createWithWebcamToolStripMenuItem.Image = Properties.Resources.icons8_webcam_48;
             createWithWebcamToolStripMenuItem.Name = "createWithWebcamToolStripMenuItem";
-            createWithWebcamToolStripMenuItem.Size = new Size(251, 26);
+            createWithWebcamToolStripMenuItem.Size = new Size(212, 26);
             createWithWebcamToolStripMenuItem.Text = "Create With Webcam";
             createWithWebcamToolStripMenuItem.Click += createWithWebcamToolStripMenuItem_Click;
             // 
@@ -202,9 +206,10 @@
             button3.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             button3.ImageIndex = 5;
             button3.ImageList = icons;
-            button3.Location = new Point(375, 467);
+            button3.Location = new Point(328, 350);
+            button3.Margin = new Padding(3, 2, 3, 2);
             button3.Name = "button3";
-            button3.Size = new Size(158, 43);
+            button3.Size = new Size(138, 32);
             button3.TabIndex = 5;
             button3.Text = "Settings";
             button3.TextAlign = ContentAlignment.MiddleRight;
@@ -212,16 +217,11 @@
             button3.UseVisualStyleBackColor = true;
             button3.Click += button3_Click;
             // 
-            // discontinuedModelTimer
-            // 
-            discontinuedModelTimer.Enabled = true;
-            discontinuedModelTimer.Tick += discontinuedModelTimer_Tick;
-            // 
             // MainForm
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(579, 519);
+            ClientSize = new Size(507, 389);
             Controls.Add(button3);
             Controls.Add(button2);
             Controls.Add(button1);
@@ -230,6 +230,7 @@
             Controls.Add(listBox1);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
+            Margin = new Padding(3, 2, 3, 2);
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "MainForm";
@@ -258,6 +259,5 @@
         private ToolStripMenuItem createWithAIToolStripMenuItem;
         private ToolStripMenuItem createWithWebcamToolStripMenuItem;
         private Button button3;
-        private System.Windows.Forms.Timer discontinuedModelTimer;
     }
 }

@@ -23,8 +23,7 @@ def create(inputText, apiKey, width, height, imagePath):
             contents = [text_input]
 
         response = client.models.generate_content(
-            model="gemini-2.0-flash-preview-image-generation",
-            #model="gemini-2.5-flash-image",
+            model="gemini-2.5-flash-image",
             contents=contents,
             config=types.GenerateContentConfig(
                 response_modalities=['TEXT', 'IMAGE']

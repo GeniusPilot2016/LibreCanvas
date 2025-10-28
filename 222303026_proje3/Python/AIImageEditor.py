@@ -18,8 +18,7 @@ def edit(inputImage, inputText, apiKey):
         text_input = (inputText)
 
         response = client.models.generate_content(
-            model="gemini-2.0-flash-preview-image-generation",
-            #model="gemini-2.5-flash-image",
+            model="gemini-2.5-flash-image",
             contents=[text_input, image],
             config=types.GenerateContentConfig(
               response_modalities=['TEXT', 'IMAGE']

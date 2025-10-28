@@ -257,23 +257,6 @@ namespace _222303026_proje3
             }
         }
 
-        private void discontinuedModelTimer_Tick(object sender, EventArgs e)
-        // Disable specific controls and tool strip items after the discontinuation date of Gemini Image Generation 2.0 model (November 12, 2025).
-        {
-            if (!(DateTime.Now == new DateTime(2025, 11, 12)))
-            {
-                return;
-            }
-            else
-            {
-                cts?.Cancel(); // Cancel any ongoing tasks
-                image = null; // Clear the image to prevent further use
-                imageIsCompleted = false; // Reset the image completion status
-                discontinuedModelTimer.Stop(); // Stop the timer after disabling the controls when the model is discontinued
-                MessageBox.Show("The Gemini Image Generation 2.0 model has been discontinued. This window will now close.", "Model Discontinued", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                this.Dispose(); // Close the form
-            }
-        }
 
         private void CreateWithAIForm_FormClosed(object sender, FormClosedEventArgs e)
         {
