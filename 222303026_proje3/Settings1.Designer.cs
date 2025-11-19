@@ -369,5 +369,17 @@ namespace _222303026_proje3 {
                 this["DefaultGaussianBlurRadius"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool settingsUpgraded {
+            get {
+                return ((bool)(this["settingsUpgraded"]));
+            }
+            set {
+                this["settingsUpgraded"] = value;
+            }
+        }
     }
 }

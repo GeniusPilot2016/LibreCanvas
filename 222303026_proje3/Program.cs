@@ -33,6 +33,7 @@ namespace _222303026_proje3
             {
                 ApplicationConfiguration.Initialize();
                 Logger.Log("Application started.", Logger.LogTypes.Info);
+                UpgradeSettingsIfNeeded();
                 try
                 {
                     EncryptionHelper.DecryptString(Settings1.Default.HashedGeminiAIAPIKey);
@@ -64,6 +65,17 @@ namespace _222303026_proje3
             finally
             {
                 Logger.Log("Application exited.", Logger.LogTypes.Info);
+            }
+        }
+        private static void UpgradeSettingsIfNeeded()
+        {
+            if (!Settings1.Default.settingsUpgraded)
+            {
+                Settings1.Default.Upgrade(); // Upgrade user settings and cryptographic settings
+                CryptographicSettings.Default.Upgrade();
+                Settings1.Default.settingsUpgraded = true;
+                Settings1.Default.Save();
+                CryptographicSettings.Default.Save();
             }
         }
     }
