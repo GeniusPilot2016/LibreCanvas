@@ -37,9 +37,9 @@
             radioButtonDontShowStartup = new RadioButton();
             radioButtonShowStartup = new RadioButton();
             groupBox2 = new GroupBox();
+            icons = new ImageList(components);
             groupBoxGemini = new GroupBox();
             label13 = new Label();
-            icons = new ImageList(components);
             textBoxGeminiAPIKey = new TextBox();
             buttonResetGeminiAPIKey = new Button();
             buttonShowHideGeminiAPIKey = new Button();
@@ -135,15 +135,6 @@
             label16 = new Label();
             label17 = new Label();
             colorDialog1 = new ColorDialog();
-            groupBox23 = new GroupBox();
-            radioButton1 = new RadioButton();
-            radioButton2 = new RadioButton();
-            groupBox24 = new GroupBox();
-            textBox1 = new TextBox();
-            label22 = new Label();
-            button3 = new Button();
-            button4 = new Button();
-            openFileDialog1 = new OpenFileDialog();
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
             groupBox3.SuspendLayout();
@@ -200,8 +191,6 @@
             tabPage4.SuspendLayout();
             groupBox16.SuspendLayout();
             groupBox17.SuspendLayout();
-            groupBox23.SuspendLayout();
-            groupBox24.SuspendLayout();
             SuspendLayout();
             // 
             // tabControl1
@@ -226,10 +215,10 @@
             tabPage1.Controls.Add(groupBox2);
             tabPage1.Controls.Add(groupBox1);
             tabPage1.ImageIndex = 0;
-            tabPage1.Location = new Point(4, 27);
+            tabPage1.Location = new Point(4, 25);
             tabPage1.Name = "tabPage1";
-            tabPage1.Padding = new Padding(3, 3, 3, 3);
-            tabPage1.Size = new Size(551, 676);
+            tabPage1.Padding = new Padding(3);
+            tabPage1.Size = new Size(551, 678);
             tabPage1.TabIndex = 0;
             tabPage1.Text = "General";
             tabPage1.UseVisualStyleBackColor = true;
@@ -239,12 +228,12 @@
             // 
             groupBox3.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             groupBox3.Controls.Add(groupBox4);
-            groupBox3.Location = new Point(6, 457);
+            groupBox3.Location = new Point(6, 289);
             groupBox3.Name = "groupBox3";
             groupBox3.Size = new Size(539, 96);
             groupBox3.TabIndex = 2;
             groupBox3.TabStop = false;
-            groupBox3.Text = "Startup Behaviors";
+            groupBox3.Text = "Startup Behaivors";
             // 
             // groupBox4
             // 
@@ -287,48 +276,16 @@
             // groupBox2
             // 
             groupBox2.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            groupBox2.Controls.Add(groupBox24);
-            groupBox2.Controls.Add(groupBox23);
             groupBox2.Controls.Add(groupBoxGemini);
             groupBox2.Controls.Add(groupBox18);
             groupBox2.Controls.Add(label14);
-            groupBox2.Location = new Point(6, 74);
+            groupBox2.Location = new Point(6, 73);
             groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(539, 362);
+            groupBox2.Size = new Size(539, 210);
             groupBox2.TabIndex = 2;
             groupBox2.TabStop = false;
             groupBox2.Text = "AI Settings";
             groupBox2.Enter += groupBox2_Enter;
-            // 
-            // groupBoxGemini
-            // 
-            groupBoxGemini.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            groupBoxGemini.Controls.Add(label13);
-            groupBoxGemini.Controls.Add(textBoxGeminiAPIKey);
-            groupBoxGemini.Controls.Add(buttonResetGeminiAPIKey);
-            groupBoxGemini.Controls.Add(buttonShowHideGeminiAPIKey);
-            groupBoxGemini.Controls.Add(buttonUpdateGeminiAPIKey);
-            groupBoxGemini.Location = new Point(5, 174);
-            groupBoxGemini.Margin = new Padding(2);
-            groupBoxGemini.Name = "groupBoxGemini";
-            groupBoxGemini.Padding = new Padding(2);
-            groupBoxGemini.Size = new Size(526, 95);
-            groupBoxGemini.TabIndex = 6;
-            groupBoxGemini.TabStop = false;
-            groupBoxGemini.Text = "Google Gemini™ Settings";
-            // 
-            // label13
-            // 
-            label13.Anchor = AnchorStyles.Top;
-            label13.AutoSize = true;
-            label13.ImageAlign = ContentAlignment.MiddleLeft;
-            label13.ImageIndex = 10;
-            label13.ImageList = icons;
-            label13.Location = new Point(6, 26);
-            label13.Name = "label13";
-            label13.Size = new Size(160, 16);
-            label13.TabIndex = 0;
-            label13.Text = "      Google Gemini™ API Key";
             // 
             // icons
             // 
@@ -351,6 +308,36 @@
             icons.Images.SetKeyName(13, "icons8-ai-chip-48.png");
             icons.Images.SetKeyName(14, "icons8-opened-folder-48.png");
             icons.Images.SetKeyName(15, "icons8-clear-48.png");
+            // 
+            // groupBoxGemini
+            // 
+            groupBoxGemini.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            groupBoxGemini.Controls.Add(label13);
+            groupBoxGemini.Controls.Add(textBoxGeminiAPIKey);
+            groupBoxGemini.Controls.Add(buttonResetGeminiAPIKey);
+            groupBoxGemini.Controls.Add(buttonShowHideGeminiAPIKey);
+            groupBoxGemini.Controls.Add(buttonUpdateGeminiAPIKey);
+            groupBoxGemini.Location = new Point(5, 22);
+            groupBoxGemini.Margin = new Padding(2);
+            groupBoxGemini.Name = "groupBoxGemini";
+            groupBoxGemini.Padding = new Padding(2);
+            groupBoxGemini.Size = new Size(526, 95);
+            groupBoxGemini.TabIndex = 6;
+            groupBoxGemini.TabStop = false;
+            groupBoxGemini.Text = "Google Gemini™ Settings";
+            // 
+            // label13
+            // 
+            label13.Anchor = AnchorStyles.Top;
+            label13.AutoSize = true;
+            label13.ImageAlign = ContentAlignment.MiddleLeft;
+            label13.ImageIndex = 10;
+            label13.ImageList = icons;
+            label13.Location = new Point(6, 26);
+            label13.Name = "label13";
+            label13.Size = new Size(160, 16);
+            label13.TabIndex = 0;
+            label13.Text = "      Google Gemini™ API Key";
             // 
             // textBoxGeminiAPIKey
             // 
@@ -418,7 +405,7 @@
             groupBox18.Controls.Add(label27);
             groupBox18.Controls.Add(label26);
             groupBox18.Controls.Add(label18);
-            groupBox18.Location = new Point(6, 298);
+            groupBox18.Location = new Point(6, 146);
             groupBox18.Name = "groupBox18";
             groupBox18.Size = new Size(527, 56);
             groupBox18.TabIndex = 5;
@@ -497,7 +484,7 @@
             label14.ImageAlign = ContentAlignment.TopLeft;
             label14.ImageIndex = 7;
             label14.ImageList = icons;
-            label14.Location = new Point(15, 271);
+            label14.Location = new Point(15, 119);
             label14.MaximumSize = new Size(540, 0);
             label14.Name = "label14";
             label14.Size = new Size(507, 24);
@@ -543,10 +530,10 @@
             // 
             tabPage2.Controls.Add(groupBox5);
             tabPage2.ImageIndex = 1;
-            tabPage2.Location = new Point(4, 27);
+            tabPage2.Location = new Point(4, 25);
             tabPage2.Name = "tabPage2";
-            tabPage2.Padding = new Padding(3, 3, 3, 3);
-            tabPage2.Size = new Size(551, 676);
+            tabPage2.Padding = new Padding(3);
+            tabPage2.Size = new Size(551, 678);
             tabPage2.TabIndex = 1;
             tabPage2.Text = "Canvas Settings";
             tabPage2.UseVisualStyleBackColor = true;
@@ -647,10 +634,10 @@
             tabPage3.Controls.Add(groupBox11);
             tabPage3.Controls.Add(groupBox6);
             tabPage3.ImageIndex = 2;
-            tabPage3.Location = new Point(4, 27);
+            tabPage3.Location = new Point(4, 25);
             tabPage3.Name = "tabPage3";
-            tabPage3.Padding = new Padding(3, 3, 3, 3);
-            tabPage3.Size = new Size(551, 676);
+            tabPage3.Padding = new Padding(3);
+            tabPage3.Size = new Size(551, 678);
             tabPage3.TabIndex = 2;
             tabPage3.Text = "Tools & Brushes";
             tabPage3.UseVisualStyleBackColor = true;
@@ -1039,10 +1026,10 @@
             tabPage5.Controls.Add(groupBox27);
             tabPage5.Controls.Add(groupBox21);
             tabPage5.ImageIndex = 12;
-            tabPage5.Location = new Point(4, 27);
+            tabPage5.Location = new Point(4, 25);
             tabPage5.Name = "tabPage5";
-            tabPage5.Padding = new Padding(3, 3, 3, 3);
-            tabPage5.Size = new Size(551, 676);
+            tabPage5.Padding = new Padding(3);
+            tabPage5.Size = new Size(551, 678);
             tabPage5.TabIndex = 4;
             tabPage5.Text = "Filters";
             tabPage5.UseVisualStyleBackColor = true;
@@ -1362,10 +1349,10 @@
             // 
             tabPage4.Controls.Add(groupBox16);
             tabPage4.ImageIndex = 3;
-            tabPage4.Location = new Point(4, 27);
+            tabPage4.Location = new Point(4, 25);
             tabPage4.Name = "tabPage4";
-            tabPage4.Padding = new Padding(3, 3, 3, 3);
-            tabPage4.Size = new Size(551, 676);
+            tabPage4.Padding = new Padding(3);
+            tabPage4.Size = new Size(551, 678);
             tabPage4.TabIndex = 3;
             tabPage4.Text = "Colors";
             tabPage4.UseVisualStyleBackColor = true;
@@ -1459,106 +1446,6 @@
             label17.TabIndex = 0;
             label17.Text = "Primary Color";
             // 
-            // groupBox23
-            // 
-            groupBox23.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            groupBox23.Controls.Add(radioButton2);
-            groupBox23.Controls.Add(radioButton1);
-            groupBox23.Location = new Point(6, 22);
-            groupBox23.Name = "groupBox23";
-            groupBox23.Size = new Size(527, 46);
-            groupBox23.TabIndex = 7;
-            groupBox23.TabStop = false;
-            groupBox23.Text = "AI Model Preference";
-            // 
-            // radioButton1
-            // 
-            radioButton1.Anchor = AnchorStyles.None;
-            radioButton1.AutoSize = true;
-            radioButton1.Checked = true;
-            radioButton1.Location = new Point(131, 17);
-            radioButton1.Name = "radioButton1";
-            radioButton1.Size = new Size(106, 20);
-            radioButton1.TabIndex = 0;
-            radioButton1.TabStop = true;
-            radioButton1.Text = "Local AI Model";
-            radioButton1.UseVisualStyleBackColor = true;
-            // 
-            // radioButton2
-            // 
-            radioButton2.Anchor = AnchorStyles.None;
-            radioButton2.AutoSize = true;
-            radioButton2.Location = new Point(270, 17);
-            radioButton2.Name = "radioButton2";
-            radioButton2.Size = new Size(136, 20);
-            radioButton2.TabIndex = 0;
-            radioButton2.Text = "Google Gemini™ API";
-            radioButton2.UseVisualStyleBackColor = true;
-            // 
-            // groupBox24
-            // 
-            groupBox24.Controls.Add(button4);
-            groupBox24.Controls.Add(button3);
-            groupBox24.Controls.Add(label22);
-            groupBox24.Controls.Add(textBox1);
-            groupBox24.Location = new Point(5, 74);
-            groupBox24.Name = "groupBox24";
-            groupBox24.Size = new Size(527, 95);
-            groupBox24.TabIndex = 8;
-            groupBox24.TabStop = false;
-            groupBox24.Text = "Local AI Settings";
-            // 
-            // textBox1
-            // 
-            textBox1.BackColor = SystemColors.Window;
-            textBox1.Location = new Point(182, 20);
-            textBox1.Name = "textBox1";
-            textBox1.ReadOnly = true;
-            textBox1.Size = new Size(333, 23);
-            textBox1.TabIndex = 0;
-            // 
-            // label22
-            // 
-            label22.AutoSize = true;
-            label22.ImageAlign = ContentAlignment.MiddleLeft;
-            label22.ImageIndex = 13;
-            label22.ImageList = icons;
-            label22.Location = new Point(10, 23);
-            label22.Name = "label22";
-            label22.Size = new Size(166, 16);
-            label22.TabIndex = 1;
-            label22.Text = "        Local AI Model Directory";
-            // 
-            // button3
-            // 
-            button3.ImageIndex = 14;
-            button3.ImageList = icons;
-            button3.Location = new Point(23, 54);
-            button3.Name = "button3";
-            button3.Size = new Size(232, 27);
-            button3.TabIndex = 2;
-            button3.Text = "Change Directory";
-            button3.TextAlign = ContentAlignment.MiddleRight;
-            button3.TextImageRelation = TextImageRelation.ImageBeforeText;
-            button3.UseVisualStyleBackColor = true;
-            // 
-            // button4
-            // 
-            button4.ImageIndex = 15;
-            button4.ImageList = icons;
-            button4.Location = new Point(271, 54);
-            button4.Name = "button4";
-            button4.Size = new Size(227, 27);
-            button4.TabIndex = 3;
-            button4.Text = "Clear Directory";
-            button4.TextAlign = ContentAlignment.MiddleRight;
-            button4.TextImageRelation = TextImageRelation.ImageBeforeText;
-            button4.UseVisualStyleBackColor = true;
-            // 
-            // openFileDialog1
-            // 
-            openFileDialog1.Filter = "GGUF (Local AI Model) Files|*.GGUF";
-            // 
             // SettingsWindow
             // 
             AutoScaleDimensions = new SizeF(96F, 96F);
@@ -1570,7 +1457,7 @@
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "SettingsWindow";
-            Padding = new Padding(8, 8, 8, 8);
+            Padding = new Padding(8);
             ShowIcon = false;
             ShowInTaskbar = false;
             Text = "Settings";
@@ -1647,10 +1534,6 @@
             groupBox16.ResumeLayout(false);
             groupBox17.ResumeLayout(false);
             groupBox17.PerformLayout();
-            groupBox23.ResumeLayout(false);
-            groupBox23.PerformLayout();
-            groupBox24.ResumeLayout(false);
-            groupBox24.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -1761,14 +1644,5 @@
         private GroupBox groupBox29;
         private Label label38;
         private NumericUpDown numericUpDownDefaultGaussianBlurRadius;
-        private GroupBox groupBox23;
-        private RadioButton radioButton2;
-        private RadioButton radioButton1;
-        private GroupBox groupBox24;
-        private Button button3;
-        private Label label22;
-        private TextBox textBox1;
-        private Button button4;
-        private OpenFileDialog openFileDialog1;
     }
 }
