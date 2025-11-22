@@ -18,7 +18,7 @@ ArtFusion is still functional, but the AI features may be unavailable due to fre
 
 ## Background & Exhibition Story
 
-ArtFusion was originally created for exhibition at the school's end-of-year showcase. However, exhibition was prohibited by the instructor until final exams were graded. After spending four months developing and adding new features, this setback was deeply disappointing and led to the project being nearly abandoned.
+ArtFusion was originally created for exhibition at the school's end-of-year showcase. However, exhibition was prohibited by the instructor until final exams were graded. After spending four months waiting and hoping to present the project, this setback was deeply disappointing and led to the project being nearly abandoned.
 
 ## Searching for a Free AI Model
 
