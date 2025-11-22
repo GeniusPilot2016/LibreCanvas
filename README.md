@@ -1,31 +1,35 @@
 # ArtFusion
 
-ArtFusion is an AI-powered image editor that combines paint-style creativity and Photoshop-like editing tools. Designed for seamless and intelligent image manipulation, ArtFusion leverages state-of-the-art AI models to enable advanced features like smart inpainting, automated enhancements, and intuitive drawing tools.
+ArtFusion is an AI-powered image editor combining paint-style creativity and Photoshop-inspired tools. It enables intuitive, intelligent image editing, with features like smart inpainting and automated enhancements powered by state-of-the-art AI.
 
-> **Note:** This project was developed utilizing the Gemini Nano Banana model. Development has slowed as free access to Gemini Nano Banana is unavailable and the previous Gemini image model is deprecated.
+> **Note:** ArtFusion currently uses the Gemini Nano Banana model for its AI features. The project is limited as the free API tier often returns `RESOURCE_EXHAUSTED` and older models are deprecated.
 >
-> If you know of a free AI model (API or local, regardless of provider), suggestions and contributions are welcome! We aim to support open, cost-accessible AI solutions for image editing.
+> Layers and transformations are not included; the focus is on paint and AI-assisted editing.
 
 ## Features
 
-- **AI-powered inpainting and editing**: Blend creative painting with AI enhancements.
-- **Photoshop-style tools**: Layers, selection, transformation, and adjustment controls.
-- **Intuitive interface**: Designed for artists and enthusiasts alike.
-- **Model-agnostic AI backend**: Easily replace or upgrade the AI model for image synthesis or manipulation.
+- **AI-powered image editing:** Smart inpainting, enhancement, and creative paint tools.
+- **Paint/Photoshop blend workflow:** Designed for easy creative manipulation with AI assistance.
+- **Model-agnostic AI backend:** The AI model can be replaced with any suitable image model or API when available.
 
 ## Status
 
-This repository is largely dormant due to the lack of a free tier for Gemini Nano Banana and deprecation of earlier models. The core editor remains, but AI-powered features are temporarily disabled. Seeking alternatives for free, modern AI image models.
+ArtFusion is still functional, but the AI features may be unavailable due to frequent `RESOURCE_EXHAUSTED` errors with the current free API tier. The project is seeking free and modern AI models (API or local) for continued development.
 
-## How to Contribute
+## Searching for a Free AI Model
 
-If you know of a free AI model or service suitable for image editing—whether via API or runnable locally—please [open an issue](https://github.com/GeniusPilot2016/ArtFusion/issues) or submit a pull request! Your help will accelerate ArtFusion’s revival.
+If you know of a free AI image editing model (API or local)—for example, Stable Diffusion (local), Hugging Face Diffusers, or free-tier APIs—please suggest it! Contributors can help revive ArtFusion by integrating a suitable model.
 
-## Get Started
+## Usage
 
-1. Clone the repo:  
+1. Clone the repo:
    ```
    git clone https://github.com/GeniusPilot2016/ArtFusion.git
    ```
-2. Install requirements *(see project files for details)*.
-3. Run the editor and experiment—AI features will return once suitable models are integrated.
+2. Install requirements *(see project files)*.
+3. Run the editor; AI features may be temporarily unavailable if API resources are exhausted.
+
+## Contributing
+
+Suggestions for free AI models and contributions to backend integration are welcome.  
+Open an issue or pull request to help improve ArtFusion!
