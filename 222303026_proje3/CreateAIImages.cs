@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using Microsoft.Web.WebView2.WinForms;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
@@ -24,27 +23,59 @@ namespace _222303026_proje3
 {
     public static class CreateAIImages
     {
-        static WebView2 webView = new WebView2();
         // The core of the AI image generation and editing functionality, that I was implemented using Python scripts (because it didn't supported by Google.GenerativeAI package) to finish my project while I was in 3D modeling course, whille my friends were using 3D VR headsets to play VR games.
-        static CreateAIImages()
-        {
-            InitializeWebViewAsync();
-        }
-        private static async void InitializeWebViewAsync()
-        {
-            if (webView.CoreWebView2 == null)
-            {
-                await webView.EnsureCoreWebView2Async();
-                PuterJsWrapper.Initialize(webView);
-            }
-        }
         public static async Task<Image> CreateImage(string prompt, int width, int height, string imagePath, CancellationTokenSource cancellationTokenSource = null)
         {
             try
             {
                 string systemPrompt = "Do not create any NSFW, sexual, nude, or inappropriate content. Only generate safe-for-work, appropriate, and non-offensive images.";
                 string promptWithSystemPrompt = $"{systemPrompt} {prompt}.";
-                return await PuterJsWrapper.GenerateImageAsync(promptWithSystemPrompt, width, height, imagePath);
+                return await Task.Run(() =>
+                {
+                    try
+                    {
+                        string pythonExe = Path.Combine(Application.StartupPath, @"Python\python.exe");
+                        string scriptPath = Path.Combine(Application.StartupPath, @"Python\AIImageCreator.py");
+                        string apiKey = EncryptionHelper.DecryptString(Settings1.Default.HashedGeminiAIAPIKey);
+
+                        var psi = new ProcessStartInfo
+                        {
+                            FileName = pythonExe,
+                            Arguments = $"\"{scriptPath}\" \"{promptWithSystemPrompt}\" \"{apiKey}\" \"{width}\" \"{height}\" \"{imagePath}\"",
+                            RedirectStandardOutput = true,
+                            RedirectStandardError = true,
+                            UseShellExecute = false,
+                            CreateNoWindow = true,
+                            StandardOutputEncoding = Encoding.UTF8
+                        };
+
+                        using (var process = Process.Start(psi))
+                        {
+                            string output = process.StandardOutput.ReadToEnd();
+                            string error = process.StandardError.ReadToEnd();
+                            process.WaitForExit();
+
+                            if (process.ExitCode != 0)
+                            {
+                                getError(error);
+                                return null;
+                            }
+
+                            // Çıktı base64 string ise:
+                            byte[] imageBytes = Convert.FromBase64String(output.Trim());
+                            using (var ms = new MemoryStream(imageBytes))
+                            {
+                                return Image.FromStream(ms);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log("Error in CreateImage: " + ex.Message, Logger.LogTypes.Error);
+                        MessageBox.Show("An error occured: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return null;
+                    }
+                }, cancellationTokenSource.Token); // Düzeltme: cancellationTokenSource yerine cancellationTokenSource.Token
             }
             catch (Exception ex)
             {
@@ -107,7 +138,7 @@ namespace _222303026_proje3
                                 }
                             }
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             Logger.Log("Error in EditImage: " + ex.Message, Logger.LogTypes.Error);
                             MessageBox.Show("An error occured: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
