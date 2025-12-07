@@ -1,3 +1,4 @@
+using Microsoft.Web.WebView2.WinForms;
 using System.Diagnostics;
 using System.Text;
 
@@ -5,43 +6,58 @@ namespace _222303026_proje3
 {
     public static class PuterJsWrapper
     {
-        /// <summary>
-        /// Calls a JavaScript function from puter.js and returns its image output.
-        /// </summary>
-        /// <param name="functionName">The name of the function to call</param>
-        /// <param name="args">The arguments to pass to the function</param>
-        /// <returns>The function's output (image) as byte[]</returns>
-        public static byte[] CallImageFunction(string functionName, params string[] args)
+        private static readonly WebView2 webView;
+
+        static PuterJsWrapper()
         {
-            string scriptPath = "puter.js";
-            string arguments = $"{scriptPath} {functionName} {string.Join(" ", args)}";
+            webView = new WebView2();
+        }
 
-            var processStartInfo = new ProcessStartInfo
+        public static async Task<Image> GenerateImageAsync(string prompt, int width, int height, CancellationToken cancellationToken = default)
+        {
+            if (webView != null && webView.CoreWebView2 != null)
             {
-                FileName = "node",
-                Arguments = arguments,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
+                string script = $"generateImage('{System.Web.HttpUtility.JavaScriptStringEncode(prompt)}', {width}, {height});";
 
-            using var process = new Process { StartInfo = processStartInfo };
-            process.Start();
+                // JavaScript yürütme görevini baþlatýn
+                var scriptTask = webView.CoreWebView2.ExecuteScriptAsync(script);
 
-            // The image data is expected to be written to standard output as a byte stream
-            using var ms = new MemoryStream();
-            process.StandardOutput.BaseStream.CopyTo(ms);
+                // Ýptal için bekleyecek bir görev oluþturun
+                var tcs = new TaskCompletionSource<bool>();
+                using (cancellationToken.Register(() => tcs.TrySetResult(true)))
+                {
+                    // JavaScript görevi veya iptal görevi tamamlanana kadar bekleyin
+                    var completedTask = await Task.WhenAny(scriptTask, tcs.Task);
 
-            string error = process.StandardError.ReadToEnd();
-            process.WaitForExit();
+                    // Eðer iptal görevi önce tamamlandýysa, bir istisna fýrlatýn
+                    if (completedTask == tcs.Task)
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                    }
+                }
 
-            if (!string.IsNullOrEmpty(error))
-            {
-                throw new Exception($"puter.js error: {error}");
+                // JavaScript görevi baþarýyla tamamlandý, sonucu alýn
+                string base64Image = await scriptTask;
+
+                // JSON dizesinden (ör. "\"base64...\"") týrnaklarý temizleyin
+                if (!string.IsNullOrEmpty(base64Image) && base64Image.Length > 1 && base64Image.StartsWith("\"") && base64Image.EndsWith("\""))
+                {
+                    base64Image = base64Image.Substring(1, base64Image.Length - 2);
+                }
+
+                if (string.IsNullOrEmpty(base64Image) || base64Image == "null")
+                {
+                    return null;
+                }
+
+                // Base64 dizesini Görüntü'ye dönüþtürün
+                byte[] imageBytes = Convert.FromBase64String(base64Image);
+                using (var ms = new MemoryStream(imageBytes))
+                {
+                    return Image.FromStream(ms);
+                }
             }
-
-            return ms.ToArray();
+            return null;
         }
     }
 }

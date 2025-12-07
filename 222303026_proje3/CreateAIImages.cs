@@ -30,52 +30,7 @@ namespace _222303026_proje3
             {
                 string systemPrompt = "Do not create any NSFW, sexual, nude, or inappropriate content. Only generate safe-for-work, appropriate, and non-offensive images.";
                 string promptWithSystemPrompt = $"{systemPrompt} {prompt}.";
-                return await Task.Run(() =>
-                {
-                    try
-                    {
-                        string pythonExe = Path.Combine(Application.StartupPath, @"Python\python.exe");
-                        string scriptPath = Path.Combine(Application.StartupPath, @"Python\AIImageCreator.py");
-                        string apiKey = EncryptionHelper.DecryptString(Settings1.Default.HashedGeminiAIAPIKey);
-
-                        var psi = new ProcessStartInfo
-                        {
-                            FileName = pythonExe,
-                            Arguments = $"\"{scriptPath}\" \"{promptWithSystemPrompt}\" \"{apiKey}\" \"{width}\" \"{height}\" \"{imagePath}\"",
-                            RedirectStandardOutput = true,
-                            RedirectStandardError = true,
-                            UseShellExecute = false,
-                            CreateNoWindow = true,
-                            StandardOutputEncoding = Encoding.UTF8
-                        };
-
-                        using (var process = Process.Start(psi))
-                        {
-                            string output = process.StandardOutput.ReadToEnd();
-                            string error = process.StandardError.ReadToEnd();
-                            process.WaitForExit();
-
-                            if (process.ExitCode != 0)
-                            {
-                                getError(error);
-                                return null;
-                            }
-
-                            // Çıktı base64 string ise:
-                            byte[] imageBytes = Convert.FromBase64String(output.Trim());
-                            using (var ms = new MemoryStream(imageBytes))
-                            {
-                                return Image.FromStream(ms);
-                            }
-                        }
-                    }
-                    catch(Exception ex)
-                    {
-                        Logger.Log("Error in CreateImage: " + ex.Message, Logger.LogTypes.Error);
-                        MessageBox.Show("An error occured: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return null;
-                    }
-                }, cancellationTokenSource.Token); // Düzeltme: cancellationTokenSource yerine cancellationTokenSource.Token
+                return await PuterJsWrapper.GenerateImageAsync(promptWithSystemPrompt, width, height);
             }
             catch (Exception ex)
             {
