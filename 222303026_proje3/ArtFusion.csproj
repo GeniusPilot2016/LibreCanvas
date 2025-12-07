@@ -23,6 +23,7 @@
   <ItemGroup>
     <None Remove="AIImageCreator.py" />
     <None Remove="AIImageEditor.py" />
+    <None Remove="Config\ImageAIModel.js" />
     <None Remove="Python\get-pip.py" />
     <None Remove="Python\libcrypto-3.dll" />
     <None Remove="Python\libffi-8.dll" />
@@ -1296,7 +1297,9 @@
     <PackageReference Include="Emgu.CV.UI" Version="4.12.0.5764" />
     <PackageReference Include="LLamaSharp" Version="0.25.0" />
     <PackageReference Include="MetadataExtractor" Version="2.9.0" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3595.46" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="Node.js" Version="5.3.0" />
     <PackageReference Include="System.Management" Version="10.0.0" />
   </ItemGroup>
 
@@ -1337,6 +1340,12 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings1.Designer.cs</LastGenOutput>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Config\ImageAIModel.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
