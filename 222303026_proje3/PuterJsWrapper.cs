@@ -11,9 +11,13 @@ namespace _222303026_proje3
         public static void Initialize(WebView2 webView)
         {
             _webView = webView ?? throw new ArgumentNullException(nameof(webView));
+            // WebView2'yi baþlatýrken, kök dizindeki Config klasörünü sanal ana makineye eþleyin
+
+            // Load the HTML file from the application directory
+            _webView.CoreWebView2.Navigate("https://file:///" + AppDomain.CurrentDomain.BaseDirectory.Replace("\\", "/") + "Config/ImageAIModel.html");
         }
 
-        public static async Task<Image> GenerateImageAsync(string prompt, int width, int height, CancellationToken cancellationToken = default)
+        public static async Task<Image> GenerateImageAsync(string prompt, int width, int height, string imagePath, CancellationToken cancellationToken = default)
         {
             if (_webView == null)
             {
@@ -25,7 +29,10 @@ namespace _222303026_proje3
                 throw new InvalidOperationException("WebView2 is not initialized. Call EnsureCoreWebView2Async first.");
             }
 
-            string script = $"generateImage('{System.Web.HttpUtility.JavaScriptStringEncode(prompt)}', {width}, {height});";
+            Image image = !string.IsNullOrEmpty(imagePath) ? Bitmap.FromFile(imagePath) : null;
+            _webView.CoreWebView2.SetVirtualHostNameToFolderMapping("appassets", AppDomain.CurrentDomain.BaseDirectory, Microsoft.Web.WebView2.Core.CoreWebView2HostResourceAccessKind.Allow);
+
+            string script = $"generateImage('{System.Web.HttpUtility.JavaScriptStringEncode(prompt)}', {image});";
 
             // JavaScript yürütme görevini baþlatýn
             var scriptTask = _webView.CoreWebView2.ExecuteScriptAsync(script);

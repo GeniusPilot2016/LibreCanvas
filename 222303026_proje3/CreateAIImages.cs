@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+using Microsoft.Web.WebView2.WinForms;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
@@ -23,14 +24,27 @@ namespace _222303026_proje3
 {
     public static class CreateAIImages
     {
+        static WebView2 webView = new WebView2();
         // The core of the AI image generation and editing functionality, that I was implemented using Python scripts (because it didn't supported by Google.GenerativeAI package) to finish my project while I was in 3D modeling course, whille my friends were using 3D VR headsets to play VR games.
+        static CreateAIImages()
+        {
+            InitializeWebViewAsync();
+        }
+        private static async void InitializeWebViewAsync()
+        {
+            if (webView.CoreWebView2 == null)
+            {
+                await webView.EnsureCoreWebView2Async();
+                PuterJsWrapper.Initialize(webView);
+            }
+        }
         public static async Task<Image> CreateImage(string prompt, int width, int height, string imagePath, CancellationTokenSource cancellationTokenSource = null)
         {
             try
             {
                 string systemPrompt = "Do not create any NSFW, sexual, nude, or inappropriate content. Only generate safe-for-work, appropriate, and non-offensive images.";
                 string promptWithSystemPrompt = $"{systemPrompt} {prompt}.";
-                return await PuterJsWrapper.GenerateImageAsync(promptWithSystemPrompt, width, height);
+                return await PuterJsWrapper.GenerateImageAsync(promptWithSystemPrompt, width, height, imagePath);
             }
             catch (Exception ex)
             {

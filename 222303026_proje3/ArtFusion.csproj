@@ -23,7 +23,6 @@
   <ItemGroup>
     <None Remove="AIImageCreator.py" />
     <None Remove="AIImageEditor.py" />
-    <None Remove="Config\ImageAIModel.js" />
     <None Remove="Python\get-pip.py" />
     <None Remove="Python\libcrypto-3.dll" />
     <None Remove="Python\libffi-8.dll" />
@@ -1343,7 +1342,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Config\ImageAIModel.js">
+    <Content Include="Config\ImageAIModel.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
