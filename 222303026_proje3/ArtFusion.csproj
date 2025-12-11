@@ -1297,7 +1297,7 @@
     <PackageReference Include="LLamaSharp" Version="0.25.0" />
     <PackageReference Include="MetadataExtractor" Version="2.9.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-    <PackageReference Include="System.Management" Version="10.0.0" />
+    <PackageReference Include="System.Management" Version="10.0.1" />
   </ItemGroup>
 
   <ItemGroup>

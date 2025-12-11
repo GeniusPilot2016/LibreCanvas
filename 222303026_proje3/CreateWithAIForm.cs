@@ -111,14 +111,18 @@ namespace _222303026_proje3
             string prompt = textBoxPrompt.Text;
             int width = (int)numericUpDownWidth.Value;
             int height = (int)numericUpDownHeight.Value;
-            Image generatedImage = await CreateAIImages.CreateImage(prompt, (int)numericUpDownWidth.Value,
-                (int)numericUpDownHeight.Value, filePath, cts);
+            Bitmap bitmap = !string.IsNullOrEmpty(filePath) ? new Bitmap(filePath) : null;
+            Image generatedImage = ImageCreatingModel.CreateImage(prompt, (int)numericUpDownWidth.Value,
+                (int)numericUpDownHeight.Value, bitmap);
+            /*Image generatedImage = await CreateAIImages.CreateImage(prompt, (int)numericUpDownWidth.Value,
+                (int)numericUpDownHeight.Value, filePath, cts);*/
             setVisibilityOfProgressBarAndSomeControls(false);
             if (generatedImage != null)
             {
                 // İlk resmi yeniden boyutlandırın
                 setVisibilityOfProgressBarAndSomeControls(false);
-                image = ResizeImage(generatedImage, width, height);
+                image = generatedImage;
+                //image = ResizeImage(generatedImage, width, height);
                 imageIsCompleted = true; // Mark the image generation as completed
             }
             this.Close();
