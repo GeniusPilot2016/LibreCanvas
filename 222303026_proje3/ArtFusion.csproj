@@ -1339,4 +1339,8 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Datasets\" />
+  </ItemGroup>
+
 </Project>
