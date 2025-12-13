@@ -16,7 +16,7 @@
 
 namespace _222303026_proje3
 {
-    public static class ThemeManager
+    public static class SystemThemeUtility
     {
         // Event that will be raised when theme changes
         public static event EventHandler ThemeChanged;

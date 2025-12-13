@@ -25,7 +25,7 @@ namespace _222303026_proje3
         {
             InitializeComponent();
             pictureBox1.Image = image;
-            ThemeManager.RegisterForm(this); 
+            SystemThemeUtility.RegisterForm(this); 
             SetTheme();
             SetFonts();
         }

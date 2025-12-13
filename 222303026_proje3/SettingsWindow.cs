@@ -286,7 +286,7 @@ namespace _222303026_proje3
                 SetTheme();
 
                 // Apply theme to all registered forms
-                ThemeManager.ApplyThemeToAllForms();
+                SystemThemeUtility.ApplyThemeToAllForms();
             }
         }
 
@@ -355,18 +355,18 @@ namespace _222303026_proje3
                     buttonUpdateGeminiAPIKey.Enabled = false;
                     buttonResetGeminiAPIKey.Enabled = true;
                     Logger.Log("Google Gemini™ API key is saved.", Logger.LogTypes.Info);
-                    MessageBox.Show("Google Gemini™ API key is saved successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageForm.Show("Google Gemini™ API key is saved successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
                 {
                     Logger.Log("The provided Google Gemini™ API key format is invalid.", Logger.LogTypes.Error);
-                    MessageBox.Show("The provided Google Gemini™ API key format is invalid. Please check and try again.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageForm.Show("The provided Google Gemini™ API key format is invalid. Please check and try again.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             catch (Exception ex)
             {
                 Logger.Log("Error saving Google Gemini™ API key: " + ex.Message, Logger.LogTypes.Error);
-                MessageBox.Show("Error: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageForm.Show("Error: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -381,12 +381,12 @@ namespace _222303026_proje3
                 buttonResetGeminiAPIKey.Enabled = false; // Disable the button after clearing the key  
                 textBoxGeminiAPIKey.Clear(); // Clear the text box
                 Logger.Log("Google Gemini™ API key has been cleared.", Logger.LogTypes.Info);
-                MessageBox.Show("Google Gemini™ API key has been cleared successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageForm.Show("Google Gemini™ API key has been cleared successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
                 Logger.Log("Error clearing Google Gemini™ API key: " + ex.Message, Logger.LogTypes.Error);
-                MessageBox.Show("Error: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageForm.Show("Error: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

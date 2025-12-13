@@ -21,7 +21,7 @@ namespace _222303026_proje3
         public About()
         {
             InitializeComponent(); 
-            ThemeManager.RegisterForm(this);
+            SystemThemeUtility.RegisterForm(this);
             SetTheme();
             SetFonts();
             label3.Text = $"Version {GetInformations.GetVersionAndStatus().version} {GetInformations.GetVersionAndStatus().status}";

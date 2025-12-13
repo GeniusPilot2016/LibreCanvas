@@ -21,7 +21,7 @@ namespace _222303026_proje3
         public LicenseWindow()
         {
             InitializeComponent();
-            ThemeManager.RegisterForm(this); 
+            SystemThemeUtility.RegisterForm(this); 
             SetTheme();
             SetFonts();
         }

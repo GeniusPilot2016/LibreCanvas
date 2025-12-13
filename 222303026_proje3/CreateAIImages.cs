@@ -72,7 +72,7 @@ namespace _222303026_proje3
                     catch (Exception ex)
                     {
                         Logger.Log("Error in CreateImage: " + ex.Message, Logger.LogTypes.Error);
-                        MessageBox.Show("An error occured: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageForm.Show("An error occured: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return null;
                     }
                 }, cancellationTokenSource.Token); // Düzeltme: cancellationTokenSource yerine cancellationTokenSource.Token
@@ -80,7 +80,7 @@ namespace _222303026_proje3
             catch (Exception ex)
             {
                 Logger.Log("Error in CreateImage: " + ex.Message, Logger.LogTypes.Error);
-                MessageBox.Show("An error occured: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageForm.Show("An error occured: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return null;
             }
         }
@@ -141,7 +141,7 @@ namespace _222303026_proje3
                         catch (Exception ex)
                         {
                             Logger.Log("Error in EditImage: " + ex.Message, Logger.LogTypes.Error);
-                            MessageBox.Show("An error occured: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageForm.Show("An error occured: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return null;
                         }
                     }, cancellationTokenSource.Token);
@@ -149,14 +149,14 @@ namespace _222303026_proje3
                 catch (Exception ex)
                 {
                     Logger.Log("Error in EditImage: " + ex.Message, Logger.LogTypes.Error);
-                    MessageBox.Show("An error occured: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageForm.Show("An error occured: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return null;
                 }
             }
             else
             {
                 Logger.Log("Google Gemini™ API key is not set.", Logger.LogTypes.Error);
-                MessageBox.Show("Google Gemini™ API key is not set. Please set it in the settings.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageForm.Show("Google Gemini™ API key is not set. Please set it in the settings.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return null;
             }
         }
@@ -226,7 +226,7 @@ namespace _222303026_proje3
             }
 
             Logger.Log(userMessage, Logger.LogTypes.Error);
-            MessageBox.Show(userMessage, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageForm.Show(userMessage, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }

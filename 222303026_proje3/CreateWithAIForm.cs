@@ -21,7 +21,7 @@ namespace _222303026_proje3
         public CreateWithAIForm()
         {
             InitializeComponent();
-            ThemeManager.RegisterForm(this);
+            SystemThemeUtility.RegisterForm(this);
             SetTheme();
             SetFonts();
             numericUpDownWidth.Value = Settings1.Default.DefaultAIGeneratedImageSize.Width;
@@ -205,28 +205,28 @@ namespace _222303026_proje3
             if (string.IsNullOrEmpty(Settings1.Default.HashedGeminiAIAPIKey))
             {
                 Logger.Log("Google Gemini™ API key is not set.", Logger.LogTypes.Error);
-                MessageBox.Show("Please enter your Google Gemini™ API key in the settings before using this feature.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageForm.Show("Please enter your Google Gemini™ API key in the settings before using this feature.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 this.Close();
                 return;
             }
             if (CreateAIImages.isAPIKeyValidFormat(EncryptionHelper.DecryptString(Settings1.Default.HashedGeminiAIAPIKey)) == false)
             {
                 Logger.Log("Google Gemini™ API key format is invalid.", Logger.LogTypes.Error);
-                MessageBox.Show("Your Google Gemini™ API key format is invalid. Please check your API key in the settings.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageForm.Show("Your Google Gemini™ API key format is invalid. Please check your API key in the settings.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 this.Close();
                 return;
             }
             if (!CheckIfInternetConnectionAvailable.IsInternetAvailable())
             {
                 Logger.Log("No internet connection available.", Logger.LogTypes.Error);
-                MessageBox.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); // Show message box if no internet connection
+                MessageForm.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); // Show message box if no internet connection
                 this.Close();
                 return;
             }
             if (!CheckIfInternetConnectionAvailable.IsServerUp())
             {
                 Logger.Log("Google API server is not reachable.", Logger.LogTypes.Error);
-                MessageBox.Show("Google API server is not reachable. Please try again later.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); // Show message box if server is down
+                MessageForm.Show("Google API server is not reachable. Please try again later.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); // Show message box if server is down
                 this.Close();
                 return;
             }
@@ -248,7 +248,7 @@ namespace _222303026_proje3
                     else
                     {
                         Logger.Log("Selected file is not a valid image.", Logger.LogTypes.Warning);
-                        MessageBox.Show("Selected file is not a valid image. Please select an image file.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        MessageForm.Show("Selected file is not a valid image. Please select an image file.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
                 }
                 catch (Exception ex)
@@ -256,7 +256,7 @@ namespace _222303026_proje3
                     labelUploadedImage.Text = "No image is uploaded";
                     filePath = null;
                     Logger.Log("Error loading image: " + ex.Message, Logger.LogTypes.Error);
-                    MessageBox.Show("Error loading image. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageForm.Show("Error loading image. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
