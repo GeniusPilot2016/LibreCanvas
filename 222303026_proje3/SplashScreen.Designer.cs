@@ -168,8 +168,9 @@
             // 
             // SplashScreen
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            AutoSize = true;
             BackgroundImage = Properties.Resources.artfusion_splash_background;
             ClientSize = new Size(868, 420);
             Controls.Add(buttonMinimize);

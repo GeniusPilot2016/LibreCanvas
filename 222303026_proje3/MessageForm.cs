@@ -25,6 +25,8 @@ namespace _222303026_proje3
     public partial class MessageForm : Form
     {
         bool darkTheme = false;
+        bool IsThemeManuallySet = false; // Flag to indicate if theme is manually set
+        int theme = 0; // 0: System, 1: Light, 2: Dark
         MessageBoxIcon icon = MessageBoxIcon.None;
         string title = string.Empty;
         string message = string.Empty;
