@@ -54,7 +54,17 @@ namespace _222303026_proje3
                 "The first version of Adobe Photoshop was released in 1990.",
                 "The GIF format supports animation and was introduced by CompuServe in 1987.",
                 "The JPEG format was created by the Joint Photographic Experts Group in 1992.",
-                "The RAW image format is used by many professional photographers for its high quality and flexibility."
+                "The RAW image format is used by many professional photographers for its high quality and flexibility.",
+                "The first version of GIMP was released in 1996 as a free and open-source alternative to Photoshop.",
+                "The PNG format supports transparency and was created as a replacement for GIF in 1996.",
+                "The first version of Paint.NET was released in 2004 as a free image editor for Windows.",
+                "The first version of Krita was released in 2005 as a free and open-source image editor for digital painting.",
+                "In 2018, Adobe introduced AI-powered features in Photoshop, such as 'Select Subject' and 'Content-Aware Fill'.",
+                "The first version of Affinity Photo was released in 2015 as a professional image editor for macOS and Windows.",
+                "Generative Fill and similar AI image editing tools have revolutionized the way images are edited, allowing for more complex and realistic edits with less effort.",
+                "The use of AI in image editing has raised ethical concerns about the authenticity and manipulation of images.",
+                "Gemini Nano Banana is an AI model developed by Google DeepMind, known for its advanced capabilities in natural language processing and understanding.",
+                "The integration of AI models like Gemini Nano Banana into image editing software has opened up new possibilities for creative expression and efficiency in the digital art world."
             };
             int funFactIndex = new Random().Next(funFacts.Length);
             LogText += $"\r\nFun Fact: {funFacts[funFactIndex]}\r\n\r\n";

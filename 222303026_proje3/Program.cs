@@ -44,23 +44,15 @@ namespace _222303026_proje3
                     Settings1.Default.HashedGeminiAIAPIKey = string.Empty;
                     Settings1.Default.Save();
                     Logger.Log("The Google Gemini™ API key is corrupted. Please re-enter the key in the settings.", Logger.LogTypes.Error);
-                    MessageBox.Show("The Google Gemini™ API key is corrupted. Please re-enter the key in the settings.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageForm.Show("The Google Gemini™ API key is corrupted. Please re-enter the key in the settings.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-                switch (Settings1.Default.ShowRecentFiles)
-                {
-                    case true:
-                        Application.Run(new MainForm());
-                        break;
-                    case false:
-                        Application.Run(new ImageEditor());
-                        break;
-                }
+                Application.Run(new SplashScreen()); // Start with the splash screen
 
             }
             catch (Exception ex)
             {
                 Logger.Log($"Unhandled exception: {ex.Message}\n{ex.StackTrace}", Logger.LogTypes.Error);
-                MessageBox.Show($"An unexpected error occurred:\n{ex.Message}\nThe application will now close.", "Fatal Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageForm.Show($"An unexpected error occurred:\n{ex.Message}\nThe application will now close.", "Fatal Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {

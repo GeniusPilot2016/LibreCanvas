@@ -19,7 +19,7 @@ namespace _222303026_proje3.Properties {
     // sınıfı tarafından otomatik olarak oluşturuldu.
     // Üye eklemek veya kaldırmak için .ResX dosyanızı düzenleyin ve sonra da ResGen
     // komutunu /str seçeneğiyle yeniden çalıştırın veya VS projenizi yeniden oluşturun.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -76,6 +76,16 @@ namespace _222303026_proje3.Properties {
         internal static System.Drawing.Bitmap artfusion_pattern {
             get {
                 object obj = ResourceManager.GetObject("artfusion_pattern", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap artfusion_splash_background {
+            get {
+                object obj = ResourceManager.GetObject("artfusion_splash_background", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -523,6 +533,16 @@ namespace _222303026_proje3.Properties {
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
+        internal static System.Drawing.Bitmap icons8_error_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-error-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
         internal static System.Drawing.Bitmap icons8_flash_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-flash-48", resourceCulture);
@@ -576,6 +596,16 @@ namespace _222303026_proje3.Properties {
         internal static System.Drawing.Bitmap icons8_image_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-image-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap icons8_information_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-information-48", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -763,6 +793,16 @@ namespace _222303026_proje3.Properties {
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
+        internal static System.Drawing.Bitmap icons8_question_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-question-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
         internal static System.Drawing.Bitmap icons8_rectangular_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-rectangular-48", resourceCulture);
@@ -916,6 +956,16 @@ namespace _222303026_proje3.Properties {
         internal static System.Drawing.Bitmap icons8_view_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-view-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap icons8_warning_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-warning-48", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
