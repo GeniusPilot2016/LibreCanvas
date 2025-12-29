@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+using cmdwtf;
+
 namespace _222303026_proje3
 {
     public partial class About : Form
@@ -24,7 +26,13 @@ namespace _222303026_proje3
             SystemThemeUtility.RegisterForm(this);
             SetTheme();
             SetFonts();
+            string buildYear = GetBuildDate().Year.ToString();
+            label4.Text = label4.Text.Replace("2025", buildYear == "2025" ? "2025" : "2025-" + buildYear);
             label3.Text = $"Version {GetInformations.GetVersionAndStatus().version} {GetInformations.GetVersionAndStatus().status}";
+        }
+        private static DateTime GetBuildDate()
+        {
+            return BuildTimestamp.BuildTime;
         }
         private void SetFonts()
         {
