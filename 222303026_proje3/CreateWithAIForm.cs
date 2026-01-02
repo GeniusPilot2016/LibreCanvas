@@ -112,8 +112,8 @@ namespace _222303026_proje3
             int width = (int)numericUpDownWidth.Value;
             int height = (int)numericUpDownHeight.Value;
             Bitmap bitmap = !string.IsNullOrEmpty(filePath) ? new Bitmap(filePath) : null;
-            Image generatedImage = ImageCreatingModel.CreateImage(prompt, (int)numericUpDownWidth.Value,
-                (int)numericUpDownHeight.Value, bitmap);
+            Image generatedImage = generatedImage = await PollinationsAI.CreateImageAsync(prompt, width, height, cts.Token);
+
             /*Image generatedImage = await CreateAIImages.CreateImage(prompt, (int)numericUpDownWidth.Value,
                 (int)numericUpDownHeight.Value, filePath, cts);*/
             setVisibilityOfProgressBarAndSomeControls(false);
@@ -202,7 +202,7 @@ namespace _222303026_proje3
 
         private void CreateWithAIForm_Load(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(Settings1.Default.HashedGeminiAIAPIKey))
+            /*if (string.IsNullOrEmpty(Settings1.Default.HashedGeminiAIAPIKey))
             {
                 Logger.Log("Google Gemini™ API key is not set.", Logger.LogTypes.Error);
                 MessageForm.Show("Please enter your Google Gemini™ API key in the settings before using this feature.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -215,7 +215,7 @@ namespace _222303026_proje3
                 MessageForm.Show("Your Google Gemini™ API key format is invalid. Please check your API key in the settings.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 this.Close();
                 return;
-            }
+            }*/
             if (!CheckIfInternetConnectionAvailable.IsInternetAvailable())
             {
                 Logger.Log("No internet connection available.", Logger.LogTypes.Error);

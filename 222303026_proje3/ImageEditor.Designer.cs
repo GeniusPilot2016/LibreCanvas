@@ -848,13 +848,14 @@
             createWithAITool.Name = "createWithAITool";
             createWithAITool.Size = new Size(37, 24);
             createWithAITool.Text = "AI Tools";
+            createWithAITool.Visible = false;
             createWithAITool.Click += createWithAITool_Click;
             // 
             // createImageToolStripMenuItem1
             // 
             createImageToolStripMenuItem1.Image = Properties.Resources.icons8_image_48;
             createImageToolStripMenuItem1.Name = "createImageToolStripMenuItem1";
-            createImageToolStripMenuItem1.Size = new Size(188, 22);
+            createImageToolStripMenuItem1.Size = new Size(192, 26);
             createImageToolStripMenuItem1.Text = "Create Image";
             createImageToolStripMenuItem1.Click += createImageToolStripMenuItem1_Click;
             // 
@@ -862,7 +863,7 @@
             // 
             generativeEraserToolStripMenuItem.Image = Properties.Resources.icons8_erase_48;
             generativeEraserToolStripMenuItem.Name = "generativeEraserToolStripMenuItem";
-            generativeEraserToolStripMenuItem.Size = new Size(188, 22);
+            generativeEraserToolStripMenuItem.Size = new Size(192, 26);
             generativeEraserToolStripMenuItem.Text = "Generative Eraser";
             generativeEraserToolStripMenuItem.Click += generativeEraserToolStripMenuItem_Click;
             // 
@@ -870,7 +871,7 @@
             // 
             removeBackgroundToolStripMenuItem2.Image = Properties.Resources.icons8_background_remover_48;
             removeBackgroundToolStripMenuItem2.Name = "removeBackgroundToolStripMenuItem2";
-            removeBackgroundToolStripMenuItem2.Size = new Size(188, 22);
+            removeBackgroundToolStripMenuItem2.Size = new Size(192, 26);
             removeBackgroundToolStripMenuItem2.Text = "Remove Background";
             removeBackgroundToolStripMenuItem2.Click += removeBackgroundToolStripMenuItem2_Click;
             // 
@@ -2189,6 +2190,7 @@
             printPreviewDialog1.Enabled = true;
             printPreviewDialog1.Icon = (Icon)resources.GetObject("printPreviewDialog1.Icon");
             printPreviewDialog1.Name = "printPreviewDialog1";
+            printPreviewDialog1.Text = "Baskı önizleme";
             printPreviewDialog1.Visible = false;
             // 
             // ImageEditor

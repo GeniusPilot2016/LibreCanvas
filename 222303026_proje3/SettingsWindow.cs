@@ -24,6 +24,16 @@ namespace _222303026_proje3
             InitializeVariables();
             SetTheme();
             SetFonts();
+            if(!groupBoxGemini.Visible)
+            {
+                groupBox3.Location = new Point(groupBox3.Location.X, groupBox3.Location.Y - groupBoxGemini.Height - 1);
+                groupBox2.Height -= groupBoxGemini.Height;
+            }
+            if(!label2.Visible)
+            {
+                groupBox3.Location = new Point(groupBox3.Location.X, groupBox3.Location.Y - label2.Height - 1);
+                groupBox2.Height -= label2.Height;
+            }
         }
         private void SetFonts()
         {

@@ -37,9 +37,9 @@
             radioButtonDontShowStartup = new RadioButton();
             radioButtonShowStartup = new RadioButton();
             groupBox2 = new GroupBox();
-            icons = new ImageList(components);
             groupBoxGemini = new GroupBox();
             label13 = new Label();
+            icons = new ImageList(components);
             textBoxGeminiAPIKey = new TextBox();
             buttonResetGeminiAPIKey = new Button();
             buttonShowHideGeminiAPIKey = new Button();
@@ -287,6 +287,37 @@
             groupBox2.Text = "AI Settings";
             groupBox2.Enter += groupBox2_Enter;
             // 
+            // groupBoxGemini
+            // 
+            groupBoxGemini.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            groupBoxGemini.Controls.Add(label13);
+            groupBoxGemini.Controls.Add(textBoxGeminiAPIKey);
+            groupBoxGemini.Controls.Add(buttonResetGeminiAPIKey);
+            groupBoxGemini.Controls.Add(buttonShowHideGeminiAPIKey);
+            groupBoxGemini.Controls.Add(buttonUpdateGeminiAPIKey);
+            groupBoxGemini.Location = new Point(5, 22);
+            groupBoxGemini.Margin = new Padding(2);
+            groupBoxGemini.Name = "groupBoxGemini";
+            groupBoxGemini.Padding = new Padding(2);
+            groupBoxGemini.Size = new Size(526, 95);
+            groupBoxGemini.TabIndex = 6;
+            groupBoxGemini.TabStop = false;
+            groupBoxGemini.Text = "Google Gemini™ Settings";
+            groupBoxGemini.Visible = false;
+            // 
+            // label13
+            // 
+            label13.Anchor = AnchorStyles.Top;
+            label13.AutoSize = true;
+            label13.ImageAlign = ContentAlignment.MiddleLeft;
+            label13.ImageIndex = 10;
+            label13.ImageList = icons;
+            label13.Location = new Point(6, 26);
+            label13.Name = "label13";
+            label13.Size = new Size(160, 16);
+            label13.TabIndex = 0;
+            label13.Text = "      Google Gemini™ API Key";
+            // 
             // icons
             // 
             icons.ColorDepth = ColorDepth.Depth32Bit;
@@ -308,36 +339,6 @@
             icons.Images.SetKeyName(13, "icons8-ai-chip-48.png");
             icons.Images.SetKeyName(14, "icons8-opened-folder-48.png");
             icons.Images.SetKeyName(15, "icons8-clear-48.png");
-            // 
-            // groupBoxGemini
-            // 
-            groupBoxGemini.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            groupBoxGemini.Controls.Add(label13);
-            groupBoxGemini.Controls.Add(textBoxGeminiAPIKey);
-            groupBoxGemini.Controls.Add(buttonResetGeminiAPIKey);
-            groupBoxGemini.Controls.Add(buttonShowHideGeminiAPIKey);
-            groupBoxGemini.Controls.Add(buttonUpdateGeminiAPIKey);
-            groupBoxGemini.Location = new Point(5, 22);
-            groupBoxGemini.Margin = new Padding(2);
-            groupBoxGemini.Name = "groupBoxGemini";
-            groupBoxGemini.Padding = new Padding(2);
-            groupBoxGemini.Size = new Size(526, 95);
-            groupBoxGemini.TabIndex = 6;
-            groupBoxGemini.TabStop = false;
-            groupBoxGemini.Text = "Google Gemini™ Settings";
-            // 
-            // label13
-            // 
-            label13.Anchor = AnchorStyles.Top;
-            label13.AutoSize = true;
-            label13.ImageAlign = ContentAlignment.MiddleLeft;
-            label13.ImageIndex = 10;
-            label13.ImageList = icons;
-            label13.Location = new Point(6, 26);
-            label13.Name = "label13";
-            label13.Size = new Size(160, 16);
-            label13.TabIndex = 0;
-            label13.Text = "      Google Gemini™ API Key";
             // 
             // textBoxGeminiAPIKey
             // 
@@ -491,6 +492,7 @@
             label14.TabIndex = 3;
             label14.Text = "        Warning: For your security, do not share your Google Gemini™ API key with anyone else.";
             label14.TextAlign = ContentAlignment.MiddleCenter;
+            label14.Visible = false;
             // 
             // groupBox1
             // 
