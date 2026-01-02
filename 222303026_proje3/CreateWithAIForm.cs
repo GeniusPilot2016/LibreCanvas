@@ -112,8 +112,8 @@ namespace _222303026_proje3
             int width = (int)numericUpDownWidth.Value;
             int height = (int)numericUpDownHeight.Value;
             Bitmap bitmap = !string.IsNullOrEmpty(filePath) ? new Bitmap(filePath) : null;
-            Image generatedImage = ImageCreatingModel.CreateImage(prompt, (int)numericUpDownWidth.Value,
-                (int)numericUpDownHeight.Value, bitmap);
+            Image generatedImage = generatedImage = await PollinationsAI.CreateImageAsync(prompt, width, height, cts.Token);
+
             /*Image generatedImage = await CreateAIImages.CreateImage(prompt, (int)numericUpDownWidth.Value,
                 (int)numericUpDownHeight.Value, filePath, cts);*/
             setVisibilityOfProgressBarAndSomeControls(false);
