@@ -168,7 +168,7 @@
             // 
             progressBarImageCreating.Anchor = AnchorStyles.Bottom;
             progressBarImageCreating.Location = new Point(126, 159);
-            progressBarImageCreating.Margin = new Padding(4, 4, 4, 4);
+            progressBarImageCreating.Margin = new Padding(4);
             progressBarImageCreating.MarqueeAnimationSpeed = 10;
             progressBarImageCreating.Name = "progressBarImageCreating";
             progressBarImageCreating.Size = new Size(385, 16);
@@ -203,6 +203,7 @@
             buttonUploadImage.TextAlign = ContentAlignment.MiddleRight;
             buttonUploadImage.TextImageRelation = TextImageRelation.ImageBeforeText;
             buttonUploadImage.UseVisualStyleBackColor = true;
+            buttonUploadImage.Visible = false;
             buttonUploadImage.Click += button1_Click_1;
             // 
             // labelUploadedImage
@@ -215,6 +216,7 @@
             labelUploadedImage.Size = new Size(126, 16);
             labelUploadedImage.TabIndex = 8;
             labelUploadedImage.Text = "No image is uploaded";
+            labelUploadedImage.Visible = false;
             // 
             // CreateWithAIForm
             // 
