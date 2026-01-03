@@ -139,7 +139,7 @@
             button1.FlatAppearance.MouseOverBackColor = Color.FromArgb(194, 0, 159);
             button1.FlatStyle = FlatStyle.Flat;
             button1.Font = new Font("Segoe UI", 14.25F, FontStyle.Regular, GraphicsUnit.Point, 162);
-            button1.Location = new Point(823, 1);
+            button1.Location = new Point(823, 0);
             button1.Name = "button1";
             button1.Size = new Size(45, 30);
             button1.TabIndex = 5;
@@ -157,7 +157,7 @@
             buttonMinimize.FlatAppearance.MouseOverBackColor = Color.FromArgb(194, 0, 159);
             buttonMinimize.FlatStyle = FlatStyle.Flat;
             buttonMinimize.Font = new Font("Segoe UI", 14.25F, FontStyle.Regular, GraphicsUnit.Point, 162);
-            buttonMinimize.Location = new Point(776, 1);
+            buttonMinimize.Location = new Point(776, 0);
             buttonMinimize.Name = "buttonMinimize";
             buttonMinimize.Size = new Size(45, 30);
             buttonMinimize.TabIndex = 5;
