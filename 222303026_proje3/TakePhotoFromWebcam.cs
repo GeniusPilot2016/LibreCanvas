@@ -126,7 +126,11 @@ namespace _222303026_proje3
             {
                 Mat frame = new Mat();
                 videoSource.Retrieve(frame);
-                pictureBox1.Image = frame.ToImage<Bgr, Byte>().ToBitmap();
+                Bitmap bitmap = frame.ToImage<Bgr, Byte>().ToBitmap();
+                pictureBox1.Invoke(new Action(() =>
+                {
+                    pictureBox1.Image = bitmap;
+                }));
             }
         }
 
