@@ -270,5 +270,9 @@ namespace _222303026_proje3
                 image = null;
             }
         }
+        public Image GetGeneratedImage()
+        {
+            return image;
+        }
     }
 }

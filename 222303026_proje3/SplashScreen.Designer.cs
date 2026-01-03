@@ -172,6 +172,7 @@
             AutoScaleMode = AutoScaleMode.Dpi;
             AutoSize = true;
             BackgroundImage = Properties.Resources.artfusion_splash_background;
+            BackgroundImageLayout = ImageLayout.Stretch;
             ClientSize = new Size(868, 420);
             Controls.Add(buttonMinimize);
             Controls.Add(button1);

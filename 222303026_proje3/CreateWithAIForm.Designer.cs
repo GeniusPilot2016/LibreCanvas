@@ -203,6 +203,7 @@
             buttonUploadImage.TextAlign = ContentAlignment.MiddleRight;
             buttonUploadImage.TextImageRelation = TextImageRelation.ImageBeforeText;
             buttonUploadImage.UseVisualStyleBackColor = true;
+            buttonUploadImage.Visible = false;
             buttonUploadImage.Click += button1_Click_1;
             // 
             // labelUploadedImage
@@ -215,6 +216,7 @@
             labelUploadedImage.Size = new Size(126, 16);
             labelUploadedImage.TabIndex = 8;
             labelUploadedImage.Text = "No image is uploaded";
+            labelUploadedImage.Visible = false;
             // 
             // CreateWithAIForm
             // 

@@ -15,12 +15,14 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using _222303026_proje3.Properties;
+using ExifLibrary;
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.Media;
+using System.Runtime.Serialization;
 using static System.Windows.Forms.DataFormats;
 
 namespace _222303026_proje3
@@ -1003,14 +1005,8 @@ namespace _222303026_proje3
                 {
                     try
                     {
-                        if (format == ImageFormat.Jpeg)
-                        {
-                            SaveJpegWithExif(tempFilePath);
-                        }
-                        else
-                        {
-                            SaveImageWithoutExif(tempFilePath, format);
-                        }
+                        MainBitmap.Save(targetFilePath, format);
+                        SaveMetaDataToImage(targetFilePath);
                     }
                     catch (Exception ex)
                     {
@@ -1051,135 +1047,23 @@ namespace _222303026_proje3
             }
         }
 
-        private void SaveJpegWithExif(string filePath)
+        private void SaveMetaDataToImage(string filePath)
         {
-            // Bitmap kopyasýný oluþtur (EXIF yazma için)
-            Bitmap bitmapToSave = new Bitmap(MainBitmap);
-
             try
             {
-                // EXIF verilerini ekle
-                AddExifDataToJpeg(bitmapToSave);
-
-                // JPEG encoder ve parametreleri
-                ImageCodecInfo jpegCodec = GetEncoderInfo("image/jpeg");
-                EncoderParameters encoderParams = new EncoderParameters(1);
-                encoderParams.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 95L);
-
-                // Doðrudan dosyaya kaydet (MemoryStream KULLANMA!)
-                bitmapToSave.Save(filePath, jpegCodec, encoderParams);
-
-                encoderParams?.Dispose();
-                Logger.Log("JPEG with EXIF saved successfully", Logger.LogTypes.Info);
+                var file = ImageFile.FromFile(filePath);
+                string programName = "ArtFusion " + GetInformations.GetVersionAndStatus() + 
+                    (aiGenerated == true ? " (AI Generated)" : string.Empty);
+                file.Properties.Set(ExifTag.Software, programName);
+                file.Properties.Set(ExifTag.Artist, Environment.UserName);
+                file.Save(filePath);
             }
-            finally
+            catch(Exception ex)
             {
-                bitmapToSave?.Dispose();
+                Logger.Log($"Error saving metadata: {ex.Message}", Logger.LogTypes.Error);
             }
         }
 
-        private void SaveImageWithoutExif(string filePath, ImageFormat format)
-        {
-            MainBitmap.Save(filePath, format);
-        }
-
-        private ImageCodecInfo GetEncoderInfo(string mimeType)
-        {
-            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageEncoders();
-            foreach (ImageCodecInfo codec in codecs)
-            {
-                if (codec.MimeType == mimeType)
-                    return codec;
-            }
-            return codecs.Length > 0 ? codecs[0] : null;
-        }
-
-        private void AddExifDataToJpeg(Bitmap bitmap)
-        {
-            const short PropertyTagTypeASCII = 2;
-            try
-            {
-                // Software tag (0x0131)
-                PropertyItem softwareItem = CreatePropertyItem(0x0131, PropertyTagTypeASCII,
-                    $"ArtFusion Version {GetInformations.GetVersionAndStatus}");
-                if (softwareItem != null)
-                    bitmap.SetPropertyItem(softwareItem);
-
-                // DateTime tag (0x0132)
-                PropertyItem dateTimeItem = CreatePropertyItem(0x0132, PropertyTagTypeASCII,
-                    DateTime.Now.ToString("yyyy:MM:dd HH:mm:ss"));
-                if (dateTimeItem != null)
-                    bitmap.SetPropertyItem(dateTimeItem);
-
-                // Artist tag (0x013B)
-                PropertyItem artistItem = CreatePropertyItem(0x013B, PropertyTagTypeASCII,
-                    Environment.UserName);
-                if (artistItem != null)
-                    bitmap.SetPropertyItem(artistItem);
-
-                // ImageDescription tag (0x010E)
-                string description = "Image created with ArtFusion";
-                if (aiGenerated)
-                    description += " (AI Generated)";
-
-                PropertyItem descriptionItem = CreatePropertyItem(0x010E, PropertyTagTypeASCII, description);
-                if (descriptionItem != null)
-                    bitmap.SetPropertyItem(descriptionItem);
-
-                Logger.Log("EXIF data added successfully", Logger.LogTypes.Info);
-            }
-            catch (Exception ex)
-            {
-                Logger.Log($"Error adding EXIF data: {ex.Message}", Logger.LogTypes.Error);
-                // Kaydý devam ettir
-            }
-        }
-
-        private PropertyItem CreatePropertyItem(int id, short type, string value)
-        {
-            PropertyItem item = null;
-
-            try
-            {
-                if (MainBitmap != null && MainBitmap.PropertyItems.Length > 0)
-                {
-                    item = MainBitmap.PropertyItems[0];
-                }
-                else
-                {
-                    using (Bitmap tempBmp = new Bitmap(1, 1))
-                    {
-                        if (tempBmp.PropertyItems.Length > 0)
-                        {
-                            item = tempBmp.PropertyItems[0];
-                        }
-                    }
-                }
-            }
-            catch
-            {
-                try
-                {
-                    item = (PropertyItem)Activator.CreateInstance(typeof(PropertyItem), true);
-                }
-                catch
-                {
-                    Logger.Log($"Failed to create PropertyItem for ID {id}", Logger.LogTypes.Warning);
-                    return null;
-                }
-            }
-
-            if (item != null)
-            {
-                item.Id = id;
-                item.Type = type;
-                byte[] bytes = System.Text.Encoding.ASCII.GetBytes(value + '\0');
-                item.Value = bytes;
-                item.Len = bytes.Length;
-            }
-
-            return item;
-        }
         private void saveFileAs()
         {
             try
@@ -1197,25 +1081,6 @@ namespace _222303026_proje3
                 fileSaved = false; // Ensure the flag is false if an exception occurs
             }
         }
-
-        // Helper method to check if a file is locked
-        private bool IsFileLocked(string filePath)
-        {
-            try
-            {
-                using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None))
-                {
-                    // If we can open the file, it's not locked
-                }
-                return false;
-            }
-            catch (IOException)
-            {
-                return true; // File is locked
-            }
-        }
-
-        // Example of updated references to the renamed variable `selectedTool`
 
         private void addTextTool_CheckedChanged(object sender, EventArgs e)
         {
@@ -2815,6 +2680,10 @@ namespace _222303026_proje3
                         action();
                         break;
                 }
+            }
+            else
+            {
+                action();
             }
         }
 
@@ -4945,13 +4814,6 @@ namespace _222303026_proje3
                         break;
                 }
             }
-        }
-    }
-    public partial class CreateWithAIForm : Form
-    {
-        public Image GetGeneratedImage()
-        {
-            return image;
         }
     }
 }
