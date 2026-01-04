@@ -14,7 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using cmdwtf;
+
+using System.Reflection;
 
 namespace Carpathia
 {
@@ -26,13 +27,16 @@ namespace Carpathia
             SystemThemeUtility.RegisterForm(this);
             SetTheme();
             SetFonts();
-            string buildYear = GetBuildDate().Year.ToString();
+            string buildYear = GetBuildYearFromMetadata();
             label4.Text = label4.Text.Replace("2025", buildYear == "2025" ? "2025" : "2025-" + buildYear);
             label3.Text = $"Version {GetInformations.GetVersionAndStatus().version} {GetInformations.GetVersionAndStatus().status}";
         }
-        private static DateTime GetBuildDate()
+        private static string GetBuildYearFromMetadata()
         {
-            return BuildTimestamp.BuildTime;
+            var assembly = Assembly.GetExecutingAssembly();
+            var yearAttr = assembly.GetCustomAttributes<AssemblyMetadataAttribute>()
+                .FirstOrDefault(a => a.Key == "Year");
+            return yearAttr?.Value ?? "2025";
         }
         private void SetFonts()
         {
