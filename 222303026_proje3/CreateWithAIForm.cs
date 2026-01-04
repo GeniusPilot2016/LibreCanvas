@@ -234,7 +234,7 @@ namespace Carpathia
 
         private void button1_Click_1(object sender, EventArgs e)
         {
-            fileBrowser.Filter = "PNG Image|*.png|JPEG Image|*.jpg;*.jpeg|Bitmap Image|*.bmp|GIF Image|*.gif|All Files|*.*";
+            /*fileBrowser.Filter = "PNG Image|*.png|JPEG Image|*.jpg;*.jpeg|Bitmap Image|*.bmp|GIF Image|*.gif|All Files|*.*";
             if (fileBrowser.ShowDialog() == DialogResult.OK)
             {
                 try
@@ -258,7 +258,7 @@ namespace Carpathia
                     Logger.Log("Error loading image: " + ex.Message, Logger.LogTypes.Error);
                     MessageForm.Show("Error loading image. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-            }
+            }*/
         }
 
 

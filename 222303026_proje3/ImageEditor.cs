@@ -734,7 +734,7 @@ namespace Carpathia
 
         private async void generativeEraserToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (CheckIfInternetConnectionAvailable.IsInternetAvailable())
+            /*if (CheckIfInternetConnectionAvailable.IsInternetAvailable())
             {
                 if (!string.IsNullOrEmpty(Settings1.Default.HashedGeminiAIAPIKey))
                 {
@@ -828,13 +828,13 @@ namespace Carpathia
             {
                 Logger.Log("No internet connection available.", Logger.LogTypes.Error);
                 MessageForm.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            }*/
         }
 
         private async void removeBackgroundToolStripMenuItem2_Click(object sender, EventArgs e)
         {
 
-            toolStripAICreateImage.Visible = false;
+            /*toolStripAICreateImage.Visible = false;
             if (CheckIfInternetConnectionAvailable.IsInternetAvailable())
             {
                 if (!string.IsNullOrEmpty(Settings1.Default.HashedGeminiAIAPIKey))
@@ -941,7 +941,7 @@ namespace Carpathia
             {
                 Logger.Log("No internet connection available.", Logger.LogTypes.Error);
                 MessageForm.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            }*/
         }
 
         private void toolStripButton8_Click(object sender, EventArgs e)
@@ -4388,6 +4388,7 @@ namespace Carpathia
         }
         private async void buttonCreate_Click(object sender, EventArgs e)
         {
+            /*
             if (CheckIfInternetConnectionAvailable.IsInternetAvailable())
             {
                 if (!string.IsNullOrEmpty(Settings1.Default.HashedGeminiAIAPIKey))
@@ -4507,7 +4508,7 @@ namespace Carpathia
             {
                 Logger.Log("No internet connection available.", Logger.LogTypes.Error);
                 MessageForm.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            }*/
         }
 
         private void textBoxPrompt_TextChanged(object sender, EventArgs e)

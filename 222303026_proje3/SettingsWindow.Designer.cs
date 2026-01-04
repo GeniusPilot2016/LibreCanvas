@@ -37,13 +37,7 @@
             radioButtonDontShowStartup = new RadioButton();
             radioButtonShowStartup = new RadioButton();
             groupBox2 = new GroupBox();
-            groupBoxGemini = new GroupBox();
-            label13 = new Label();
             icons = new ImageList(components);
-            textBoxGeminiAPIKey = new TextBox();
-            buttonResetGeminiAPIKey = new Button();
-            buttonShowHideGeminiAPIKey = new Button();
-            buttonUpdateGeminiAPIKey = new Button();
             groupBox18 = new GroupBox();
             numericUpDownDefaultAIGeneratedImageHeight = new NumericUpDown();
             numericUpDownDefaultAIGeneratedImageWidth = new NumericUpDown();
@@ -51,7 +45,6 @@
             label27 = new Label();
             label26 = new Label();
             label18 = new Label();
-            label14 = new Label();
             groupBox1 = new GroupBox();
             label1 = new Label();
             comboBoxTheme = new ComboBox();
@@ -140,7 +133,6 @@
             groupBox3.SuspendLayout();
             groupBox4.SuspendLayout();
             groupBox2.SuspendLayout();
-            groupBoxGemini.SuspendLayout();
             groupBox18.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultAIGeneratedImageHeight).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultAIGeneratedImageWidth).BeginInit();
@@ -228,7 +220,7 @@
             // 
             groupBox3.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             groupBox3.Controls.Add(groupBox4);
-            groupBox3.Location = new Point(6, 289);
+            groupBox3.Location = new Point(6, 164);
             groupBox3.Name = "groupBox3";
             groupBox3.Size = new Size(539, 96);
             groupBox3.TabIndex = 2;
@@ -276,47 +268,14 @@
             // groupBox2
             // 
             groupBox2.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            groupBox2.Controls.Add(groupBoxGemini);
             groupBox2.Controls.Add(groupBox18);
-            groupBox2.Controls.Add(label14);
             groupBox2.Location = new Point(6, 73);
             groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(539, 210);
+            groupBox2.Size = new Size(539, 85);
             groupBox2.TabIndex = 2;
             groupBox2.TabStop = false;
             groupBox2.Text = "AI Settings";
             groupBox2.Enter += groupBox2_Enter;
-            // 
-            // groupBoxGemini
-            // 
-            groupBoxGemini.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            groupBoxGemini.Controls.Add(label13);
-            groupBoxGemini.Controls.Add(textBoxGeminiAPIKey);
-            groupBoxGemini.Controls.Add(buttonResetGeminiAPIKey);
-            groupBoxGemini.Controls.Add(buttonShowHideGeminiAPIKey);
-            groupBoxGemini.Controls.Add(buttonUpdateGeminiAPIKey);
-            groupBoxGemini.Location = new Point(5, 22);
-            groupBoxGemini.Margin = new Padding(2);
-            groupBoxGemini.Name = "groupBoxGemini";
-            groupBoxGemini.Padding = new Padding(2);
-            groupBoxGemini.Size = new Size(526, 95);
-            groupBoxGemini.TabIndex = 6;
-            groupBoxGemini.TabStop = false;
-            groupBoxGemini.Text = "Google Gemini™ Settings";
-            groupBoxGemini.Visible = false;
-            // 
-            // label13
-            // 
-            label13.Anchor = AnchorStyles.Top;
-            label13.AutoSize = true;
-            label13.ImageAlign = ContentAlignment.MiddleLeft;
-            label13.ImageIndex = 10;
-            label13.ImageList = icons;
-            label13.Location = new Point(6, 26);
-            label13.Name = "label13";
-            label13.Size = new Size(160, 16);
-            label13.TabIndex = 0;
-            label13.Text = "      Google Gemini™ API Key";
             // 
             // icons
             // 
@@ -340,63 +299,6 @@
             icons.Images.SetKeyName(14, "icons8-opened-folder-48.png");
             icons.Images.SetKeyName(15, "icons8-clear-48.png");
             // 
-            // textBoxGeminiAPIKey
-            // 
-            textBoxGeminiAPIKey.Anchor = AnchorStyles.Top;
-            textBoxGeminiAPIKey.Location = new Point(175, 23);
-            textBoxGeminiAPIKey.Name = "textBoxGeminiAPIKey";
-            textBoxGeminiAPIKey.Size = new Size(261, 23);
-            textBoxGeminiAPIKey.TabIndex = 1;
-            textBoxGeminiAPIKey.UseSystemPasswordChar = true;
-            textBoxGeminiAPIKey.TextChanged += textBox1_TextChanged;
-            // 
-            // buttonResetGeminiAPIKey
-            // 
-            buttonResetGeminiAPIKey.Anchor = AnchorStyles.Top;
-            buttonResetGeminiAPIKey.Enabled = false;
-            buttonResetGeminiAPIKey.ImageIndex = 9;
-            buttonResetGeminiAPIKey.ImageList = icons;
-            buttonResetGeminiAPIKey.Location = new Point(272, 51);
-            buttonResetGeminiAPIKey.Name = "buttonResetGeminiAPIKey";
-            buttonResetGeminiAPIKey.Size = new Size(227, 27);
-            buttonResetGeminiAPIKey.TabIndex = 4;
-            buttonResetGeminiAPIKey.Text = "Reset Google Gemini™ API Key";
-            buttonResetGeminiAPIKey.TextAlign = ContentAlignment.MiddleRight;
-            buttonResetGeminiAPIKey.TextImageRelation = TextImageRelation.ImageBeforeText;
-            buttonResetGeminiAPIKey.UseVisualStyleBackColor = true;
-            buttonResetGeminiAPIKey.Click += button5_Click;
-            // 
-            // buttonShowHideGeminiAPIKey
-            // 
-            buttonShowHideGeminiAPIKey.Anchor = AnchorStyles.Top;
-            buttonShowHideGeminiAPIKey.ImageIndex = 5;
-            buttonShowHideGeminiAPIKey.ImageList = icons;
-            buttonShowHideGeminiAPIKey.Location = new Point(441, 20);
-            buttonShowHideGeminiAPIKey.Name = "buttonShowHideGeminiAPIKey";
-            buttonShowHideGeminiAPIKey.Size = new Size(75, 27);
-            buttonShowHideGeminiAPIKey.TabIndex = 2;
-            buttonShowHideGeminiAPIKey.Text = "Show";
-            buttonShowHideGeminiAPIKey.TextAlign = ContentAlignment.MiddleRight;
-            buttonShowHideGeminiAPIKey.TextImageRelation = TextImageRelation.ImageBeforeText;
-            buttonShowHideGeminiAPIKey.UseVisualStyleBackColor = true;
-            buttonShowHideGeminiAPIKey.Click += button3_Click;
-            // 
-            // buttonUpdateGeminiAPIKey
-            // 
-            buttonUpdateGeminiAPIKey.Anchor = AnchorStyles.Top;
-            buttonUpdateGeminiAPIKey.Enabled = false;
-            buttonUpdateGeminiAPIKey.ImageIndex = 8;
-            buttonUpdateGeminiAPIKey.ImageList = icons;
-            buttonUpdateGeminiAPIKey.Location = new Point(24, 51);
-            buttonUpdateGeminiAPIKey.Name = "buttonUpdateGeminiAPIKey";
-            buttonUpdateGeminiAPIKey.Size = new Size(232, 27);
-            buttonUpdateGeminiAPIKey.TabIndex = 4;
-            buttonUpdateGeminiAPIKey.Text = "Update Google Gemini™ API Key";
-            buttonUpdateGeminiAPIKey.TextAlign = ContentAlignment.MiddleRight;
-            buttonUpdateGeminiAPIKey.TextImageRelation = TextImageRelation.ImageBeforeText;
-            buttonUpdateGeminiAPIKey.UseVisualStyleBackColor = true;
-            buttonUpdateGeminiAPIKey.Click += button4_Click;
-            // 
             // groupBox18
             // 
             groupBox18.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
@@ -406,7 +308,7 @@
             groupBox18.Controls.Add(label27);
             groupBox18.Controls.Add(label26);
             groupBox18.Controls.Add(label18);
-            groupBox18.Location = new Point(6, 146);
+            groupBox18.Location = new Point(6, 21);
             groupBox18.Name = "groupBox18";
             groupBox18.Size = new Size(527, 56);
             groupBox18.TabIndex = 5;
@@ -477,22 +379,6 @@
             label18.Size = new Size(40, 16);
             label18.TabIndex = 0;
             label18.Text = "Width";
-            // 
-            // label14
-            // 
-            label14.Anchor = AnchorStyles.Bottom;
-            label14.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label14.ImageAlign = ContentAlignment.TopLeft;
-            label14.ImageIndex = 7;
-            label14.ImageList = icons;
-            label14.Location = new Point(15, 119);
-            label14.MaximumSize = new Size(540, 0);
-            label14.Name = "label14";
-            label14.Size = new Size(507, 24);
-            label14.TabIndex = 3;
-            label14.Text = "        Warning: For your security, do not share your Google Gemini™ API key with anyone else.";
-            label14.TextAlign = ContentAlignment.MiddleCenter;
-            label14.Visible = false;
             // 
             // groupBox1
             // 
@@ -1469,8 +1355,6 @@
             groupBox4.ResumeLayout(false);
             groupBox4.PerformLayout();
             groupBox2.ResumeLayout(false);
-            groupBoxGemini.ResumeLayout(false);
-            groupBoxGemini.PerformLayout();
             groupBox18.ResumeLayout(false);
             groupBox18.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultAIGeneratedImageHeight).EndInit();
@@ -1596,12 +1480,6 @@
         private Panel panelPrimaryColorPreview;
         private Button button2;
         private Button button1;
-        private Button buttonShowHideGeminiAPIKey;
-        private TextBox textBoxGeminiAPIKey;
-        private Label label13;
-        private Label label14;
-        private Button buttonUpdateGeminiAPIKey;
-        private Button buttonResetGeminiAPIKey;
         private GroupBox groupBox18;
         private NumericUpDown numericUpDownDefaultAIGeneratedImageWidth;
         private Label label18;
@@ -1614,7 +1492,6 @@
         private Label label21;
         private NumericUpDown numericUpDownDefaultRadius;
         private ColorDialog colorDialog1;
-        private GroupBox groupBoxGemini;
         private Label label27;
         private Label label26;
         private Label label28;

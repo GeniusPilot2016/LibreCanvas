@@ -24,16 +24,6 @@ namespace Carpathia
             InitializeVariables();
             SetTheme();
             SetFonts();
-            if(!groupBoxGemini.Visible)
-            {
-                groupBox3.Location = new Point(groupBox3.Location.X, groupBox3.Location.Y - groupBoxGemini.Height - 1);
-                groupBox2.Height -= groupBoxGemini.Height;
-            }
-            if(!label2.Visible)
-            {
-                groupBox3.Location = new Point(groupBox3.Location.X, groupBox3.Location.Y - label2.Height - 1);
-                groupBox2.Height -= label2.Height;
-            }
         }
         private void SetFonts()
         {
@@ -63,11 +53,6 @@ namespace Carpathia
 
             // General settings
             comboBoxTheme.SelectedIndex = Settings1.Default.PreferredTheme;
-            if (!string.IsNullOrEmpty(Settings1.Default.HashedGeminiAIAPIKey))
-            {
-                textBoxGeminiAPIKey.Text = EncryptionHelper.DecryptString(Settings1.Default.HashedGeminiAIAPIKey);
-                buttonResetGeminiAPIKey.Enabled = true;
-            }
             numericUpDownDefaultAIGeneratedImageWidth.Value = Settings1.Default.DefaultAIGeneratedImageSize.Width;
             numericUpDownDefaultAIGeneratedImageHeight.Value = Settings1.Default.DefaultAIGeneratedImageSize.Height;
             switch (Settings1.Default.ShowRecentFiles)
@@ -321,83 +306,6 @@ namespace Carpathia
         private void groupBox2_Enter(object sender, EventArgs e)
         {
 
-        }
-
-        private void button3_Click(object sender, EventArgs e)
-        {
-            if (textBoxGeminiAPIKey.UseSystemPasswordChar)
-            {
-                textBoxGeminiAPIKey.UseSystemPasswordChar = false;
-                buttonShowHideGeminiAPIKey.ImageIndex = 6;
-                buttonShowHideGeminiAPIKey.Text = "Hide";
-            }
-            else
-            {
-                textBoxGeminiAPIKey.UseSystemPasswordChar = true;
-                buttonShowHideGeminiAPIKey.ImageIndex = 5;
-                buttonShowHideGeminiAPIKey.Text = "Show";
-            }
-        }
-
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-            if (string.IsNullOrEmpty(textBoxGeminiAPIKey.Text) ||
-                textBoxGeminiAPIKey.Text == EncryptionHelper.DecryptString(Settings1.Default.HashedGeminiAIAPIKey))
-            {
-                buttonUpdateGeminiAPIKey.Enabled = false;
-            }
-            else
-            {
-                buttonUpdateGeminiAPIKey.Enabled = true;
-            }
-        }
-
-        private void button4_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if(CreateAIImages.isAPIKeyValidFormat(textBoxGeminiAPIKey.Text))
-                {
-                    EncryptionHelper.ChangeKeyAndIV(); // Change the key and IV for encryption
-
-                    Settings1.Default.HashedGeminiAIAPIKey = EncryptionHelper.EncryptString(textBoxGeminiAPIKey.Text);
-                    Settings1.Default.Save(); // Save the settings to persist the changes
-                    buttonUpdateGeminiAPIKey.Enabled = false;
-                    buttonResetGeminiAPIKey.Enabled = true;
-                    Logger.Log("Google Gemini™ API key is saved.", Logger.LogTypes.Info);
-                    MessageForm.Show("Google Gemini™ API key is saved successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                else
-                {
-                    Logger.Log("The provided Google Gemini™ API key format is invalid.", Logger.LogTypes.Error);
-                    MessageForm.Show("The provided Google Gemini™ API key format is invalid. Please check and try again.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log("Error saving Google Gemini™ API key: " + ex.Message, Logger.LogTypes.Error);
-                MessageForm.Show("Error: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void button5_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                EncryptionHelper.ChangeKeyAndIV(); // Change the key and IV for encryption
-                Settings1.Default.HashedGeminiAIAPIKey = string.Empty; // Clear the API key by setting it to an empty string  
-                Settings1.Default.Save(); // Save the settings to persist the changes
-                buttonUpdateGeminiAPIKey.Enabled = false;
-                buttonResetGeminiAPIKey.Enabled = false; // Disable the button after clearing the key  
-                textBoxGeminiAPIKey.Clear(); // Clear the text box
-                Logger.Log("Google Gemini™ API key has been cleared.", Logger.LogTypes.Info);
-                MessageForm.Show("Google Gemini™ API key has been cleared successfully.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                Logger.Log("Error clearing Google Gemini™ API key: " + ex.Message, Logger.LogTypes.Error);
-                MessageForm.Show("Error: " + ex.Message, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
         }
 
         private void numericUpDownDefaultAIGeneratedImageHeight_ValueChanged(object sender, EventArgs e)
