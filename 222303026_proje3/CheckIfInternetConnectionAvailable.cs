@@ -16,7 +16,7 @@
 
 using System.Net.NetworkInformation;
 
-namespace _222303026_proje3
+namespace Carpathia
 {
     public class CheckIfInternetConnectionAvailable
     {

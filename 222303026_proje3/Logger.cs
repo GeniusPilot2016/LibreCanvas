@@ -16,7 +16,7 @@
 
 using System.Diagnostics;
 
-namespace _222303026_proje3
+namespace Carpathia
 {
     public static class Logger
     {

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace _222303026_proje3 {
+namespace Carpathia {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

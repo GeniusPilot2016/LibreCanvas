@@ -15,13 +15,13 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using System.Media;
-using _222303026_proje3.Properties;
+using Carpathia.Properties;
 using DirectShowLib;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 
-namespace _222303026_proje3
+namespace Carpathia
 {
     public partial class TakePhotoFromWebcam : Form
     {

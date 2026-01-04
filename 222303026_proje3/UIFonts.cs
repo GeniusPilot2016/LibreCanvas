@@ -14,10 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using _222303026_proje3.Properties;
+using Carpathia.Properties;
 using System.Drawing.Text;
 
-namespace _222303026_proje3
+namespace Carpathia
 {
     public class UIFonts : IDisposable
     {

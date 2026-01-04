@@ -16,7 +16,7 @@
 
 using cmdwtf;
 
-namespace _222303026_proje3
+namespace Carpathia
 {
     public partial class About : Form
     {

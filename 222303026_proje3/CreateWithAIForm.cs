@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace _222303026_proje3
+namespace Carpathia
 {
     public partial class CreateWithAIForm : Form
     {

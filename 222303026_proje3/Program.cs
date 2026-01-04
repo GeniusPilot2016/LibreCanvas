@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-namespace _222303026_proje3
+namespace Carpathia
 {
     // The program that's my old school project, a simple image editor with AI features.
     // But my teacher prohibited to exhibit our projects until he grades them, so I didn't exhibit it on my school's end of year exhibition.

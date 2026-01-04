@@ -23,7 +23,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 
-namespace _222303026_proje3
+namespace Carpathia
 {
     public partial class SplashScreen : Form
     {

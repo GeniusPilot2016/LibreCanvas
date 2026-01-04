@@ -26,7 +26,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace _222303026_proje3
+namespace Carpathia
 {
     public static class PollinationsAI
     {

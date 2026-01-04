@@ -14,13 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using _222303026_proje3.Properties;
+using Carpathia.Properties;
 using System.Drawing;
 using System.Media;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace _222303026_proje3
+namespace Carpathia
 {
     public partial class MessageForm : Form
     {

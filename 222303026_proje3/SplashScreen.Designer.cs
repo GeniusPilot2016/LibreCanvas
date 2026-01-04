@@ -1,4 +1,4 @@
-﻿namespace _222303026_proje3
+﻿namespace Carpathia
 {
     partial class SplashScreen
     {

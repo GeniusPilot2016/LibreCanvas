@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-using _222303026_proje3.Properties;
+using Carpathia.Properties;
 using ExifLibrary;
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
@@ -25,7 +25,7 @@ using System.Media;
 using System.Runtime.Serialization;
 using static System.Windows.Forms.DataFormats;
 
-namespace _222303026_proje3
+namespace Carpathia
 {
     public partial class ImageEditor : Form
     {

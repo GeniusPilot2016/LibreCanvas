@@ -17,7 +17,7 @@
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 
-namespace _222303026_proje3
+namespace Carpathia
 {
     public static class Filters
     {

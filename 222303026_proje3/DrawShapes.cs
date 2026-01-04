@@ -16,7 +16,7 @@
 
 using System.Drawing.Drawing2D;
 
-namespace _222303026_proje3
+namespace Carpathia
 {
     public class DrawShapes
     {

@@ -19,7 +19,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace _222303026_proje3
+namespace Carpathia
 {
     public static class CreateAIImages
     {
