@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11312.151 d18.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibreCanvas", "222303026_proje3\LibreCanvas.csproj", "{6077E90E-BE36-494D-9BEC-EA666E33FFEE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6077E90E-BE36-494D-9BEC-EA666E33FFEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6077E90E-BE36-494D-9BEC-EA666E33FFEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6077E90E-BE36-494D-9BEC-EA666E33FFEE}.Debug|x64.ActiveCfg = Debug|x64
+		{6077E90E-BE36-494D-9BEC-EA666E33FFEE}.Debug|x64.Build.0 = Debug|x64
+		{6077E90E-BE36-494D-9BEC-EA666E33FFEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6077E90E-BE36-494D-9BEC-EA666E33FFEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6077E90E-BE36-494D-9BEC-EA666E33FFEE}.Release|x64.ActiveCfg = Release|x64
+		{6077E90E-BE36-494D-9BEC-EA666E33FFEE}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2DC59BB6-D9C8-46DC-A748-29322E205227}
+	EndGlobalSection
+EndGlobal
