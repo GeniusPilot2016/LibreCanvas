@@ -130,7 +130,7 @@
   <data name="icons8-bold-48" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\icons8-bold-48.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="artfusion_pattern" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="librecanvas_pattern" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\artfusion_pattern.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="icons8-art-48" type="System.Resources.ResXFileRef, System.Windows.Forms">
@@ -358,8 +358,8 @@
   <data name="icons8-webcam-481" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\icons8-webcam-481.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="artfusion_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\artfusion_icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="librecanvas_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\librecanvas_icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="icons8-add-text-48" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\icons8-add-text-48.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -409,7 +409,7 @@
   <data name="icons8-print-48" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\icons8-print-48.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="artfusion_splash_background" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="librecanvas_splash_background" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\artfusion_splash_background.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="icons8-information-48" type="System.Resources.ResXFileRef, System.Windows.Forms">

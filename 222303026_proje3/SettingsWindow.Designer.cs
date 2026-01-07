@@ -37,7 +37,6 @@
             radioButtonDontShowStartup = new RadioButton();
             radioButtonShowStartup = new RadioButton();
             groupBox2 = new GroupBox();
-            icons = new ImageList(components);
             groupBox18 = new GroupBox();
             numericUpDownDefaultAIGeneratedImageHeight = new NumericUpDown();
             numericUpDownDefaultAIGeneratedImageWidth = new NumericUpDown();
@@ -127,6 +126,7 @@
             panelPrimaryColorPreview = new Panel();
             label16 = new Label();
             label17 = new Label();
+            icons = new ImageList(components);
             colorDialog1 = new ColorDialog();
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
@@ -276,28 +276,6 @@
             groupBox2.TabStop = false;
             groupBox2.Text = "AI Settings";
             groupBox2.Enter += groupBox2_Enter;
-            // 
-            // icons
-            // 
-            icons.ColorDepth = ColorDepth.Depth32Bit;
-            icons.ImageStream = (ImageListStreamer)resources.GetObject("icons.ImageStream");
-            icons.TransparentColor = Color.Transparent;
-            icons.Images.SetKeyName(0, "icons8-wrench-48.png");
-            icons.Images.SetKeyName(1, "icons8-canvas-48.png");
-            icons.Images.SetKeyName(2, "icons8-drawing-48.png");
-            icons.Images.SetKeyName(3, "icons8-color-48.png");
-            icons.Images.SetKeyName(4, "icons8-ai-48.png");
-            icons.Images.SetKeyName(5, "icons8-mark-view-as-non-hidden-48.png");
-            icons.Images.SetKeyName(6, "icons8-mark-view-as-hidden-48.png");
-            icons.Images.SetKeyName(7, "icons8-warning-48.png");
-            icons.Images.SetKeyName(8, "icons8-update-48 (1).png");
-            icons.Images.SetKeyName(9, "icons8-reset-48.png");
-            icons.Images.SetKeyName(10, "icons8-bard-48.png");
-            icons.Images.SetKeyName(11, "icons8-hugging-face-48.png");
-            icons.Images.SetKeyName(12, "icons8-photo-editor-48.png");
-            icons.Images.SetKeyName(13, "icons8-ai-chip-48.png");
-            icons.Images.SetKeyName(14, "icons8-opened-folder-48.png");
-            icons.Images.SetKeyName(15, "icons8-clear-48.png");
             // 
             // groupBox18
             // 
@@ -1333,6 +1311,28 @@
             label17.Size = new Size(81, 16);
             label17.TabIndex = 0;
             label17.Text = "Primary Color";
+            // 
+            // icons
+            // 
+            icons.ColorDepth = ColorDepth.Depth32Bit;
+            icons.ImageStream = (ImageListStreamer)resources.GetObject("icons.ImageStream");
+            icons.TransparentColor = Color.Transparent;
+            icons.Images.SetKeyName(0, "icons8-wrench-48.png");
+            icons.Images.SetKeyName(1, "icons8-canvas-48.png");
+            icons.Images.SetKeyName(2, "icons8-drawing-48.png");
+            icons.Images.SetKeyName(3, "icons8-color-48.png");
+            icons.Images.SetKeyName(4, "icons8-ai-48.png");
+            icons.Images.SetKeyName(5, "icons8-mark-view-as-non-hidden-48.png");
+            icons.Images.SetKeyName(6, "icons8-mark-view-as-hidden-48.png");
+            icons.Images.SetKeyName(7, "icons8-warning-48.png");
+            icons.Images.SetKeyName(8, "icons8-update-48 (1).png");
+            icons.Images.SetKeyName(9, "icons8-reset-48.png");
+            icons.Images.SetKeyName(10, "icons8-bard-48.png");
+            icons.Images.SetKeyName(11, "icons8-hugging-face-48.png");
+            icons.Images.SetKeyName(12, "icons8-photo-editor-48.png");
+            icons.Images.SetKeyName(13, "icons8-ai-chip-48.png");
+            icons.Images.SetKeyName(14, "icons8-opened-folder-48.png");
+            icons.Images.SetKeyName(15, "icons8-clear-48.png");
             // 
             // SettingsWindow
             // 

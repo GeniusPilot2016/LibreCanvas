@@ -1,4 +1,4 @@
-﻿// ArtFusion - The AI-enabled simple image editor for everyone, born as a school project by GeniusPilot2016
+﻿// LibreCanvas - The AI-enabled simple image editor for everyone, born as a school project by GeniusPilot2016
 // Copyright (C) 2025 GeniusPilot2016
 //
 // This program is free software: you can redistribute it and/or modify
@@ -122,7 +122,7 @@ namespace Carpathia
 
         private void buttonForkMeOnGithub_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://github.com/GeniusPilot2016/ArtFusion") { UseShellExecute = true });
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://github.com/GeniusPilot2016/LibreCanvas") { UseShellExecute = true });
         }
 
         private void buttonViewLicenseText_Click(object sender, EventArgs e)

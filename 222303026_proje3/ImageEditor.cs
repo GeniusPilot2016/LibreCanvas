@@ -1,4 +1,4 @@
-// ArtFusion - The AI-enabled simple image editor for everyone, born as a school project by GeniusPilot2016
+// LibreCanvas - The AI-enabled simple image editor for everyone, born as a school project by GeniusPilot2016
 // Copyright (C) 2025 GeniusPilot2016
 //
 // This program is free software: you can redistribute it and/or modify
@@ -1052,7 +1052,7 @@ namespace Carpathia
             try
             {
                 var file = ImageFile.FromFile(filePath);
-                string programName = "ArtFusion " + GetInformations.GetVersionAndStatus() + 
+                string programName = "LibreCanvas " + GetInformations.GetVersionAndStatus() + 
                     (aiGenerated == true ? " (AI Generated)" : string.Empty);
                 file.Properties.Set(ExifTag.Software, programName);
                 file.Properties.Set(ExifTag.Artist, Environment.UserName);

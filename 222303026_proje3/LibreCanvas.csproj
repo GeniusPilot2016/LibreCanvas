@@ -11,16 +11,18 @@
     <Company></Company>
     <Authors>GeniusPilot2016 (Nisa Özdoğan)</Authors>
     <Version>0.17.0-alpha</Version>
-    <Title>ArtFusion</Title>
-    <PackageId>artfusion</PackageId>
-    <ApplicationIcon>artfusion_icon.ico</ApplicationIcon>
+    <Title>LibreCanvas</Title>
+    <PackageId>librecanvas</PackageId>
+    <ApplicationIcon>librecanvas_icon.ico</ApplicationIcon>
 	<ForceDesignerDpiUnaware>true</ForceDesignerDpiUnaware>
     <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
     <Platforms>AnyCPU;x64</Platforms>
     <Year>$([System.DateTime]::Now.Year)</Year>
     <CopyrightYear Condition="'$(Year)' == '2025'">2025</CopyrightYear>
     <CopyrightYear Condition="'$(Year)' != '2025'">2025-$(Year)</CopyrightYear>
-    <Copyright>© $(CopyrightYear) GeniusPilot2016. NeoBleeper is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.</Copyright>
+    <Copyright>© $(CopyrightYear) GeniusPilot2016. LibreCanvas is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.</Copyright>
+    <NeutralLanguage>en-001</NeutralLanguage>
+    <PackageIcon>librecanvas_icon.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -39,7 +41,14 @@
 	<Compile Remove="Datasets\**" />
 	<EmbeddedResource Remove="Datasets\**" />
 	<None Remove="Datasets\**" />  
-    <Content Include="artfusion_icon.ico" />
+    <Content Include="librecanvas_icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\..\OneDrive\Masaüstü\librecanvas_icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>

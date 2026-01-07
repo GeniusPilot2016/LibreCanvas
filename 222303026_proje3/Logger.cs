@@ -1,4 +1,4 @@
-﻿// ArtFusion - The AI-enabled simple image editor for everyone, born as a school project by GeniusPilot2016
+﻿// LibreCanvas - The AI-enabled simple image editor for everyone, born as a school project by GeniusPilot2016
 // Copyright (C) 2025 GeniusPilot2016
 //
 // This program is free software: you can redistribute it and/or modify
@@ -26,15 +26,17 @@ namespace Carpathia
         static String LogText;
         static Logger()
         {
-            LogText += "     _         _   _____          _             \r\n" +
-                "    / \\   _ __| |_|  ___|   _ ___(_) ___  _ __  \r\n" +
-                "   / _ \\ | '__| __| |_ | | | / __| |/ _ \\| '_ \\ \r\n" +
-                "  / ___ \\| |  | |_|  _|| |_| \\__ \\ | (_) | | | |\r\n" +
-                " /_/   \\_\\_|   \\__|_|   \\__,_|___/_|\\___/|_| |_|\r\n" +
-                "                                                ";
+            LogText += "  _      _ _               _____                          \r\n" +
+                " | |    (_) |             / ____|                         \r\n" +
+                " | |     _| |__  _ __ ___| |     __ _ _ ____   ____ _ ___ \r\n" +
+                " | |    | | '_ \\| '__/ _ \\ |    / _` | '_ \\ \\ / / _` / __|\r\n" +
+                " | |____| | |_) | | |  __/ |___| (_| | | | \\ V / (_| \\__ \\\r\n" +
+                " |______|_|_.__/|_|  \\___|\\_____\\__,_|_| |_|\\_/ \\__,_|___/\r\n" +
+                "                                                          \r\n" +
+                "                                                          ";
             LogText += "\nNew Dimension of Digital Art \r\n";
-            LogText += "\nhttps://github.com/GeniusPilot2016/ArtFusion \r\n\n";
-            LogText += $"ArtFusion Version {GetInformations.GetVersionAndStatus().version} {GetInformations.GetVersionAndStatus().status}\r\n";
+            LogText += "\nhttps://github.com/GeniusPilot2016/LibreCanvas \r\n\n";
+            LogText += $"LibreCanvas Version {GetInformations.GetVersionAndStatus().version} {GetInformations.GetVersionAndStatus().status}\r\n";
             LogText += GetInformations.getSystemInfo();
             string[] funFacts = new string[]
             {

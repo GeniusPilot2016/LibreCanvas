@@ -77,7 +77,7 @@
             // 
             // panel1
             // 
-            panel1.BackgroundImage = Properties.Resources.artfusion_pattern;
+            panel1.BackgroundImage = Properties.Resources.librecanvas_pattern;
             panel1.Controls.Add(pictureBox1);
             panel1.Controls.Add(label3);
             panel1.Controls.Add(label2);
@@ -90,9 +90,10 @@
             // 
             // pictureBox1
             // 
+            pictureBox1.Anchor = AnchorStyles.None;
             pictureBox1.BackColor = Color.Transparent;
-            pictureBox1.Image = Properties.Resources.artfusion_icon;
-            pictureBox1.Location = new Point(60, 47);
+            pictureBox1.Image = Properties.Resources.librecanvas_icon;
+            pictureBox1.Location = new Point(40, 45);
             pictureBox1.Margin = new Padding(3, 2, 3, 2);
             pictureBox1.Name = "pictureBox1";
             pictureBox1.Size = new Size(124, 106);
@@ -102,10 +103,11 @@
             // 
             // label3
             // 
+            label3.Anchor = AnchorStyles.None;
             label3.AutoSize = true;
             label3.BackColor = Color.Transparent;
             label3.Font = new Font("HarmonyOS Sans", 13.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label3.Location = new Point(189, 118);
+            label3.Location = new Point(169, 116);
             label3.Name = "label3";
             label3.Size = new Size(123, 25);
             label3.TabIndex = 1;
@@ -113,14 +115,15 @@
             // 
             // label2
             // 
+            label2.Anchor = AnchorStyles.None;
             label2.AutoSize = true;
             label2.BackColor = Color.Transparent;
             label2.Font = new Font("HarmonyOS Sans", 35.9999962F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label2.Location = new Point(178, 58);
+            label2.Location = new Point(158, 56);
             label2.Name = "label2";
-            label2.Size = new Size(252, 64);
+            label2.Size = new Size(307, 64);
             label2.TabIndex = 0;
-            label2.Text = "ArtFusion";
+            label2.Text = "LibreCanvas";
             // 
             // button1
             // 
@@ -234,7 +237,7 @@
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "MainForm";
-            Text = "ArtFusion";
+            Text = "LibreCanvas";
             FormClosed += MainForm_FormClosed;
             panel1.ResumeLayout(false);
             panel1.PerformLayout();

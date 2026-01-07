@@ -61,36 +61,6 @@ namespace Carpathia.Properties {
         }
         
         /// <summary>
-        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
-        /// </summary>
-        internal static System.Drawing.Bitmap artfusion_icon {
-            get {
-                object obj = ResourceManager.GetObject("artfusion_icon", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
-        /// </summary>
-        internal static System.Drawing.Bitmap artfusion_pattern {
-            get {
-                object obj = ResourceManager.GetObject("artfusion_pattern", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
-        /// </summary>
-        internal static System.Drawing.Bitmap artfusion_splash_background {
-            get {
-                object obj = ResourceManager.GetObject("artfusion_splash_background", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
         ///   System.Byte[] türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
         internal static byte[] HarmonyOS_Sans_Black {
@@ -1016,6 +986,36 @@ namespace Carpathia.Properties {
         internal static System.Drawing.Bitmap icons8_zoom_out_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-zoom-out-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap librecanvas_icon {
+            get {
+                object obj = ResourceManager.GetObject("librecanvas_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap librecanvas_pattern {
+            get {
+                object obj = ResourceManager.GetObject("librecanvas_pattern", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap librecanvas_splash_background {
+            get {
+                object obj = ResourceManager.GetObject("librecanvas_splash_background", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

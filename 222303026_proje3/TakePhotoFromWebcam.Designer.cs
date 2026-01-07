@@ -41,9 +41,10 @@
             // pictureBox1
             // 
             pictureBox1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            pictureBox1.Location = new Point(12, 12);
+            pictureBox1.Location = new Point(10, 9);
+            pictureBox1.Margin = new Padding(3, 2, 3, 2);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(1000, 564);
+            pictureBox1.Size = new Size(875, 423);
             pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
             pictureBox1.TabIndex = 0;
             pictureBox1.TabStop = false;
@@ -54,9 +55,10 @@
             button1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             button1.ImageIndex = 0;
             button1.ImageList = icons;
-            button1.Location = new Point(429, 591);
+            button1.Location = new Point(375, 443);
+            button1.Margin = new Padding(3, 2, 3, 2);
             button1.Name = "button1";
-            button1.Size = new Size(153, 42);
+            button1.Size = new Size(134, 32);
             button1.TabIndex = 1;
             button1.Text = "Take Photo";
             button1.TextAlign = ContentAlignment.MiddleRight;
@@ -76,9 +78,9 @@
             label1.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             label1.AutoSize = true;
             label1.Font = new Font("HarmonyOS Sans", 8.999999F);
-            label1.Location = new Point(666, 604);
+            label1.Location = new Point(583, 453);
             label1.Name = "label1";
-            label1.Size = new Size(61, 20);
+            label1.Size = new Size(49, 16);
             label1.TabIndex = 2;
             label1.Text = "Camera";
             // 
@@ -88,22 +90,24 @@
             comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBox1.Font = new Font("HarmonyOS Sans", 8.999999F);
             comboBox1.FormattingEnabled = true;
-            comboBox1.Location = new Point(733, 601);
+            comboBox1.Location = new Point(641, 451);
+            comboBox1.Margin = new Padding(3, 2, 3, 2);
             comboBox1.Name = "comboBox1";
-            comboBox1.Size = new Size(279, 28);
+            comboBox1.Size = new Size(245, 24);
             comboBox1.TabIndex = 3;
             comboBox1.SelectedIndexChanged += comboBox1_SelectedIndexChanged_1;
             // 
             // TakePhotoFromWebcam
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1024, 645);
+            ClientSize = new Size(896, 484);
             Controls.Add(comboBox1);
             Controls.Add(label1);
             Controls.Add(button1);
             Controls.Add(pictureBox1);
             Icon = (Icon)resources.GetObject("$this.Icon");
+            Margin = new Padding(3, 2, 3, 2);
             Name = "TakePhotoFromWebcam";
             ShowIcon = false;
             Text = "Take Photo From Webcam";

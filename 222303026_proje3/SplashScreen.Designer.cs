@@ -74,7 +74,7 @@
             labelStatus.Name = "labelStatus";
             labelStatus.Size = new Size(844, 55);
             labelStatus.TabIndex = 2;
-            labelStatus.Text = "ArtFusion is starting...";
+            labelStatus.Text = "LibreCanvas is starting...";
             labelStatus.TextAlign = ContentAlignment.BottomLeft;
             labelStatus.MouseDown += splash_MouseDown;
             labelStatus.MouseMove += splash_MouseMove;
@@ -84,7 +84,7 @@
             // 
             pictureBox1.Anchor = AnchorStyles.None;
             pictureBox1.BackColor = Color.Transparent;
-            pictureBox1.Image = Properties.Resources.artfusion_icon;
+            pictureBox1.Image = Properties.Resources.librecanvas_icon;
             pictureBox1.Location = new Point(23, 62);
             pictureBox1.Name = "pictureBox1";
             pictureBox1.Size = new Size(225, 225);
@@ -118,9 +118,9 @@
             label3.Font = new Font("HarmonyOS Sans", 72F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label3.Location = new Point(234, 88);
             label3.Name = "label3";
-            label3.Size = new Size(504, 127);
+            label3.Size = new Size(613, 127);
             label3.TabIndex = 4;
-            label3.Text = "ArtFusion";
+            label3.Text = "LibreCanvas";
             label3.MouseDown += splash_MouseDown;
             label3.MouseMove += splash_MouseMove;
             label3.MouseUp += splash_MouseUp;
@@ -171,7 +171,7 @@
             AutoScaleDimensions = new SizeF(96F, 96F);
             AutoScaleMode = AutoScaleMode.Dpi;
             AutoSize = true;
-            BackgroundImage = Properties.Resources.artfusion_splash_background;
+            BackgroundImage = Properties.Resources.librecanvas_splash_background;
             BackgroundImageLayout = ImageLayout.Stretch;
             ClientSize = new Size(868, 420);
             Controls.Add(buttonMinimize);
@@ -187,7 +187,7 @@
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "SplashScreen";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "ArtFusion";
+            Text = "LibreCanvas";
             Shown += SplashScreen_Shown;
             MouseDown += splash_MouseDown;
             MouseMove += splash_MouseMove;

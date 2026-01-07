@@ -50,7 +50,7 @@
             // 
             // panel1
             // 
-            panel1.BackgroundImage = Properties.Resources.artfusion_pattern;
+            panel1.BackgroundImage = Properties.Resources.librecanvas_pattern;
             panel1.Controls.Add(pictureBox1);
             panel1.Controls.Add(label3);
             panel1.Controls.Add(label2);
@@ -65,8 +65,8 @@
             // 
             pictureBox1.Anchor = AnchorStyles.None;
             pictureBox1.BackColor = Color.Transparent;
-            pictureBox1.Image = Properties.Resources.artfusion_icon;
-            pictureBox1.Location = new Point(79, 33);
+            pictureBox1.Image = Properties.Resources.librecanvas_icon;
+            pictureBox1.Location = new Point(57, 29);
             pictureBox1.Margin = new Padding(3, 2, 3, 2);
             pictureBox1.Name = "pictureBox1";
             pictureBox1.Size = new Size(124, 106);
@@ -80,7 +80,7 @@
             label3.AutoSize = true;
             label3.BackColor = Color.Transparent;
             label3.Font = new Font("HarmonyOS Sans", 13.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label3.Location = new Point(207, 99);
+            label3.Location = new Point(185, 95);
             label3.Name = "label3";
             label3.Size = new Size(123, 25);
             label3.TabIndex = 1;
@@ -92,18 +92,18 @@
             label2.AutoSize = true;
             label2.BackColor = Color.Transparent;
             label2.Font = new Font("HarmonyOS Sans", 35.9999962F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label2.Location = new Point(198, 40);
+            label2.Location = new Point(176, 36);
             label2.Name = "label2";
-            label2.Size = new Size(252, 64);
+            label2.Size = new Size(307, 64);
             label2.TabIndex = 0;
-            label2.Text = "ArtFusion";
+            label2.Text = "LibreCanvas";
             // 
             // label1
             // 
             label1.Anchor = AnchorStyles.Bottom;
             label1.AutoSize = true;
             label1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label1.Location = new Point(232, 338);
+            label1.Location = new Point(232, 319);
             label1.Name = "label1";
             label1.Size = new Size(80, 16);
             label1.TabIndex = 6;
@@ -115,7 +115,7 @@
             listView1.Columns.AddRange(new ColumnHeader[] { columnHeader1, columnHeader2 });
             listView1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             listView1.Items.AddRange(new ListViewItem[] { listViewItem1 });
-            listView1.Location = new Point(10, 355);
+            listView1.Location = new Point(10, 336);
             listView1.Margin = new Padding(3, 2, 3, 2);
             listView1.Name = "listView1";
             listView1.Size = new Size(533, 183);
@@ -140,7 +140,7 @@
             label4.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             label4.Location = new Point(79, 187);
             label4.Name = "label4";
-            label4.Size = new Size(356, 96);
+            label4.Size = new Size(371, 80);
             label4.TabIndex = 9;
             label4.Text = resources.GetString("label4.Text");
             // 
@@ -150,7 +150,7 @@
             buttonVisitIcons8.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             buttonVisitIcons8.ImageIndex = 0;
             buttonVisitIcons8.ImageList = icons;
-            buttonVisitIcons8.Location = new Point(57, 298);
+            buttonVisitIcons8.Location = new Point(57, 279);
             buttonVisitIcons8.Margin = new Padding(3, 2, 3, 2);
             buttonVisitIcons8.Name = "buttonVisitIcons8";
             buttonVisitIcons8.Size = new Size(136, 26);
@@ -176,7 +176,7 @@
             buttonViewLicenseText.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             buttonViewLicenseText.ImageIndex = 1;
             buttonViewLicenseText.ImageList = icons;
-            buttonViewLicenseText.Location = new Point(198, 298);
+            buttonViewLicenseText.Location = new Point(198, 279);
             buttonViewLicenseText.Margin = new Padding(3, 2, 3, 2);
             buttonViewLicenseText.Name = "buttonViewLicenseText";
             buttonViewLicenseText.Size = new Size(144, 26);
@@ -193,7 +193,7 @@
             buttonForkMeOnGithub.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             buttonForkMeOnGithub.ImageIndex = 2;
             buttonForkMeOnGithub.ImageList = icons;
-            buttonForkMeOnGithub.Location = new Point(347, 298);
+            buttonForkMeOnGithub.Location = new Point(347, 279);
             buttonForkMeOnGithub.Margin = new Padding(3, 2, 3, 2);
             buttonForkMeOnGithub.Name = "buttonForkMeOnGithub";
             buttonForkMeOnGithub.Size = new Size(153, 26);
@@ -209,7 +209,7 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoSize = true;
-            ClientSize = new Size(554, 546);
+            ClientSize = new Size(554, 527);
             Controls.Add(buttonForkMeOnGithub);
             Controls.Add(listView1);
             Controls.Add(panel1);
