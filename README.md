@@ -25,7 +25,7 @@ LibreCanvas is fully usable as a creative editor, but AI image editing features 
 
 ## Background & Exhibition Story
 
-LibreCanvas was originally developed for a school exhibition, but showing it was delayed by instruction until after final exams. Despite four months of intensive work and multiple backend changes, most AI features were recently removed due to API instability. The core, paint-focused editing environment is still maintained.
+LibreCanvas was originally developed for project of visual programming lesson and end-of-year exhibition of school before graduation, but showing it was prohibited by instructor until grading final exams. Despite four months of intensive work and multiple backend changes, most AI features were recently removed due to API instability. The core, paint-focused editing environment is still maintained.
 
 ## Seeking Alternatives
 
