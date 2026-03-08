@@ -105,27 +105,42 @@ namespace Carpathia
             }
             TitleBarHelper.ApplyCustomTitleBar(this, true);
         }
+        Image generatedImage = null; // To hold the generated image from the AI
         private async void button1_Click(object sender, EventArgs e)
         {
-            setVisibilityOfProgressBarAndSomeControls(true);
-            string prompt = textBoxPrompt.Text;
-            int width = (int)numericUpDownWidth.Value;
-            int height = (int)numericUpDownHeight.Value;
-            Bitmap bitmap = !string.IsNullOrEmpty(filePath) ? new Bitmap(filePath) : null;
-            Image generatedImage = generatedImage = await PollinationsAI.CreateImageAsync(prompt, width, height, bitmap, cts.Token);
-
-            /*Image generatedImage = await CreateAIImages.CreateImage(prompt, (int)numericUpDownWidth.Value,
-                (int)numericUpDownHeight.Value, filePath, cts);*/
-            setVisibilityOfProgressBarAndSomeControls(false);
-            if (generatedImage != null)
+            try
             {
-                // İlk resmi yeniden boyutlandırın
-                setVisibilityOfProgressBarAndSomeControls(false);
-                image = generatedImage;
-                //image = ResizeImage(generatedImage, width, height);
-                imageIsCompleted = true; // Mark the image generation as completed
+                setVisibilityOfProgressBarAndSomeControls(true);
+                string prompt = textBoxPrompt.Text;
+                int width = (int)numericUpDownWidth.Value;
+                int height = (int)numericUpDownHeight.Value;
+                Bitmap bitmap = !string.IsNullOrEmpty(filePath) ? new Bitmap(filePath) : null;
+                generatedImage = await PollinationsAI.CreateImageAsync(prompt, width, height, bitmap, cts.Token);
+
+                /*Image generatedImage = await CreateAIImages.CreateImage(prompt, (int)numericUpDownWidth.Value,
+                    (int)numericUpDownHeight.Value, filePath, cts);*/
+                
             }
-            this.Close();
+            catch (Exception ex)
+            {
+                if(ex is not OperationCanceledException && ex is not TaskCanceledException)
+                {
+                    HandleStatus(ex.Message);
+                }
+            }
+            finally
+            {
+                setVisibilityOfProgressBarAndSomeControls(false);
+                if (generatedImage != null)
+                {
+                    // İlk resmi yeniden boyutlandırın
+                    setVisibilityOfProgressBarAndSomeControls(false);
+                    image = generatedImage;
+                    //image = ResizeImage(generatedImage, width, height);
+                    imageIsCompleted = true; // Mark the image generation as completed
+                }
+                this.Close();
+            }
         }
         private void setVisibilityOfProgressBarAndSomeControls(bool isVisible)
         {
@@ -202,34 +217,7 @@ namespace Carpathia
 
         private void CreateWithAIForm_Load(object sender, EventArgs e)
         {
-            /*if (string.IsNullOrEmpty(Settings1.Default.HashedGeminiAIAPIKey))
-            {
-                Logger.Log("Google Gemini™ API key is not set.", Logger.LogTypes.Error);
-                MessageForm.Show("Please enter your Google Gemini™ API key in the settings before using this feature.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.Close();
-                return;
-            }
-            if (CreateAIImages.isAPIKeyValidFormat(EncryptionHelper.DecryptString(Settings1.Default.HashedGeminiAIAPIKey)) == false)
-            {
-                Logger.Log("Google Gemini™ API key format is invalid.", Logger.LogTypes.Error);
-                MessageForm.Show("Your Google Gemini™ API key format is invalid. Please check your API key in the settings.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.Close();
-                return;
-            }*/
-            if (!CheckIfInternetConnectionAvailable.IsInternetAvailable())
-            {
-                Logger.Log("No internet connection available.", Logger.LogTypes.Error);
-                MessageForm.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); // Show message box if no internet connection
-                this.Close();
-                return;
-            }
-            if (!CheckIfInternetConnectionAvailable.IsServerUp())
-            {
-                Logger.Log("Google API server is not reachable.", Logger.LogTypes.Error);
-                MessageForm.Show("Google API server is not reachable. Please try again later.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); // Show message box if server is down
-                this.Close();
-                return;
-            }
+            HandleStatus();
         }
 
         private void button1_Click_1(object sender, EventArgs e)
@@ -260,8 +248,66 @@ namespace Carpathia
                 }
             }*/
         }
+        enum StatusMode
+        {
+            CheckResult,
+            ExceptionText
+        }
+        private string HandleStatusInternal(PollinationsAI.AvailabilityStatus status, StatusMode statusMode)
+        {
+            switch (status)
+            {
+                case PollinationsAI.AvailabilityStatus.BadRequest:
+                    return "Bad request to Pollinations AI API. The request was invalid or malformed.";
 
-
+                case PollinationsAI.AvailabilityStatus.Unauthorized:
+                    return "Unauthorized access to Pollinations AI API. Please check your API key and permissions.";
+                case PollinationsAI.AvailabilityStatus.Forbidden:
+                    return "Forbidden access to Pollinations AI API. You do not have permission to access this resource.";
+                case PollinationsAI.AvailabilityStatus.NotFound:
+                    return "Pollinations AI API endpoint not found. The specified URL is incorrect or the service is unavailable.";
+                case PollinationsAI.AvailabilityStatus.InternalServerError:
+                    return "Internal server error in Pollinations AI API. The server encountered an unexpected condition that prevented it from fulfilling the request.";
+                case PollinationsAI.AvailabilityStatus.ServiceUnavailable:
+                    return "Pollinations AI API service is unavailable. The server is currently unable to handle the request due to temporary overload or maintenance.";
+                case PollinationsAI.AvailabilityStatus.GatewayTimeout:
+                    return "Gateway timeout when accessing Pollinations AI API. The server did not receive a timely response from an upstream server while trying to fulfill the request.";
+                case PollinationsAI.AvailabilityStatus.PaymentRequired:
+                    return "Payment required for Pollinations AI API. Access to the API requires payment or subscription.";
+                case PollinationsAI.AvailabilityStatus.RateLimited:
+                    return "Rate limited by Pollinations AI API. Too many requests have been made in a given amount of time.";
+                case PollinationsAI.AvailabilityStatus.Unavailable:
+                    return "Pollinations AI API is unavailable. The service is currently not available or cannot be reached.";
+                case PollinationsAI.AvailabilityStatus.NoInternetConnection:
+                    return "No internet connection available to access Pollinations AI API. Please check your network connection.";
+                default:
+                    switch (statusMode)
+                    {
+                        case StatusMode.CheckResult:
+                            return "An error occurred while checking the availability of Pollinations AI API.";
+                        case StatusMode.ExceptionText:
+                            return "An error occured while generating the image.";
+                    }
+                    return "An unknown error occurred with Pollinations AI API.";
+            }
+        }
+        private void HandleStatus()
+        {
+            PollinationsAI.AvailabilityStatus status = PollinationsAI.CheckServiceAvailability();
+            string message = HandleStatusInternal(status, StatusMode.CheckResult);
+            Logger.Log(message, Logger.LogTypes.Error);
+            if (status != PollinationsAI.AvailabilityStatus.Available)
+            {
+                MessageForm.Show(this, message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
+            }
+        }
+        private void HandleStatus(string errorText)
+        {
+            string message = HandleStatusInternal(PollinationsAI.GetAvailabilityStatusFromText(errorText), StatusMode.ExceptionText);
+            Logger.Log(message, Logger.LogTypes.Error);
+            MessageForm.Show(this, message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
         private void CreateWithAIForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             if (!imageIsCompleted)

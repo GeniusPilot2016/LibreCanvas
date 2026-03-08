@@ -34,59 +34,51 @@ namespace Carpathia
 
         public static async Task<Image> CreateImageAsync(string prompt, int width, int height, Image referenceImage = null, CancellationToken ct = default)
         {
-            try
-            {
-                /*string optimizedPrompt = await OptimizeAndFlagPromptAsync(prompt, ct);
-                if(string.IsNullOrEmpty(optimizedPrompt))
-                {
-                    Logger.Log("Prompt optimization failed or returned empty.", Logger.LogTypes.Warning);
-                    return null;
-                }*/
-                Random rnd = new Random();
-                int seed = rnd.Next(1, 999999999);
-                //string encodedPrompt = HttpUtility.UrlEncode(optimizedPrompt);
-                string encodedPrompt = HttpUtility.UrlEncode(prompt);
+            /*string optimizedPrompt = await OptimizeAndFlagPromptAsync(prompt, ct);
+               if(string.IsNullOrEmpty(optimizedPrompt))
+               {
+                   Logger.Log("Prompt optimization failed or returned empty.", Logger.LogTypes.Warning);
+                   return null;
+               }*/
+            Random rnd = new Random();
+            int seed = rnd.Next(1, 999999999);
+            //string encodedPrompt = HttpUtility.UrlEncode(optimizedPrompt);
+            string encodedPrompt = HttpUtility.UrlEncode(prompt);
 
-                string url;
-                if (referenceImage != null)
+            string url;
+            if (referenceImage != null)
+            {
+                string referenceImageUrl = await CreateTemporaryImageURL(referenceImage);
+                if (string.IsNullOrEmpty(referenceImageUrl))
                 {
-                    string referenceImageUrl = await CreateTemporaryImageURL(referenceImage);
-                    if (string.IsNullOrEmpty(referenceImageUrl))
-                    {
-                        Logger.Log("Reference image upload failed, generating without reference", Logger.LogTypes.Warning);
-                        url = $"https://image.pollinations.ai/prompt/{encodedPrompt}?width={width}&height={height}&nologo=true&seed={seed}&model=nanobanana-pro";
-                    }
-                    else
-                    {
-                        // Decode the URL to ensure it's properly formatted
-                        string encodedImageUrl = HttpUtility.UrlEncode(referenceImageUrl);
-                        url = $"https://image.pollinations.ai/prompt/{encodedPrompt}?width={width}&height={height}&nologo=true&seed={seed}&model=nanobanana-pro&enhance=true&image_link={encodedImageUrl}";
-                        Logger.Log($"Using reference image URL: {referenceImageUrl}", Logger.LogTypes.Info);
-                    }
+                    Logger.Log("Reference image upload failed, generating without reference", Logger.LogTypes.Warning);
+                    url = $"https://image.pollinations.ai/prompt/{encodedPrompt}?width={width}&height={height}&nologo=true&seed={seed}&model=nanobanana-pro";
                 }
                 else
                 {
-                    url = $"https://image.pollinations.ai/prompt/{encodedPrompt}?width={width}&height={height}&nologo=true&seed={seed}&model=nanobanana-pro";
-                }
-
-                Logger.Log($"Generating image with Pollinations.AI: {prompt}", Logger.LogTypes.Info);
-                Logger.Log($"Full URL: {url}", Logger.LogTypes.Info);
-
-                var response = await httpClient.GetAsync(url, ct);
-                response.EnsureSuccessStatusCode();
-
-                using (var stream = await response.Content.ReadAsStreamAsync())
-                {
-                    var image = Image.FromStream(stream);
-                    Logger.Log("Image generated successfully with Pollinations.AI", Logger.LogTypes.Info);
-                    image = RescaleImage(image, width, height);
-                    return image;
+                    // Decode the URL to ensure it's properly formatted
+                    string encodedImageUrl = HttpUtility.UrlEncode(referenceImageUrl);
+                    url = $"https://image.pollinations.ai/prompt/{encodedPrompt}?width={width}&height={height}&nologo=true&seed={seed}&model=nanobanana-pro&enhance=true&image_link={encodedImageUrl}";
+                    Logger.Log($"Using reference image URL: {referenceImageUrl}", Logger.LogTypes.Info);
                 }
             }
-            catch (Exception ex)
+            else
             {
-                Logger.Log($"Pollinations.AI error: {ex.Message}", Logger.LogTypes.Error);
-                return null;
+                url = $"https://image.pollinations.ai/prompt/{encodedPrompt}?width={width}&height={height}&nologo=true&seed={seed}&model=nanobanana-pro";
+            }
+
+            Logger.Log($"Generating image with Pollinations.AI: {prompt}", Logger.LogTypes.Info);
+            Logger.Log($"Full URL: {url}", Logger.LogTypes.Info);
+
+            var response = await httpClient.GetAsync(url, ct);
+            response.EnsureSuccessStatusCode();
+
+            using (var stream = await response.Content.ReadAsStreamAsync())
+            {
+                var image = Image.FromStream(stream);
+                Logger.Log("Image generated successfully with Pollinations.AI", Logger.LogTypes.Info);
+                image = RescaleImage(image, width, height);
+                return image;
             }
         }
 
@@ -165,6 +157,87 @@ namespace Carpathia
             {
                 Logger.Log($"Failed to upload temporary image: {ex.Message}", Logger.LogTypes.Error);
                 return null; // Return null on failure
+            }
+        }
+
+        public enum AvailabilityStatus
+        {
+            Available,
+            BadRequest,
+            Unauthorized,
+            Forbidden,
+            NotFound,
+            PaymentRequired,
+            RateLimited,
+            InternalServerError,
+            ServiceUnavailable,
+            GatewayTimeout,
+            Unavailable,
+            NoInternetConnection,
+            Error
+        }
+
+        public static AvailabilityStatus GetAvailabilityStatusFromText(string statusText)
+        {
+            return statusText.ToLower() switch
+            {
+                "400" or "badrequest" => AvailabilityStatus.BadRequest,
+                "401" or "unauthorized" => AvailabilityStatus.Unauthorized,
+                "403" or "forbidden" => AvailabilityStatus.Forbidden,
+                "404" or "notfound" => AvailabilityStatus.NotFound,
+                "402" or "paymentrequired" => AvailabilityStatus.PaymentRequired,
+                "429" or "ratelimited" => AvailabilityStatus.RateLimited,
+                "500" or "internalservererror" => AvailabilityStatus.InternalServerError,
+                "503" or "serviceunavailable" => AvailabilityStatus.ServiceUnavailable,
+                "504" or "gatewaytimeout" => AvailabilityStatus.GatewayTimeout,
+                "An error occured while sending the request" => AvailabilityStatus.NoInternetConnection,
+                _ => AvailabilityStatus.Error,
+            };
+        }
+
+        private static AvailabilityStatus ConvertHTTPStatusCodeToAvailabilityStatus(System.Net.HttpStatusCode statusCode)
+        {
+            return statusCode switch
+            {
+                System.Net.HttpStatusCode.OK => AvailabilityStatus.Available,
+                System.Net.HttpStatusCode.BadRequest => AvailabilityStatus.BadRequest,
+                System.Net.HttpStatusCode.Unauthorized => AvailabilityStatus.Unauthorized,
+                System.Net.HttpStatusCode.Forbidden => AvailabilityStatus.Forbidden,
+                System.Net.HttpStatusCode.PaymentRequired => AvailabilityStatus.PaymentRequired,
+                System.Net.HttpStatusCode.NotFound => AvailabilityStatus.NotFound,
+                System.Net.HttpStatusCode.TooManyRequests => AvailabilityStatus.RateLimited,
+                System.Net.HttpStatusCode.InternalServerError => AvailabilityStatus.InternalServerError,
+                System.Net.HttpStatusCode.ServiceUnavailable => AvailabilityStatus.ServiceUnavailable,
+                System.Net.HttpStatusCode.GatewayTimeout => AvailabilityStatus.GatewayTimeout,
+                _ => AvailabilityStatus.Unavailable,
+            };
+        }
+
+        public static AvailabilityStatus CheckServiceAvailability()
+        {
+            // Check physical network connectivity first to avoid unnecessary HTTP requests when offline.
+            if (!System.Net.NetworkInformation.NetworkInterface.GetIsNetworkAvailable())
+            {
+                return AvailabilityStatus.NoInternetConnection;
+            }
+
+            try
+            { 
+                var response = httpClient.GetAsync("https://image.pollinations.ai/prompt").Result;
+                return ConvertHTTPStatusCodeToAvailabilityStatus(response.StatusCode);
+            }
+            catch (Exception ex)
+            {
+                // Analyze the exception to determine if it's a connectivity issue or something else. We check the base exception to catch underlying network errors that may be wrapped in an AggregateException or other types.
+                Exception baseException = ex.GetBaseException();
+
+                if (baseException is HttpRequestException ||
+                    baseException is System.Net.Sockets.SocketException)
+                {
+                    return AvailabilityStatus.NoInternetConnection;
+                }
+
+                return AvailabilityStatus.Unavailable;
             }
         }
 
