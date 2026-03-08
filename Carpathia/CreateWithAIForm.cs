@@ -295,9 +295,9 @@ namespace Carpathia
         {
             PollinationsAI.AvailabilityStatus status = PollinationsAI.CheckServiceAvailability();
             string message = HandleStatusInternal(status, StatusMode.CheckResult);
-            Logger.Log(message, Logger.LogTypes.Error);
             if (status != PollinationsAI.AvailabilityStatus.Available)
             {
+                Logger.Log(message, Logger.LogTypes.Error);
                 MessageForm.Show(this, message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 this.Close();
             }
@@ -305,7 +305,7 @@ namespace Carpathia
         private void HandleStatus(string errorText)
         {
             string message = HandleStatusInternal(PollinationsAI.GetAvailabilityStatusFromText(errorText), StatusMode.ExceptionText);
-            Logger.Log(message, Logger.LogTypes.Error);
+            Logger.Log(message + "\r\n" + errorText, Logger.LogTypes.Error);
             MessageForm.Show(this, message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         private void CreateWithAIForm_FormClosed(object sender, FormClosedEventArgs e)

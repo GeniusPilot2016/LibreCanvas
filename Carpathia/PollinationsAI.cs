@@ -179,20 +179,112 @@ namespace Carpathia
 
         public static AvailabilityStatus GetAvailabilityStatusFromText(string statusText)
         {
-            return statusText.ToLower() switch
+            if (string.IsNullOrWhiteSpace(statusText))
+                return AvailabilityStatus.Error;
+
+            var normalized = statusText.Trim().ToLowerInvariant();
+
+            // 1) Metin içinde üç haneli HTTP kodu varsa kullan
+            var codeMatch = Regex.Match(normalized, @"\b(\d{3})\b");
+            if (codeMatch.Success && int.TryParse(codeMatch.Groups[1].Value, out int codeFromText))
             {
-                "400" or "badrequest" => AvailabilityStatus.BadRequest,
-                "401" or "unauthorized" => AvailabilityStatus.Unauthorized,
-                "403" or "forbidden" => AvailabilityStatus.Forbidden,
-                "404" or "notfound" => AvailabilityStatus.NotFound,
-                "402" or "paymentrequired" => AvailabilityStatus.PaymentRequired,
-                "429" or "ratelimited" => AvailabilityStatus.RateLimited,
-                "500" or "internalservererror" => AvailabilityStatus.InternalServerError,
-                "503" or "serviceunavailable" => AvailabilityStatus.ServiceUnavailable,
-                "504" or "gatewaytimeout" => AvailabilityStatus.GatewayTimeout,
-                "An error occured while sending the request" => AvailabilityStatus.NoInternetConnection,
-                _ => AvailabilityStatus.Error,
-            };
+                return codeFromText switch
+                {
+                    200 or 201 or 202 => AvailabilityStatus.Available,
+                    400 => AvailabilityStatus.BadRequest,
+                    401 => AvailabilityStatus.Unauthorized,
+                    403 => AvailabilityStatus.Forbidden,
+                    404 => AvailabilityStatus.NotFound,
+                    402 => AvailabilityStatus.PaymentRequired,
+                    429 => AvailabilityStatus.RateLimited,
+                    500 => AvailabilityStatus.InternalServerError,
+                    503 => AvailabilityStatus.ServiceUnavailable,
+                    504 => AvailabilityStatus.GatewayTimeout,
+                    _ => AvailabilityStatus.Unavailable,
+                };
+            }
+
+            // 2) "Response status code does not indicate success: XXX" gibi ifadeleri yakala
+            var responsePattern = new Regex(@"response status code does not indicate success\s*:\s*(\d{3}|[a-z0-9\-_ ]+)", RegexOptions.IgnoreCase);
+            var responseMatch = responsePattern.Match(statusText);
+            if (responseMatch.Success)
+            {
+                var captured = responseMatch.Groups[1].Value.Trim().ToLowerInvariant();
+
+                if (int.TryParse(captured, out int codeFromPhrase))
+                {
+                    return codeFromPhrase switch
+                    {
+                        200 or 201 or 202 => AvailabilityStatus.Available,
+                        400 => AvailabilityStatus.BadRequest,
+                        401 => AvailabilityStatus.Unauthorized,
+                        403 => AvailabilityStatus.Forbidden,
+                        404 => AvailabilityStatus.NotFound,
+                        402 => AvailabilityStatus.PaymentRequired,
+                        429 => AvailabilityStatus.RateLimited,
+                        500 => AvailabilityStatus.InternalServerError,
+                        503 => AvailabilityStatus.ServiceUnavailable,
+                        504 => AvailabilityStatus.GatewayTimeout,
+                        _ => AvailabilityStatus.Unavailable,
+                    };
+                }
+
+                // Eğer sayı yoksa durum adından eşleştir (örn. "notfound", "internalservererror", vb.)
+                if (captured.Contains("notfound") || captured.Contains("not found"))
+                    return AvailabilityStatus.NotFound;
+                if (captured.Contains("badrequest") || captured.Contains("bad request"))
+                    return AvailabilityStatus.BadRequest;
+                if (captured.Contains("unauthorized"))
+                    return AvailabilityStatus.Unauthorized;
+                if (captured.Contains("forbidden"))
+                    return AvailabilityStatus.Forbidden;
+                if (captured.Contains("paymentrequired") || captured.Contains("payment required"))
+                    return AvailabilityStatus.PaymentRequired;
+                if (captured.Contains("ratelimited") || captured.Contains("rate limited") || captured.Contains("too many requests"))
+                    return AvailabilityStatus.RateLimited;
+                if (captured.Contains("internalservererror") || captured.Contains("internal server error"))
+                    return AvailabilityStatus.InternalServerError;
+                if (captured.Contains("serviceunavailable") || captured.Contains("service unavailable"))
+                    return AvailabilityStatus.ServiceUnavailable;
+                if (captured.Contains("gatewaytimeout") || captured.Contains("gateway timeout"))
+                    return AvailabilityStatus.GatewayTimeout;
+                if (captured.Contains("no internet") || captured.Contains("no internet connection") || captured.Contains("could not connect"))
+                    return AvailabilityStatus.NoInternetConnection;
+            }
+
+            // 3) Genel anahtar kelime eşlemeleri (çeşitli varyantlar)
+            if (normalized.Contains("no internet") ||
+                normalized.Contains("no internet connection") ||
+                normalized.Contains("an error occurred while sending the request") ||
+                normalized.Contains("an error occured while sending the request") ||
+                normalized.Contains("could not connect") ||
+                normalized.Contains("network is unreachable") ||
+                normalized.Contains("name or service not known") ||
+                normalized.Contains("response status code does not indicate success"))
+            {
+                return AvailabilityStatus.NoInternetConnection;
+            }
+
+            if (normalized.Contains("badrequest") || normalized.Contains("bad request"))
+                return AvailabilityStatus.BadRequest;
+            if (normalized.Contains("unauthorized"))
+                return AvailabilityStatus.Unauthorized;
+            if (normalized.Contains("forbidden"))
+                return AvailabilityStatus.Forbidden;
+            if (normalized.Contains("notfound") || normalized.Contains("not found"))
+                return AvailabilityStatus.NotFound;
+            if (normalized.Contains("paymentrequired") || normalized.Contains("payment required"))
+                return AvailabilityStatus.PaymentRequired;
+            if (normalized.Contains("ratelimited") || normalized.Contains("rate limited") || normalized.Contains("too many requests"))
+                return AvailabilityStatus.RateLimited;
+            if (normalized.Contains("internalservererror") || normalized.Contains("internal server error"))
+                return AvailabilityStatus.InternalServerError;
+            if (normalized.Contains("serviceunavailable") || normalized.Contains("service unavailable"))
+                return AvailabilityStatus.ServiceUnavailable;
+            if (normalized.Contains("gatewaytimeout") || normalized.Contains("gateway timeout"))
+                return AvailabilityStatus.GatewayTimeout;
+
+            return AvailabilityStatus.Error;
         }
 
         private static AvailabilityStatus ConvertHTTPStatusCodeToAvailabilityStatus(System.Net.HttpStatusCode statusCode)
