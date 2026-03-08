@@ -105,27 +105,39 @@ namespace Carpathia
             }
             TitleBarHelper.ApplyCustomTitleBar(this, true);
         }
+        Image generatedImage = null; // To hold the generated image from the AI
         private async void button1_Click(object sender, EventArgs e)
         {
-            setVisibilityOfProgressBarAndSomeControls(true);
-            string prompt = textBoxPrompt.Text;
-            int width = (int)numericUpDownWidth.Value;
-            int height = (int)numericUpDownHeight.Value;
-            Bitmap bitmap = !string.IsNullOrEmpty(filePath) ? new Bitmap(filePath) : null;
-            Image generatedImage = generatedImage = await PollinationsAI.CreateImageAsync(prompt, width, height, bitmap, cts.Token);
-
-            /*Image generatedImage = await CreateAIImages.CreateImage(prompt, (int)numericUpDownWidth.Value,
-                (int)numericUpDownHeight.Value, filePath, cts);*/
-            setVisibilityOfProgressBarAndSomeControls(false);
-            if (generatedImage != null)
+            try
             {
-                // İlk resmi yeniden boyutlandırın
-                setVisibilityOfProgressBarAndSomeControls(false);
-                image = generatedImage;
-                //image = ResizeImage(generatedImage, width, height);
-                imageIsCompleted = true; // Mark the image generation as completed
+                setVisibilityOfProgressBarAndSomeControls(true);
+                string prompt = textBoxPrompt.Text;
+                int width = (int)numericUpDownWidth.Value;
+                int height = (int)numericUpDownHeight.Value;
+                Bitmap bitmap = !string.IsNullOrEmpty(filePath) ? new Bitmap(filePath) : null;
+                generatedImage = await PollinationsAI.CreateImageAsync(prompt, width, height, bitmap, cts.Token);
+
+                /*Image generatedImage = await CreateAIImages.CreateImage(prompt, (int)numericUpDownWidth.Value,
+                    (int)numericUpDownHeight.Value, filePath, cts);*/
+                
             }
-            this.Close();
+            catch (Exception ex)
+            {
+                MessageForm.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                setVisibilityOfProgressBarAndSomeControls(false);
+                if (generatedImage != null)
+                {
+                    // İlk resmi yeniden boyutlandırın
+                    setVisibilityOfProgressBarAndSomeControls(false);
+                    image = generatedImage;
+                    //image = ResizeImage(generatedImage, width, height);
+                    imageIsCompleted = true; // Mark the image generation as completed
+                }
+                this.Close();
+            }
         }
         private void setVisibilityOfProgressBarAndSomeControls(bool isVisible)
         {

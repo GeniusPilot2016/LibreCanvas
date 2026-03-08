@@ -85,8 +85,13 @@ namespace Carpathia
             }
             catch (Exception ex)
             {
-                Logger.Log($"Pollinations.AI error: {ex.Message}", Logger.LogTypes.Error);
-                return null;
+                if (ex is not OperationCanceledException or TaskCanceledException)
+                {
+                    Logger.Log($"Failed to generate image with Pollinations.AI: {ex.Message}", Logger.LogTypes.Error);
+                    Exception PollinationsAIException = new Exception(ex.Message); // Custom exception for better error handling for pollinations.ai
+                    throw PollinationsAIException; // Throw as custom exception to be caught by the caller, allowing for specific handling of pollinations.ai errors in single exception type.
+                }
+                return null; // Return null if the operation was canceled
             }
         }
 
