@@ -336,6 +336,7 @@ namespace Carpathia
         private void InitializeComponentAndFont()
         {
             InitializeComponent();
+            this.MouseWheel += ImageEditor_MouseWheel;
             SystemThemeUtility.RegisterForm(this);
             if (fontsComboBox.Items.Count > 0)
             {
@@ -360,6 +361,47 @@ namespace Carpathia
                 fontsComboBox.SelectedIndex = 0;
             }
             toolStripSample.Font = new Font(fontFamilies[fontsComboBox.SelectedIndex], toolStripSample.Font.Size, toolStripSample.Font.Style);
+        }
+        
+        private void ImageEditor_MouseWheel(object sender, MouseEventArgs e)
+        {
+            if (ModifierKeys.HasFlag(Keys.Control))
+            {
+                if (e.Delta > 0)
+                {
+                    ZoomIn();
+                }
+                else if (e.Delta < 0)
+                {
+                    ZoomOut();
+                }
+            }
+        }
+
+        private void ZoomIn()
+        {
+            zoom += 0.1f;
+            if (zoom > 5) zoom = 5; // Maximum zoom level
+            ApplyZoom();
+        }
+
+        private void ZoomOut()
+        {
+            zoom -= 0.1f;
+            if (zoom < 0.1f) zoom = 0.1f; // Minimum zoom level
+            ApplyZoom();
+        }
+
+        private void ApplyZoom()
+        {
+            if (MainBitmap != null)
+            {
+                pictureBoxCanvas.Image = new Bitmap(MainBitmap, new Size((int)(originalSize.Width * zoom), (int)(originalSize.Height * zoom)));
+            }
+            canvasPanel.Size = new Size((int)(originalSize.Width * zoom) + 20, (int)(originalSize.Height * zoom) + 20);
+            pictureBoxCanvas.Size = panelResizer.Size;
+            CenterCanvasPanel();
+            labelZoom.Text = $"{(int)(zoom * 100)}%";
         }
         private void SetFonts()
         {
@@ -2098,15 +2140,14 @@ namespace Carpathia
 
         private void DrawBrush(Graphics graphics, Action<Graphics, Color, int, Point> drawAction, Color color, int size, Point location)
         {
-            // Scale the location based on the zoom level
-            Point scaledLocation = new Point((int)Math.Round(location.X / zoom), (int)Math.Round(location.Y / zoom));
-
+            // Note: callers pass coordinates in image (bitmap) pixel space already
+            // Do not apply any additional zoom scaling here to avoid double-scaling
             if (x == -1 && y == -1)
             {
                 // Set the initial position without drawing
-                x = scaledLocation.X;
-                y = scaledLocation.Y;
-                drawAction(graphics, color, size, scaledLocation);
+                x = location.X;
+                y = location.Y;
+                drawAction(graphics, color, size, location);
             }
             else
             {
@@ -2117,9 +2158,9 @@ namespace Carpathia
 
         private void FillGap(Graphics graphics, Action<Graphics, Color, int, Point> drawAction, Color color, int size, Point start, Point end)
         {
-            // Baþlangýç ve bitiþ noktalarýný zoom'a göre ölçekle
-            start = new Point((int)(start.X / zoom), (int)(start.Y / zoom));
-            end = new Point((int)(end.X / zoom), (int)(end.Y / zoom));
+
+            // start and end are expected to be in image (bitmap) pixel coordinates already.
+            // Do not apply zoom scaling here.
 
             int dx = Math.Abs(end.X - start.X);
             int dy = Math.Abs(end.Y - start.Y);
