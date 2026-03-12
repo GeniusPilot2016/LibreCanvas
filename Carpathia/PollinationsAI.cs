@@ -52,19 +52,19 @@ namespace Carpathia
                 if (string.IsNullOrEmpty(referenceImageUrl))
                 {
                     Logger.Log("Reference image upload failed, generating without reference", Logger.LogTypes.Warning);
-                    url = $"https://image.pollinations.ai/prompt/{encodedPrompt}?width={width}&height={height}&nologo=true&seed={seed}&model=nanobanana-pro";
+                    url = $"https://image.pollinations.ai/prompt/{encodedPrompt}?width={width}&height={height}&nologo=true&seed={seed}";
                 }
                 else
                 {
                     // Decode the URL to ensure it's properly formatted
                     string encodedImageUrl = HttpUtility.UrlEncode(referenceImageUrl);
-                    url = $"https://image.pollinations.ai/prompt/{encodedPrompt}?width={width}&height={height}&nologo=true&seed={seed}&model=nanobanana-pro&enhance=true&image_link={encodedImageUrl}";
+                    url = $"https://image.pollinations.ai/prompt/{encodedPrompt}?width={width}&height={height}&nologo=true&seed={seed}&enhance=true&image_link={encodedImageUrl}";
                     Logger.Log($"Using reference image URL: {referenceImageUrl}", Logger.LogTypes.Info);
                 }
             }
             else
             {
-                url = $"https://image.pollinations.ai/prompt/{encodedPrompt}?width={width}&height={height}&nologo=true&seed={seed}&model=nanobanana-pro";
+                url = $"https://image.pollinations.ai/prompt/{encodedPrompt}?width={width}&height={height}&nologo=true&seed={seed}";
             }
 
             Logger.Log($"Generating image with Pollinations.AI: {prompt}", Logger.LogTypes.Info);
