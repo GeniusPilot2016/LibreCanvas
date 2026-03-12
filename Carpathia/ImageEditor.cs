@@ -431,6 +431,32 @@ namespace Carpathia
                 fontsComboBox.SelectedIndex = 0;
             }
             toolStripSample.Font = new Font(fontFamilies[fontsComboBox.SelectedIndex], toolStripSample.Font.Size, toolStripSample.Font.Style);
+
+            // --- BEGIN: focus & mouse-wheel forwarding fix (prevents Ctrl+Wheel zoom being swallowed when scrollbars present) ---
+            // Make sure controls that can be hovered receive focus so MouseWheel events reach the form handler when Ctrl is pressed.
+            // PictureBox and panels may handle mouse wheel for scrolling; forwarding ensures consistent zoom behavior.
+            try
+            {
+                // Allow these controls to receive focus
+                pictureBoxCanvas.TabStop = true;
+                canvasPanel.TabStop = true;
+                UIPanel.TabStop = true;
+
+                // When mouse enters the canvas or panels, give focus to that control (so MouseWheel events bubble predictably).
+                pictureBoxCanvas.MouseEnter += (s, ev) => this.ActiveControl = pictureBoxCanvas;
+                canvasPanel.MouseEnter += (s, ev) => this.ActiveControl = canvasPanel;
+                UIPanel.MouseEnter += (s, ev) => this.ActiveControl = UIPanel;
+
+                // Forward MouseWheel from inner controls to the same handler (some controls consume wheel for scrolling).
+                pictureBoxCanvas.MouseWheel += ImageEditor_MouseWheel;
+                canvasPanel.MouseWheel += ImageEditor_MouseWheel;
+                UIPanel.MouseWheel += ImageEditor_MouseWheel;
+            }
+            catch
+            {
+                // Defensive: if designer-generated controls are not yet initialized this will fail silently.
+            }
+            // --- END ---
         }
         
         private void ImageEditor_MouseWheel(object sender, MouseEventArgs e)
@@ -452,26 +478,16 @@ namespace Carpathia
         {
             zoom += 0.1f;
             if (zoom > 5) zoom = 5; // Maximum zoom level
-            ApplyZoom();
+            UpdatePictureBoxZoom();
+            ScaleSelection();
         }
 
         private void ZoomOut()
         {
             zoom -= 0.1f;
             if (zoom < 0.1f) zoom = 0.1f; // Minimum zoom level
-            ApplyZoom();
-        }
-
-        private void ApplyZoom()
-        {
-            if (MainBitmap != null)
-            {
-                pictureBoxCanvas.Image = new Bitmap(MainBitmap, new Size((int)(originalSize.Width * zoom), (int)(originalSize.Height * zoom)));
-            }
-            canvasPanel.Size = new Size((int)(originalSize.Width * zoom) + 20, (int)(originalSize.Height * zoom) + 20);
-            pictureBoxCanvas.Size = panelResizer.Size;
-            CenterCanvasPanel();
-            labelZoom.Text = $"{(int)(zoom * 100)}%";
+            UpdatePictureBoxZoom();
+            ScaleSelection();
         }
         private void SetFonts()
         {
