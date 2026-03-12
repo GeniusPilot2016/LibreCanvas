@@ -53,6 +53,9 @@ namespace Carpathia
         private BasicFilters basicFilters;
         private ArtisticFilters artisticFilters = ArtisticFilters.None;
         private Point lastMousePos;
+        // Current mouse position over the pictureBox (control coordinates)
+        private Point currentMousePosition = Point.Empty;
+        private bool isMouseOverCanvas = false;
         Size originalSize; // Unzoomed size
         Size originalSelectionRectangleSize; // Unzoomed size
         Point originalSelectionRectangleLocation; // Unzoomed location
@@ -71,6 +74,73 @@ namespace Carpathia
             Left,
             Middle,
             Right
+        }
+
+        // Helper: draw a soft/realistic brush preview
+        private void DrawBrushPreview(Graphics g, Point center, int size, int styleIndex, Color color, float zoom)
+        {
+            // Uniform round preview: filled circle with selected color and subtle outline
+            int r = Math.Max(1, size / 2);
+            // Semi-transparent fill using selected color
+            using (Brush fill = new SolidBrush(Color.FromArgb(180, color)))
+            {
+                g.FillEllipse(fill, center.X - r, center.Y - r, r * 2, r * 2);
+            }
+            // Thin contrasting outline for visibility on any background
+            Color outlineColor = Color.FromArgb(220, Color.Black);
+            using (Pen outline = new Pen(outlineColor, Math.Max(1, (int)Math.Ceiling(zoom))))
+            {
+                outline.Alignment = PenAlignment.Center;
+                g.DrawEllipse(outline, center.X - r, center.Y - r, r * 2, r * 2);
+            }
+        }
+
+        // Helper: draw pen preview styles
+        private void DrawPenPreview(Graphics g, Point center, int size, int styleIndex, Color color, float zoom)
+        {
+            // Unified round preview for pen: filled circle in selected color + outline
+            int r = Math.Max(1, size / 2);
+            using (Brush fill = new SolidBrush(Color.FromArgb(200, color)))
+            {
+                g.FillEllipse(fill, center.X - r, center.Y - r, r * 2, r * 2);
+            }
+            using (Pen outline = new Pen(Color.FromArgb(220, Color.Black), Math.Max(1, (int)Math.Ceiling(zoom))))
+            {
+                outline.Alignment = PenAlignment.Center;
+                g.DrawEllipse(outline, center.X - r, center.Y - r, r * 2, r * 2);
+            }
+        }
+
+        // Helper: draw spray preview (dots)
+        private void DrawSprayPreview(Graphics g, Point center, int size, Color color, float zoom)
+        {
+            // Simplified round preview for spray: filled circle in selected color + dotted outline
+            int r = Math.Max(1, size / 2);
+            using (Brush fill = new SolidBrush(Color.FromArgb(160, color)))
+            {
+                g.FillEllipse(fill, center.X - r, center.Y - r, r * 2, r * 2);
+            }
+            using (Pen outline = new Pen(Color.FromArgb(180, Color.Black), Math.Max(1, (int)Math.Ceiling(zoom))))
+            {
+                outline.DashStyle = DashStyle.Dot;
+                outline.Alignment = PenAlignment.Center;
+                g.DrawEllipse(outline, center.X - r, center.Y - r, r * 2, r * 2);
+            }
+        }
+
+        // Helper: draw eraser preview (dashed white circle with semi-transparent fill)
+        private void DrawEraserPreview(Graphics g, Point center, int size, float zoom)
+        {
+            int r = Math.Max(1, size / 2);
+            using (Brush b = new SolidBrush(Color.FromArgb(100, Color.White)))
+            {
+                g.FillEllipse(b, center.X - r, center.Y - r, r * 2, r * 2);
+            }
+            using (Pen p = new Pen(Color.FromArgb(210, Color.White), Math.Max(1, (int)Math.Ceiling(zoom))))
+            {
+                p.DashStyle = DashStyle.Dash;
+                g.DrawEllipse(p, center.X - r, center.Y - r, r * 2, r * 2);
+            }
         }
         private BlurEffect blurEffect = BlurEffect.None;
         enum BlurEffect
@@ -336,6 +406,7 @@ namespace Carpathia
         private void InitializeComponentAndFont()
         {
             InitializeComponent();
+            this.MouseWheel += ImageEditor_MouseWheel;
             SystemThemeUtility.RegisterForm(this);
             if (fontsComboBox.Items.Count > 0)
             {
@@ -360,6 +431,47 @@ namespace Carpathia
                 fontsComboBox.SelectedIndex = 0;
             }
             toolStripSample.Font = new Font(fontFamilies[fontsComboBox.SelectedIndex], toolStripSample.Font.Size, toolStripSample.Font.Style);
+        }
+        
+        private void ImageEditor_MouseWheel(object sender, MouseEventArgs e)
+        {
+            if (ModifierKeys.HasFlag(Keys.Control))
+            {
+                if (e.Delta > 0)
+                {
+                    ZoomIn();
+                }
+                else if (e.Delta < 0)
+                {
+                    ZoomOut();
+                }
+            }
+        }
+
+        private void ZoomIn()
+        {
+            zoom += 0.1f;
+            if (zoom > 5) zoom = 5; // Maximum zoom level
+            ApplyZoom();
+        }
+
+        private void ZoomOut()
+        {
+            zoom -= 0.1f;
+            if (zoom < 0.1f) zoom = 0.1f; // Minimum zoom level
+            ApplyZoom();
+        }
+
+        private void ApplyZoom()
+        {
+            if (MainBitmap != null)
+            {
+                pictureBoxCanvas.Image = new Bitmap(MainBitmap, new Size((int)(originalSize.Width * zoom), (int)(originalSize.Height * zoom)));
+            }
+            canvasPanel.Size = new Size((int)(originalSize.Width * zoom) + 20, (int)(originalSize.Height * zoom) + 20);
+            pictureBoxCanvas.Size = panelResizer.Size;
+            CenterCanvasPanel();
+            labelZoom.Text = $"{(int)(zoom * 100)}%";
         }
         private void SetFonts()
         {
@@ -1559,6 +1671,9 @@ namespace Carpathia
         {
             if (!isImageCurrentlyCreating)
             {
+                // Track mouse position for the brush tip preview
+                currentMousePosition = e.Location;
+                isMouseOverCanvas = true;
                 if (isdrawing)
                 {
                     switch (selectedTool)
@@ -1859,6 +1974,11 @@ namespace Carpathia
                     labelCanvasPositon.Visible = true;
                     labelCanvasPositon.Text = $"{x}, {y}px";
                 }
+                // If not currently drawing, redraw to update the brush tip cursor
+                if (!isdrawing)
+                {
+                    pictureBoxCanvas.Invalidate();
+                }
             }
         }
         private void drawIntoCanvas(MouseEventArgs e)
@@ -2093,20 +2213,72 @@ namespace Carpathia
                         e.Graphics.DrawRectangle(whitePen, offsetRectangle);
                     }
                 }
+
+                // Draw brush/pen/eraser/spray cursor preview when not drawing
+                if (!isdrawing && MainBitmap != null && isMouseOverCanvas)
+                {
+                    bool shouldShow = selectedTool == Tools.Brush || selectedTool == Tools.Pen || selectedTool == Tools.Eraser || selectedTool == Tools.Spray;
+                    if (shouldShow)
+                    {
+                        e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+                        int sizePixels = brushSize;
+                        int styleIndex = 0;
+                        switch (selectedTool)
+                        {
+                            case Tools.Brush:
+                                sizePixels = brushSize;
+                                styleIndex = comboBoxBrushType.SelectedIndex;
+                                break;
+                            case Tools.Pen:
+                                sizePixels = penSize;
+                                styleIndex = comboBoxPenType.SelectedIndex;
+                                break;
+                            case Tools.Eraser:
+                                sizePixels = eraserSize;
+                                styleIndex = 0;
+                                break;
+                            case Tools.Spray:
+                                sizePixels = sprayToolSize;
+                                styleIndex = 0;
+                                break;
+                        }
+
+                        int displaySize = Math.Max(1, (int)Math.Round(sizePixels * zoom));
+                        Point center = currentMousePosition;
+
+                        // Use specialized preview renderers to better emulate brush/pen/spray appearance
+                        if (selectedTool == Tools.Brush)
+                        {
+                            DrawBrushPreview(e.Graphics, center, displaySize, styleIndex, color1, zoom);
+                        }
+                        else if (selectedTool == Tools.Pen)
+                        {
+                            DrawPenPreview(e.Graphics, center, displaySize, styleIndex, color1, zoom);
+                        }
+                        else if (selectedTool == Tools.Eraser)
+                        {
+                            DrawEraserPreview(e.Graphics, center, displaySize, zoom);
+                        }
+                        else if (selectedTool == Tools.Spray)
+                        {
+                            DrawSprayPreview(e.Graphics, center, displaySize, color1, zoom);
+                        }
+                    }
+                }
             }
         }
 
         private void DrawBrush(Graphics graphics, Action<Graphics, Color, int, Point> drawAction, Color color, int size, Point location)
         {
-            // Scale the location based on the zoom level
-            Point scaledLocation = new Point((int)Math.Round(location.X / zoom), (int)Math.Round(location.Y / zoom));
-
+            // Note: callers pass coordinates in image (bitmap) pixel space already
+            // Do not apply any additional zoom scaling here to avoid double-scaling
             if (x == -1 && y == -1)
             {
                 // Set the initial position without drawing
-                x = scaledLocation.X;
-                y = scaledLocation.Y;
-                drawAction(graphics, color, size, scaledLocation);
+                x = location.X;
+                y = location.Y;
+                drawAction(graphics, color, size, location);
             }
             else
             {
@@ -2117,9 +2289,9 @@ namespace Carpathia
 
         private void FillGap(Graphics graphics, Action<Graphics, Color, int, Point> drawAction, Color color, int size, Point start, Point end)
         {
-            // Baþlangýç ve bitiþ noktalarýný zoom'a göre ölçekle
-            start = new Point((int)(start.X / zoom), (int)(start.Y / zoom));
-            end = new Point((int)(end.X / zoom), (int)(end.Y / zoom));
+
+            // start and end are expected to be in image (bitmap) pixel coordinates already.
+            // Do not apply zoom scaling here.
 
             int dx = Math.Abs(end.X - start.X);
             int dy = Math.Abs(end.Y - start.Y);
@@ -2234,6 +2406,8 @@ namespace Carpathia
         {
             toolStripSeparator15.Visible = false;
             labelCanvasPositon.Visible = false;
+            isMouseOverCanvas = false;
+            pictureBoxCanvas.Invalidate();
         }
 
         private void labelSize_Click(object sender, EventArgs e)
