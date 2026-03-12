@@ -1556,47 +1556,50 @@ namespace Carpathia
                     }
                     else
                     {
+                        // Convert end point to image (bitmap) coordinates using current zoom
+                        Point endPointImage = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
+
                         switch (selectedTool)
                         {
                             case Tools.Line:
                                 using (Graphics graphics = Graphics.FromImage(MainBitmap))
                                 {
-                                    DrawShapes.DrawLineOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
+                                    DrawShapes.DrawLineOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, endPointImage);
                                 }
                                 isModified = true;
                                 break;
                             case Tools.Round:
                                 using (Graphics graphics = Graphics.FromImage(MainBitmap))
                                 {
-                                    DrawShapes.DrawRoundOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
+                                    DrawShapes.DrawRoundOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, endPointImage);
                                 }
                                 isModified = true;
                                 break;
                             case Tools.Rectangle:
                                 using (Graphics graphics = Graphics.FromImage(MainBitmap))
                                 {
-                                    DrawShapes.DrawRectangleOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
+                                    DrawShapes.DrawRectangleOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, endPointImage);
                                 }
                                 isModified = true;
                                 break;
                             case Tools.RoundedRectangle:
                                 using (Graphics graphics = Graphics.FromImage(MainBitmap))
                                 {
-                                    DrawShapes.DrawRoundedRectangleOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location, radius);
+                                    DrawShapes.DrawRoundedRectangleOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, endPointImage, radius);
                                 }
                                 isModified = true;
                                 break;
                             case Tools.Triangle:
                                 using (Graphics graphics = Graphics.FromImage(MainBitmap))
                                 {
-                                    DrawShapes.DrawTriangleOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, e.Location);
+                                    DrawShapes.DrawTriangleOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, endPointImage);
                                 }
                                 isModified = true;
                                 break;
                             case Tools.Hexagon:
                                 using (Graphics graphics = Graphics.FromImage(MainBitmap))
                                 {
-                                    DrawShapes.DrawHexagonOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, points, startPoint, e.Location);
+                                    DrawShapes.DrawHexagonOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, points, startPoint, endPointImage);
                                 }
                                 isModified = true;
                                 break;
