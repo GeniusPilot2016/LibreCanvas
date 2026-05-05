@@ -31,54 +31,71 @@ namespace Carpathia
     public static class PollinationsAI
     {
         private static readonly HttpClient httpClient = new HttpClient();
-
+        private static readonly Semaphore InterProcessSemaphore = new Semaphore(1, 1, "Global\\LibreCanvas_AI_Image_Creator_Lock");
         public static async Task<Image> CreateImageAsync(string prompt, int width, int height, Image referenceImage = null, CancellationToken ct = default)
         {
-            /*string optimizedPrompt = await OptimizeAndFlagPromptAsync(prompt, ct);
-               if(string.IsNullOrEmpty(optimizedPrompt))
-               {
-                   Logger.Log("Prompt optimization failed or returned empty.", Logger.LogTypes.Warning);
-                   return null;
-               }*/
-            Random rnd = new Random();
-            int seed = rnd.Next(1, 999999999);
-            //string encodedPrompt = HttpUtility.UrlEncode(optimizedPrompt);
-            string encodedPrompt = HttpUtility.UrlEncode(prompt);
-
-            string url;
-            if (referenceImage != null)
+            if (!InterProcessSemaphore.WaitOne(0))
             {
-                string referenceImageUrl = await CreateTemporaryImageURL(referenceImage);
-                if (string.IsNullOrEmpty(referenceImageUrl))
+                MessageForm.Show("Another session is currently generating an image. Please wait.",
+                                 "System Busy", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return null;
+            }
+            try
+            {
+                /*string optimizedPrompt = await OptimizeAndFlagPromptAsync(prompt, ct);
+                   if(string.IsNullOrEmpty(optimizedPrompt))
+                   {
+                       Logger.Log("Prompt optimization failed or returned empty.", Logger.LogTypes.Warning);
+                       return null;
+                   }*/
+                Random rnd = new Random();
+                int seed = rnd.Next(1, 999999999);
+                //string encodedPrompt = HttpUtility.UrlEncode(optimizedPrompt);
+                string encodedPrompt = HttpUtility.UrlEncode(prompt);
+
+                string url;
+                if (referenceImage != null)
                 {
-                    Logger.Log("Reference image upload failed, generating without reference", Logger.LogTypes.Warning);
-                    url = $"https://image.pollinations.ai/prompt/{encodedPrompt}?width={width}&height={height}&nologo=true&seed={seed}";
+                    string referenceImageUrl = await CreateTemporaryImageURL(referenceImage);
+                    if (string.IsNullOrEmpty(referenceImageUrl))
+                    {
+                        Logger.Log("Reference image upload failed, generating without reference", Logger.LogTypes.Warning);
+                        url = $"https://image.pollinations.ai/prompt/{encodedPrompt}?width={width}&height={height}&nologo=true&seed={seed}";
+                    }
+                    else
+                    {
+                        // Decode the URL to ensure it's properly formatted
+                        string encodedImageUrl = HttpUtility.UrlEncode(referenceImageUrl);
+                        url = $"https://image.pollinations.ai/prompt/{encodedPrompt}?width={width}&height={height}&nologo=true&seed={seed}&enhance=true&image_link={encodedImageUrl}";
+                        Logger.Log($"Using reference image URL: {referenceImageUrl}", Logger.LogTypes.Info);
+                    }
                 }
                 else
                 {
-                    // Decode the URL to ensure it's properly formatted
-                    string encodedImageUrl = HttpUtility.UrlEncode(referenceImageUrl);
-                    url = $"https://image.pollinations.ai/prompt/{encodedPrompt}?width={width}&height={height}&nologo=true&seed={seed}&enhance=true&image_link={encodedImageUrl}";
-                    Logger.Log($"Using reference image URL: {referenceImageUrl}", Logger.LogTypes.Info);
+                    url = $"https://image.pollinations.ai/prompt/{encodedPrompt}?width={width}&height={height}&nologo=true&seed={seed}";
+                }
+
+                Logger.Log($"Generating image with Pollinations.AI: {prompt}", Logger.LogTypes.Info);
+                Logger.Log($"Full URL: {url}", Logger.LogTypes.Info);
+
+                var response = await httpClient.GetAsync(url, ct);
+                response.EnsureSuccessStatusCode();
+
+                using (var stream = await response.Content.ReadAsStreamAsync())
+                {
+                    var image = Image.FromStream(stream);
+                    Logger.Log("Image generated successfully with Pollinations.AI", Logger.LogTypes.Info);
+                    image = RescaleImage(image, width, height);
+                    return image;
                 }
             }
-            else
+            catch (Exception ex)
             {
-                url = $"https://image.pollinations.ai/prompt/{encodedPrompt}?width={width}&height={height}&nologo=true&seed={seed}";
+                throw;
             }
-
-            Logger.Log($"Generating image with Pollinations.AI: {prompt}", Logger.LogTypes.Info);
-            Logger.Log($"Full URL: {url}", Logger.LogTypes.Info);
-
-            var response = await httpClient.GetAsync(url, ct);
-            response.EnsureSuccessStatusCode();
-
-            using (var stream = await response.Content.ReadAsStreamAsync())
+            finally
             {
-                var image = Image.FromStream(stream);
-                Logger.Log("Image generated successfully with Pollinations.AI", Logger.LogTypes.Info);
-                image = RescaleImage(image, width, height);
-                return image;
+                InterProcessSemaphore.Release();
             }
         }
 
