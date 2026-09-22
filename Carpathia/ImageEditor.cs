@@ -15,6 +15,7 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using Carpathia.Properties;
+using System.Collections;
 using ExifLibrary;
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
@@ -41,6 +42,7 @@ namespace Carpathia
             radius = Settings1.Default.DefaultRadiusSize,
             points = Settings1.Default.DefaultPointsCount,
             tolerance = Settings1.Default.DefaultBucketTolerance,
+            tolerance2 = 50,
             pixelationSize = Settings1.Default.DefaultPixelationSize,
             pixelationOffsetX = Settings1.Default.DefaultPixelationOffsetX,
             pixelationOffsetY = Settings1.Default.DefaultPixelationOffsetY;
@@ -62,6 +64,17 @@ namespace Carpathia
         Bitmap MainBitmap;
         Bitmap SelectedBitmap;
         Rectangle SelectionRectangle = new Rectangle();
+        // Magic Wand is a mask-based selection. It deliberately does NOT use
+        // SelectedBitmap/SelectionRectangle, which belong to transformable rectangular selections.
+        private BitArray magicSelectionMask;
+        private int magicSelectionMaskWidth;
+        private int magicSelectionMaskHeight;
+        private Rectangle magicSelectionBounds = Rectangle.Empty;
+        private readonly List<(Point Start, Point End)> magicSelectionOutlineSegments = new();
+        // Animated marching-ants phase. This changes only the white dash phase;
+        // selection geometry and mask coordinates never move.
+        private readonly System.Windows.Forms.Timer marchingAntsTimer = new System.Windows.Forms.Timer();
+        private float marchingAntsOffset = 0f;
         Point SelectionStartPoint;
         FontStyle fontStyle = FontStyle.Regular;
         private TextToolAlign textToolAlign = TextToolAlign.Left;
@@ -229,6 +242,61 @@ namespace Carpathia
         }
         private Pen SelectionPen;
 
+        private void CropToSelection()
+        {
+            if (MainBitmap == null || !isSelected || SelectionRectangle.IsEmpty)
+            {
+                MessageForm.Show("Create a rectangular selection first, then choose Crop.", "Crop", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            Rectangle r = new Rectangle(originalSelectionRectangleLocation, originalSelectionRectangleSize);
+            r.Intersect(new Rectangle(Point.Empty, MainBitmap.Size));
+            if (r.Width < 1 || r.Height < 1) return;
+            SaveStateForUndo();
+            var cropped = MainBitmap.Clone(r, PixelFormat.Format32bppArgb);
+            MainBitmap.Dispose(); MainBitmap = cropped;
+            SetAsUnselected(); RefreshCanvasAfterTransform();
+        }
+
+        private void RotateCanvas(RotateFlipType transform)
+        {
+            if (MainBitmap == null) return;
+            SaveStateForUndo(); MainBitmap.RotateFlip(transform); RefreshCanvasAfterTransform();
+        }
+
+        private void ApplyGrayscaleQuick()
+        {
+            if (MainBitmap == null) return;
+            SaveStateForUndo();
+            var output = new Bitmap(MainBitmap.Width, MainBitmap.Height, PixelFormat.Format32bppArgb);
+            using (var g = Graphics.FromImage(output)) using (var attrs = new ImageAttributes())
+            {
+                attrs.SetColorMatrix(new ColorMatrix(new float[][] {
+                    new float[] {.299f,.299f,.299f,0,0}, new float[] {.587f,.587f,.587f,0,0},
+                    new float[] {.114f,.114f,.114f,0,0}, new float[] {0,0,0,1,0}, new float[] {0,0,0,0,1}}));
+                g.DrawImage(MainBitmap, new Rectangle(0, 0, output.Width, output.Height), 0, 0, MainBitmap.Width, MainBitmap.Height, GraphicsUnit.Pixel, attrs);
+            }
+            MainBitmap.Dispose(); MainBitmap = output; RefreshCanvasAfterTransform();
+        }
+
+        private void FitCanvasToWorkspace()
+        {
+            if (MainBitmap == null || UIPanel.ClientSize.Width < 1 || UIPanel.ClientSize.Height < 1) return;
+            float zx = Math.Max(.05f, (UIPanel.ClientSize.Width - 60f) / MainBitmap.Width);
+            float zy = Math.Max(.05f, (UIPanel.ClientSize.Height - 60f) / MainBitmap.Height);
+            zoom = Math.Min(8f, Math.Min(zx, zy)); RefreshCanvasAfterTransform(false);
+        }
+
+        private void RefreshCanvasAfterTransform(bool markModified = true)
+        {
+            originalSize = MainBitmap.Size; pictureBoxCanvas.Image = MainBitmap;
+            canvasPanel.Size = new Size((int)Math.Round(MainBitmap.Width * zoom) + 20, (int)Math.Round(MainBitmap.Height * zoom) + 20);
+            pictureBoxCanvas.Size = panelResizer.Size; UIPanel.AutoScrollMinSize = canvasPanel.Size;
+            labelSize.Text = $"{MainBitmap.Width} X {MainBitmap.Height}px"; labelZoom.Text = $"{Math.Round(zoom * 100)}%";
+            if (markModified) { isModified = true; isSaved = false; }
+            CenterCanvasPanel(); pictureBoxCanvas.Invalidate(); UpdateUndoRedoButtons();
+        }
+
         private void SetInitialValues()
         {
             toolStripComboBoxAirBrushSize.SelectedItem = sprayToolSize;
@@ -238,6 +306,7 @@ namespace Carpathia
             comboBoxPenType.SelectedIndex = Settings1.Default.DefaultPenStyle;
             comboBoxEraserSize.SelectedItem = eraserSize.ToString();
             textBoxTolerance.Text = tolerance.ToString();
+            textBoxTolerance2.Text = tolerance2.ToString();
             comboBoxShapeThickness.SelectedItem = shapeThickness.ToString();
             textBoxRadius.Text = radius.ToString();
             textBoxPoints.Text = points.ToString();
@@ -406,6 +475,11 @@ namespace Carpathia
         private void InitializeComponentAndFont()
         {
             InitializeComponent();
+
+            // Animate only the dash phase. 60 ms gives a smooth but lightweight motion.
+            marchingAntsTimer.Interval = 60;
+            marchingAntsTimer.Tick += MarchingAntsTimer_Tick;
+            marchingAntsTimer.Start();
             this.MouseWheel += ImageEditor_MouseWheel;
             SystemThemeUtility.RegisterForm(this);
             if (fontsComboBox.Items.Count > 0)
@@ -458,34 +532,56 @@ namespace Carpathia
             }
             // --- END ---
         }
-        
+
+        private void MarchingAntsTimer_Tick(object sender, EventArgs e)
+        {
+            // Do no repaint work while there is no visible selection.
+            if (!isSelected || (magicSelectionMask == null && SelectionRectangle.IsEmpty))
+                return;
+
+            // The white pen uses a {3,3} pattern. Advance the phase and wrap it
+            // so the value stays small even if the editor remains open for hours.
+            marchingAntsOffset += 0.75f;
+            if (marchingAntsOffset >= 6f)
+                marchingAntsOffset -= 6f;
+
+            pictureBoxCanvas.Invalidate();
+        }
+
         private void ImageEditor_MouseWheel(object sender, MouseEventArgs e)
         {
-            if (ModifierKeys.HasFlag(Keys.Control))
-            {
-                if (e.Delta > 0)
-                {
-                    ZoomIn();
-                }
-                else if (e.Delta < 0)
-                {
-                    ZoomOut();
-                }
-            }
+            if (!ModifierKeys.HasFlag(Keys.Control) || e.Delta == 0)
+                return;
+
+            // Prevent a child control's Ctrl+wheel from also being processed
+            // by its parent scroll container.
+            if (e is HandledMouseEventArgs handledMouseEvent)
+                handledMouseEvent.Handled = true;
+
+            // Keep the original zoom/layout system intact, but make wheel zoom
+            // finer. 120 is one standard wheel notch; precision touchpads can
+            // provide smaller deltas and therefore get proportionally smaller
+            // zoom changes.
+            float wheelSteps = e.Delta / 120f;
+            float requestedZoom = zoom + (0.05f * wheelSteps);
+
+            zoom = Math.Max(0.05f, Math.Min(5f, requestedZoom));
+            UpdatePictureBoxZoom();
+            ScaleSelection();
         }
 
         private void ZoomIn()
         {
-            zoom += 0.1f;
-            if (zoom > 5) zoom = 5; // Maximum zoom level
+            zoom += 0.05f;
+            if (zoom > 5f) zoom = 5f;
             UpdatePictureBoxZoom();
             ScaleSelection();
         }
 
         private void ZoomOut()
         {
-            zoom -= 0.1f;
-            if (zoom < 0.1f) zoom = 0.1f; // Minimum zoom level
+            zoom -= 0.05f;
+            if (zoom < 0.05f) zoom = 0.05f;
             UpdatePictureBoxZoom();
             ScaleSelection();
         }
@@ -592,12 +688,7 @@ namespace Carpathia
             isModified = false;
             SetAsUnselected();
             pictureBoxCanvas.Image = null;
-            Image image;
-            using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                image = Image.FromStream(fs);
-                // Use the image
-            }
+            Bitmap image = SecurityGuard.LoadLocalImage(fileName);
             // panel1'in AutoScroll özelliðini true yaparak kaydýrma çubuklarýný etkinleþtiriyoruz
             UIPanel.AutoScroll = true;
 
@@ -1180,13 +1271,13 @@ namespace Carpathia
             try
             {
                 var file = ImageFile.FromFile(filePath);
-                string programName = "LibreCanvas " + GetInformations.GetVersionAndStatus() + 
+                string programName = "LibreCanvas " + GetInformations.GetVersionAndStatus() +
                     (aiGenerated == true ? " (AI Generated)" : string.Empty);
                 file.Properties.Set(ExifTag.Software, programName);
                 file.Properties.Set(ExifTag.Artist, Environment.UserName);
                 file.Save(filePath);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Logger.Log($"Error saving metadata: {ex.Message}", Logger.LogTypes.Error);
             }
@@ -1427,6 +1518,11 @@ namespace Carpathia
             if (magicSelectTool.Checked)
             {
                 selectedTool = Tools.MagicSelection;
+                toolStripMagicSelection.Visible = true;
+            }
+            else
+            {
+                toolStripMagicSelection.Visible = false;
             }
         }
 
@@ -2000,6 +2096,51 @@ namespace Carpathia
                 }
             }
         }
+        private void DrawMarchingAntsRectangle(Graphics graphics, Rectangle rect)
+        {
+            GraphicsState state = graphics.Save();
+            try
+            {
+                graphics.SmoothingMode = SmoothingMode.None;
+                graphics.PixelOffsetMode = PixelOffsetMode.Half;
+
+                var (blackPen, whitePen) = CreateMarchingAntsPens();
+                using (blackPen)
+                using (whitePen)
+                {
+                    float inset = Math.Max(1f, Math.Max(blackPen.Width, whitePen.Width) / 2f);
+                    RectangleF visibleRect = rect;
+
+                    if (visibleRect.Left <= 0f)
+                    {
+                        float oldRight = visibleRect.Right;
+                        visibleRect.X = inset;
+                        visibleRect.Width = Math.Max(0f, oldRight - visibleRect.X);
+                    }
+                    if (visibleRect.Top <= 0f)
+                    {
+                        float oldBottom = visibleRect.Bottom;
+                        visibleRect.Y = inset;
+                        visibleRect.Height = Math.Max(0f, oldBottom - visibleRect.Y);
+                    }
+                    if (visibleRect.Right >= pictureBoxCanvas.ClientSize.Width)
+                        visibleRect.Width = Math.Max(0f, pictureBoxCanvas.ClientSize.Width - inset - visibleRect.X);
+                    if (visibleRect.Bottom >= pictureBoxCanvas.ClientSize.Height)
+                        visibleRect.Height = Math.Max(0f, pictureBoxCanvas.ClientSize.Height - inset - visibleRect.Y);
+
+                    if (visibleRect.Width > 0f && visibleRect.Height > 0f)
+                    {
+                        graphics.DrawRectangle(blackPen, visibleRect.X, visibleRect.Y, visibleRect.Width, visibleRect.Height);
+                        graphics.DrawRectangle(whitePen, visibleRect.X, visibleRect.Y, visibleRect.Width, visibleRect.Height);
+                    }
+                }
+            }
+            finally
+            {
+                graphics.Restore(state);
+            }
+        }
+
         private void drawIntoCanvas(MouseEventArgs e)
         {
             if (!isSelected && MainBitmap == null)
@@ -2010,15 +2151,27 @@ namespace Carpathia
             {
                 if (SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
                 {
-                    SelectedBitmap = new Bitmap((int)(SelectionRectangle.Width / zoom), (int)(SelectionRectangle.Height / zoom));
+                    SelectedBitmap = new Bitmap(
+                        (int)(SelectionRectangle.Width / zoom),
+                        (int)(SelectionRectangle.Height / zoom));
+
+                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                    {
+                        g.Clear(Color.Transparent);
+                        Rectangle sourceRect = new Rectangle(
+                            originalSelectionRectangleLocation.X,
+                            originalSelectionRectangleLocation.Y,
+                            originalSelectionRectangleSize.Width,
+                            originalSelectionRectangleSize.Height);
+                        g.DrawImage(MainBitmap,
+                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                            sourceRect,
+                            GraphicsUnit.Pixel);
+                    }
                 }
             }
-            if (isSelected)
+            if (isSelected && SelectedBitmap != null)
             {
-                if (SelectedBitmap == null)
-                {
-                    return; // Or handle the case where SelectedBitmap is not initialized
-                }
                 using (Graphics graphics = Graphics.FromImage(SelectedBitmap))
                 {
 
@@ -2106,6 +2259,116 @@ namespace Carpathia
                     }
                 }
             }
+            else if (magicSelectionMask != null && isSelected && SelectedBitmap == null)
+            {
+                // Draw into MainBitmap but clipped to the magic selection mask.
+                using (Graphics g = Graphics.FromImage(MainBitmap))
+                {
+                    GraphicsState gs = g.Save();
+                    try
+                    {
+                        // Build clip region from mask runs (in image coordinates)
+                        using (GraphicsPath path = new GraphicsPath())
+                        {
+                            int width = magicSelectionMaskWidth;
+                            int height = magicSelectionMaskHeight;
+                            for (int yy = 0; yy < height; yy++)
+                            {
+                                int runStart = -1;
+                                for (int xx = 0; xx < width; xx++)
+                                {
+                                    if (magicSelectionMask[yy * width + xx])
+                                    {
+                                        if (runStart < 0) runStart = xx;
+                                    }
+                                    else if (runStart >= 0)
+                                    {
+                                        // The magic mask uses absolute MainBitmap coordinates. Do not add the bounds offset again.
+                                        path.AddRectangle(new Rectangle(runStart, yy, xx - runStart, 1));
+                                        runStart = -1;
+                                    }
+                                }
+                                if (runStart >= 0)
+                                {
+                                    // The magic mask uses absolute MainBitmap coordinates. Do not add the bounds offset again.
+                                    path.AddRectangle(new Rectangle(runStart, yy, width - runStart, 1));
+                                }
+                            }
+
+                            g.SetClip(new Region(path), CombineMode.Replace);
+
+                            // Perform the same drawing logic but onto MainBitmap with image coordinates
+                            switch (selectedTool)
+                            {
+                                case Tools.Brush:
+                                    switch (comboBoxBrushType.SelectedIndex)
+                                    {
+                                        case 0:
+                                            DrawBrush(g, BrushShapes.DrawCircleBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                            isModified = true;
+                                            break;
+                                        case 1:
+                                            DrawBrush(g, BrushShapes.DrawOilBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                            isModified = true;
+                                            break;
+                                        case 2:
+                                            DrawBrush(g, BrushShapes.DrawCalligraphyBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                            isModified = true;
+                                            break;
+                                        case 3:
+                                            DrawBrush(g, BrushShapes.DrawWatercolorBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                            isModified = true;
+                                            break;
+                                    }
+                                    break;
+                                case Tools.Pen:
+                                    switch (comboBoxPenType.SelectedIndex)
+                                    {
+                                        case 0:
+                                            DrawBrush(g, BrushShapes.DrawSquareBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                            isModified = true;
+                                            break;
+                                        case 1:
+                                            DrawBrush(g, BrushShapes.DrawMarkerBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                            isModified = true;
+                                            break;
+                                        case 2:
+                                            DrawBrush(g, BrushShapes.DrawCrayonBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                            isModified = true;
+                                            break;
+                                        case 3:
+                                            DrawBrush(g, BrushShapes.DrawCalligraphyBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                            isModified = true;
+                                            break;
+                                    }
+                                    break;
+                                case Tools.Eraser:
+                                    g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
+                                    DrawBrush(g, BrushShapes.DrawCircleBrush, Color.FromArgb(0, 0, 0, 0), eraserSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                    isModified = true;
+                                    break;
+                                case Tools.Spray:
+                                    DrawBrush(g, BrushShapes.DrawSprayBrush, color1, sprayToolSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                    isModified = true;
+                                    break;
+                                case Tools.ColorDrop:
+                                    Color pixelColor = MainBitmap.GetPixel((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom));
+                                    color1 = pixelColor;
+                                    foregroundColorButton.BackColor = pixelColor;
+                                    break;
+                            }
+                        }
+                        x = (int)Math.Round(e.X / zoom);
+                        y = (int)Math.Round(e.Y / zoom);
+                    }
+                    finally
+                    {
+                        g.Restore(gs);
+                        g.ResetClip();
+                    }
+                }
+            }
+
             else
             {
                 using (Graphics graphics = Graphics.FromImage(MainBitmap))
@@ -2187,12 +2450,56 @@ namespace Carpathia
             pictureBoxCanvas.Image = MainBitmap;
             pictureBoxCanvas.Invalidate();
         }
+        private (Pen blackPen, Pen whitePen) CreateMarchingAntsPens()
+        {
+            // Thicker black base + slightly thinner white dashes.
+            // Keeping the white stroke narrower leaves a visible black edge and
+            // makes the marching ants readable on both light and dark pixels.
+            Pen blackPen = new Pen(Color.Black, 3f)
+            {
+                DashStyle = DashStyle.Solid,
+                DashCap = DashCap.Flat,
+                Alignment = PenAlignment.Center
+            };
+
+            Pen whitePen = new Pen(Color.White, 2f)
+            {
+                DashStyle = DashStyle.Custom,
+                DashPattern = new float[] { 3f, 3f },
+                DashOffset = marchingAntsOffset,
+                DashCap = DashCap.Flat,
+                Alignment = PenAlignment.Center
+            };
+
+            return (blackPen, whitePen);
+        }
+
+        private PointF KeepAntPointVisibleAtCanvasEdge(PointF point, float displayWidth, float displayHeight, float strokeWidth)
+        {
+            // A centered GDI+ pen drawn exactly at 0 or at width/height has half
+            // of its stroke clipped by the PictureBox. Only move points that are
+            // on the OUTER canvas boundary; interior magic-selection edges stay
+            // at their exact coordinates.
+            float inset = Math.Max(1f, strokeWidth / 2f);
+
+            if (point.X <= 0f)
+                point.X = inset;
+            else if (point.X >= displayWidth)
+                point.X = Math.Max(inset, displayWidth - inset);
+
+            if (point.Y <= 0f)
+                point.Y = inset;
+            else if (point.Y >= displayHeight)
+                point.Y = Math.Max(inset, displayHeight - inset);
+
+            return point;
+        }
         private void pictureBoxCanvas_Paint(object sender, PaintEventArgs e)
         {
             if (pictureBoxCanvas.Image != null)
             {
                 // Draw the SelectedBitmap if it exists
-                if (SelectedBitmap != null && !SelectionRectangle.IsEmpty)
+                if (SelectedBitmap != null && !SelectionRectangle.IsEmpty && magicSelectionMask == null)
                 {
                     e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
                     e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
@@ -2205,32 +2512,14 @@ namespace Carpathia
                         GraphicsUnit.Pixel);
                 }
 
-                // Draw the selection rectangle with dashed lines
-                if (!SelectionRectangle.IsEmpty)
+                // Draw the actual Magic Wand contour instead of its rectangular bounds.
+                if (magicSelectionMask != null)
                 {
-                    using (Pen blackPen = new Pen(Color.Black, 2)
-                    {
-                        DashStyle = DashStyle.Custom,
-                        DashPattern = new float[] { 4, 4 }
-                    })
-                    {
-                        e.Graphics.DrawRectangle(blackPen, SelectionRectangle);
-                    }
-
-                    using (Pen whitePen = new Pen(Color.White, 2)
-                    {
-                        DashStyle = DashStyle.Custom,
-                        DashPattern = new float[] { 4, 4 }
-                    })
-                    {
-                        Rectangle offsetRectangle = new Rectangle(
-                            SelectionRectangle.X + 2,
-                            SelectionRectangle.Y + 2,
-                            SelectionRectangle.Width - 4,
-                            SelectionRectangle.Height - 4
-                        );
-                        e.Graphics.DrawRectangle(whitePen, offsetRectangle);
-                    }
+                    DrawMagicSelectionOutline(e.Graphics);
+                }
+                else if (!SelectionRectangle.IsEmpty)
+                {
+                    DrawMarchingAntsRectangle(e.Graphics, SelectionRectangle);
                 }
 
                 // Draw brush/pen/eraser/spray cursor preview when not drawing
@@ -2407,6 +2696,14 @@ namespace Carpathia
                         isSelected = true;
                         SelectionStartPoint = e.Location;
                         pictureBoxCanvas.Invalidate();
+                        break;
+
+                    case Tools.MagicSelection:
+                        // Magic Wand is a click operation, not a drag/draw operation.
+                        // Select only the contiguous area whose colour is within the current tolerance.
+                        Point magicPoint = new Point((int)(e.X / zoom), (int)(e.Y / zoom));
+                        CreateMagicSelection(magicPoint, tolerance2);
+                        isdrawing = false; // Prevent MouseUp from treating the selection as a paint stroke.
                         break;
 
                     default:
@@ -2677,6 +2974,228 @@ namespace Carpathia
                 SystemSounds.Beep.Play();
             }
         }
+        private void DrawMagicSelectionOutline(Graphics graphics)
+        {
+            if (magicSelectionMask == null || magicSelectionOutlineSegments.Count == 0 || magicSelectionBounds.IsEmpty)
+                return;
+
+            GraphicsState state = graphics.Save();
+            try
+            {
+                graphics.SmoothingMode = SmoothingMode.None;
+                graphics.PixelOffsetMode = PixelOffsetMode.Half;
+
+                var (blackPen, whitePen) = CreateMarchingAntsPens();
+                using (blackPen)
+                using (whitePen)
+                {
+                    // Outline segments are already stored in absolute MainBitmap coordinates.
+                    // Adding magicSelectionBounds.Left/Top here would offset the contour a second time.
+                    float displayWidth = magicSelectionMaskWidth * zoom;
+                    float displayHeight = magicSelectionMaskHeight * zoom;
+                    float outerStrokeWidth = Math.Max(blackPen.Width, whitePen.Width);
+
+                    foreach (var segment in magicSelectionOutlineSegments)
+                    {
+                        PointF a = new PointF(segment.Start.X * zoom, segment.Start.Y * zoom);
+                        PointF b = new PointF(segment.End.X * zoom, segment.End.Y * zoom);
+
+                        if (float.IsNaN(a.X) || float.IsNaN(a.Y) || float.IsNaN(b.X) || float.IsNaN(b.Y) ||
+                            float.IsInfinity(a.X) || float.IsInfinity(a.Y) || float.IsInfinity(b.X) || float.IsInfinity(b.Y))
+                            continue;
+
+                        // Keep canvas-border ants fully visible instead of letting
+                        // half of the centered pen get clipped outside the control.
+                        a = KeepAntPointVisibleAtCanvasEdge(a, displayWidth, displayHeight, outerStrokeWidth);
+                        b = KeepAntPointVisibleAtCanvasEdge(b, displayWidth, displayHeight, outerStrokeWidth);
+
+                        graphics.DrawLine(blackPen, a, b);
+                        graphics.DrawLine(whitePen, a, b);
+                    }
+                }
+            }
+            finally
+            {
+                graphics.Restore(state);
+            }
+        }
+        private void BuildMagicSelectionOutlineSegments()
+        {
+            magicSelectionOutlineSegments.Clear();
+            if (magicSelectionMask == null || magicSelectionMaskWidth <= 0 || magicSelectionMaskHeight <= 0)
+                return;
+
+            int width = magicSelectionMaskWidth;
+            int height = magicSelectionMaskHeight;
+
+            bool SelectedAt(int x, int y)
+            {
+                if (x < 0 || y < 0 || x >= width || y >= height)
+                    return false;
+                return magicSelectionMask[y * width + x];
+            }
+
+            for (int y = 0; y <= height; y++)
+            {
+                int runStart = -1;
+                for (int x = 0; x < width; x++)
+                {
+                    bool edge = SelectedAt(x, y - 1) != SelectedAt(x, y);
+                    if (edge && runStart < 0)
+                        runStart = x;
+                    else if (!edge && runStart >= 0)
+                    {
+                        magicSelectionOutlineSegments.Add((new Point(runStart, y), new Point(x, y)));
+                        runStart = -1;
+                    }
+                }
+                if (runStart >= 0)
+                    magicSelectionOutlineSegments.Add((new Point(runStart, y), new Point(width, y)));
+            }
+
+            for (int x = 0; x <= width; x++)
+            {
+                int runStart = -1;
+                for (int y = 0; y < height; y++)
+                {
+                    bool edge = SelectedAt(x - 1, y) != SelectedAt(x, y);
+                    if (edge && runStart < 0)
+                        runStart = y;
+                    else if (!edge && runStart >= 0)
+                    {
+                        magicSelectionOutlineSegments.Add((new Point(x, runStart), new Point(x, y)));
+                        runStart = -1;
+                    }
+                }
+                if (runStart >= 0)
+                    magicSelectionOutlineSegments.Add((new Point(x, runStart), new Point(x, height)));
+            }
+        }
+
+        private void CreateMagicSelection(Point seed, int selectionTolerance)
+        {
+            if (MainBitmap == null || seed.X < 0 || seed.Y < 0 ||
+                seed.X >= MainBitmap.Width || seed.Y >= MainBitmap.Height)
+                return;
+
+            if (isSelected)
+                SetAsUnselected();
+
+            Color target = MainBitmap.GetPixel(seed.X, seed.Y);
+            int width = MainBitmap.Width;
+            int height = MainBitmap.Height;
+            BitArray selected = new BitArray(width * height);
+            Stack<Point> seeds = new Stack<Point>();
+            seeds.Push(seed);
+
+            int minX = width, minY = height, maxX = -1, maxY = -1;
+            int selectedCount = 0;
+
+            // Magic Wand tolerance is explicitly 0..100.
+            // 0 = exact colour only; 100 = every colour matches.
+            selectionTolerance = Math.Clamp(selectionTolerance, 0, 100);
+
+            bool Matches(int px, int py)
+            {
+                if (selectionTolerance >= 100)
+                    return true;
+
+                return IsColorWithinTolerance(MainBitmap.GetPixel(px, py), target, selectionTolerance);
+            }
+
+            while (seeds.Count > 0)
+            {
+                Point seedPoint = seeds.Pop();
+                int sy = seedPoint.Y;
+                int sx = seedPoint.X;
+                int seedIndex = sy * width + sx;
+                if (selected[seedIndex] || !Matches(sx, sy))
+                    continue;
+
+                int left = sx;
+                while (left > 0)
+                {
+                    int nx = left - 1;
+                    if (selected[sy * width + nx] || !Matches(nx, sy))
+                        break;
+                    left = nx;
+                }
+
+                int right = sx;
+                while (right + 1 < width)
+                {
+                    int nx = right + 1;
+                    if (selected[sy * width + nx] || !Matches(nx, sy))
+                        break;
+                    right = nx;
+                }
+
+                bool spanAbove = false;
+                bool spanBelow = false;
+                for (int x = left; x <= right; x++)
+                {
+                    int index = sy * width + x;
+                    if (!selected[index])
+                    {
+                        selected[index] = true;
+                        selectedCount++;
+                        if (x < minX) minX = x;
+                        if (x > maxX) maxX = x;
+                        if (sy < minY) minY = sy;
+                        if (sy > maxY) maxY = sy;
+                    }
+
+                    if (sy > 0)
+                    {
+                        int aboveIndex = (sy - 1) * width + x;
+                        bool aboveMatches = !selected[aboveIndex] && Matches(x, sy - 1);
+                        if (aboveMatches && !spanAbove)
+                        {
+                            seeds.Push(new Point(x, sy - 1));
+                            spanAbove = true;
+                        }
+                        else if (!aboveMatches)
+                        {
+                            spanAbove = false;
+                        }
+                    }
+
+                    if (sy + 1 < height)
+                    {
+                        int belowIndex = (sy + 1) * width + x;
+                        bool belowMatches = !selected[belowIndex] && Matches(x, sy + 1);
+                        if (belowMatches && !spanBelow)
+                        {
+                            seeds.Push(new Point(x, sy + 1));
+                            spanBelow = true;
+                        }
+                        else if (!belowMatches)
+                        {
+                            spanBelow = false;
+                        }
+                    }
+                }
+            }
+
+            if (selectedCount == 0)
+                return;
+
+            magicSelectionMask = selected;
+            magicSelectionMaskWidth = width;
+            magicSelectionMaskHeight = height;
+            magicSelectionBounds = Rectangle.FromLTRB(minX, minY, maxX + 1, maxY + 1);
+            BuildMagicSelectionOutlineSegments();
+
+            SelectedBitmap?.Dispose();
+            SelectedBitmap = null;
+            SelectionRectangle = Rectangle.Empty;
+            originalSelectionRectangleLocation = Point.Empty;
+            originalSelectionRectangleSize = Size.Empty;
+            isSelected = true;
+
+            pictureBoxCanvas.Invalidate();
+        }
+
         private void FloodFill(Bitmap bmp, Point pt, Color replacementColor, int tolerance)
         {
             // Validate input
@@ -2774,6 +3293,9 @@ namespace Carpathia
 
         private void ImageEditor_FormClosed(object sender, FormClosedEventArgs e)
         {
+            marchingAntsTimer.Stop();
+            marchingAntsTimer.Tick -= MarchingAntsTimer_Tick;
+            marchingAntsTimer.Dispose();
             Application.Exit();
         }
 
@@ -3351,6 +3873,11 @@ namespace Carpathia
                 // Seçim durumunu sýfýrlayýn
                 SelectionRectangle = Rectangle.Empty;
                 isSelected = false;
+                magicSelectionMask = null;
+                magicSelectionMaskWidth = 0;
+                magicSelectionMaskHeight = 0;
+                magicSelectionBounds = Rectangle.Empty;
+                magicSelectionOutlineSegments.Clear();
                 if (artisticFilters == ArtisticFilters.None || blurEffect == BlurEffect.None)
                 {
                     pictureBoxCanvas.Image = MainBitmap;
@@ -3395,6 +3922,51 @@ namespace Carpathia
             finally
             {
                 textBoxTolerance.Text = tolerance.ToString();
+            }
+        }
+        private void setMagicSelectionToolTolerance()
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(textBoxTolerance2.Text))
+                    throw new FormatException();
+
+                int value = Convert.ToInt32(textBoxTolerance2.Text);
+
+                // Magic Wand accepts the complete 0..100 range.
+                // 0 = exact colour match, 100 = select everything connected
+                // from the clicked pixel (which is the whole canvas because every colour matches).
+                if (value < 0 || value > 100)
+                    throw new OverflowException();
+
+                tolerance2 = value;
+            }
+            catch (FormatException)
+            {
+                Logger.Log(
+                    "Invalid tolerance value entered for magic selection tool: " + textBoxTolerance2.Text,
+                    Logger.LogTypes.Error);
+                MessageForm.Show(
+                    "Invalid tolerance value is entered. Enter a value from 0 to 100.",
+                    string.Empty,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+            catch (OverflowException)
+            {
+                Logger.Log(
+                    "Magic selection tolerance must be between 0 and 100: " + textBoxTolerance2.Text,
+                    Logger.LogTypes.Error);
+                MessageForm.Show(
+                    "Magic selection tolerance must be between 0 and 100.",
+                    string.Empty,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+            finally
+            {
+                // Restore/show the last valid Magic Wand value only.
+                textBoxTolerance2.Text = tolerance2.ToString();
             }
         }
         private void toolStripTextBox1_Leave(object sender, EventArgs e)
@@ -4310,59 +4882,45 @@ namespace Carpathia
 
         private void CutOrCopy()
         {
-            // Create a copy with the same pixel format as the original bitmap
-            // or explicitly use 32bppArgb if needed for transparency
-            Bitmap copyBitmap = new Bitmap(MainBitmap.Width, MainBitmap.Height, PixelFormat.Format32bppArgb);
+            Bitmap copyBitmap;
 
-            // Set up color attributes to preserve transparency
-            ImageAttributes imageAttributes = new ImageAttributes();
-
-            // Create a color matrix that preserves alpha channel (the 4th row)
-            ColorMatrix colorMatrix = new ColorMatrix(new float[][] {
-            new float[] {1, 0, 0, 0, 0},
-            new float[] {0, 1, 0, 0, 0},
-            new float[] {0, 0, 1, 0, 0},
-            new float[] {0, 0, 0, 1, 0},
-            new float[] {0, 0, 0, 0, 1}
-        });
-
-            imageAttributes.SetColorMatrix(colorMatrix);
-
-            using (Graphics g = Graphics.FromImage(copyBitmap))
+            if (magicSelectionMask != null && !magicSelectionBounds.IsEmpty)
             {
-                // Set high quality settings to prevent quality loss
-                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                g.SmoothingMode = SmoothingMode.HighQuality;
-                g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                g.CompositingQuality = CompositingQuality.HighQuality;
+                copyBitmap = new Bitmap(magicSelectionBounds.Width, magicSelectionBounds.Height, PixelFormat.Format32bppArgb);
+                for (int y = magicSelectionBounds.Top; y < magicSelectionBounds.Bottom; y++)
+                {
+                    for (int x = magicSelectionBounds.Left; x < magicSelectionBounds.Right; x++)
+                    {
+                        int mx = x - magicSelectionBounds.Left;
+                        int my = y - magicSelectionBounds.Top;
 
-                // Clear with transparent color first
+                        // magicSelectionMask is indexed in absolute MainBitmap coordinates.
+                        // mx/my are only the destination coordinates inside copyBitmap.
+                        if (x >= 0 && y >= 0 && x < magicSelectionMaskWidth && y < magicSelectionMaskHeight &&
+                            magicSelectionMask[y * magicSelectionMaskWidth + x])
+                        {
+                            copyBitmap.SetPixel(mx, my, MainBitmap.GetPixel(x, y));
+                        }
+                    }
+                }
+            }
+            else
+            {
+                copyBitmap = new Bitmap(MainBitmap.Width, MainBitmap.Height, PixelFormat.Format32bppArgb);
+                using Graphics g = Graphics.FromImage(copyBitmap);
                 g.Clear(Color.Transparent);
-
-                // Draw the original bitmap using the color matrix to preserve alpha
-                g.DrawImage(MainBitmap,
-                    new Rectangle(0, 0, MainBitmap.Width, MainBitmap.Height),
-                    0, 0, MainBitmap.Width, MainBitmap.Height,
-                    GraphicsUnit.Pixel,
-                    imageAttributes);
+                g.DrawImageUnscaled(MainBitmap, 0, 0);
             }
 
-            // Use PNG format specifically for the clipboard to preserve transparency
-            // This is a key part of the solution
             DataObject dataObject = new DataObject();
-
-            // Add both PNG and standard bitmap format
             using (MemoryStream pngStream = new MemoryStream())
             {
                 copyBitmap.Save(pngStream, ImageFormat.Png);
                 dataObject.SetData("PNG", false, pngStream);
             }
-
-            // Also include the standard bitmap format for compatibility
             dataObject.SetData(DataFormats.Bitmap, true, copyBitmap);
-
-            // Set the data object to clipboard
             Clipboard.SetDataObject(dataObject, true);
+            copyBitmap.Dispose();
         }
 
         private void Cut_Click(object sender, EventArgs e)
@@ -4371,8 +4929,22 @@ namespace Carpathia
             {
                 SaveStateForUndo();
                 CutOrCopy();
-                isModified = true;
-                MainBitmap = new Bitmap(MainBitmap.Width, MainBitmap.Height);
+                if (magicSelectionMask != null && !magicSelectionBounds.IsEmpty)
+                {
+                    for (int y = magicSelectionBounds.Top; y < magicSelectionBounds.Bottom; y++)
+                    {
+                        for (int x = magicSelectionBounds.Left; x < magicSelectionBounds.Right; x++)
+                        {
+                            if (magicSelectionMask[y * magicSelectionMaskWidth + x])
+                                MainBitmap.SetPixel(x, y, Color.Transparent);
+                        }
+                    }
+                    SetAsUnselected();
+                }
+                else
+                {
+                    MainBitmap = new Bitmap(MainBitmap.Width, MainBitmap.Height);
+                }
                 pictureBoxCanvas.Image = MainBitmap;
                 pictureBoxCanvas.Invalidate();
                 isModified = true;
@@ -4479,13 +5051,21 @@ namespace Carpathia
         }
         private void UpdatePictureBoxZoom()
         {
-            UIPanel.AutoScrollMinSize = canvasPanel.Size;
             if (MainBitmap == null) return;
 
-            canvasPanel.Size = new Size((int)(originalSize.Width * zoom) + 20, (int)(originalSize.Height * zoom) + 20);
+            // Preserve the original canvas sizing/centering behavior.
+            canvasPanel.Size = new Size(
+                (int)(originalSize.Width * zoom) + 20,
+                (int)(originalSize.Height * zoom) + 20);
+
             pictureBoxCanvas.Size = panelResizer.Size;
+
+            // The scroll extent must describe the NEW canvas size, not the
+            // previous zoom step's size.
+            UIPanel.AutoScrollMinSize = canvasPanel.Size;
+
             CenterCanvasPanel();
-            pictureBoxCanvas.Invalidate(); // Yeniden çizim için tetikleyin
+            pictureBoxCanvas.Invalidate();
             labelZoom.Text = $"{(int)Math.Round(zoom * 100)}%";
         }
 
@@ -4986,6 +5566,36 @@ namespace Carpathia
             saveFileAs();
         }
 
+        private void cropTool_Click(object sender, EventArgs e)
+        {
+            CropToSelection();
+        }
+
+        private void rotateTool_Click(object sender, EventArgs e)
+        {
+            RotateCanvas(RotateFlipType.Rotate90FlipNone);
+        }
+
+        private void flipHTool_Click(object sender, EventArgs e)
+        {
+            RotateCanvas(RotateFlipType.RotateNoneFlipX);
+        }
+
+        private void flipVTool_Click(object sender, EventArgs e)
+        {
+            RotateCanvas(RotateFlipType.RotateNoneFlipY);
+        }
+
+        private void grayscaleTool_Click(object sender, EventArgs e)
+        {
+            ApplyGrayscaleQuick();
+        }
+
+        private void fitTool_Click(object sender, EventArgs e)
+        {
+            FitCanvasToWorkspace();
+        }
+
         private void ImageEditor_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (isModified)
@@ -5008,6 +5618,19 @@ namespace Carpathia
                         break;
                 }
             }
+        }
+
+        private void toolStripTextBox1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                setMagicSelectionToolTolerance();
+            }
+        }
+
+        private void toolStripTextBox1_Leave_1(object sender, EventArgs e)
+        {
+            setMagicSelectionToolTolerance();
         }
     }
 }

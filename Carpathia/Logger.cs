@@ -1,4 +1,4 @@
-﻿// LibreCanvas - The AI-enabled simple image editor for everyone, born as a school project by GeniusPilot2016
+// LibreCanvas - The AI-enabled simple image editor for everyone, born as a school project by GeniusPilot2016
 // Copyright (C) 2025 GeniusPilot2016
 //
 // This program is free software: you can redistribute it and/or modify
@@ -37,7 +37,7 @@ namespace Carpathia
             LogText += "\nNew Dimension of Digital Art \r\n";
             LogText += "\nhttps://github.com/GeniusPilot2016/LibreCanvas \r\n\n";
             LogText += $"LibreCanvas Version {GetInformations.GetVersionAndStatus().version} {GetInformations.GetVersionAndStatus().status}\r\n";
-            LogText += GetInformations.getSystemInfo();
+            // Do not persist machine/system inventory in production logs.
             string[] funFacts = new string[]
             {
                 "The first digital image editor, 'Paint', was released with Windows 1.0 in 1985.",
@@ -97,10 +97,21 @@ namespace Carpathia
                     LoggingType = "Info";
                     break;
             }
-            string logMessage = $"[{DateTime.Now:HH:mm:ss}] - [{LoggingType}] {message}";
+            string safeMessage = Sanitize(message);
+            string logMessage = $"[{DateTime.Now:HH:mm:ss}] - [{LoggingType}] {safeMessage}";
             LogText += logMessage + "\r\n";
             WriteLogToFile(LogText);
             Debug.WriteLine(logMessage);
+        }
+
+        private static string Sanitize(string message)
+        {
+            if (string.IsNullOrEmpty(message)) return string.Empty;
+            // Keep logs diagnostic, not a store for prompts, URLs, tokens or local paths.
+            message = System.Text.RegularExpressions.Regex.Replace(message, @"https?://\S+", "[URL REDACTED]", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            message = System.Text.RegularExpressions.Regex.Replace(message, @"(?i)(api[_-]?key|authorization|token|secret)\s*[:=]\s*\S+", "$1=[REDACTED]");
+            message = System.Text.RegularExpressions.Regex.Replace(message, @"[A-Za-z]:\\[^\r\n]+", "[LOCAL PATH REDACTED]");
+            return message.Length > 2000 ? message[..2000] + "…" : message;
         }
 
         private static void WriteLogToFile(string content)
