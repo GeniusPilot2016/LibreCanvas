@@ -1,4 +1,4 @@
-﻿// LibreCanvas - The AI-enabled simple image editor for everyone, born as a school project by GeniusPilot2016
+// LibreCanvas - The AI-enabled simple image editor for everyone, born as a school project by GeniusPilot2016
 // Copyright (C) 2025 GeniusPilot2016
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,31 +24,15 @@ namespace Carpathia
         {
             try
             {
-                Process process = new();
-                process.StartInfo.FileName = "cmd.exe";
-                process.StartInfo.Arguments =
-                    @"/C reg query HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize\";
-                process.StartInfo.UseShellExecute = false;
-                process.StartInfo.RedirectStandardOutput = true;
-                process.StartInfo.CreateNoWindow = true;
-                process.Start();
-
-                string output = process.StandardOutput.ReadToEnd();
-                string[] keys = output.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
-                for (int i = 0; i < keys.Length; i++)
-                {
-                    if (keys[i].Contains("AppsUseLightTheme"))
-                    {
-                        return keys[i].EndsWith("0");
-                    }
-                }
+                using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", false);
+                object? value = key?.GetValue("AppsUseLightTheme");
+                return value is int i && i == 0;
             }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex);
+                return false;
             }
-
-            return false;
         }
     }
 }

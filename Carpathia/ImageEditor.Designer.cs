@@ -96,6 +96,13 @@
             copyTool = new ToolStripButton();
             cutTool = new ToolStripButton();
             toolStripButton9 = new ToolStripButton();
+            toolStripSeparatorProfessional = new ToolStripSeparator();
+            cropTool = new ToolStripButton();
+            rotateTool = new ToolStripButton();
+            flipHTool = new ToolStripButton();
+            flipVTool = new ToolStripButton();
+            grayscaleTool = new ToolStripButton();
+            fitTool = new ToolStripButton();
             menuStrip1 = new MenuStrip();
             dosyaToolStripMenuItem = new ToolStripMenuItem();
             yeniToolStripMenuItem = new ToolStripMenuItem();
@@ -143,28 +150,16 @@
             içindekilerToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator5 = new ToolStripSeparator();
             hakkındaToolStripMenuItem = new ToolStripMenuItem();
-            toolStripPixelate = new ToolStrip();
-            toolStripLabel14 = new ToolStripLabel();
-            textBoxPixelationSize = new ToolStripTextBox();
-            toolStripSeparator30 = new ToolStripSeparator();
-            toolStripLabel15 = new ToolStripLabel();
-            textBoxPixelationOffsetX = new ToolStripTextBox();
-            toolStripSeparator31 = new ToolStripSeparator();
-            toolStripLabel16 = new ToolStripLabel();
-            textBoxPixelationOffsetY = new ToolStripTextBox();
-            toolStripSeparator35 = new ToolStripSeparator();
-            buttonApplyPixelation = new ToolStripButton();
-            buttonCancelPixelation = new ToolStripButton();
+            toolStripPen = new ToolStrip();
+            toolStripLabel10 = new ToolStripLabel();
+            comboBoxPenSize = new ToolStripComboBox();
+            toolStripSeparator22 = new ToolStripSeparator();
+            toolStripLabel11 = new ToolStripLabel();
+            comboBoxPenType = new ToolStripComboBox();
             toolStripSpray = new ToolStrip();
             spraySizeLabel = new ToolStripLabel();
             comboBoxSpraySize = new ToolStripComboBox();
             toolStripSeparator25 = new ToolStripSeparator();
-            toolStripAICreateImage = new ToolStrip();
-            labelPrompt = new ToolStripLabel();
-            textBoxPrompt = new ToolStripTextBox();
-            toolStripSeparator34 = new ToolStripSeparator();
-            buttonCreate = new ToolStripButton();
-            buttonClose = new ToolStripButton();
             toolStripShapes = new ToolStrip();
             toolStripLabel13 = new ToolStripLabel();
             comboBoxShapeThickness = new ToolStripComboBox();
@@ -192,10 +187,34 @@
             buttonAlignRight = new ToolStripButton();
             toolStripSeparator20 = new ToolStripSeparator();
             buttonBackgroundFilling = new ToolStripButton();
-            toolStripAirBrush = new ToolStrip();
-            toolStripLabel9 = new ToolStripLabel();
-            toolStripComboBoxAirBrushSize = new ToolStripComboBox();
-            toolStripSeparator21 = new ToolStripSeparator();
+            toolStripBrush = new ToolStrip();
+            toolStripLabel2 = new ToolStripLabel();
+            comboBoxBrushSize = new ToolStripComboBox();
+            toolStripSeparator17 = new ToolStripSeparator();
+            toolStripLabel6 = new ToolStripLabel();
+            comboBoxBrushType = new ToolStripComboBox();
+            toolStripPixelate = new ToolStrip();
+            toolStripLabel14 = new ToolStripLabel();
+            textBoxPixelationSize = new ToolStripTextBox();
+            toolStripSeparator30 = new ToolStripSeparator();
+            toolStripLabel15 = new ToolStripLabel();
+            textBoxPixelationOffsetX = new ToolStripTextBox();
+            toolStripSeparator31 = new ToolStripSeparator();
+            toolStripLabel16 = new ToolStripLabel();
+            textBoxPixelationOffsetY = new ToolStripTextBox();
+            toolStripSeparator35 = new ToolStripSeparator();
+            buttonApplyPixelation = new ToolStripButton();
+            buttonCancelPixelation = new ToolStripButton();
+            toolStripEraser = new ToolStrip();
+            toolStripLabel12 = new ToolStripLabel();
+            comboBoxEraserSize = new ToolStripComboBox();
+            toolStripSeparator23 = new ToolStripSeparator();
+            toolStripGaussianBlur = new ToolStrip();
+            toolStripLabel17 = new ToolStripLabel();
+            textboxGaussianBlurRadius = new ToolStripTextBox();
+            toolStripSeparator33 = new ToolStripSeparator();
+            buttonApplyGaussianBlur = new ToolStripButton();
+            buttonCancelGaussianBlur = new ToolStripButton();
             toolStripArtisticFilters = new ToolStrip();
             toolStripLabel5 = new ToolStripLabel();
             textBoxArtisticFilterSize = new ToolStripTextBox();
@@ -208,31 +227,22 @@
             toolStripSeparator32 = new ToolStripSeparator();
             buttonArtisticFiltersOK = new ToolStripButton();
             buttonArtisticFiltersCancel = new ToolStripButton();
-            toolStripBrush = new ToolStrip();
-            toolStripLabel2 = new ToolStripLabel();
-            comboBoxBrushSize = new ToolStripComboBox();
-            toolStripSeparator17 = new ToolStripSeparator();
-            toolStripLabel6 = new ToolStripLabel();
-            comboBoxBrushType = new ToolStripComboBox();
+            toolStripAICreateImage = new ToolStrip();
+            labelPrompt = new ToolStripLabel();
+            textBoxPrompt = new ToolStripTextBox();
+            toolStripSeparator34 = new ToolStripSeparator();
+            buttonCreate = new ToolStripButton();
+            buttonClose = new ToolStripButton();
             toolStripBucketTool = new ToolStrip();
             toolStripLabel4 = new ToolStripLabel();
             textBoxTolerance = new ToolStripTextBox();
-            toolStripEraser = new ToolStrip();
-            toolStripLabel12 = new ToolStripLabel();
-            comboBoxEraserSize = new ToolStripComboBox();
-            toolStripSeparator23 = new ToolStripSeparator();
-            toolStripGaussianBlur = new ToolStrip();
-            toolStripLabel17 = new ToolStripLabel();
-            textboxGaussianBlurRadius = new ToolStripTextBox();
-            toolStripSeparator33 = new ToolStripSeparator();
-            buttonApplyGaussianBlur = new ToolStripButton();
-            buttonCancelGaussianBlur = new ToolStripButton();
-            toolStripPen = new ToolStrip();
-            toolStripLabel10 = new ToolStripLabel();
-            comboBoxPenSize = new ToolStripComboBox();
-            toolStripSeparator22 = new ToolStripSeparator();
-            toolStripLabel11 = new ToolStripLabel();
-            comboBoxPenType = new ToolStripComboBox();
+            toolStripMagicSelection = new ToolStrip();
+            toolStripLabel19 = new ToolStripLabel();
+            textBoxTolerance2 = new ToolStripTextBox();
+            toolStripAirBrush = new ToolStrip();
+            toolStripLabel9 = new ToolStripLabel();
+            toolStripComboBoxAirBrushSize = new ToolStripComboBox();
+            toolStripSeparator21 = new ToolStripSeparator();
             colorDialog1 = new ColorDialog();
             openFileDialog1 = new OpenFileDialog();
             saveFileDialog1 = new SaveFileDialog();
@@ -250,18 +260,19 @@
             ((System.ComponentModel.ISupportInitialize)pictureBoxCanvas).BeginInit();
             toolStripTools.SuspendLayout();
             menuStrip1.SuspendLayout();
-            toolStripPixelate.SuspendLayout();
+            toolStripPen.SuspendLayout();
             toolStripSpray.SuspendLayout();
-            toolStripAICreateImage.SuspendLayout();
             toolStripShapes.SuspendLayout();
             toolStripText.SuspendLayout();
-            toolStripAirBrush.SuspendLayout();
-            toolStripArtisticFilters.SuspendLayout();
             toolStripBrush.SuspendLayout();
-            toolStripBucketTool.SuspendLayout();
+            toolStripPixelate.SuspendLayout();
             toolStripEraser.SuspendLayout();
             toolStripGaussianBlur.SuspendLayout();
-            toolStripPen.SuspendLayout();
+            toolStripArtisticFilters.SuspendLayout();
+            toolStripAICreateImage.SuspendLayout();
+            toolStripBucketTool.SuspendLayout();
+            toolStripMagicSelection.SuspendLayout();
+            toolStripAirBrush.SuspendLayout();
             SuspendLayout();
             // 
             // toolStripContainer1
@@ -280,27 +291,27 @@
             // toolStripContainer1.LeftToolStripPanel
             // 
             toolStripContainer1.LeftToolStripPanel.Controls.Add(toolStripTools);
-            toolStripContainer1.Location = new Point(0, 0);
+            toolStripContainer1.Location = new Point(0, 24);
             toolStripContainer1.Name = "toolStripContainer1";
-            toolStripContainer1.Size = new Size(1289, 812);
+            toolStripContainer1.Size = new Size(1289, 788);
             toolStripContainer1.TabIndex = 0;
             toolStripContainer1.Text = "toolStripContainer1";
             // 
             // toolStripContainer1.TopToolStripPanel
             // 
-            toolStripContainer1.TopToolStripPanel.Controls.Add(menuStrip1);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripPixelate);
+            toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripEraser);
+            toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripPen);
+            toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripGaussianBlur);
+            toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripAirBrush);
+            toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripArtisticFilters);
+            toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripBucketTool);
+            toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripBrush);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripSpray);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripAICreateImage);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripShapes);
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripText);
-            toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripAirBrush);
-            toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripArtisticFilters);
-            toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripBrush);
-            toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripBucketTool);
-            toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripEraser);
-            toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripGaussianBlur);
-            toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripPen);
+            toolStripContainer1.TopToolStripPanel.Controls.Add(toolStripMagicSelection);
             // 
             // toolStripBase
             // 
@@ -464,7 +475,7 @@
             canvasPanel.Controls.Add(resize_top);
             canvasPanel.Controls.Add(pictureBoxCanvas);
             canvasPanel.Controls.Add(panelResizer);
-            canvasPanel.Location = new Point(228, 54);
+            canvasPanel.Location = new Point(210, 90);
             canvasPanel.Name = "canvasPanel";
             canvasPanel.Size = new Size(820, 620);
             canvasPanel.TabIndex = 2;
@@ -625,7 +636,7 @@
             toolStripTools.Dock = DockStyle.None;
             toolStripTools.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             toolStripTools.ImageScalingSize = new Size(20, 20);
-            toolStripTools.Items.AddRange(new ToolStripItem[] { mouseTool, toolStripSeparator11, selectTool, magicSelectTool, toolStripSeparator10, brushTool, penTool, eraserTool, bucketTool, sprayTool, addTextTool, drawShapeTool, toolStripSeparator6, createWithAITool, colorDropTool, zoomTool, toolStripSeparator9, foregroundColorButton, backgroundColorButton, toolStripSeparator7, pasteTool, copyTool, cutTool, toolStripButton9 });
+            toolStripTools.Items.AddRange(new ToolStripItem[] { mouseTool, toolStripSeparator11, selectTool, magicSelectTool, toolStripSeparator10, brushTool, penTool, eraserTool, bucketTool, sprayTool, addTextTool, drawShapeTool, toolStripSeparator6, createWithAITool, colorDropTool, zoomTool, toolStripSeparator9, foregroundColorButton, backgroundColorButton, toolStripSeparator7, pasteTool, copyTool, cutTool, toolStripButton9, toolStripSeparatorProfessional, cropTool, rotateTool, flipHTool, flipVTool, grayscaleTool, fitTool });
             toolStripTools.Location = new Point(0, 0);
             toolStripTools.Name = "toolStripTools";
             toolStripTools.Size = new Size(39, 763);
@@ -676,7 +687,6 @@
             magicSelectTool.Size = new Size(37, 24);
             magicSelectTool.Tag = "";
             magicSelectTool.Text = "Magic Selection";
-            magicSelectTool.Visible = false;
             magicSelectTool.CheckedChanged += magicSelectTool_CheckedChanged;
             magicSelectTool.Click += magicSelectTool_Click;
             // 
@@ -992,11 +1002,75 @@
             toolStripButton9.Text = "Show Transparent Image Pattern";
             toolStripButton9.Click += toolStripButton9_Click;
             // 
+            // toolStripSeparatorProfessional
+            // 
+            toolStripSeparatorProfessional.Name = "toolStripSeparatorProfessional";
+            toolStripSeparatorProfessional.Size = new Size(37, 6);
+            // 
+            // cropTool
+            // 
+            cropTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            cropTool.Image = Properties.Resources.icons8_crop_48;
+            cropTool.Name = "cropTool";
+            cropTool.Size = new Size(37, 24);
+            cropTool.Text = "Crop";
+            cropTool.ToolTipText = "Crop";
+            cropTool.Click += cropTool_Click;
+            // 
+            // rotateTool
+            // 
+            rotateTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            rotateTool.Image = Properties.Resources.icons8_rotate_48;
+            rotateTool.Name = "rotateTool";
+            rotateTool.Size = new Size(37, 24);
+            rotateTool.Text = "Rotate";
+            rotateTool.ToolTipText = "Rotate";
+            rotateTool.Click += rotateTool_Click;
+            // 
+            // flipHTool
+            // 
+            flipHTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            flipHTool.Image = Properties.Resources.icons8_flip_horizontal_48;
+            flipHTool.Name = "flipHTool";
+            flipHTool.Size = new Size(37, 24);
+            flipHTool.Text = "Flip H";
+            flipHTool.ToolTipText = "Flip H";
+            flipHTool.Click += flipHTool_Click;
+            // 
+            // flipVTool
+            // 
+            flipVTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            flipVTool.Image = Properties.Resources.icons8_flip_vertical_48;
+            flipVTool.Name = "flipVTool";
+            flipVTool.Size = new Size(37, 24);
+            flipVTool.Text = "Flip V";
+            flipVTool.ToolTipText = "Flip V";
+            flipVTool.Click += flipVTool_Click;
+            // 
+            // grayscaleTool
+            // 
+            grayscaleTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            grayscaleTool.Image = Properties.Resources.icons8_black_and_white_48__1_;
+            grayscaleTool.Name = "grayscaleTool";
+            grayscaleTool.Size = new Size(37, 24);
+            grayscaleTool.Text = "B&W";
+            grayscaleTool.ToolTipText = "B&W";
+            grayscaleTool.Click += grayscaleTool_Click;
+            // 
+            // fitTool
+            // 
+            fitTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            fitTool.Image = Properties.Resources.icons8_fit_to_page_48;
+            fitTool.Name = "fitTool";
+            fitTool.Size = new Size(37, 24);
+            fitTool.Text = "Fit";
+            fitTool.ToolTipText = "Fit canvas in workspace";
+            fitTool.Click += fitTool_Click;
+            // 
             // menuStrip1
             // 
             menuStrip1.BackgroundImage = Properties.Resources.toolstrip_light;
             menuStrip1.BackgroundImageLayout = ImageLayout.Stretch;
-            menuStrip1.Dock = DockStyle.None;
             menuStrip1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             menuStrip1.ImageScalingSize = new Size(20, 20);
             menuStrip1.Items.AddRange(new ToolStripItem[] { dosyaToolStripMenuItem, düzenleToolStripMenuItem, araçlarToolStripMenuItem, settingsToolStripMenuItem, yardımToolStripMenuItem });
@@ -1020,7 +1094,7 @@
             yeniToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             yeniToolStripMenuItem.Name = "yeniToolStripMenuItem";
             yeniToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.N;
-            yeniToolStripMenuItem.Size = new Size(188, 22);
+            yeniToolStripMenuItem.Size = new Size(192, 26);
             yeniToolStripMenuItem.Text = "&New";
             yeniToolStripMenuItem.Click += yeniToolStripMenuItem_Click;
             // 
@@ -1028,7 +1102,7 @@
             // 
             createWithWebcamToolStripMenuItem.Image = Properties.Resources.icons8_webcam_481;
             createWithWebcamToolStripMenuItem.Name = "createWithWebcamToolStripMenuItem";
-            createWithWebcamToolStripMenuItem.Size = new Size(188, 22);
+            createWithWebcamToolStripMenuItem.Size = new Size(192, 26);
             createWithWebcamToolStripMenuItem.Text = "Create with Webcam";
             createWithWebcamToolStripMenuItem.Click += createWithWebcamToolStripMenuItem_Click;
             // 
@@ -1036,7 +1110,7 @@
             // 
             createWithAIToolStripMenuItem.Image = Properties.Resources.icons8_artificial_intelligence_48;
             createWithAIToolStripMenuItem.Name = "createWithAIToolStripMenuItem";
-            createWithAIToolStripMenuItem.Size = new Size(188, 22);
+            createWithAIToolStripMenuItem.Size = new Size(192, 26);
             createWithAIToolStripMenuItem.Text = "Create with AI";
             createWithAIToolStripMenuItem.Click += createWithAIToolStripMenuItem_Click;
             // 
@@ -1046,14 +1120,14 @@
             açToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             açToolStripMenuItem.Name = "açToolStripMenuItem";
             açToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.O;
-            açToolStripMenuItem.Size = new Size(188, 22);
+            açToolStripMenuItem.Size = new Size(192, 26);
             açToolStripMenuItem.Text = "&Open";
             açToolStripMenuItem.Click += açToolStripMenuItem_Click;
             // 
             // toolStripSeparator
             // 
             toolStripSeparator.Name = "toolStripSeparator";
-            toolStripSeparator.Size = new Size(185, 6);
+            toolStripSeparator.Size = new Size(189, 6);
             // 
             // kaydetToolStripMenuItem
             // 
@@ -1061,7 +1135,7 @@
             kaydetToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             kaydetToolStripMenuItem.Name = "kaydetToolStripMenuItem";
             kaydetToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.S;
-            kaydetToolStripMenuItem.Size = new Size(188, 22);
+            kaydetToolStripMenuItem.Size = new Size(192, 26);
             kaydetToolStripMenuItem.Text = "&Save";
             kaydetToolStripMenuItem.Click += kaydetToolStripMenuItem_Click;
             // 
@@ -1069,14 +1143,14 @@
             // 
             farklıKaydetToolStripMenuItem.Enabled = false;
             farklıKaydetToolStripMenuItem.Name = "farklıKaydetToolStripMenuItem";
-            farklıKaydetToolStripMenuItem.Size = new Size(188, 22);
+            farklıKaydetToolStripMenuItem.Size = new Size(192, 26);
             farklıKaydetToolStripMenuItem.Text = "&Save As";
             farklıKaydetToolStripMenuItem.Click += farklıKaydetToolStripMenuItem_Click;
             // 
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new Size(185, 6);
+            toolStripSeparator1.Size = new Size(189, 6);
             // 
             // printToolStripMenuItem
             // 
@@ -1084,7 +1158,7 @@
             printToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             printToolStripMenuItem.Name = "printToolStripMenuItem";
             printToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.P;
-            printToolStripMenuItem.Size = new Size(188, 22);
+            printToolStripMenuItem.Size = new Size(192, 26);
             printToolStripMenuItem.Text = "&Print";
             printToolStripMenuItem.Click += printToolStripMenuItem_Click;
             // 
@@ -1093,19 +1167,19 @@
             printPreviewToolStripMenuItem.Image = Properties.Resources.icons8_view_48;
             printPreviewToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             printPreviewToolStripMenuItem.Name = "printPreviewToolStripMenuItem";
-            printPreviewToolStripMenuItem.Size = new Size(188, 22);
+            printPreviewToolStripMenuItem.Size = new Size(192, 26);
             printPreviewToolStripMenuItem.Text = "P&rint Preview";
             printPreviewToolStripMenuItem.Click += printPreviewToolStripMenuItem_Click;
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new Size(185, 6);
+            toolStripSeparator2.Size = new Size(189, 6);
             // 
             // çıkışToolStripMenuItem
             // 
             çıkışToolStripMenuItem.Name = "çıkışToolStripMenuItem";
-            çıkışToolStripMenuItem.Size = new Size(188, 22);
+            çıkışToolStripMenuItem.Size = new Size(192, 26);
             çıkışToolStripMenuItem.Text = "&Exit";
             çıkışToolStripMenuItem.Click += çıkışToolStripMenuItem_Click;
             // 
@@ -1188,7 +1262,7 @@
             filtersToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { mirrorToolStripMenuItem, flashToolStripMenuItem, frozenToolStripMenuItem, winterToolStripMenuItem, blackAndWhiteToolStripMenuItem, oldPictureToolStripMenuItem, cherryToolStripMenuItem, lightAddToolStripMenuItem, purpleToolStripMenuItem, fogToolStripMenuItem });
             filtersToolStripMenuItem.Image = Properties.Resources.icons8_photo_gallery_48;
             filtersToolStripMenuItem.Name = "filtersToolStripMenuItem";
-            filtersToolStripMenuItem.Size = new Size(160, 26);
+            filtersToolStripMenuItem.Size = new Size(184, 26);
             filtersToolStripMenuItem.Text = "Basic Filters";
             // 
             // mirrorToolStripMenuItem
@@ -1276,7 +1350,7 @@
             artisticFiltersToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { cartoonToolStripMenuItem, oilPaintingToolStripMenuItem });
             artisticFiltersToolStripMenuItem.Image = Properties.Resources.icons8_art_48;
             artisticFiltersToolStripMenuItem.Name = "artisticFiltersToolStripMenuItem";
-            artisticFiltersToolStripMenuItem.Size = new Size(160, 26);
+            artisticFiltersToolStripMenuItem.Size = new Size(184, 26);
             artisticFiltersToolStripMenuItem.Text = "Artistic Filters";
             // 
             // cartoonToolStripMenuItem
@@ -1300,7 +1374,7 @@
             ambientFiltersToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { chloeToolStripMenuItem });
             ambientFiltersToolStripMenuItem.Image = Properties.Resources.icons8_spa_candle_48;
             ambientFiltersToolStripMenuItem.Name = "ambientFiltersToolStripMenuItem";
-            ambientFiltersToolStripMenuItem.Size = new Size(160, 26);
+            ambientFiltersToolStripMenuItem.Size = new Size(184, 26);
             ambientFiltersToolStripMenuItem.Text = "Ambient Filters";
             // 
             // chloeToolStripMenuItem
@@ -1316,7 +1390,7 @@
             blurToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { pixellateToolStripMenuItem, blurToolStripMenuItem1 });
             blurToolStripMenuItem.Image = Properties.Resources.icons8_blur_48;
             blurToolStripMenuItem.Name = "blurToolStripMenuItem";
-            blurToolStripMenuItem.Size = new Size(160, 26);
+            blurToolStripMenuItem.Size = new Size(184, 26);
             blurToolStripMenuItem.Text = "Blurring";
             // 
             // pixellateToolStripMenuItem
@@ -1369,106 +1443,57 @@
             hakkındaToolStripMenuItem.Text = "&About";
             hakkındaToolStripMenuItem.Click += hakkındaToolStripMenuItem_Click;
             // 
-            // toolStripPixelate
+            // toolStripPen
             // 
-            toolStripPixelate.BackgroundImage = Properties.Resources.toolstrip_light;
-            toolStripPixelate.BackgroundImageLayout = ImageLayout.Stretch;
-            toolStripPixelate.Dock = DockStyle.None;
-            toolStripPixelate.GripStyle = ToolStripGripStyle.Hidden;
-            toolStripPixelate.ImageScalingSize = new Size(20, 20);
-            toolStripPixelate.Items.AddRange(new ToolStripItem[] { toolStripLabel14, textBoxPixelationSize, toolStripSeparator30, toolStripLabel15, textBoxPixelationOffsetX, toolStripSeparator31, toolStripLabel16, textBoxPixelationOffsetY, toolStripSeparator35, buttonApplyPixelation, buttonCancelPixelation });
-            toolStripPixelate.Location = new Point(0, 0);
-            toolStripPixelate.Name = "toolStripPixelate";
-            toolStripPixelate.Size = new Size(381, 27);
-            toolStripPixelate.Stretch = true;
-            toolStripPixelate.TabIndex = 15;
-            toolStripPixelate.Visible = false;
+            toolStripPen.BackgroundImage = Properties.Resources.toolstrip_light;
+            toolStripPen.BackgroundImageLayout = ImageLayout.Stretch;
+            toolStripPen.Dock = DockStyle.None;
+            toolStripPen.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            toolStripPen.GripStyle = ToolStripGripStyle.Hidden;
+            toolStripPen.ImageScalingSize = new Size(20, 20);
+            toolStripPen.Items.AddRange(new ToolStripItem[] { toolStripLabel10, comboBoxPenSize, toolStripSeparator22, toolStripLabel11, comboBoxPenType });
+            toolStripPen.Location = new Point(0, 25);
+            toolStripPen.Name = "toolStripPen";
+            toolStripPen.Size = new Size(1289, 25);
+            toolStripPen.Stretch = true;
+            toolStripPen.TabIndex = 13;
+            toolStripPen.Visible = false;
             // 
-            // toolStripLabel14
+            // toolStripLabel10
             // 
-            toolStripLabel14.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            toolStripLabel14.Name = "toolStripLabel14";
-            toolStripLabel14.Size = new Size(30, 24);
-            toolStripLabel14.Text = "Size";
+            toolStripLabel10.Name = "toolStripLabel10";
+            toolStripLabel10.Size = new Size(30, 22);
+            toolStripLabel10.Text = "Size";
             // 
-            // textBoxPixelationSize
+            // comboBoxPenSize
             // 
-            textBoxPixelationSize.BorderStyle = BorderStyle.FixedSingle;
-            textBoxPixelationSize.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            textBoxPixelationSize.Name = "textBoxPixelationSize";
-            textBoxPixelationSize.Size = new Size(75, 27);
-            textBoxPixelationSize.Text = "16";
-            textBoxPixelationSize.Leave += textBoxPixelationSize_Leave;
-            textBoxPixelationSize.KeyDown += textBoxPixelationSize_KeyDown;
+            comboBoxPenSize.FlatStyle = FlatStyle.Flat;
+            comboBoxPenSize.Items.AddRange(new object[] { "8", "9", "10", "11", "12", "14", "16", "18", "20", "22", "24", "26", "28", "36", "48", "72" });
+            comboBoxPenSize.Name = "comboBoxPenSize";
+            comboBoxPenSize.Size = new Size(75, 25);
+            comboBoxPenSize.Text = "11";
+            comboBoxPenSize.SelectedIndexChanged += comboBoxPenSize_TextChanged;
+            comboBoxPenSize.TextChanged += comboBoxPenSize_TextChanged;
             // 
-            // toolStripSeparator30
+            // toolStripSeparator22
             // 
-            toolStripSeparator30.Name = "toolStripSeparator30";
-            toolStripSeparator30.Size = new Size(6, 27);
+            toolStripSeparator22.Name = "toolStripSeparator22";
+            toolStripSeparator22.Size = new Size(6, 25);
             // 
-            // toolStripLabel15
+            // toolStripLabel11
             // 
-            toolStripLabel15.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            toolStripLabel15.Name = "toolStripLabel15";
-            toolStripLabel15.Size = new Size(51, 24);
-            toolStripLabel15.Text = "Offset X";
+            toolStripLabel11.Name = "toolStripLabel11";
+            toolStripLabel11.Size = new Size(57, 22);
+            toolStripLabel11.Text = "Pen Type";
             // 
-            // textBoxPixelationOffsetX
+            // comboBoxPenType
             // 
-            textBoxPixelationOffsetX.BorderStyle = BorderStyle.FixedSingle;
-            textBoxPixelationOffsetX.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            textBoxPixelationOffsetX.Name = "textBoxPixelationOffsetX";
-            textBoxPixelationOffsetX.Size = new Size(50, 27);
-            textBoxPixelationOffsetX.Text = "0";
-            textBoxPixelationOffsetX.Leave += textBoxPixelationOffsetX_Leave;
-            textBoxPixelationOffsetX.KeyDown += textBoxPixelationOffsetX_KeyDown;
-            // 
-            // toolStripSeparator31
-            // 
-            toolStripSeparator31.Name = "toolStripSeparator31";
-            toolStripSeparator31.Size = new Size(6, 27);
-            // 
-            // toolStripLabel16
-            // 
-            toolStripLabel16.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            toolStripLabel16.Name = "toolStripLabel16";
-            toolStripLabel16.Size = new Size(50, 24);
-            toolStripLabel16.Text = "Offset Y";
-            // 
-            // textBoxPixelationOffsetY
-            // 
-            textBoxPixelationOffsetY.BorderStyle = BorderStyle.FixedSingle;
-            textBoxPixelationOffsetY.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            textBoxPixelationOffsetY.Name = "textBoxPixelationOffsetY";
-            textBoxPixelationOffsetY.Size = new Size(50, 27);
-            textBoxPixelationOffsetY.Text = "0";
-            textBoxPixelationOffsetY.Leave += textBoxPixelationOffsetY_Leave;
-            textBoxPixelationOffsetY.KeyDown += textBoxPixelationOffsetY_KeyDown;
-            // 
-            // toolStripSeparator35
-            // 
-            toolStripSeparator35.Name = "toolStripSeparator35";
-            toolStripSeparator35.Size = new Size(6, 27);
-            // 
-            // buttonApplyPixelation
-            // 
-            buttonApplyPixelation.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            buttonApplyPixelation.Image = Properties.Resources.icons8_done_48;
-            buttonApplyPixelation.ImageTransparentColor = Color.Magenta;
-            buttonApplyPixelation.Name = "buttonApplyPixelation";
-            buttonApplyPixelation.Size = new Size(24, 24);
-            buttonApplyPixelation.Text = "toolStripButton1";
-            buttonApplyPixelation.Click += buttonApplyPixelation_Click;
-            // 
-            // buttonCancelPixelation
-            // 
-            buttonCancelPixelation.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            buttonCancelPixelation.Image = Properties.Resources.icons8_close_48;
-            buttonCancelPixelation.ImageTransparentColor = Color.Magenta;
-            buttonCancelPixelation.Name = "buttonCancelPixelation";
-            buttonCancelPixelation.Size = new Size(24, 24);
-            buttonCancelPixelation.Text = "toolStripButton2";
-            buttonCancelPixelation.Click += buttonCancelPixelation_Click;
+            comboBoxPenType.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBoxPenType.FlatStyle = FlatStyle.Flat;
+            comboBoxPenType.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            comboBoxPenType.Items.AddRange(new object[] { "Pencil", "Marker", "Crayon", "Calligraphy Pen" });
+            comboBoxPenType.Name = "comboBoxPenType";
+            comboBoxPenType.Size = new Size(200, 25);
             // 
             // toolStripSpray
             // 
@@ -1507,62 +1532,6 @@
             toolStripSeparator25.Name = "toolStripSeparator25";
             toolStripSeparator25.Size = new Size(6, 25);
             // 
-            // toolStripAICreateImage
-            // 
-            toolStripAICreateImage.BackgroundImage = Properties.Resources.toolstrip_light;
-            toolStripAICreateImage.BackgroundImageLayout = ImageLayout.Stretch;
-            toolStripAICreateImage.Dock = DockStyle.None;
-            toolStripAICreateImage.GripStyle = ToolStripGripStyle.Hidden;
-            toolStripAICreateImage.ImageScalingSize = new Size(20, 20);
-            toolStripAICreateImage.Items.AddRange(new ToolStripItem[] { labelPrompt, textBoxPrompt, toolStripSeparator34, buttonCreate, buttonClose });
-            toolStripAICreateImage.Location = new Point(0, 28);
-            toolStripAICreateImage.Name = "toolStripAICreateImage";
-            toolStripAICreateImage.Size = new Size(605, 27);
-            toolStripAICreateImage.Stretch = true;
-            toolStripAICreateImage.TabIndex = 14;
-            toolStripAICreateImage.Visible = false;
-            // 
-            // labelPrompt
-            // 
-            labelPrompt.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            labelPrompt.Name = "labelPrompt";
-            labelPrompt.Size = new Size(46, 24);
-            labelPrompt.Text = "Prompt";
-            // 
-            // textBoxPrompt
-            // 
-            textBoxPrompt.BorderStyle = BorderStyle.FixedSingle;
-            textBoxPrompt.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            textBoxPrompt.Name = "textBoxPrompt";
-            textBoxPrompt.Size = new Size(500, 27);
-            textBoxPrompt.TextChanged += textBoxPrompt_TextChanged;
-            // 
-            // toolStripSeparator34
-            // 
-            toolStripSeparator34.Name = "toolStripSeparator34";
-            toolStripSeparator34.Size = new Size(6, 27);
-            // 
-            // buttonCreate
-            // 
-            buttonCreate.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            buttonCreate.Enabled = false;
-            buttonCreate.Image = Properties.Resources.icons8_done_481;
-            buttonCreate.ImageTransparentColor = Color.Magenta;
-            buttonCreate.Name = "buttonCreate";
-            buttonCreate.Size = new Size(24, 24);
-            buttonCreate.Text = "Create Image";
-            buttonCreate.Click += buttonCreate_Click;
-            // 
-            // buttonClose
-            // 
-            buttonClose.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            buttonClose.Image = Properties.Resources.icons8_close_481;
-            buttonClose.ImageTransparentColor = Color.Magenta;
-            buttonClose.Name = "buttonClose";
-            buttonClose.Size = new Size(24, 24);
-            buttonClose.Text = "Close";
-            buttonClose.Click += buttonClose_Click;
-            // 
             // toolStripShapes
             // 
             toolStripShapes.BackgroundImage = Properties.Resources.toolstrip_light;
@@ -1572,7 +1541,7 @@
             toolStripShapes.GripStyle = ToolStripGripStyle.Hidden;
             toolStripShapes.ImageScalingSize = new Size(20, 20);
             toolStripShapes.Items.AddRange(new ToolStripItem[] { toolStripLabel13, comboBoxShapeThickness, toolStripSeparator24, labelRadius, textBoxRadius, toolStripSeparator26, labelPoint, textBoxPoints });
-            toolStripShapes.Location = new Point(0, 28);
+            toolStripShapes.Location = new Point(0, 24);
             toolStripShapes.Name = "toolStripShapes";
             toolStripShapes.Size = new Size(310, 25);
             toolStripShapes.Stretch = true;
@@ -1803,40 +1772,252 @@
             buttonBackgroundFilling.Text = "Background Filling";
             buttonBackgroundFilling.CheckedChanged += buttonBackgroundFilling_CheckedChanged;
             // 
-            // toolStripAirBrush
+            // toolStripBrush
             // 
-            toolStripAirBrush.BackgroundImage = Properties.Resources.toolstrip_light;
-            toolStripAirBrush.BackgroundImageLayout = ImageLayout.Stretch;
-            toolStripAirBrush.Dock = DockStyle.None;
-            toolStripAirBrush.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            toolStripAirBrush.ImageScalingSize = new Size(20, 20);
-            toolStripAirBrush.Items.AddRange(new ToolStripItem[] { toolStripLabel9, toolStripComboBoxAirBrushSize, toolStripSeparator21 });
-            toolStripAirBrush.Location = new Point(0, 28);
-            toolStripAirBrush.Name = "toolStripAirBrush";
-            toolStripAirBrush.Size = new Size(125, 25);
-            toolStripAirBrush.Stretch = true;
-            toolStripAirBrush.TabIndex = 3;
-            toolStripAirBrush.Visible = false;
+            toolStripBrush.BackgroundImage = Properties.Resources.toolstrip_light;
+            toolStripBrush.BackgroundImageLayout = ImageLayout.Stretch;
+            toolStripBrush.Dock = DockStyle.None;
+            toolStripBrush.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            toolStripBrush.GripStyle = ToolStripGripStyle.Hidden;
+            toolStripBrush.ImageScalingSize = new Size(20, 20);
+            toolStripBrush.Items.AddRange(new ToolStripItem[] { toolStripLabel2, comboBoxBrushSize, toolStripSeparator17, toolStripLabel6, comboBoxBrushType });
+            toolStripBrush.Location = new Point(0, 0);
+            toolStripBrush.Name = "toolStripBrush";
+            toolStripBrush.Size = new Size(1289, 25);
+            toolStripBrush.Stretch = true;
+            toolStripBrush.TabIndex = 10;
+            toolStripBrush.Visible = false;
             // 
-            // toolStripLabel9
+            // toolStripLabel2
             // 
-            toolStripLabel9.Name = "toolStripLabel9";
-            toolStripLabel9.Size = new Size(30, 22);
-            toolStripLabel9.Text = "Size";
+            toolStripLabel2.Name = "toolStripLabel2";
+            toolStripLabel2.Size = new Size(30, 22);
+            toolStripLabel2.Text = "Size";
             // 
-            // toolStripComboBoxAirBrushSize
+            // comboBoxBrushSize
             // 
-            toolStripComboBoxAirBrushSize.Items.AddRange(new object[] { "8", "9", "10", "11", "12", "14", "16", "18", "20", "22", "24", "26", "28", "36", "48", "72" });
-            toolStripComboBoxAirBrushSize.Name = "toolStripComboBoxAirBrushSize";
-            toolStripComboBoxAirBrushSize.Size = new Size(75, 25);
-            toolStripComboBoxAirBrushSize.Text = "11";
-            toolStripComboBoxAirBrushSize.SelectedIndexChanged += comboBoxSpraySize_TextChanged;
-            toolStripComboBoxAirBrushSize.TextChanged += comboBoxSpraySize_TextChanged;
+            comboBoxBrushSize.FlatStyle = FlatStyle.Flat;
+            comboBoxBrushSize.Items.AddRange(new object[] { "8", "9", "10", "11", "12", "14", "16", "18", "20", "22", "24", "26", "28", "36", "48", "72" });
+            comboBoxBrushSize.Name = "comboBoxBrushSize";
+            comboBoxBrushSize.Size = new Size(75, 25);
+            comboBoxBrushSize.Text = "11";
+            comboBoxBrushSize.SelectedIndexChanged += comboBoxBrushSize_TextChanged;
+            comboBoxBrushSize.TextChanged += comboBoxBrushSize_TextChanged;
             // 
-            // toolStripSeparator21
+            // toolStripSeparator17
             // 
-            toolStripSeparator21.Name = "toolStripSeparator21";
-            toolStripSeparator21.Size = new Size(6, 25);
+            toolStripSeparator17.Name = "toolStripSeparator17";
+            toolStripSeparator17.Size = new Size(6, 25);
+            // 
+            // toolStripLabel6
+            // 
+            toolStripLabel6.Name = "toolStripLabel6";
+            toolStripLabel6.Size = new Size(67, 22);
+            toolStripLabel6.Text = "Brush Type";
+            // 
+            // comboBoxBrushType
+            // 
+            comboBoxBrushType.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBoxBrushType.FlatStyle = FlatStyle.Flat;
+            comboBoxBrushType.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            comboBoxBrushType.Items.AddRange(new object[] { "Brush", "Oil Paint Brush", "Calligraphy Brush", "Watercolor Brush" });
+            comboBoxBrushType.Name = "comboBoxBrushType";
+            comboBoxBrushType.Size = new Size(200, 25);
+            // 
+            // toolStripPixelate
+            // 
+            toolStripPixelate.BackgroundImage = Properties.Resources.toolstrip_light;
+            toolStripPixelate.BackgroundImageLayout = ImageLayout.Stretch;
+            toolStripPixelate.Dock = DockStyle.None;
+            toolStripPixelate.GripStyle = ToolStripGripStyle.Hidden;
+            toolStripPixelate.ImageScalingSize = new Size(20, 20);
+            toolStripPixelate.Items.AddRange(new ToolStripItem[] { toolStripLabel14, textBoxPixelationSize, toolStripSeparator30, toolStripLabel15, textBoxPixelationOffsetX, toolStripSeparator31, toolStripLabel16, textBoxPixelationOffsetY, toolStripSeparator35, buttonApplyPixelation, buttonCancelPixelation });
+            toolStripPixelate.Location = new Point(0, 0);
+            toolStripPixelate.Name = "toolStripPixelate";
+            toolStripPixelate.Size = new Size(1289, 27);
+            toolStripPixelate.Stretch = true;
+            toolStripPixelate.TabIndex = 15;
+            toolStripPixelate.Visible = false;
+            // 
+            // toolStripLabel14
+            // 
+            toolStripLabel14.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            toolStripLabel14.Name = "toolStripLabel14";
+            toolStripLabel14.Size = new Size(30, 24);
+            toolStripLabel14.Text = "Size";
+            // 
+            // textBoxPixelationSize
+            // 
+            textBoxPixelationSize.BorderStyle = BorderStyle.FixedSingle;
+            textBoxPixelationSize.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            textBoxPixelationSize.Name = "textBoxPixelationSize";
+            textBoxPixelationSize.Size = new Size(75, 27);
+            textBoxPixelationSize.Text = "16";
+            textBoxPixelationSize.Leave += textBoxPixelationSize_Leave;
+            textBoxPixelationSize.KeyDown += textBoxPixelationSize_KeyDown;
+            // 
+            // toolStripSeparator30
+            // 
+            toolStripSeparator30.Name = "toolStripSeparator30";
+            toolStripSeparator30.Size = new Size(6, 27);
+            // 
+            // toolStripLabel15
+            // 
+            toolStripLabel15.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            toolStripLabel15.Name = "toolStripLabel15";
+            toolStripLabel15.Size = new Size(51, 24);
+            toolStripLabel15.Text = "Offset X";
+            // 
+            // textBoxPixelationOffsetX
+            // 
+            textBoxPixelationOffsetX.BorderStyle = BorderStyle.FixedSingle;
+            textBoxPixelationOffsetX.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            textBoxPixelationOffsetX.Name = "textBoxPixelationOffsetX";
+            textBoxPixelationOffsetX.Size = new Size(50, 27);
+            textBoxPixelationOffsetX.Text = "0";
+            textBoxPixelationOffsetX.Leave += textBoxPixelationOffsetX_Leave;
+            textBoxPixelationOffsetX.KeyDown += textBoxPixelationOffsetX_KeyDown;
+            // 
+            // toolStripSeparator31
+            // 
+            toolStripSeparator31.Name = "toolStripSeparator31";
+            toolStripSeparator31.Size = new Size(6, 27);
+            // 
+            // toolStripLabel16
+            // 
+            toolStripLabel16.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            toolStripLabel16.Name = "toolStripLabel16";
+            toolStripLabel16.Size = new Size(50, 24);
+            toolStripLabel16.Text = "Offset Y";
+            // 
+            // textBoxPixelationOffsetY
+            // 
+            textBoxPixelationOffsetY.BorderStyle = BorderStyle.FixedSingle;
+            textBoxPixelationOffsetY.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            textBoxPixelationOffsetY.Name = "textBoxPixelationOffsetY";
+            textBoxPixelationOffsetY.Size = new Size(50, 27);
+            textBoxPixelationOffsetY.Text = "0";
+            textBoxPixelationOffsetY.Leave += textBoxPixelationOffsetY_Leave;
+            textBoxPixelationOffsetY.KeyDown += textBoxPixelationOffsetY_KeyDown;
+            // 
+            // toolStripSeparator35
+            // 
+            toolStripSeparator35.Name = "toolStripSeparator35";
+            toolStripSeparator35.Size = new Size(6, 27);
+            // 
+            // buttonApplyPixelation
+            // 
+            buttonApplyPixelation.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            buttonApplyPixelation.Image = Properties.Resources.icons8_done_48;
+            buttonApplyPixelation.ImageTransparentColor = Color.Magenta;
+            buttonApplyPixelation.Name = "buttonApplyPixelation";
+            buttonApplyPixelation.Size = new Size(24, 24);
+            buttonApplyPixelation.Text = "toolStripButton1";
+            buttonApplyPixelation.Click += buttonApplyPixelation_Click;
+            // 
+            // buttonCancelPixelation
+            // 
+            buttonCancelPixelation.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            buttonCancelPixelation.Image = Properties.Resources.icons8_close_48;
+            buttonCancelPixelation.ImageTransparentColor = Color.Magenta;
+            buttonCancelPixelation.Name = "buttonCancelPixelation";
+            buttonCancelPixelation.Size = new Size(24, 24);
+            buttonCancelPixelation.Text = "toolStripButton2";
+            buttonCancelPixelation.Click += buttonCancelPixelation_Click;
+            // 
+            // toolStripEraser
+            // 
+            toolStripEraser.BackgroundImage = Properties.Resources.toolstrip_light;
+            toolStripEraser.BackgroundImageLayout = ImageLayout.Stretch;
+            toolStripEraser.Dock = DockStyle.None;
+            toolStripEraser.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            toolStripEraser.GripStyle = ToolStripGripStyle.Hidden;
+            toolStripEraser.ImageScalingSize = new Size(20, 20);
+            toolStripEraser.Items.AddRange(new ToolStripItem[] { toolStripLabel12, comboBoxEraserSize, toolStripSeparator23 });
+            toolStripEraser.Location = new Point(0, 106);
+            toolStripEraser.Name = "toolStripEraser";
+            toolStripEraser.Size = new Size(1289, 25);
+            toolStripEraser.Stretch = true;
+            toolStripEraser.TabIndex = 5;
+            toolStripEraser.Visible = false;
+            // 
+            // toolStripLabel12
+            // 
+            toolStripLabel12.Name = "toolStripLabel12";
+            toolStripLabel12.Size = new Size(30, 22);
+            toolStripLabel12.Text = "Size";
+            // 
+            // comboBoxEraserSize
+            // 
+            comboBoxEraserSize.FlatStyle = FlatStyle.Flat;
+            comboBoxEraserSize.Items.AddRange(new object[] { "8", "9", "10", "11", "12", "14", "16", "18", "20", "22", "24", "26", "28", "36", "48", "72" });
+            comboBoxEraserSize.Name = "comboBoxEraserSize";
+            comboBoxEraserSize.Size = new Size(75, 25);
+            comboBoxEraserSize.Text = "11";
+            comboBoxEraserSize.SelectedIndexChanged += comboBoxEraserSize_SelectedIndexChanged;
+            comboBoxEraserSize.TextChanged += comboBoxEraserSize_TextChanged;
+            // 
+            // toolStripSeparator23
+            // 
+            toolStripSeparator23.Name = "toolStripSeparator23";
+            toolStripSeparator23.Size = new Size(6, 25);
+            // 
+            // toolStripGaussianBlur
+            // 
+            toolStripGaussianBlur.BackgroundImage = Properties.Resources.toolstrip_light;
+            toolStripGaussianBlur.BackgroundImageLayout = ImageLayout.Stretch;
+            toolStripGaussianBlur.Dock = DockStyle.None;
+            toolStripGaussianBlur.GripStyle = ToolStripGripStyle.Hidden;
+            toolStripGaussianBlur.ImageScalingSize = new Size(20, 20);
+            toolStripGaussianBlur.Items.AddRange(new ToolStripItem[] { toolStripLabel17, textboxGaussianBlurRadius, toolStripSeparator33, buttonApplyGaussianBlur, buttonCancelGaussianBlur });
+            toolStripGaussianBlur.Location = new Point(0, 79);
+            toolStripGaussianBlur.Name = "toolStripGaussianBlur";
+            toolStripGaussianBlur.Size = new Size(1289, 27);
+            toolStripGaussianBlur.Stretch = true;
+            toolStripGaussianBlur.TabIndex = 16;
+            toolStripGaussianBlur.Visible = false;
+            // 
+            // toolStripLabel17
+            // 
+            toolStripLabel17.Font = new Font("HarmonyOS Sans", 9F);
+            toolStripLabel17.Name = "toolStripLabel17";
+            toolStripLabel17.Size = new Size(44, 24);
+            toolStripLabel17.Text = "Radius";
+            // 
+            // textboxGaussianBlurRadius
+            // 
+            textboxGaussianBlurRadius.BorderStyle = BorderStyle.FixedSingle;
+            textboxGaussianBlurRadius.Font = new Font("HarmonyOS Sans", 9F);
+            textboxGaussianBlurRadius.Name = "textboxGaussianBlurRadius";
+            textboxGaussianBlurRadius.Size = new Size(75, 27);
+            textboxGaussianBlurRadius.Text = "1,50";
+            textboxGaussianBlurRadius.Leave += textboxGaussianBlurRadius_Leave;
+            textboxGaussianBlurRadius.KeyDown += textboxGaussianBlurRadius_KeyDown;
+            // 
+            // toolStripSeparator33
+            // 
+            toolStripSeparator33.Name = "toolStripSeparator33";
+            toolStripSeparator33.Size = new Size(6, 27);
+            // 
+            // buttonApplyGaussianBlur
+            // 
+            buttonApplyGaussianBlur.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            buttonApplyGaussianBlur.Image = Properties.Resources.icons8_done_48;
+            buttonApplyGaussianBlur.ImageTransparentColor = Color.Magenta;
+            buttonApplyGaussianBlur.Name = "buttonApplyGaussianBlur";
+            buttonApplyGaussianBlur.Size = new Size(24, 24);
+            buttonApplyGaussianBlur.Text = "Apply";
+            buttonApplyGaussianBlur.Click += buttonApplyGaussianBlur_Click;
+            // 
+            // buttonCancelGaussianBlur
+            // 
+            buttonCancelGaussianBlur.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            buttonCancelGaussianBlur.Image = Properties.Resources.icons8_close_48;
+            buttonCancelGaussianBlur.ImageTransparentColor = Color.Magenta;
+            buttonCancelGaussianBlur.Name = "buttonCancelGaussianBlur";
+            buttonCancelGaussianBlur.Size = new Size(24, 24);
+            buttonCancelGaussianBlur.Text = "Cancel";
+            buttonCancelGaussianBlur.Click += buttonCancelGaussianBlur_Click;
             // 
             // toolStripArtisticFilters
             // 
@@ -1846,9 +2027,9 @@
             toolStripArtisticFilters.GripStyle = ToolStripGripStyle.Hidden;
             toolStripArtisticFilters.ImageScalingSize = new Size(20, 20);
             toolStripArtisticFilters.Items.AddRange(new ToolStripItem[] { toolStripLabel5, textBoxArtisticFilterSize, toolStripSeparator27, toolStripLabel7, textBoxArtisticFilterIntensity, toolStripSeparator28, toolStripLabel8, textBoxArtisticFilterThreshold, toolStripSeparator32, buttonArtisticFiltersOK, buttonArtisticFiltersCancel });
-            toolStripArtisticFilters.Location = new Point(0, 28);
+            toolStripArtisticFilters.Location = new Point(0, 52);
             toolStripArtisticFilters.Name = "toolStripArtisticFilters";
-            toolStripArtisticFilters.Size = new Size(400, 27);
+            toolStripArtisticFilters.Size = new Size(1289, 27);
             toolStripArtisticFilters.Stretch = true;
             toolStripArtisticFilters.TabIndex = 9;
             toolStripArtisticFilters.Visible = false;
@@ -1939,57 +2120,61 @@
             buttonArtisticFiltersCancel.Text = "Cancel";
             buttonArtisticFiltersCancel.Click += buttonArtisticFiltersCancel_Click;
             // 
-            // toolStripBrush
+            // toolStripAICreateImage
             // 
-            toolStripBrush.BackgroundImage = Properties.Resources.toolstrip_light;
-            toolStripBrush.BackgroundImageLayout = ImageLayout.Stretch;
-            toolStripBrush.Dock = DockStyle.None;
-            toolStripBrush.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            toolStripBrush.GripStyle = ToolStripGripStyle.Hidden;
-            toolStripBrush.ImageScalingSize = new Size(20, 20);
-            toolStripBrush.Items.AddRange(new ToolStripItem[] { toolStripLabel2, comboBoxBrushSize, toolStripSeparator17, toolStripLabel6, comboBoxBrushType });
-            toolStripBrush.Location = new Point(0, 28);
-            toolStripBrush.Name = "toolStripBrush";
-            toolStripBrush.Size = new Size(385, 25);
-            toolStripBrush.Stretch = true;
-            toolStripBrush.TabIndex = 10;
-            toolStripBrush.Visible = false;
+            toolStripAICreateImage.BackgroundImage = Properties.Resources.toolstrip_light;
+            toolStripAICreateImage.BackgroundImageLayout = ImageLayout.Stretch;
+            toolStripAICreateImage.Dock = DockStyle.None;
+            toolStripAICreateImage.GripStyle = ToolStripGripStyle.Hidden;
+            toolStripAICreateImage.ImageScalingSize = new Size(20, 20);
+            toolStripAICreateImage.Items.AddRange(new ToolStripItem[] { labelPrompt, textBoxPrompt, toolStripSeparator34, buttonCreate, buttonClose });
+            toolStripAICreateImage.Location = new Point(0, 25);
+            toolStripAICreateImage.Name = "toolStripAICreateImage";
+            toolStripAICreateImage.Size = new Size(1289, 27);
+            toolStripAICreateImage.Stretch = true;
+            toolStripAICreateImage.TabIndex = 14;
+            toolStripAICreateImage.Visible = false;
             // 
-            // toolStripLabel2
+            // labelPrompt
             // 
-            toolStripLabel2.Name = "toolStripLabel2";
-            toolStripLabel2.Size = new Size(30, 22);
-            toolStripLabel2.Text = "Size";
+            labelPrompt.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            labelPrompt.Name = "labelPrompt";
+            labelPrompt.Size = new Size(46, 24);
+            labelPrompt.Text = "Prompt";
             // 
-            // comboBoxBrushSize
+            // textBoxPrompt
             // 
-            comboBoxBrushSize.FlatStyle = FlatStyle.Flat;
-            comboBoxBrushSize.Items.AddRange(new object[] { "8", "9", "10", "11", "12", "14", "16", "18", "20", "22", "24", "26", "28", "36", "48", "72" });
-            comboBoxBrushSize.Name = "comboBoxBrushSize";
-            comboBoxBrushSize.Size = new Size(75, 25);
-            comboBoxBrushSize.Text = "11";
-            comboBoxBrushSize.SelectedIndexChanged += comboBoxBrushSize_TextChanged;
-            comboBoxBrushSize.TextChanged += comboBoxBrushSize_TextChanged;
+            textBoxPrompt.BorderStyle = BorderStyle.FixedSingle;
+            textBoxPrompt.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            textBoxPrompt.Name = "textBoxPrompt";
+            textBoxPrompt.Size = new Size(500, 27);
+            textBoxPrompt.TextChanged += textBoxPrompt_TextChanged;
             // 
-            // toolStripSeparator17
+            // toolStripSeparator34
             // 
-            toolStripSeparator17.Name = "toolStripSeparator17";
-            toolStripSeparator17.Size = new Size(6, 25);
+            toolStripSeparator34.Name = "toolStripSeparator34";
+            toolStripSeparator34.Size = new Size(6, 27);
             // 
-            // toolStripLabel6
+            // buttonCreate
             // 
-            toolStripLabel6.Name = "toolStripLabel6";
-            toolStripLabel6.Size = new Size(67, 22);
-            toolStripLabel6.Text = "Brush Type";
+            buttonCreate.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            buttonCreate.Enabled = false;
+            buttonCreate.Image = Properties.Resources.icons8_done_481;
+            buttonCreate.ImageTransparentColor = Color.Magenta;
+            buttonCreate.Name = "buttonCreate";
+            buttonCreate.Size = new Size(24, 24);
+            buttonCreate.Text = "Create Image";
+            buttonCreate.Click += buttonCreate_Click;
             // 
-            // comboBoxBrushType
+            // buttonClose
             // 
-            comboBoxBrushType.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboBoxBrushType.FlatStyle = FlatStyle.Flat;
-            comboBoxBrushType.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            comboBoxBrushType.Items.AddRange(new object[] { "Brush", "Oil Paint Brush", "Calligraphy Brush", "Watercolor Brush" });
-            comboBoxBrushType.Name = "comboBoxBrushType";
-            comboBoxBrushType.Size = new Size(200, 25);
+            buttonClose.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            buttonClose.Image = Properties.Resources.icons8_close_481;
+            buttonClose.ImageTransparentColor = Color.Magenta;
+            buttonClose.Name = "buttonClose";
+            buttonClose.Size = new Size(24, 24);
+            buttonClose.Text = "Close";
+            buttonClose.Click += buttonClose_Click;
             // 
             // toolStripBucketTool
             // 
@@ -1999,9 +2184,9 @@
             toolStripBucketTool.GripStyle = ToolStripGripStyle.Hidden;
             toolStripBucketTool.ImageScalingSize = new Size(20, 20);
             toolStripBucketTool.Items.AddRange(new ToolStripItem[] { toolStripLabel4, textBoxTolerance });
-            toolStripBucketTool.Location = new Point(0, 28);
+            toolStripBucketTool.Location = new Point(0, 25);
             toolStripBucketTool.Name = "toolStripBucketTool";
-            toolStripBucketTool.Size = new Size(165, 25);
+            toolStripBucketTool.Size = new Size(1289, 25);
             toolStripBucketTool.Stretch = true;
             toolStripBucketTool.TabIndex = 8;
             toolStripBucketTool.Visible = false;
@@ -2023,151 +2208,71 @@
             textBoxTolerance.Leave += toolStripTextBox1_Leave;
             textBoxTolerance.KeyDown += textBoxTolerance_KeyDown;
             // 
-            // toolStripEraser
+            // toolStripMagicSelection
             // 
-            toolStripEraser.BackgroundImage = Properties.Resources.toolstrip_light;
-            toolStripEraser.BackgroundImageLayout = ImageLayout.Stretch;
-            toolStripEraser.Dock = DockStyle.None;
-            toolStripEraser.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            toolStripEraser.GripStyle = ToolStripGripStyle.Hidden;
-            toolStripEraser.ImageScalingSize = new Size(20, 20);
-            toolStripEraser.Items.AddRange(new ToolStripItem[] { toolStripLabel12, comboBoxEraserSize, toolStripSeparator23 });
-            toolStripEraser.Location = new Point(0, 28);
-            toolStripEraser.Name = "toolStripEraser";
-            toolStripEraser.Size = new Size(116, 25);
-            toolStripEraser.Stretch = true;
-            toolStripEraser.TabIndex = 5;
-            toolStripEraser.Visible = false;
+            toolStripMagicSelection.BackgroundImage = Properties.Resources.toolstrip_light;
+            toolStripMagicSelection.BackgroundImageLayout = ImageLayout.Stretch;
+            toolStripMagicSelection.Dock = DockStyle.None;
+            toolStripMagicSelection.GripStyle = ToolStripGripStyle.Hidden;
+            toolStripMagicSelection.ImageScalingSize = new Size(20, 20);
+            toolStripMagicSelection.Items.AddRange(new ToolStripItem[] { toolStripLabel19, textBoxTolerance2 });
+            toolStripMagicSelection.Location = new Point(0, 232);
+            toolStripMagicSelection.Name = "toolStripMagicSelection";
+            toolStripMagicSelection.Size = new Size(165, 25);
+            toolStripMagicSelection.Stretch = true;
+            toolStripMagicSelection.TabIndex = 20;
+            toolStripMagicSelection.Visible = false;
             // 
-            // toolStripLabel12
+            // toolStripLabel19
             // 
-            toolStripLabel12.Name = "toolStripLabel12";
-            toolStripLabel12.Size = new Size(30, 22);
-            toolStripLabel12.Text = "Size";
+            toolStripLabel19.Font = new Font("HarmonyOS Sans", 8.999999F);
+            toolStripLabel19.Name = "toolStripLabel19";
+            toolStripLabel19.Size = new Size(60, 22);
+            toolStripLabel19.Text = "Tolerance";
             // 
-            // comboBoxEraserSize
+            // textBoxTolerance2
             // 
-            comboBoxEraserSize.FlatStyle = FlatStyle.Flat;
-            comboBoxEraserSize.Items.AddRange(new object[] { "8", "9", "10", "11", "12", "14", "16", "18", "20", "22", "24", "26", "28", "36", "48", "72" });
-            comboBoxEraserSize.Name = "comboBoxEraserSize";
-            comboBoxEraserSize.Size = new Size(75, 25);
-            comboBoxEraserSize.Text = "11";
-            comboBoxEraserSize.SelectedIndexChanged += comboBoxEraserSize_SelectedIndexChanged;
-            comboBoxEraserSize.TextChanged += comboBoxEraserSize_TextChanged;
+            textBoxTolerance2.BorderStyle = BorderStyle.FixedSingle;
+            textBoxTolerance2.Font = new Font("HarmonyOS Sans", 8.999999F);
+            textBoxTolerance2.Name = "textBoxTolerance2";
+            textBoxTolerance2.Size = new Size(100, 25);
+            textBoxTolerance2.Text = "50";
             // 
-            // toolStripSeparator23
+            // toolStripAirBrush
             // 
-            toolStripSeparator23.Name = "toolStripSeparator23";
-            toolStripSeparator23.Size = new Size(6, 25);
+            toolStripAirBrush.BackgroundImage = Properties.Resources.toolstrip_light;
+            toolStripAirBrush.BackgroundImageLayout = ImageLayout.Stretch;
+            toolStripAirBrush.Dock = DockStyle.None;
+            toolStripAirBrush.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            toolStripAirBrush.GripStyle = ToolStripGripStyle.Hidden;
+            toolStripAirBrush.ImageScalingSize = new Size(20, 20);
+            toolStripAirBrush.Items.AddRange(new ToolStripItem[] { toolStripLabel9, toolStripComboBoxAirBrushSize, toolStripSeparator21 });
+            toolStripAirBrush.Location = new Point(0, 0);
+            toolStripAirBrush.Name = "toolStripAirBrush";
+            toolStripAirBrush.Size = new Size(1289, 25);
+            toolStripAirBrush.Stretch = true;
+            toolStripAirBrush.TabIndex = 3;
+            toolStripAirBrush.Visible = false;
             // 
-            // toolStripGaussianBlur
+            // toolStripLabel9
             // 
-            toolStripGaussianBlur.BackgroundImage = Properties.Resources.toolstrip_light;
-            toolStripGaussianBlur.BackgroundImageLayout = ImageLayout.Stretch;
-            toolStripGaussianBlur.Dock = DockStyle.None;
-            toolStripGaussianBlur.GripStyle = ToolStripGripStyle.Hidden;
-            toolStripGaussianBlur.ImageScalingSize = new Size(20, 20);
-            toolStripGaussianBlur.Items.AddRange(new ToolStripItem[] { toolStripLabel17, textboxGaussianBlurRadius, toolStripSeparator33, buttonApplyGaussianBlur, buttonCancelGaussianBlur });
-            toolStripGaussianBlur.Location = new Point(0, 28);
-            toolStripGaussianBlur.Name = "toolStripGaussianBlur";
-            toolStripGaussianBlur.Size = new Size(178, 27);
-            toolStripGaussianBlur.Stretch = true;
-            toolStripGaussianBlur.TabIndex = 16;
-            toolStripGaussianBlur.Visible = false;
+            toolStripLabel9.Name = "toolStripLabel9";
+            toolStripLabel9.Size = new Size(30, 22);
+            toolStripLabel9.Text = "Size";
             // 
-            // toolStripLabel17
+            // toolStripComboBoxAirBrushSize
             // 
-            toolStripLabel17.Font = new Font("HarmonyOS Sans", 9F);
-            toolStripLabel17.Name = "toolStripLabel17";
-            toolStripLabel17.Size = new Size(44, 24);
-            toolStripLabel17.Text = "Radius";
+            toolStripComboBoxAirBrushSize.Items.AddRange(new object[] { "8", "9", "10", "11", "12", "14", "16", "18", "20", "22", "24", "26", "28", "36", "48", "72" });
+            toolStripComboBoxAirBrushSize.Name = "toolStripComboBoxAirBrushSize";
+            toolStripComboBoxAirBrushSize.Size = new Size(75, 25);
+            toolStripComboBoxAirBrushSize.Text = "11";
+            toolStripComboBoxAirBrushSize.SelectedIndexChanged += comboBoxSpraySize_TextChanged;
+            toolStripComboBoxAirBrushSize.TextChanged += comboBoxSpraySize_TextChanged;
             // 
-            // textboxGaussianBlurRadius
+            // toolStripSeparator21
             // 
-            textboxGaussianBlurRadius.BorderStyle = BorderStyle.FixedSingle;
-            textboxGaussianBlurRadius.Font = new Font("HarmonyOS Sans", 9F);
-            textboxGaussianBlurRadius.Name = "textboxGaussianBlurRadius";
-            textboxGaussianBlurRadius.Size = new Size(75, 27);
-            textboxGaussianBlurRadius.Text = "1,50";
-            textboxGaussianBlurRadius.Leave += textboxGaussianBlurRadius_Leave;
-            textboxGaussianBlurRadius.KeyDown += textboxGaussianBlurRadius_KeyDown;
-            // 
-            // toolStripSeparator33
-            // 
-            toolStripSeparator33.Name = "toolStripSeparator33";
-            toolStripSeparator33.Size = new Size(6, 27);
-            // 
-            // buttonApplyGaussianBlur
-            // 
-            buttonApplyGaussianBlur.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            buttonApplyGaussianBlur.Image = Properties.Resources.icons8_done_48;
-            buttonApplyGaussianBlur.ImageTransparentColor = Color.Magenta;
-            buttonApplyGaussianBlur.Name = "buttonApplyGaussianBlur";
-            buttonApplyGaussianBlur.Size = new Size(24, 24);
-            buttonApplyGaussianBlur.Text = "Apply";
-            buttonApplyGaussianBlur.Click += buttonApplyGaussianBlur_Click;
-            // 
-            // buttonCancelGaussianBlur
-            // 
-            buttonCancelGaussianBlur.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            buttonCancelGaussianBlur.Image = Properties.Resources.icons8_close_48;
-            buttonCancelGaussianBlur.ImageTransparentColor = Color.Magenta;
-            buttonCancelGaussianBlur.Name = "buttonCancelGaussianBlur";
-            buttonCancelGaussianBlur.Size = new Size(24, 24);
-            buttonCancelGaussianBlur.Text = "Cancel";
-            buttonCancelGaussianBlur.Click += buttonCancelGaussianBlur_Click;
-            // 
-            // toolStripPen
-            // 
-            toolStripPen.BackgroundImage = Properties.Resources.toolstrip_light;
-            toolStripPen.BackgroundImageLayout = ImageLayout.Stretch;
-            toolStripPen.Dock = DockStyle.None;
-            toolStripPen.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            toolStripPen.GripStyle = ToolStripGripStyle.Hidden;
-            toolStripPen.ImageScalingSize = new Size(20, 20);
-            toolStripPen.Items.AddRange(new ToolStripItem[] { toolStripLabel10, comboBoxPenSize, toolStripSeparator22, toolStripLabel11, comboBoxPenType });
-            toolStripPen.Location = new Point(0, 28);
-            toolStripPen.Name = "toolStripPen";
-            toolStripPen.Size = new Size(375, 25);
-            toolStripPen.Stretch = true;
-            toolStripPen.TabIndex = 13;
-            toolStripPen.Visible = false;
-            // 
-            // toolStripLabel10
-            // 
-            toolStripLabel10.Name = "toolStripLabel10";
-            toolStripLabel10.Size = new Size(30, 22);
-            toolStripLabel10.Text = "Size";
-            // 
-            // comboBoxPenSize
-            // 
-            comboBoxPenSize.FlatStyle = FlatStyle.Flat;
-            comboBoxPenSize.Items.AddRange(new object[] { "8", "9", "10", "11", "12", "14", "16", "18", "20", "22", "24", "26", "28", "36", "48", "72" });
-            comboBoxPenSize.Name = "comboBoxPenSize";
-            comboBoxPenSize.Size = new Size(75, 25);
-            comboBoxPenSize.Text = "11";
-            comboBoxPenSize.SelectedIndexChanged += comboBoxPenSize_TextChanged;
-            comboBoxPenSize.TextChanged += comboBoxPenSize_TextChanged;
-            // 
-            // toolStripSeparator22
-            // 
-            toolStripSeparator22.Name = "toolStripSeparator22";
-            toolStripSeparator22.Size = new Size(6, 25);
-            // 
-            // toolStripLabel11
-            // 
-            toolStripLabel11.Name = "toolStripLabel11";
-            toolStripLabel11.Size = new Size(57, 22);
-            toolStripLabel11.Text = "Pen Type";
-            // 
-            // comboBoxPenType
-            // 
-            comboBoxPenType.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboBoxPenType.FlatStyle = FlatStyle.Flat;
-            comboBoxPenType.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            comboBoxPenType.Items.AddRange(new object[] { "Pencil", "Marker", "Crayon", "Calligraphy Pen" });
-            comboBoxPenType.Name = "comboBoxPenType";
-            comboBoxPenType.Size = new Size(200, 25);
+            toolStripSeparator21.Name = "toolStripSeparator21";
+            toolStripSeparator21.Size = new Size(6, 25);
             // 
             // colorDialog1
             // 
@@ -2198,6 +2303,7 @@
             AutoScaleMode = AutoScaleMode.None;
             ClientSize = new Size(1289, 812);
             Controls.Add(toolStripContainer1);
+            Controls.Add(menuStrip1);
             DoubleBuffered = true;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "ImageEditor";
@@ -2224,31 +2330,34 @@
             toolStripTools.PerformLayout();
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
-            toolStripPixelate.ResumeLayout(false);
-            toolStripPixelate.PerformLayout();
+            toolStripPen.ResumeLayout(false);
+            toolStripPen.PerformLayout();
             toolStripSpray.ResumeLayout(false);
             toolStripSpray.PerformLayout();
-            toolStripAICreateImage.ResumeLayout(false);
-            toolStripAICreateImage.PerformLayout();
             toolStripShapes.ResumeLayout(false);
             toolStripShapes.PerformLayout();
             toolStripText.ResumeLayout(false);
             toolStripText.PerformLayout();
-            toolStripAirBrush.ResumeLayout(false);
-            toolStripAirBrush.PerformLayout();
-            toolStripArtisticFilters.ResumeLayout(false);
-            toolStripArtisticFilters.PerformLayout();
             toolStripBrush.ResumeLayout(false);
             toolStripBrush.PerformLayout();
-            toolStripBucketTool.ResumeLayout(false);
-            toolStripBucketTool.PerformLayout();
+            toolStripPixelate.ResumeLayout(false);
+            toolStripPixelate.PerformLayout();
             toolStripEraser.ResumeLayout(false);
             toolStripEraser.PerformLayout();
             toolStripGaussianBlur.ResumeLayout(false);
             toolStripGaussianBlur.PerformLayout();
-            toolStripPen.ResumeLayout(false);
-            toolStripPen.PerformLayout();
+            toolStripArtisticFilters.ResumeLayout(false);
+            toolStripArtisticFilters.PerformLayout();
+            toolStripAICreateImage.ResumeLayout(false);
+            toolStripAICreateImage.PerformLayout();
+            toolStripBucketTool.ResumeLayout(false);
+            toolStripBucketTool.PerformLayout();
+            toolStripMagicSelection.ResumeLayout(false);
+            toolStripMagicSelection.PerformLayout();
+            toolStripAirBrush.ResumeLayout(false);
+            toolStripAirBrush.PerformLayout();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -2390,6 +2499,13 @@
         private ToolStripLabel labelCreatingImage;
         private ToolStripLabel labelAIImageErasing;
         private ToolStripProgressBar progressBarAIImageCreation;
+        private ToolStripSeparator toolStripSeparatorProfessional;
+        private ToolStripButton cropTool;
+        private ToolStripButton rotateTool;
+        private ToolStripButton flipHTool;
+        private ToolStripButton flipVTool;
+        private ToolStripButton grayscaleTool;
+        private ToolStripButton fitTool;
         private MenuStrip menuStrip1;
         private ToolStripMenuItem dosyaToolStripMenuItem;
         private ToolStripMenuItem yeniToolStripMenuItem;
@@ -2464,5 +2580,8 @@
         private ToolStripSeparator toolStripSeparator34;
         private ToolStripSeparator toolStripSeparator35;
         private ToolStripLabel labelBackgroundRemoving;
+        private ToolStrip toolStripMagicSelection;
+        private ToolStripLabel toolStripLabel19;
+        private ToolStripTextBox textBoxTolerance2;
     }
 }

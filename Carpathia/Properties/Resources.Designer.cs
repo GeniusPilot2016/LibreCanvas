@@ -293,6 +293,16 @@ namespace Carpathia.Properties {
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
+        internal static System.Drawing.Bitmap icons8_black_and_white_48__1_ {
+            get {
+                object obj = ResourceManager.GetObject("icons8-black-and-white-48 (1)", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
         internal static System.Drawing.Bitmap icons8_blur_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-blur-48", resourceCulture);
@@ -396,6 +406,16 @@ namespace Carpathia.Properties {
         internal static System.Drawing.Bitmap icons8_copy_to_clipboard_481 {
             get {
                 object obj = ResourceManager.GetObject("icons8-copy-to-clipboard-481", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap icons8_crop_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-crop-48", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -513,9 +533,39 @@ namespace Carpathia.Properties {
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
+        internal static System.Drawing.Bitmap icons8_fit_to_page_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-fit-to-page-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
         internal static System.Drawing.Bitmap icons8_flash_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-flash-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap icons8_flip_horizontal_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-flip-horizontal-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap icons8_flip_vertical_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-flip-vertical-48", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -806,6 +856,26 @@ namespace Carpathia.Properties {
         internal static System.Drawing.Bitmap icons8_reflection_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-reflection-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap icons8_rotate_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-rotate-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap icons8_rotate_481 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-rotate-481", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

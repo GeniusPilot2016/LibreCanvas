@@ -1,4 +1,4 @@
-﻿// LibreCanvas - The AI-enabled simple image editor for everyone, born as a school project by GeniusPilot2016
+// LibreCanvas - The AI-enabled simple image editor for everyone, born as a school project by GeniusPilot2016
 // Copyright (C) 2025 GeniusPilot2016
 //
 // This program is free software: you can redistribute it and/or modify
@@ -54,40 +54,28 @@ namespace Carpathia
                 string encodedPrompt = HttpUtility.UrlEncode(prompt);
 
                 string url;
+                // Privacy hardening: never upload a user's reference image to an anonymous
+                // third-party temporary host. Until the configured AI endpoint supports a
+                // direct authenticated image upload, reference-image transport is disabled.
                 if (referenceImage != null)
-                {
-                    string referenceImageUrl = await CreateTemporaryImageURL(referenceImage);
-                    if (string.IsNullOrEmpty(referenceImageUrl))
-                    {
-                        Logger.Log("Reference image upload failed, generating without reference", Logger.LogTypes.Warning);
-                        url = $"https://image.pollinations.ai/prompt/{encodedPrompt}?width={width}&height={height}&nologo=true&seed={seed}";
-                    }
-                    else
-                    {
-                        // Decode the URL to ensure it's properly formatted
-                        string encodedImageUrl = HttpUtility.UrlEncode(referenceImageUrl);
-                        url = $"https://image.pollinations.ai/prompt/{encodedPrompt}?width={width}&height={height}&nologo=true&seed={seed}&enhance=true&image_link={encodedImageUrl}";
-                        Logger.Log($"Using reference image URL: {referenceImageUrl}", Logger.LogTypes.Info);
-                    }
-                }
-                else
-                {
-                    url = $"https://image.pollinations.ai/prompt/{encodedPrompt}?width={width}&height={height}&nologo=true&seed={seed}";
-                }
+                    Logger.Log("Reference image transport disabled for privacy; generating from text only.", Logger.LogTypes.Warning);
 
-                Logger.Log($"Generating image with Pollinations.AI: {prompt}", Logger.LogTypes.Info);
-                Logger.Log($"Full URL: {url}", Logger.LogTypes.Info);
+                SecurityGuard.ValidateDimensions(width, height);
+                url = $"https://image.pollinations.ai/prompt/{encodedPrompt}?width={width}&height={height}&nologo=true&seed={seed}";
+                Logger.Log($"Generating AI image ({width}x{height}, reference supplied={referenceImage != null}).", Logger.LogTypes.Info);
 
-                var response = await httpClient.GetAsync(url, ct);
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
                 response.EnsureSuccessStatusCode();
+                if (!SecurityGuard.IsAllowedImageContentType(response.Content.Headers.ContentType))
+                    throw new InvalidDataException("AI service returned an unsupported content type.");
 
-                using (var stream = await response.Content.ReadAsStreamAsync())
-                {
-                    var image = Image.FromStream(stream);
-                    Logger.Log("Image generated successfully with Pollinations.AI", Logger.LogTypes.Info);
-                    image = RescaleImage(image, width, height);
-                    return image;
-                }
+                byte[] bytes = await SecurityGuard.ReadBoundedAsync(response.Content, SecurityGuard.MaxRemoteImageBytes, ct);
+                using var stream = new MemoryStream(bytes, writable: false);
+                using var decoded = Image.FromStream(stream, useEmbeddedColorManagement: true, validateImageData: true);
+                SecurityGuard.ValidateDimensions(decoded.Width, decoded.Height);
+                Logger.Log("AI image generated successfully.", Logger.LogTypes.Info);
+                return RescaleImage(decoded, width, height);
             }
             catch (Exception ex)
             {
@@ -127,55 +115,6 @@ namespace Carpathia
             return destImage;
         }
 
-        private static async Task<string> CreateTemporaryImageURL(Image image)
-        {
-            try
-            {
-                using (var ms = new MemoryStream())
-                {
-                    // Use JPEG format for better compatibility
-                    image.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
-                    byte[] imageBytes = ms.ToArray();
-
-                    // Use tmpfiles.org for temporary image hosting
-                    using (var content = new MultipartFormDataContent())
-                    {
-                        var fileContent = new ByteArrayContent(imageBytes);
-                        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/jpeg");
-                        content.Add(fileContent, "file", "reference.jpg");
-
-                        var response = await httpClient.PostAsync("https://tmpfiles.org/api/v1/upload", content);
-
-                        if (!response.IsSuccessStatusCode)
-                        {
-                            Logger.Log($"Upload failed with status: {response.StatusCode}", Logger.LogTypes.Warning);
-                            return null;
-                        }
-
-                        string responseBody = await response.Content.ReadAsStringAsync();
-                        var json = JObject.Parse(responseBody);
-
-                        string tmpUrl = json["data"]?["url"]?.ToString();
-                        if (string.IsNullOrEmpty(tmpUrl))
-                        {
-                            Logger.Log("Failed to parse upload response", Logger.LogTypes.Warning);
-                            return null;
-                        }
-
-                        // Create direct access URL
-                        string directUrl = tmpUrl.Replace("tmpfiles.org/", "tmpfiles.org/dl/");
-
-                        Logger.Log($"Temporary image uploaded: {directUrl}", Logger.LogTypes.Info);
-                        return directUrl;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log($"Failed to upload temporary image: {ex.Message}", Logger.LogTypes.Error);
-                return null; // Return null on failure
-            }
-        }
 
         public enum AvailabilityStatus
         {
