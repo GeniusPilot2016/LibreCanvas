@@ -37,6 +37,13 @@
             radioButtonDontShowStartup = new RadioButton();
             radioButtonShowStartup = new RadioButton();
             groupBox2 = new GroupBox();
+            groupBox23 = new GroupBox();
+            button4 = new Button();
+            icons = new ImageList(components);
+            label14 = new Label();
+            button3 = new Button();
+            textBox1 = new TextBox();
+            label13 = new Label();
             groupBox18 = new GroupBox();
             numericUpDownDefaultAIGeneratedImageHeight = new NumericUpDown();
             numericUpDownDefaultAIGeneratedImageWidth = new NumericUpDown();
@@ -126,13 +133,13 @@
             panelPrimaryColorPreview = new Panel();
             label16 = new Label();
             label17 = new Label();
-            icons = new ImageList(components);
             colorDialog1 = new ColorDialog();
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
             groupBox3.SuspendLayout();
             groupBox4.SuspendLayout();
             groupBox2.SuspendLayout();
+            groupBox23.SuspendLayout();
             groupBox18.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultAIGeneratedImageHeight).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultAIGeneratedImageWidth).BeginInit();
@@ -220,7 +227,7 @@
             // 
             groupBox3.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             groupBox3.Controls.Add(groupBox4);
-            groupBox3.Location = new Point(6, 164);
+            groupBox3.Location = new Point(6, 284);
             groupBox3.Name = "groupBox3";
             groupBox3.Size = new Size(539, 96);
             groupBox3.TabIndex = 2;
@@ -268,14 +275,109 @@
             // groupBox2
             // 
             groupBox2.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox2.Controls.Add(groupBox23);
             groupBox2.Controls.Add(groupBox18);
             groupBox2.Location = new Point(6, 73);
             groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(539, 85);
+            groupBox2.Size = new Size(539, 205);
             groupBox2.TabIndex = 2;
             groupBox2.TabStop = false;
             groupBox2.Text = "AI Settings";
             groupBox2.Enter += groupBox2_Enter;
+            // 
+            // groupBox23
+            // 
+            groupBox23.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox23.Controls.Add(button4);
+            groupBox23.Controls.Add(label14);
+            groupBox23.Controls.Add(button3);
+            groupBox23.Controls.Add(textBox1);
+            groupBox23.Controls.Add(label13);
+            groupBox23.Location = new Point(6, 22);
+            groupBox23.Name = "groupBox23";
+            groupBox23.Size = new Size(527, 120);
+            groupBox23.TabIndex = 6;
+            groupBox23.TabStop = false;
+            groupBox23.Text = "HuggingFace API Settings";
+            // 
+            // button4
+            // 
+            button4.ImageIndex = 8;
+            button4.ImageList = icons;
+            button4.Location = new Point(190, 80);
+            button4.Name = "button4";
+            button4.Size = new Size(140, 28);
+            button4.TabIndex = 4;
+            button4.Text = "Save API Key";
+            button4.TextAlign = ContentAlignment.MiddleRight;
+            button4.TextImageRelation = TextImageRelation.ImageBeforeText;
+            button4.UseVisualStyleBackColor = true;
+            button4.Click += button4_Click;
+            // 
+            // icons
+            // 
+            icons.ColorDepth = ColorDepth.Depth32Bit;
+            icons.ImageStream = (ImageListStreamer)resources.GetObject("icons.ImageStream");
+            icons.TransparentColor = Color.Transparent;
+            icons.Images.SetKeyName(0, "icons8-wrench-48.png");
+            icons.Images.SetKeyName(1, "icons8-canvas-48.png");
+            icons.Images.SetKeyName(2, "icons8-drawing-48.png");
+            icons.Images.SetKeyName(3, "icons8-color-48.png");
+            icons.Images.SetKeyName(4, "icons8-ai-48.png");
+            icons.Images.SetKeyName(5, "icons8-mark-view-as-non-hidden-48.png");
+            icons.Images.SetKeyName(6, "icons8-mark-view-as-hidden-48.png");
+            icons.Images.SetKeyName(7, "icons8-warning-48.png");
+            icons.Images.SetKeyName(8, "icons8-update-48 (1).png");
+            icons.Images.SetKeyName(9, "icons8-reset-48.png");
+            icons.Images.SetKeyName(10, "icons8-bard-48.png");
+            icons.Images.SetKeyName(11, "icons8-hugging-face-48.png");
+            icons.Images.SetKeyName(12, "icons8-photo-editor-48.png");
+            icons.Images.SetKeyName(13, "icons8-ai-chip-48.png");
+            icons.Images.SetKeyName(14, "icons8-opened-folder-48.png");
+            icons.Images.SetKeyName(15, "icons8-clear-48.png");
+            // 
+            // label14
+            // 
+            label14.AutoSize = true;
+            label14.ImageAlign = ContentAlignment.MiddleLeft;
+            label14.ImageIndex = 7;
+            label14.ImageList = icons;
+            label14.Location = new Point(64, 55);
+            label14.Name = "label14";
+            label14.Size = new Size(397, 16);
+            label14.TabIndex = 3;
+            label14.Text = "        Warning: Do not share your HuggingFace API key with anyone else.";
+            label14.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // button3
+            // 
+            button3.ImageIndex = 5;
+            button3.ImageList = icons;
+            button3.Location = new Point(441, 22);
+            button3.Name = "button3";
+            button3.Size = new Size(75, 30);
+            button3.TabIndex = 2;
+            button3.Text = "Show";
+            button3.TextImageRelation = TextImageRelation.ImageBeforeText;
+            button3.UseVisualStyleBackColor = true;
+            button3.Click += button3_Click;
+            // 
+            // textBox1
+            // 
+            textBox1.Location = new Point(137, 25);
+            textBox1.Name = "textBox1";
+            textBox1.Size = new Size(298, 23);
+            textBox1.TabIndex = 1;
+            textBox1.UseSystemPasswordChar = true;
+            // 
+            // label13
+            // 
+            label13.AutoSize = true;
+            label13.Location = new Point(6, 28);
+            label13.Name = "label13";
+            label13.Size = new Size(125, 16);
+            label13.TabIndex = 0;
+            label13.Text = "HuggingFace API Key";
             // 
             // groupBox18
             // 
@@ -286,7 +388,7 @@
             groupBox18.Controls.Add(label27);
             groupBox18.Controls.Add(label26);
             groupBox18.Controls.Add(label18);
-            groupBox18.Location = new Point(6, 21);
+            groupBox18.Location = new Point(6, 141);
             groupBox18.Name = "groupBox18";
             groupBox18.Size = new Size(527, 56);
             groupBox18.TabIndex = 5;
@@ -1312,28 +1414,6 @@
             label17.TabIndex = 0;
             label17.Text = "Primary Color";
             // 
-            // icons
-            // 
-            icons.ColorDepth = ColorDepth.Depth32Bit;
-            icons.ImageStream = (ImageListStreamer)resources.GetObject("icons.ImageStream");
-            icons.TransparentColor = Color.Transparent;
-            icons.Images.SetKeyName(0, "icons8-wrench-48.png");
-            icons.Images.SetKeyName(1, "icons8-canvas-48.png");
-            icons.Images.SetKeyName(2, "icons8-drawing-48.png");
-            icons.Images.SetKeyName(3, "icons8-color-48.png");
-            icons.Images.SetKeyName(4, "icons8-ai-48.png");
-            icons.Images.SetKeyName(5, "icons8-mark-view-as-non-hidden-48.png");
-            icons.Images.SetKeyName(6, "icons8-mark-view-as-hidden-48.png");
-            icons.Images.SetKeyName(7, "icons8-warning-48.png");
-            icons.Images.SetKeyName(8, "icons8-update-48 (1).png");
-            icons.Images.SetKeyName(9, "icons8-reset-48.png");
-            icons.Images.SetKeyName(10, "icons8-bard-48.png");
-            icons.Images.SetKeyName(11, "icons8-hugging-face-48.png");
-            icons.Images.SetKeyName(12, "icons8-photo-editor-48.png");
-            icons.Images.SetKeyName(13, "icons8-ai-chip-48.png");
-            icons.Images.SetKeyName(14, "icons8-opened-folder-48.png");
-            icons.Images.SetKeyName(15, "icons8-clear-48.png");
-            // 
             // SettingsWindow
             // 
             AutoScaleDimensions = new SizeF(96F, 96F);
@@ -1355,6 +1435,8 @@
             groupBox4.ResumeLayout(false);
             groupBox4.PerformLayout();
             groupBox2.ResumeLayout(false);
+            groupBox23.ResumeLayout(false);
+            groupBox23.PerformLayout();
             groupBox18.ResumeLayout(false);
             groupBox18.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)numericUpDownDefaultAIGeneratedImageHeight).EndInit();
@@ -1523,5 +1605,11 @@
         private GroupBox groupBox29;
         private Label label38;
         private NumericUpDown numericUpDownDefaultGaussianBlurRadius;
+        private GroupBox groupBox23;
+        private Button button3;
+        private TextBox textBox1;
+        private Label label13;
+        private Label label14;
+        private Button button4;
     }
 }

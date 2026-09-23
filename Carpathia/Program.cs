@@ -34,18 +34,6 @@ namespace Carpathia
                 ApplicationConfiguration.Initialize();
                 Logger.Log("Application started.", Logger.LogTypes.Info);
                 UpgradeSettingsIfNeeded();
-                try
-                {
-                    EncryptionHelper.DecryptString(Settings1.Default.HashedGeminiAIAPIKey);
-                }
-                catch (Exception)
-                {
-                    EncryptionHelper.ChangeKeyAndIV();
-                    Settings1.Default.HashedGeminiAIAPIKey = string.Empty;
-                    Settings1.Default.Save();
-                    Logger.Log("The Google Gemini™ API key is corrupted. Please re-enter the key in the settings.", Logger.LogTypes.Error);
-                    MessageForm.Show("The Google Gemini™ API key is corrupted. Please re-enter the key in the settings.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
                 Application.Run(new SplashScreen()); // Start with the splash screen
 
             }
