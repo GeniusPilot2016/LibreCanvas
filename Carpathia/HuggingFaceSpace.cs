@@ -395,36 +395,36 @@ namespace Carpathia
                 );
 
             var payload =
-                new JsonObject
-                {
-                    ["prompt"] =
-                        JsonValue.Create(
-                            prompt
-                        ),
+            new JsonObject
+            {
+                ["prompt"] =
+                    JsonValue.Create(
+                        prompt
+                    ),
 
-                    ["input_images"] =
-                        inputImages,
+                ["input_images"] =
+                    inputImages,
 
-                    ["enhance"] =
-                        JsonValue.Create(
-                            false
-                        ),
+                ["enhance"] =
+                    JsonValue.Create(
+                        true
+                    ),
 
-                    ["seed"] =
-                        JsonValue.Create(
-                            0.0
-                        ),
+                ["seed"] =
+                    JsonValue.Create(
+                        0.0
+                    ),
 
-                    ["randomize_seed"] =
-                        JsonValue.Create(
-                            true
-                        ),
+                ["randomize_seed"] =
+                    JsonValue.Create(
+                        true
+                    ),
 
-                    ["aspect_ratio"] =
-                        JsonValue.Create(
-                            aspectRatio
-                        )
-                };
+                ["aspect_ratio"] =
+                    JsonValue.Create(
+                        aspectRatio
+                    )
+            };
 
             string jsonPayload =
                 payload.ToJsonString();
