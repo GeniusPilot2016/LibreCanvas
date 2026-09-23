@@ -1,5 +1,5 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="_222303026_proje3" GeneratedClassName="Settings1">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Carpathia" GeneratedClassName="Settings1">
   <Profiles />
   <Settings>
     <Setting Name="RecentFiles" Type="System.Collections.Specialized.StringCollection" Scope="User">
@@ -44,7 +44,7 @@
     <Setting Name="SecondaryColor" Type="System.Drawing.Color" Scope="User">
       <Value Profile="(Default)">Black</Value>
     </Setting>
-    <Setting Name="HashedGeminiAIAPIKey" Type="System.String" Scope="User">
+    <Setting Name="HuggingFaceAPIKeyBase64" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="DefaultAIGeneratedImageSize" Type="System.Drawing.Size" Scope="User">

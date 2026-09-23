@@ -108,38 +108,84 @@ namespace Carpathia
         Image generatedImage = null; // To hold the generated image from the AI
         private async void button1_Click(object sender, EventArgs e)
         {
+            Bitmap bitmap = null;
+
             try
             {
                 setVisibilityOfProgressBarAndSomeControls(true);
+
                 string prompt = textBoxPrompt.Text;
                 int width = (int)numericUpDownWidth.Value;
                 int height = (int)numericUpDownHeight.Value;
-                Bitmap bitmap = !string.IsNullOrEmpty(filePath) ? new Bitmap(filePath) : null;
-                generatedImage = await PollinationsAI.CreateImageAsync(prompt, width, height, bitmap, cts.Token);
 
-                /*Image generatedImage = await CreateAIImages.CreateImage(prompt, (int)numericUpDownWidth.Value,
-                    (int)numericUpDownHeight.Value, filePath, cts);*/
-                
+                if (!string.IsNullOrEmpty(filePath))
+                {
+                    bitmap = new Bitmap(filePath);
+                }
+
+                generatedImage = await HuggingFaceSpace.GenerateImage(
+                    prompt,
+                    bitmap,
+                    width,
+                    height,
+                    cts.Token
+                );
+
+                if (generatedImage != null)
+                {
+                    image = generatedImage;
+                    imageIsCompleted = true;
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                // Request was cancelled.
+            }
+            catch (OperationCanceledException)
+            {
+                // User closed/cancelled the generation.
+            }
+            catch (HuggingFaceApiException ex)
+            {
+                Logger.Log(
+                    ex.Message,
+                    Logger.LogTypes.Error
+                );
+
+                MessageForm.Show(
+                    this,
+                    ex.Message,
+                    ex.DisplayTitle,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
             }
             catch (Exception ex)
             {
-                if(ex is not OperationCanceledException && ex is not TaskCanceledException)
-                {
-                    HandleStatus(ex.Message);
-                }
+                // Do NOT pass HuggingFace errors to PollinationsAI.
+                Logger.Log(
+                    "Hugging Face image generation error:\r\n" + ex,
+                    Logger.LogTypes.Error
+                );
+
+                MessageForm.Show(
+                    this,
+                    "An error occurred while generating the image.\r\n\r\n" + ex.Message,
+                    "Image Generation Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
             }
             finally
             {
+                bitmap?.Dispose();
+
                 setVisibilityOfProgressBarAndSomeControls(false);
-                if (generatedImage != null)
+
+                if (!IsDisposed)
                 {
-                    // İlk resmi yeniden boyutlandırın
-                    setVisibilityOfProgressBarAndSomeControls(false);
-                    image = generatedImage;
-                    //image = ResizeImage(generatedImage, width, height);
-                    imageIsCompleted = true; // Mark the image generation as completed
+                    Close();
                 }
-                this.Close();
             }
         }
         private void setVisibilityOfProgressBarAndSomeControls(bool isVisible)
@@ -217,17 +263,17 @@ namespace Carpathia
 
         private void CreateWithAIForm_Load(object sender, EventArgs e)
         {
-            HandleStatus();
+            //HandleStatus();
         }
 
         private void button1_Click_1(object sender, EventArgs e)
         {
-            /*fileBrowser.Filter = "PNG Image|*.png|JPEG Image|*.jpg;*.jpeg|Bitmap Image|*.bmp|GIF Image|*.gif|All Files|*.*";
+            fileBrowser.Filter = "PNG Image|*.png|JPEG Image|*.jpg;*.jpeg|Bitmap Image|*.bmp|GIF Image|*.gif|All Files|*.*";
             if (fileBrowser.ShowDialog() == DialogResult.OK)
             {
                 try
                 {
-                    if (CreateAIImages.isImage(fileBrowser.FileName))
+                    if (IsImage(fileBrowser.FileName))
                     {
                         filePath = fileBrowser.FileName;
                         labelUploadedImage.Text = Path.GetFileName(filePath);
@@ -246,7 +292,28 @@ namespace Carpathia
                     Logger.Log("Error loading image: " + ex.Message, Logger.LogTypes.Error);
                     MessageForm.Show("Error loading image. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-            }*/
+            }
+        }
+
+        private bool IsImage(string filePath)
+        {
+            try
+            {
+                using (var img = Image.FromFile(filePath))
+                {
+                    return true;
+                }
+            }
+            catch (OutOfMemoryException)
+            {
+                // The file does not have a valid image format or GDI+ does not support the pixel format of the file.
+                return false;
+            }
+            catch (FileNotFoundException)
+            {
+                // The file does not exist.
+                return false;
+            }
         }
         enum StatusMode
         {

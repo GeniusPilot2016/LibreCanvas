@@ -38,7 +38,7 @@ namespace Carpathia
                         foreach (Control groupedControl in groupBox.Controls)
                         {
                             groupedControl.Font = uiFonts.SetUIFont(groupedControl.Font.Size, groupedControl.Font.Style);
-                            foreach(Control childGroupedControl in groupedControl.Controls)
+                            foreach (Control childGroupedControl in groupedControl.Controls)
                             {
                                 childGroupedControl.Font = uiFonts.SetUIFont(childGroupedControl.Font.Size, childGroupedControl.Font.Style);
                             }
@@ -102,7 +102,8 @@ namespace Carpathia
             // Color settings
             panelPrimaryColorPreview.BackColor = Settings1.Default.PrimaryColor;
             panelSecondaryColorPreview.BackColor = Settings1.Default.SecondaryColor;
-
+            EncryptionHelper encryptionHelper = new EncryptionHelper();
+            textBox1.Text = encryptionHelper.DecryptStringFromBase64(Settings1.Default.HuggingFaceAPIKeyBase64); 
         }
         private void SetTheme()
         {
@@ -272,7 +273,7 @@ namespace Carpathia
         }
         private void comboBoxTheme_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if(comboBoxTheme.SelectedIndex != Settings1.Default.PreferredTheme)
+            if (comboBoxTheme.SelectedIndex != Settings1.Default.PreferredTheme)
             {
                 Settings1.Default.PreferredTheme = comboBoxTheme.SelectedIndex;
                 Settings1.Default.Save(); // Save the settings to persist the changes
@@ -467,6 +468,32 @@ namespace Carpathia
         {
             Settings1.Default.DefaultGaussianBlurRadius = (float)numericUpDownDefaultGaussianBlurRadius.Value;
             Settings1.Default.Save();
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            if (button3.Text == "Hide")
+            {
+                this.Hide();
+                button3.Text = "Show";
+                button3.ImageIndex = 5;
+                textBox1.UseSystemPasswordChar = true;
+            }
+            else
+            {
+                this.Show();
+                button3.Text = "Hide";
+                button3.ImageIndex = 6;
+                textBox1.UseSystemPasswordChar = false;
+            }
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            EncryptionHelper encryptionHelper = new EncryptionHelper();
+            Settings1.Default.HuggingFaceAPIKeyBase64 = encryptionHelper.EncryptStringAsBase64(textBox1.Text);
+            Settings1.Default.Save();
+            MessageForm.Show("API key saved successfully", "API Key Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }
