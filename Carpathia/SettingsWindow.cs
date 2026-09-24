@@ -474,14 +474,12 @@ namespace Carpathia
         {
             if (button3.Text == "Hide")
             {
-                this.Hide();
                 button3.Text = "Show";
                 button3.ImageIndex = 5;
                 textBox1.UseSystemPasswordChar = true;
             }
             else
             {
-                this.Show();
                 button3.Text = "Hide";
                 button3.ImageIndex = 6;
                 textBox1.UseSystemPasswordChar = false;
