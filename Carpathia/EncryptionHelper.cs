@@ -39,10 +39,7 @@ public class EncryptionHelper
     public string DecryptStringFromBase64(string base64CipherText)
     {
         if (string.IsNullOrWhiteSpace(base64CipherText))
-            throw new ArgumentException(
-                "Encrypted Base64 text cannot be empty.",
-                nameof(base64CipherText)
-            );
+            return string.Empty;
 
         byte[] encryptedBytes =
             Convert.FromBase64String(base64CipherText);
