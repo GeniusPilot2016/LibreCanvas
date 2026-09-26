@@ -47,6 +47,7 @@ namespace Carpathia
                 }
             }
         }
+        string APIKey = string.Empty; // Store the former API key to check for changes
         private void InitializeVariables()
         {
             // Initialize variables or settings here if needed
@@ -103,7 +104,8 @@ namespace Carpathia
             panelPrimaryColorPreview.BackColor = Settings1.Default.PrimaryColor;
             panelSecondaryColorPreview.BackColor = Settings1.Default.SecondaryColor;
             EncryptionHelper encryptionHelper = new EncryptionHelper();
-            textBox1.Text = encryptionHelper.DecryptStringFromBase64(Settings1.Default.HuggingFaceAPIKeyBase64); 
+            APIKey = encryptionHelper.DecryptStringFromBase64(Settings1.Default.HuggingFaceAPIKeyBase64);
+            textBox1.Text = APIKey;
         }
         private void SetTheme()
         {
@@ -491,7 +493,13 @@ namespace Carpathia
             EncryptionHelper encryptionHelper = new EncryptionHelper();
             Settings1.Default.HuggingFaceAPIKeyBase64 = encryptionHelper.EncryptStringAsBase64(textBox1.Text);
             Settings1.Default.Save();
+            button4.Enabled = false; // Disable the save button after saving
             MessageForm.Show("API key saved successfully", "API Key Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            button4.Enabled = textBox1.Text != APIKey; // Enable or disable the save button based on whether the text has changed
         }
     }
 }

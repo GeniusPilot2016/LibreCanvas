@@ -302,6 +302,7 @@
             // 
             // button4
             // 
+            button4.Enabled = false;
             button4.ImageIndex = 8;
             button4.ImageList = icons;
             button4.Location = new Point(190, 80);
@@ -369,6 +370,7 @@
             textBox1.Size = new Size(298, 23);
             textBox1.TabIndex = 1;
             textBox1.UseSystemPasswordChar = true;
+            textBox1.TextChanged += textBox1_TextChanged;
             // 
             // label13
             // 
