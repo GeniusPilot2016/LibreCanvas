@@ -120,10 +120,10 @@ namespace Carpathia
 
                 if (!string.IsNullOrEmpty(filePath))
                 {
-                    bitmap = new Bitmap(filePath);
+                    bitmap = LoadInputImage(filePath);
                 }
 
-                generatedImage = await HuggingFaceSpace.GenerateImage(
+                generatedImage = await ImageGenerationCore.GenerateImage(
                     prompt,
                     bitmap,
                     width,
@@ -145,7 +145,7 @@ namespace Carpathia
             {
                 // User closed/cancelled the generation.
             }
-            catch (HuggingFaceApiException ex)
+            catch (CoreApiException ex)
             {
                 Logger.Log(
                     ex.Message,
@@ -187,6 +187,38 @@ namespace Carpathia
                     Close();
                 }
             }
+        }
+        private static Bitmap LoadInputImage(string path)
+        {
+            using var original = new Bitmap(path);
+
+            if (original.Width < 512 && original.Height < 512)
+                return new Bitmap(original);
+
+            int width, height;
+
+            if (original.Width >= original.Height)
+            {
+                width = 512;
+                height = Math.Max(1,
+                    (int)Math.Round(original.Height * (510.0 / original.Width)));
+            }
+            else
+            {
+                height = 512;
+                width = Math.Max(1,
+                    (int)Math.Round(original.Width * (510.0 / original.Height)));
+            }
+
+            var resized = new Bitmap(width, height);
+            using (var graphics = Graphics.FromImage(resized))
+            {
+                graphics.InterpolationMode =
+                    System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                graphics.DrawImage(original, 0, 0, width, height);
+            }
+
+            return resized;
         }
         private void setVisibilityOfProgressBarAndSomeControls(bool isVisible)
         {
