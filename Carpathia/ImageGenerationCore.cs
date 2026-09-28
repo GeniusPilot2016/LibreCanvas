@@ -28,6 +28,8 @@ namespace Carpathia
         }
     }
 
+    // Keeps the existing class and method name for callers.
+    // Requests go to the LibreCanvas backend API
     public static class ImageGenerationCore
     {
         private static readonly HttpClient Client = new HttpClient
