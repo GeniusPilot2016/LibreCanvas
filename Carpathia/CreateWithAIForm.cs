@@ -120,10 +120,10 @@ namespace Carpathia
 
                 if (!string.IsNullOrEmpty(filePath))
                 {
-                    bitmap = new Bitmap(filePath);
+                    bitmap = LoadInputImage(filePath);
                 }
 
-                generatedImage = await HuggingFaceSpace.GenerateImage(
+                generatedImage = await ImageGenerationCore.GenerateImage(
                     prompt,
                     bitmap,
                     width,
@@ -145,7 +145,7 @@ namespace Carpathia
             {
                 // User closed/cancelled the generation.
             }
-            catch (HuggingFaceApiException ex)
+            catch (CoreApiException ex)
             {
                 Logger.Log(
                     ex.Message,
@@ -187,6 +187,38 @@ namespace Carpathia
                     Close();
                 }
             }
+        }
+        private static Bitmap LoadInputImage(string path)
+        {
+            using var original = new Bitmap(path);
+
+            if (original.Width < 512 && original.Height < 512)
+                return new Bitmap(original);
+
+            int width, height;
+
+            if (original.Width >= original.Height)
+            {
+                width = 512;
+                height = Math.Max(1,
+                    (int)Math.Round(original.Height * (510.0 / original.Width)));
+            }
+            else
+            {
+                height = 512;
+                width = Math.Max(1,
+                    (int)Math.Round(original.Width * (510.0 / original.Height)));
+            }
+
+            var resized = new Bitmap(width, height);
+            using (var graphics = Graphics.FromImage(resized))
+            {
+                graphics.InterpolationMode =
+                    System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                graphics.DrawImage(original, 0, 0, width, height);
+            }
+
+            return resized;
         }
         private void setVisibilityOfProgressBarAndSomeControls(bool isVisible)
         {
@@ -320,61 +352,7 @@ namespace Carpathia
             CheckResult,
             ExceptionText
         }
-        private string HandleStatusInternal(PollinationsAI.AvailabilityStatus status, StatusMode statusMode)
-        {
-            switch (status)
-            {
-                case PollinationsAI.AvailabilityStatus.BadRequest:
-                    return "Bad request to Pollinations AI API. The request was invalid or malformed.";
-
-                case PollinationsAI.AvailabilityStatus.Unauthorized:
-                    return "Unauthorized access to Pollinations AI API. Please check your API key and permissions.";
-                case PollinationsAI.AvailabilityStatus.Forbidden:
-                    return "Forbidden access to Pollinations AI API. You do not have permission to access this resource.";
-                case PollinationsAI.AvailabilityStatus.NotFound:
-                    return "Pollinations AI API endpoint not found. The specified URL is incorrect or the service is unavailable.";
-                case PollinationsAI.AvailabilityStatus.InternalServerError:
-                    return "Internal server error in Pollinations AI API. The server encountered an unexpected condition that prevented it from fulfilling the request.";
-                case PollinationsAI.AvailabilityStatus.ServiceUnavailable:
-                    return "Pollinations AI API service is unavailable. The server is currently unable to handle the request due to temporary overload or maintenance.";
-                case PollinationsAI.AvailabilityStatus.GatewayTimeout:
-                    return "Gateway timeout when accessing Pollinations AI API. The server did not receive a timely response from an upstream server while trying to fulfill the request.";
-                case PollinationsAI.AvailabilityStatus.PaymentRequired:
-                    return "Payment required for Pollinations AI API. Access to the API requires payment or subscription.";
-                case PollinationsAI.AvailabilityStatus.RateLimited:
-                    return "Rate limited by Pollinations AI API. Too many requests have been made in a given amount of time.";
-                case PollinationsAI.AvailabilityStatus.Unavailable:
-                    return "Pollinations AI API is unavailable. The service is currently not available or cannot be reached.";
-                case PollinationsAI.AvailabilityStatus.NoInternetConnection:
-                    return "No internet connection available to access Pollinations AI API. Please check your network connection.";
-                default:
-                    switch (statusMode)
-                    {
-                        case StatusMode.CheckResult:
-                            return "An error occurred while checking the availability of Pollinations AI API.";
-                        case StatusMode.ExceptionText:
-                            return "An error occured while generating the image.";
-                    }
-                    return "An unknown error occurred with Pollinations AI API.";
-            }
-        }
-        private void HandleStatus()
-        {
-            PollinationsAI.AvailabilityStatus status = PollinationsAI.CheckServiceAvailability();
-            string message = HandleStatusInternal(status, StatusMode.CheckResult);
-            if (status != PollinationsAI.AvailabilityStatus.Available)
-            {
-                Logger.Log(message, Logger.LogTypes.Error);
-                MessageForm.Show(this, message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.Close();
-            }
-        }
-        private void HandleStatus(string errorText)
-        {
-            string message = HandleStatusInternal(PollinationsAI.GetAvailabilityStatusFromText(errorText), StatusMode.ExceptionText);
-            Logger.Log(message + "\r\n" + errorText, Logger.LogTypes.Error);
-            MessageForm.Show(this, message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
+        
         private void CreateWithAIForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             if (!imageIsCompleted)
