@@ -1,6 +1,6 @@
 # LibreCanvas
 
-<img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/1e23f098-21aa-4a2c-8a01-bbc3fa442342" />
+![image](https://github.com/user-attachments/assets/1e23f098-21aa-4a2c-8a01-bbc3fa442342)
 
 [![GitHub stars](https://img.shields.io/github/stars/GeniusPilot2016/LibreCanvas?style=social)](https://github.com/GeniusPilot2016/LibreCanvas/stargazers)
 [![License](https://img.shields.io/github/license/GeniusPilot2016/LibreCanvas?style=flat-square)](https://github.com/GeniusPilot2016/LibreCanvas/blob/main/LICENSE)
