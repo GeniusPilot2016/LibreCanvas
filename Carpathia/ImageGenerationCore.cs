@@ -60,11 +60,17 @@ namespace Carpathia
                 ? "/api/text-to-image"
                 : "/api/image-to-image";
 
+            // The backend only accepts output dimensions that are multiples of 16
+            // and between 256 and 1920. Generate at a valid size first, then
+            // resize the decoded result back to the exact size requested by the caller.
+            int generationWidth = NormalizeGenerationDimension(width);
+            int generationHeight = NormalizeGenerationDimension(height);
+
             var payload = new JsonObject
             {
                 ["text"] = prompt,
-                ["width"] = width,
-                ["height"] = height
+                ["width"] = generationWidth,
+                ["height"] = generationHeight
             };
 
             if (image != null)
@@ -193,7 +199,32 @@ namespace Carpathia
 
                 using var imageStream = new MemoryStream(imageBytes);
                 using Image decoded = Image.FromStream(imageStream);
-                return new Bitmap(decoded);
+
+                if (decoded.Width == width && decoded.Height == height)
+                    return new Bitmap(decoded);
+
+                var resized = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+                using (var graphics = Graphics.FromImage(resized))
+                {
+                    graphics.CompositingMode =
+                        System.Drawing.Drawing2D.CompositingMode.SourceCopy;
+                    graphics.CompositingQuality =
+                        System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                    graphics.InterpolationMode =
+                        System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                    graphics.SmoothingMode =
+                        System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                    graphics.PixelOffsetMode =
+                        System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+
+                    graphics.DrawImage(
+                        decoded,
+                        new Rectangle(0, 0, width, height),
+                        0, 0, decoded.Width, decoded.Height,
+                        GraphicsUnit.Pixel);
+                }
+
+                return resized;
             }
             catch (OperationCanceledException)
             {
@@ -209,6 +240,18 @@ namespace Carpathia
                     ex.Message,
                     innerException: ex);
             }
+        }
+
+        private static int NormalizeGenerationDimension(int value)
+        {
+            const int min = 256;
+            const int max = 1920;
+            const int step = 16;
+
+            int clamped = Math.Max(min, Math.Min(max, value));
+            int normalized = (int)Math.Round(clamped / (double)step) * step;
+
+            return Math.Max(min, Math.Min(max, normalized));
         }
 
         private static string CreateHeader()
