@@ -105,7 +105,6 @@ namespace Carpathia
             panelSecondaryColorPreview.BackColor = Settings1.Default.SecondaryColor;
             EncryptionHelper encryptionHelper = new EncryptionHelper();
             APIKey = encryptionHelper.DecryptStringFromBase64(Settings1.Default.HuggingFaceAPIKeyBase64);
-            textBox1.Text = APIKey;
         }
         private void SetTheme()
         {
@@ -470,36 +469,6 @@ namespace Carpathia
         {
             Settings1.Default.DefaultGaussianBlurRadius = (float)numericUpDownDefaultGaussianBlurRadius.Value;
             Settings1.Default.Save();
-        }
-
-        private void button3_Click(object sender, EventArgs e)
-        {
-            if (button3.Text == "Hide")
-            {
-                button3.Text = "Show";
-                button3.ImageIndex = 5;
-                textBox1.UseSystemPasswordChar = true;
-            }
-            else
-            {
-                button3.Text = "Hide";
-                button3.ImageIndex = 6;
-                textBox1.UseSystemPasswordChar = false;
-            }
-        }
-
-        private void button4_Click(object sender, EventArgs e)
-        {
-            EncryptionHelper encryptionHelper = new EncryptionHelper();
-            Settings1.Default.HuggingFaceAPIKeyBase64 = encryptionHelper.EncryptStringAsBase64(textBox1.Text);
-            Settings1.Default.Save();
-            button4.Enabled = false; // Disable the save button after saving
-            MessageForm.Show("API key saved successfully", "API Key Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-            button4.Enabled = textBox1.Text != APIKey; // Enable or disable the save button based on whether the text has changed
         }
     }
 }
