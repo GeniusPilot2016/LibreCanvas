@@ -953,216 +953,376 @@ namespace Carpathia
 
         private async void generativeEraserToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            /*if (CheckIfInternetConnectionAvailable.IsInternetAvailable())
+            if (CheckIfInternetConnectionAvailable.IsInternetAvailable())
             {
-                if (!string.IsNullOrEmpty(Settings1.Default.HashedGeminiAIAPIKey))
+                try
                 {
-                    try
+                    if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
                     {
-                        if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
+                        SaveStateForUndo();
+                        isImageCurrentlyCreating = true;
+                        toolStripAICreateImage.Visible = false;
+                        if (SelectedBitmap == null)
                         {
-                            SaveStateForUndo();
-                            isImageCurrentlyCreating = true;
-                            toolStripAICreateImage.Visible = false;
-                            if (SelectedBitmap == null)
+                            SelectedBitmap = new Bitmap(
+                                (int)(SelectionRectangle.Width / zoom),
+                                (int)(SelectionRectangle.Height / zoom));
+                            using (Graphics g = Graphics.FromImage(SelectedBitmap))
                             {
-                                SelectedBitmap = new Bitmap(
-                                    (int)(SelectionRectangle.Width / zoom),
-                                    (int)(SelectionRectangle.Height / zoom));
-                                using (Graphics g = Graphics.FromImage(SelectedBitmap))
-                                {
-                                    g.Clear(Color.Transparent);
-                                    Rectangle sourceRect = new Rectangle(
-                                        (int)(originalSelectionRectangleLocation.X),
-                                        (int)(originalSelectionRectangleLocation.Y),
-                                        (int)(originalSelectionRectangleSize.Width),
-                                        (int)(originalSelectionRectangleSize.Height));
-                                    g.DrawImage(MainBitmap,
-                                        new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                                        sourceRect,
-                                        GraphicsUnit.Pixel);
-                                }
-                                canvasPanel.Enabled = false;
-                                menuStrip1.Enabled = false;
-                                toolStripTools.Enabled = false;
-                                toolStripSeparator29.Visible = true;
-                                labelAIImageErasing.Visible = true;
-                                progressBarAIImageCreation.Visible = true;
-                                var image = await CreateAIImages.EditImage(
-            SelectedBitmap, "Remove the object or person in context of the image.", cts);
+                                g.Clear(Color.Transparent);
+                                Rectangle sourceRect = new Rectangle(
+                                    (int)(originalSelectionRectangleLocation.X),
+                                    (int)(originalSelectionRectangleLocation.Y),
+                                    (int)(originalSelectionRectangleSize.Width),
+                                    (int)(originalSelectionRectangleSize.Height));
+                                g.DrawImage(MainBitmap,
+                                    new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                                    sourceRect,
+                                    GraphicsUnit.Pixel);
+                            }
+                            canvasPanel.Enabled = false;
+                            menuStrip1.Enabled = false;
+                            toolStripTools.Enabled = false;
+                            toolStripSeparator29.Visible = true;
+                            labelAIImageErasing.Visible = true;
+                            progressBarAIImageCreation.Visible = true;
+                            var image = await ImageGenerationCore.GenerateImage("Remove the object or person in context of the image.",
+                                SelectedBitmap, SelectedBitmap.Width, SelectedBitmap.Height, cts.Token);
 
-                                if (image != null)
-                                {
-                                    SelectedBitmap = (Bitmap)image;
-                                    MergeMainBitmapWithSelected();
-                                    isModified = true; // Mark the image as modified
-                                }
-                                else
-                                {
-                                    Undo();
-                                    ClearRedoStack();
-                                    Logger.Log("The generated image is null.", Logger.LogTypes.Error);
-                                    MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                }
+                            if (image != null)
+                            {
+                                SelectedBitmap = (Bitmap)image;
+                                MergeMainBitmapWithSelected();
+                                isModified = true; // Mark the image as modified
+                            }
+                            else
+                            {
+                                Undo();
+                                ClearRedoStack();
+                                Logger.Log("The generated image is null.", Logger.LogTypes.Error);
+                                MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             }
                         }
-                        else
-                        {
-                            SystemSounds.Beep.Play(); // Play a beep sound when the image is not selected
-                        }
                     }
-                    catch (NullReferenceException)
+                    else
                     {
-                        Undo();
-                        ClearRedoStack();
-                        Logger.Log("The generated image is null.", Logger.LogTypes.Error);
-                        MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    catch (Exception ex)
-                    {
-                        Undo();
-                        ClearRedoStack();
-                        Logger.Log("An error occurred: " + ex.Message, Logger.LogTypes.Error);
-                        MessageForm.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    finally
-                    {
-                        isImageCurrentlyCreating = false;
-                        pictureBoxCanvas.Invalidate();
-                        canvasPanel.Enabled = true;
-                        menuStrip1.Enabled = true;
-                        toolStripTools.Enabled = true;
-                        toolStripSeparator29.Visible = false;
-                        labelAIImageErasing.Visible = false;
-                        progressBarAIImageCreation.Visible = false;
+                        SystemSounds.Beep.Play(); // Play a beep sound when the image is not selected
                     }
                 }
-                else
+                catch (NullReferenceException)
                 {
-                    Logger.Log("Google Gemini™ API key is missing.", Logger.LogTypes.Error);
-                    MessageForm.Show("Please enter your Google Gemini™ API key in the settings before using this feature.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Undo();
+                    ClearRedoStack();
+                    Logger.Log("The generated image is null.", Logger.LogTypes.Error);
+                    MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (Exception ex)
+                {
+                    Undo();
+                    ClearRedoStack();
+                    Logger.Log("An error occurred: " + ex.Message, Logger.LogTypes.Error);
+                    MessageForm.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    isImageCurrentlyCreating = false;
+                    pictureBoxCanvas.Invalidate();
+                    canvasPanel.Enabled = true;
+                    menuStrip1.Enabled = true;
+                    toolStripTools.Enabled = true;
+                    toolStripSeparator29.Visible = false;
+                    labelAIImageErasing.Visible = false;
+                    progressBarAIImageCreation.Visible = false;
                 }
             }
             else
             {
                 Logger.Log("No internet connection available.", Logger.LogTypes.Error);
                 MessageForm.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }*/
+            }
         }
 
         private async void removeBackgroundToolStripMenuItem2_Click(object sender, EventArgs e)
         {
 
-            /*toolStripAICreateImage.Visible = false;
+            toolStripAICreateImage.Visible = false;
             if (CheckIfInternetConnectionAvailable.IsInternetAvailable())
             {
-                if (!string.IsNullOrEmpty(Settings1.Default.HashedGeminiAIAPIKey))
+                try
                 {
-                    try
+                    isImageCurrentlyCreating = true;
+                    canvasPanel.Enabled = false;
+                    menuStrip1.Enabled = false;
+                    toolStripTools.Enabled = false;
+                    toolStripSeparator29.Visible = true;
+                    labelBackgroundRemoving.Visible = true;
+                    progressBarAIImageCreation.Visible = true;
+                    SaveStateForUndo();
+                    if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
                     {
-                        isImageCurrentlyCreating = true;
-                        canvasPanel.Enabled = false;
-                        menuStrip1.Enabled = false;
-                        toolStripTools.Enabled = false;
-                        toolStripSeparator29.Visible = true;
-                        labelBackgroundRemoving.Visible = true;
-                        progressBarAIImageCreation.Visible = true;
-                        SaveStateForUndo();
-                        if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
+                        if (SelectedBitmap == null)
                         {
-                            if (SelectedBitmap == null)
+                            SelectedBitmap = new Bitmap(
+                                (int)(SelectionRectangle.Width / zoom),
+                                (int)(SelectionRectangle.Height / zoom));
+                            using (Graphics g = Graphics.FromImage(SelectedBitmap))
                             {
-                                SelectedBitmap = new Bitmap(
-                                    (int)(SelectionRectangle.Width / zoom),
-                                    (int)(SelectionRectangle.Height / zoom));
-                                using (Graphics g = Graphics.FromImage(SelectedBitmap))
-                                {
-                                    g.Clear(Color.Transparent);
-                                    Rectangle sourceRect = new Rectangle(
-                                        (int)(originalSelectionRectangleLocation.X),
-                                        (int)(originalSelectionRectangleLocation.Y),
-                                        (int)(originalSelectionRectangleSize.Width),
-                                        (int)(originalSelectionRectangleSize.Height));
-                                    g.DrawImage(MainBitmap,
-                                        new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                                        sourceRect,
-                                        GraphicsUnit.Pixel);
-                                }
+                                g.Clear(Color.Transparent);
+                                Rectangle sourceRect = new Rectangle(
+                                    (int)(originalSelectionRectangleLocation.X),
+                                    (int)(originalSelectionRectangleLocation.Y),
+                                    (int)(originalSelectionRectangleSize.Width),
+                                    (int)(originalSelectionRectangleSize.Height));
+                                g.DrawImage(MainBitmap,
+                                    new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                                    sourceRect,
+                                    GraphicsUnit.Pixel);
                             }
-                            var imageTask = CreateAIImages.EditImage(SelectedBitmap, "Isolate the object or person and make the background transparent.", cts);
-                            var image = await imageTask; // Await the task to get the result
-                            if (image != null)
-                            {
-                                SelectedBitmap = new Bitmap(image); // Convert Image to Bitmap  
-                                MergeMainBitmapWithSelected();
-                            }
-                            else
-                            {
-                                Undo();
-                                ClearRedoStack();
-                                Logger.Log("The generated image is null.", Logger.LogTypes.Error);
-                                MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            }
+                        }
+                        var imageTask = ImageGenerationCore.GenerateImage("Isolate the main object or person precisely and remove the entire background. Return the result as a PNG with a true transparent alpha channel (RGBA). All background pixels must have alpha 0. Do not replace the background with white, black, gray, any solid color, blur, studio backdrop, gradient, or checkerboard pattern. Preserve the subject’s original colors, edges, fine details, hair, and semi-transparent areas.", 
+                            SelectedBitmap, SelectedBitmap.Width, SelectedBitmap.Height, cts.Token);
+                        var image = await imageTask; // Await the task to get the result
+                        if (image != null)
+                        {
+                            SelectedBitmap = new Bitmap(image); // Convert Image to Bitmap  
+                            MergeMainBitmapWithSelected();
                         }
                         else
                         {
-                            var imageTask = CreateAIImages.EditImage(MainBitmap, "Isolate the object or person and make the background transparent.", cts);
-                            var image = await imageTask; // Await the task to get the result
-                            if (image != null)
-                            {
-                                MainBitmap = new Bitmap(image); // Convert Image to Bitmap  
-                                pictureBoxCanvas.Image = MainBitmap;
-                                pictureBoxCanvas.Invalidate();
-                            }
-                            else
-                            {
-                                Undo();
-                                ClearRedoStack();
-                                Logger.Log("The generated image is null.", Logger.LogTypes.Error);
-                                MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            }
+                            Undo();
+                            ClearRedoStack();
+                            Logger.Log("The generated image is null.", Logger.LogTypes.Error);
+                            MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
+                    }
+                    else
+                    {
+                        var imageTask = ImageGenerationCore.GenerateImage("Isolate the object or person and make the background transparent.",
+                            MainBitmap, MainBitmap.Width, MainBitmap.Height, cts.Token);
+                        var image = await imageTask; // Await the task to get the result
+                        if (image != null)
+                        {
+                            image = RemoveGeneratedCheckerboard(image);
+                            MainBitmap = new Bitmap(image); // Convert Image to Bitmap  
+                            pictureBoxCanvas.Image = MainBitmap;
+                            pictureBoxCanvas.Invalidate();
+                        }
+                        else
+                        {
+                            Undo();
+                            ClearRedoStack();
+                            Logger.Log("The generated image is null.", Logger.LogTypes.Error);
+                            MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
 
-                    }
-                    catch (NullReferenceException)
-                    {
-                        Undo();
-                        ClearRedoStack();
-                        Logger.Log("The generated image is null.", Logger.LogTypes.Error);
-                        MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    catch (Exception ex)
-                    {
-                        Undo();
-                        ClearRedoStack();
-                        Logger.Log("An error occurred: " + ex.Message, Logger.LogTypes.Error);
-                        MessageForm.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    finally
-                    {
-                        isImageCurrentlyCreating = false;
-                        pictureBoxCanvas.Invalidate();
-                        canvasPanel.Enabled = true;
-                        menuStrip1.Enabled = true;
-                        toolStripTools.Enabled = true;
-                        toolStripSeparator29.Visible = false;
-                        labelBackgroundRemoving.Visible = false;
-                        progressBarAIImageCreation.Visible = false;
-                    }
                 }
-                else
+                catch (NullReferenceException)
                 {
-                    Logger.Log("Google Gemini™ API key is missing.", Logger.LogTypes.Error);
-                    MessageForm.Show("Please enter your Google Gemini™ API key in the settings before using this feature.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Undo();
+                    ClearRedoStack();
+                    Logger.Log("The generated image is null.", Logger.LogTypes.Error);
+                    MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (Exception ex)
+                {
+                    Undo();
+                    ClearRedoStack();
+                    Logger.Log("An error occurred: " + ex.Message, Logger.LogTypes.Error);
+                    MessageForm.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    isImageCurrentlyCreating = false;
+                    pictureBoxCanvas.Invalidate();
+                    canvasPanel.Enabled = true;
+                    menuStrip1.Enabled = true;
+                    toolStripTools.Enabled = true;
+                    toolStripSeparator29.Visible = false;
+                    labelBackgroundRemoving.Visible = false;
+                    progressBarAIImageCreation.Visible = false;
                 }
             }
             else
             {
                 Logger.Log("No internet connection available.", Logger.LogTypes.Error);
                 MessageForm.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }*/
+            }
         }
+        private Bitmap RemoveGeneratedCheckerboard(Image source)
+        {
+            Bitmap bitmap = new Bitmap(
+                source.Width,
+                source.Height,
+                PixelFormat.Format32bppArgb);
 
+            using (Graphics g = Graphics.FromImage(bitmap))
+            {
+                g.Clear(Color.Transparent);
+                g.DrawImage(source, 0, 0, source.Width, source.Height);
+            }
+
+            int width = bitmap.Width;
+            int height = bitmap.Height;
+
+            // Find the most common neutral gray/white shades on the outer border.
+            int[] histogram = new int[256];
+
+            void Sample(Color c)
+            {
+                int max = Math.Max(c.R, Math.Max(c.G, c.B));
+                int min = Math.Min(c.R, Math.Min(c.G, c.B));
+
+                // Checkerboard is essentially grayscale.
+                if (max - min <= 25)
+                {
+                    int gray = (c.R + c.G + c.B) / 3;
+
+                    // Ignore very dark colors to reduce the chance of
+                    // considering subject outlines/background shadows.
+                    if (gray >= 110)
+                        histogram[gray]++;
+                }
+            }
+
+            for (int x = 0; x < width; x++)
+            {
+                Sample(bitmap.GetPixel(x, 0));
+                Sample(bitmap.GetPixel(x, height - 1));
+            }
+
+            for (int y = 0; y < height; y++)
+            {
+                Sample(bitmap.GetPixel(0, y));
+                Sample(bitmap.GetPixel(width - 1, y));
+            }
+
+            // Find the two strongest gray shades.
+            int firstShade = -1;
+            int secondShade = -1;
+            int firstCount = -1;
+            int secondCount = -1;
+
+            for (int i = 110; i < 256; i++)
+            {
+                if (histogram[i] > firstCount)
+                {
+                    secondCount = firstCount;
+                    secondShade = firstShade;
+
+                    firstCount = histogram[i];
+                    firstShade = i;
+                }
+                else if (histogram[i] > secondCount)
+                {
+                    secondCount = histogram[i];
+                    secondShade = i;
+                }
+            }
+
+            if (firstShade < 0)
+                return bitmap;
+
+            if (secondShade < 0)
+                secondShade = firstShade;
+
+            const int grayTolerance = 40;
+            const int saturationTolerance = 35;
+
+            bool IsCheckerPixel(Color c)
+            {
+                if (c.A == 0)
+                    return true;
+
+                int max = Math.Max(c.R, Math.Max(c.G, c.B));
+                int min = Math.Min(c.R, Math.Min(c.G, c.B));
+
+                // Must still be close to neutral gray.
+                if (max - min > saturationTolerance)
+                    return false;
+
+                int gray = (c.R + c.G + c.B) / 3;
+
+                bool shade1 =
+                    Math.Abs(gray - firstShade) <= grayTolerance;
+
+                bool shade2 =
+                    Math.Abs(gray - secondShade) <= grayTolerance;
+
+                // Also accept common near-white checkerboard cells.
+                bool nearWhite =
+                    c.R >= 205 &&
+                    c.G >= 205 &&
+                    c.B >= 205 &&
+                    max - min <= saturationTolerance;
+
+                return shade1 || shade2 || nearWhite;
+            }
+
+            bool[,] visited = new bool[width, height];
+            Queue<Point> queue = new Queue<Point>();
+
+            void AddIfBackground(int x, int y)
+            {
+                if (x < 0 || y < 0 || x >= width || y >= height)
+                    return;
+
+                if (visited[x, y])
+                    return;
+
+                Color c = bitmap.GetPixel(x, y);
+
+                if (!IsCheckerPixel(c))
+                    return;
+
+                visited[x, y] = true;
+                queue.Enqueue(new Point(x, y));
+            }
+
+            // Start only from the outside of the image.
+            // Therefore gray/white details INSIDE the subject aren't
+            // automatically erased.
+            for (int x = 0; x < width; x++)
+            {
+                AddIfBackground(x, 0);
+                AddIfBackground(x, height - 1);
+            }
+
+            for (int y = 0; y < height; y++)
+            {
+                AddIfBackground(0, y);
+                AddIfBackground(width - 1, y);
+            }
+
+            while (queue.Count > 0)
+            {
+                Point p = queue.Dequeue();
+
+                AddIfBackground(p.X - 1, p.Y);
+                AddIfBackground(p.X + 1, p.Y);
+                AddIfBackground(p.X, p.Y - 1);
+                AddIfBackground(p.X, p.Y + 1);
+            }
+
+            // Actually make the detected checkerboard transparent.
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    if (!visited[x, y])
+                        continue;
+
+                    Color c = bitmap.GetPixel(x, y);
+
+                    bitmap.SetPixel(
+                        x,
+                        y,
+                        Color.FromArgb(0, c.R, c.G, c.B));
+                }
+            }
+
+            return bitmap;
+        }
         private void toolStripButton8_Click(object sender, EventArgs e)
         {
             ToolStripButtonsClick(colorDropTool);
@@ -5161,127 +5321,120 @@ namespace Carpathia
         }
         private async void buttonCreate_Click(object sender, EventArgs e)
         {
-            /*
             if (CheckIfInternetConnectionAvailable.IsInternetAvailable())
             {
-                if (!string.IsNullOrEmpty(Settings1.Default.HashedGeminiAIAPIKey))
+                try
                 {
-                    try
+                    SaveStateForUndo();
+                    isImageCurrentlyCreating = true;
+                    canvasPanel.Enabled = false;
+                    menuStrip1.Enabled = false;
+                    toolStripTools.Enabled = false;
+                    toolStripSeparator29.Visible = true;
+                    labelCreatingImage.Visible = true;
+                    progressBarAIImageCreation.Visible = true;
+                    buttonCreate.Enabled = false;
+                    textBoxPrompt.Enabled = false;
+                    labelPrompt.Enabled = false;
+                    buttonClose.Enabled = false;
+                    if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
                     {
-                        SaveStateForUndo();
-                        isImageCurrentlyCreating = true;
-                        canvasPanel.Enabled = false;
-                        menuStrip1.Enabled = false;
-                        toolStripTools.Enabled = false;
-                        toolStripSeparator29.Visible = true;
-                        labelCreatingImage.Visible = true;
-                        progressBarAIImageCreation.Visible = true;
-                        buttonCreate.Enabled = false;
-                        textBoxPrompt.Enabled = false;
-                        labelPrompt.Enabled = false;
-                        buttonClose.Enabled = false;
-                        if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
+                        if (SelectedBitmap == null)
                         {
-                            if (SelectedBitmap == null)
+                            SelectedBitmap = new Bitmap(
+                                (int)(SelectionRectangle.Width / zoom),
+                                (int)(SelectionRectangle.Height / zoom));
+                            using (Graphics g = Graphics.FromImage(SelectedBitmap))
                             {
-                                SelectedBitmap = new Bitmap(
-                                    (int)(SelectionRectangle.Width / zoom),
-                                    (int)(SelectionRectangle.Height / zoom));
-                                using (Graphics g = Graphics.FromImage(SelectedBitmap))
-                                {
-                                    g.Clear(Color.Transparent);
-                                    Rectangle sourceRect = new Rectangle(
-                                        (int)(originalSelectionRectangleLocation.X),
-                                        (int)(originalSelectionRectangleLocation.Y),
-                                        (int)(originalSelectionRectangleSize.Width),
-                                        (int)(originalSelectionRectangleSize.Height));
-                                    g.DrawImage(MainBitmap,
-                                        new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                                        sourceRect,
-                                        GraphicsUnit.Pixel);
-                                }
+                                g.Clear(Color.Transparent);
+                                Rectangle sourceRect = new Rectangle(
+                                    (int)(originalSelectionRectangleLocation.X),
+                                    (int)(originalSelectionRectangleLocation.Y),
+                                    (int)(originalSelectionRectangleSize.Width),
+                                    (int)(originalSelectionRectangleSize.Height));
+                                g.DrawImage(MainBitmap,
+                                    new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                                    sourceRect,
+                                    GraphicsUnit.Pixel);
                             }
-                            var imageTask = CreateAIImages.EditImage(SelectedBitmap, textBoxPrompt.Text, cts);
-                            var image = await imageTask; // Await the task to get the result
-                            if (image != null)
-                            {
-                                SelectedBitmap = new Bitmap(image); // Convert Image to Bitmap  
-                                MergeMainBitmapWithSelected();
-                                isModified = true;
-                            }
-                            else
-                            {
-                                Undo();
-                                ClearRedoStack();
-                                Logger.Log("The generated image is null.", Logger.LogTypes.Error);
-                                MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            }
+                        }
+                        var imageTask = ImageGenerationCore.GenerateImage(textBoxPrompt.Text, SelectedBitmap,
+                            SelectedBitmap.Width, SelectedBitmap.Height, cts.Token);
+                        var image = await imageTask; // Await the task to get the result
+                        if (image != null)
+                        {
+                            SelectedBitmap = new Bitmap(image); // Convert Image to Bitmap  
+                            MergeMainBitmapWithSelected();
+                            isModified = true;
                         }
                         else
                         {
-                            var imageTask = CreateAIImages.EditImage(MainBitmap, textBoxPrompt.Text, cts);
-                            var image = await imageTask; // Await the task to get the result
-                            if (image != null)
-                            {
-                                MainBitmap = new Bitmap(image); // Convert Image to Bitmap  
-                                pictureBoxCanvas.Invalidate();
-                                isModified = true;
-                            }
-                            else
-                            {
-                                Undo();
-                                ClearRedoStack();
-                                Logger.Log("The generated image is null.", Logger.LogTypes.Error);
-                                MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            }
+                            Undo();
+                            ClearRedoStack();
+                            Logger.Log("The generated image is null.", Logger.LogTypes.Error);
+                            MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
-                    catch (NullReferenceException)
+                    else
                     {
-                        Undo();
-                        ClearRedoStack();
-                        Logger.Log("The generated image is null.", Logger.LogTypes.Error);
-                        MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    catch (Exception ex)
-                    {
-                        Undo();
-                        ClearRedoStack();
-                        Logger.Log("Error during AI image creation: " + ex.Message, Logger.LogTypes.Error);
-                        MessageForm.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    finally
-                    {
-                        isImageCurrentlyCreating = false;
-                        pictureBoxCanvas.Invalidate();
-                        canvasPanel.Enabled = true;
-                        menuStrip1.Enabled = true;
-                        toolStripTools.Enabled = true;
-                        toolStripSeparator29.Visible = false;
-                        labelCreatingImage.Visible = false;
-                        if (!string.IsNullOrEmpty(textBoxPrompt.Text))
+                        var imageTask = ImageGenerationCore.GenerateImage(textBoxPrompt.Text, MainBitmap, 
+                            MainBitmap.Width, MainBitmap.Height, cts.Token);
+                        var image = await imageTask; // Await the task to get the result
+                        if (image != null)
                         {
-                            buttonCreate.Enabled = true;
+                            MainBitmap = new Bitmap(image); // Convert Image to Bitmap  
+                            pictureBoxCanvas.Invalidate();
+                            isModified = true;
                         }
-                        textBoxPrompt.Enabled = true;
-                        labelPrompt.Enabled = true;
-                        buttonClose.Enabled = true;
-                        progressBarAIImageCreation.Visible = false;
-                        toolStripAICreateImage.Visible = false;
-                        textBoxPrompt.Clear();
+                        else
+                        {
+                            Undo();
+                            ClearRedoStack();
+                            Logger.Log("The generated image is null.", Logger.LogTypes.Error);
+                            MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
                     }
                 }
-                else
+                catch (NullReferenceException)
                 {
-                    Logger.Log("Please enter your Google Gemini™ API key in the settings before using this feature.", Logger.LogTypes.Error);
-                    MessageForm.Show("Please enter your Google Gemini™ API key in the settings before using this feature.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Undo();
+                    ClearRedoStack();
+                    Logger.Log("The generated image is null.", Logger.LogTypes.Error);
+                    MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (Exception ex)
+                {
+                    Undo();
+                    ClearRedoStack();
+                    Logger.Log("Error during AI image creation: " + ex.Message, Logger.LogTypes.Error);
+                    MessageForm.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    isImageCurrentlyCreating = false;
+                    pictureBoxCanvas.Invalidate();
+                    canvasPanel.Enabled = true;
+                    menuStrip1.Enabled = true;
+                    toolStripTools.Enabled = true;
+                    toolStripSeparator29.Visible = false;
+                    labelCreatingImage.Visible = false;
+                    if (!string.IsNullOrEmpty(textBoxPrompt.Text))
+                    {
+                        buttonCreate.Enabled = true;
+                    }
+                    textBoxPrompt.Enabled = true;
+                    labelPrompt.Enabled = true;
+                    buttonClose.Enabled = true;
+                    progressBarAIImageCreation.Visible = false;
+                    toolStripAICreateImage.Visible = false;
+                    textBoxPrompt.Clear();
                 }
             }
             else
             {
                 Logger.Log("No internet connection available.", Logger.LogTypes.Error);
                 MessageForm.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }*/
+            }
         }
 
         private void textBoxPrompt_TextChanged(object sender, EventArgs e)
