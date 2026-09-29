@@ -1,5 +1,7 @@
 # LibreCanvas
 
+<img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/1e23f098-21aa-4a2c-8a01-bbc3fa442342" />
+
 LibreCanvas is a creative image editor inspired by classic paint applications and Photoshop, with built-in **AI-powered image generation and editing features**.
 
 After a period of reduced AI functionality caused by backend migration and API limitations, **AI features are functional again with the new backend integration**.
