@@ -9,7 +9,7 @@
 [![Last commit](https://img.shields.io/github/last-commit/GeniusPilot2016/LibreCanvas?style=flat-square)](https://github.com/GeniusPilot2016/LibreCanvas/commits/master)
 [![PRs](https://img.shields.io/github/issues-pr/GeniusPilot2016/LibreCanvas?style=flat-square)](https://github.com/GeniusPilot2016/LibreCanvas/pulls)
 [![GitHub forks](https://img.shields.io/github/forks/GeniusPilot2016/LibreCanvas?style=social)](https://github.com/GeniusPilot2016/LibreCanvas/network/members)
-[![Alpha](https://img.shields.io/badge/status-beta-orange?style=flat-square)](https://github.com/GeniusPilot2016/LibreCanvas)
+[![Alpha](https://img.shields.io/badge/status-alpha-orange?style=flat-square)](https://github.com/GeniusPilot2016/LibreCanvas)
 
 LibreCanvas is a creative image editor inspired by classic paint applications and Photoshop, with built-in **AI-powered image generation and editing features**.
 
