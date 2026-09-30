@@ -56,8 +56,7 @@
             textBoxPrompt.Margin = new Padding(2);
             textBoxPrompt.Name = "textBoxPrompt";
             textBoxPrompt.Size = new Size(321, 23);
-            textBoxPrompt.TabIndex = 0;
-            textBoxPrompt.TextChanged += textBoxPrompt_TextChanged;
+            textBoxPrompt.TabIndex = 4;
             // 
             // labelPrompt
             // 
@@ -74,15 +73,14 @@
             // buttonCreate
             // 
             buttonCreate.Anchor = AnchorStyles.Top;
-            buttonCreate.Enabled = false;
             buttonCreate.Font = new Font("HarmonyOS Sans", 8.999999F);
             buttonCreate.ImageIndex = 0;
             buttonCreate.ImageList = icons;
-            buttonCreate.Location = new Point(394, 14);
+            buttonCreate.Location = new Point(394, 15);
             buttonCreate.Margin = new Padding(2);
             buttonCreate.Name = "buttonCreate";
             buttonCreate.Size = new Size(116, 28);
-            buttonCreate.TabIndex = 2;
+            buttonCreate.TabIndex = 0;
             buttonCreate.Text = "Create Image";
             buttonCreate.TextAlign = ContentAlignment.MiddleRight;
             buttonCreate.TextImageRelation = TextImageRelation.ImageBeforeText;
@@ -110,7 +108,7 @@
             label2.Margin = new Padding(2, 0, 2, 0);
             label2.Name = "label2";
             label2.Size = new Size(457, 16);
-            label2.TabIndex = 1;
+            label2.TabIndex = 0;
             label2.Text = "        Warning: AI image generator may produce inaccurate or inappropriate images.";
             label2.TextAlign = ContentAlignment.MiddleRight;
             // 
@@ -124,7 +122,7 @@
             numericUpDownWidth.Minimum = new decimal(new int[] { 64, 0, 0, 0 });
             numericUpDownWidth.Name = "numericUpDownWidth";
             numericUpDownWidth.Size = new Size(55, 23);
-            numericUpDownWidth.TabIndex = 3;
+            numericUpDownWidth.TabIndex = 2;
             numericUpDownWidth.Value = new decimal(new int[] { 1024, 0, 0, 0 });
             // 
             // labelWidth
@@ -198,7 +196,7 @@
             buttonUploadImage.Location = new Point(151, 94);
             buttonUploadImage.Name = "buttonUploadImage";
             buttonUploadImage.Size = new Size(108, 29);
-            buttonUploadImage.TabIndex = 7;
+            buttonUploadImage.TabIndex = 1;
             buttonUploadImage.Text = "Upload";
             buttonUploadImage.TextAlign = ContentAlignment.MiddleRight;
             buttonUploadImage.TextImageRelation = TextImageRelation.ImageBeforeText;
@@ -210,7 +208,7 @@
             labelUploadedImage.Anchor = AnchorStyles.None;
             labelUploadedImage.AutoSize = true;
             labelUploadedImage.Font = new Font("HarmonyOS Sans", 8.999999F);
-            labelUploadedImage.Location = new Point(265, 98);
+            labelUploadedImage.Location = new Point(265, 100);
             labelUploadedImage.Name = "labelUploadedImage";
             labelUploadedImage.Size = new Size(126, 16);
             labelUploadedImage.TabIndex = 8;

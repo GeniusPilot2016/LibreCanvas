@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Carpathia.Properties;
+using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
 using System.Drawing;
@@ -26,6 +27,7 @@ namespace Carpathia
             SetFonts();
             numericUpDownWidth.Value = Settings1.Default.DefaultAIGeneratedImageSize.Width;
             numericUpDownHeight.Value = Settings1.Default.DefaultAIGeneratedImageSize.Height;
+            SelectRandomPrompt(); // Select a random prompt from the resources
         }
         private void SetFonts()
         {
@@ -118,10 +120,18 @@ namespace Carpathia
                 int width = (int)numericUpDownWidth.Value;
                 int height = (int)numericUpDownHeight.Value;
 
+                if (string.IsNullOrWhiteSpace(prompt))
+                {
+                    prompt = textBoxPrompt.PlaceholderText; // Use the randomly selected prompt if the user hasn't entered one
+                    filePath = null; // Clear the file path if no prompt is provided
+                }
+
                 if (!string.IsNullOrEmpty(filePath))
                 {
                     bitmap = LoadInputImage(filePath);
                 }
+
+
 
                 generatedImage = await ImageGenerationCore.GenerateImage(
                     prompt,
@@ -164,7 +174,7 @@ namespace Carpathia
             {
                 // Do NOT pass HuggingFace errors to PollinationsAI.
                 Logger.Log(
-                    "Hugging Face image generation error:\r\n" + ex,
+                    "Image generation error:\r\n" + ex,
                     Logger.LogTypes.Error
                 );
 
@@ -187,6 +197,61 @@ namespace Carpathia
                     Close();
                 }
             }
+        }
+        private void SelectRandomPrompt()
+        {
+            Random random = new Random();
+            int number = random.Next(1, 16); // Random number between 1 and 15
+            string selectedPrompt = string.Empty;
+            switch (number)
+            {
+                case 1:
+                    selectedPrompt = Resources.example_prompt_1;
+                    break;
+                case 2:
+                    selectedPrompt = Resources.example_prompt_2;
+                    break;
+                case 3:
+                    selectedPrompt = Resources.example_prompt_3;
+                    break;
+                case 4:
+                    selectedPrompt = Resources.example_prompt_4;
+                    break;
+                case 5:
+                    selectedPrompt = Resources.example_prompt_5;
+                    break;
+                case 6:
+                    selectedPrompt = Resources.example_prompt_6;
+                    break;
+                case 7:
+                    selectedPrompt = Resources.example_prompt_7;
+                    break;
+                case 8:
+                    selectedPrompt = Resources.example_prompt_8;
+                    break;
+                case 9:
+                    selectedPrompt = Resources.example_prompt_9;
+                    break;
+                case 10:
+                    selectedPrompt = Resources.example_prompt_10;
+                    break;
+                case 11:
+                    selectedPrompt = Resources.example_prompt_11;
+                    break;
+                case 12:
+                    selectedPrompt = Resources.example_prompt_12;
+                    break;
+                case 13:
+                    selectedPrompt = Resources.example_prompt_13;
+                    break;
+                case 14:
+                    selectedPrompt = Resources.example_prompt_14;
+                    break;
+                case 15:
+                    selectedPrompt = Resources.example_prompt_15;
+                    break;
+            }
+            textBoxPrompt.PlaceholderText = selectedPrompt;
         }
         private static Bitmap LoadInputImage(string path)
         {
@@ -281,18 +346,6 @@ namespace Carpathia
             return destImage;
         }
 
-        private void textBoxPrompt_TextChanged(object sender, EventArgs e)
-        {
-            if (!string.IsNullOrEmpty(textBoxPrompt.Text))
-            {
-                buttonCreate.Enabled = true;
-            }
-            else
-            {
-                buttonCreate.Enabled = false;
-            }
-        }
-
         private void CreateWithAIForm_Load(object sender, EventArgs e)
         {
             //HandleStatus();
@@ -352,7 +405,7 @@ namespace Carpathia
             CheckResult,
             ExceptionText
         }
-        
+
         private void CreateWithAIForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             if (!imageIsCompleted)

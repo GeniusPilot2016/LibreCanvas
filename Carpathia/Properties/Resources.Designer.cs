@@ -61,6 +61,141 @@ namespace Carpathia.Properties {
         }
         
         /// <summary>
+        ///   A futuristic city at night with neon lights and flying cars benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_1 {
+            get {
+                return ResourceManager.GetString("example_prompt_1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A watercolor painting of Istanbul and the Bosphorus benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_10 {
+            get {
+                return ResourceManager.GetString("example_prompt_10", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A mysterious forest with glowing blue plants and fog benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_11 {
+            get {
+                return ResourceManager.GetString("example_prompt_11", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A professional portrait of a woman in studio lighting benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_12 {
+            get {
+                return ResourceManager.GetString("example_prompt_12", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A retro 1980s arcade room with colorful neon signs benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_13 {
+            get {
+                return ResourceManager.GetString("example_prompt_13", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A tiny medieval village inside a glass bottle benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_14 {
+            get {
+                return ResourceManager.GetString("example_prompt_14", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A cinematic underwater scene with whales and sun rays benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_15 {
+            get {
+                return ResourceManager.GetString("example_prompt_15", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A cozy cabin in a snowy forest, warm lights, cinematic atmosphere benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_2 {
+            get {
+                return ResourceManager.GetString("example_prompt_2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A realistic astronaut standing on Mars during sunset benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_3 {
+            get {
+                return ResourceManager.GetString("example_prompt_3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A cyberpunk samurai in Tokyo, neon rain, cinematic lighting benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_4 {
+            get {
+                return ResourceManager.GetString("example_prompt_4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A minimalist product photo of a luxury watch on a black background benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_5 {
+            get {
+                return ResourceManager.GetString("example_prompt_5", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A fantasy castle above the clouds, dramatic sunrise benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_6 {
+            get {
+                return ResourceManager.GetString("example_prompt_6", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A cute orange cat wearing sunglasses at the beach benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_7 {
+            get {
+                return ResourceManager.GetString("example_prompt_7", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A modern living room with large windows and natural light benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_8 {
+            get {
+                return ResourceManager.GetString("example_prompt_8", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A photorealistic sports car on a mountain road at sunset benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_9 {
+            get {
+                return ResourceManager.GetString("example_prompt_9", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   System.Byte[] türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
         internal static byte[] HarmonyOS_Sans_Black {
@@ -186,6 +321,16 @@ namespace Carpathia.Properties {
         internal static System.Drawing.Bitmap icons8_about_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-about-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap icons8_add_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-add-48", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -383,6 +528,16 @@ namespace Carpathia.Properties {
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
+        internal static System.Drawing.Bitmap icons8_collapse_arrow_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-collapse-arrow-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
         internal static System.Drawing.Bitmap icons8_color_dropper_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-color-dropper-48", resourceCulture);
@@ -453,6 +608,16 @@ namespace Carpathia.Properties {
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
+        internal static System.Drawing.Bitmap icons8_delete_48__1_ {
+            get {
+                object obj = ResourceManager.GetObject("icons8-delete-48 (1)", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
         internal static System.Drawing.Bitmap icons8_dimension_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-dimension-48", resourceCulture);
@@ -496,6 +661,16 @@ namespace Carpathia.Properties {
         internal static System.Drawing.Bitmap icons8_done_481 {
             get {
                 object obj = ResourceManager.GetObject("icons8-done-481", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap icons8_drop_down_arrow_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-drop-down-arrow-48", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

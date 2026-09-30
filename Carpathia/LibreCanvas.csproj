@@ -10,7 +10,7 @@
     <Product>ArtFusion</Product>
     <Company></Company>
     <Authors>GeniusPilot2016 (Nisa Özdoğan)</Authors>
-    <Version>0.20.0-alpha</Version>
+    <Version>0.21.0-alpha</Version>
     <Title>LibreCanvas</Title>
     <PackageId>librecanvas</PackageId>
     <ApplicationIcon>librecanvas_icon.ico</ApplicationIcon>

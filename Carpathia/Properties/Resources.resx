@@ -160,6 +160,9 @@
   <data name="icons8-photo-gallery-48" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\icons8-photo-gallery-48.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="icons8-collapse-arrow-48" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\icons8-collapse-arrow-48.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="icons8-triangle-48" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\icons8-triangle-48.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -337,6 +340,9 @@
   <data name="icons8-dimension-96" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\icons8-dimension-96.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="icons8-fit-to-page-48" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\icons8-fit-to-page-48.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="icons8-artificial-intelligence-48" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\icons8-artificial-intelligence-48.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -388,6 +394,9 @@
   <data name="icons8-add-text-48" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\icons8-add-text-48.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="icons8-add-48" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\icons8-add-48.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="icons8-align-right-48" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\icons8-align-right-48.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -436,13 +445,61 @@
   <data name="icons8-question-48" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\icons8-question-48.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="icons8-delete-48 (1)" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\icons8-delete-48 (1).png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="icons8-save-48" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\icons8-save-48.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="icons8-flip-vertical-48" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\icons8-flip-vertical-48.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="icons8-fit-to-page-48" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\icons8-fit-to-page-48.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="icons8-drop-down-arrow-48" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\icons8-drop-down-arrow-48.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="example_prompt_1" xml:space="preserve">
+    <value>A futuristic city at night with neon lights and flying cars</value>
+  </data>
+  <data name="example_prompt_15" xml:space="preserve">
+    <value>A cinematic underwater scene with whales and sun rays</value>
+  </data>
+  <data name="example_prompt_14" xml:space="preserve">
+    <value>A tiny medieval village inside a glass bottle</value>
+  </data>
+  <data name="example_prompt_13" xml:space="preserve">
+    <value>A retro 1980s arcade room with colorful neon signs</value>
+  </data>
+  <data name="example_prompt_12" xml:space="preserve">
+    <value>A professional portrait of a woman in studio lighting</value>
+  </data>
+  <data name="example_prompt_11" xml:space="preserve">
+    <value>A mysterious forest with glowing blue plants and fog</value>
+  </data>
+  <data name="example_prompt_10" xml:space="preserve">
+    <value>A watercolor painting of Istanbul and the Bosphorus</value>
+  </data>
+  <data name="example_prompt_9" xml:space="preserve">
+    <value>A photorealistic sports car on a mountain road at sunset</value>
+  </data>
+  <data name="example_prompt_8" xml:space="preserve">
+    <value>A modern living room with large windows and natural light</value>
+  </data>
+  <data name="example_prompt_7" xml:space="preserve">
+    <value>A cute orange cat wearing sunglasses at the beach</value>
+  </data>
+  <data name="example_prompt_6" xml:space="preserve">
+    <value>A fantasy castle above the clouds, dramatic sunrise</value>
+  </data>
+  <data name="example_prompt_5" xml:space="preserve">
+    <value>A minimalist product photo of a luxury watch on a black background</value>
+  </data>
+  <data name="example_prompt_4" xml:space="preserve">
+    <value>A cyberpunk samurai in Tokyo, neon rain, cinematic lighting</value>
+  </data>
+  <data name="example_prompt_3" xml:space="preserve">
+    <value>A realistic astronaut standing on Mars during sunset</value>
+  </data>
+  <data name="example_prompt_2" xml:space="preserve">
+    <value>A cozy cabin in a snowy forest, warm lights, cinematic atmosphere</value>
   </data>
 </root>

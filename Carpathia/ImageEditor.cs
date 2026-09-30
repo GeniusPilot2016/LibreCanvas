@@ -81,6 +81,66 @@ namespace Carpathia
         string openedFilePath = string.Empty;
         bool fileSaved = false;
         bool aiGenerated = false;
+
+        // Layer system. MainBitmap always represents the currently selected/editable layer.
+        // Each layer keeps its own bitmap snapshot and listView1 shows its live thumbnail
+        // through imageListLayerThumbnails.
+        private sealed class EditorLayer : IDisposable
+        {
+            public string Name { get; set; }
+            public Bitmap Bitmap { get; set; }
+            public string ThumbnailKey { get; } = Guid.NewGuid().ToString("N");
+
+            public EditorLayer(string name, Bitmap bitmap)
+            {
+                Name = name;
+                Bitmap = bitmap;
+            }
+
+            public void Dispose()
+            {
+                Bitmap?.Dispose();
+                Bitmap = null;
+            }
+        }
+
+        private readonly List<EditorLayer> editorLayers = new();
+        private int activeLayerIndex = -1;
+        private bool suppressLayerSelectionChanged = false;
+
+        // Only layers that actually changed are queued for thumbnail regeneration.
+        // Selection/reordering/compositing never touches unrelated thumbnails.
+        private readonly HashSet<string> dirtyLayerThumbnailKeys = new();
+        private readonly System.Windows.Forms.Timer layerThumbnailRefreshTimer = new System.Windows.Forms.Timer();
+
+        // MainBitmap is the editable bitmap of the active layer.
+        // compositeCanvasBitmap is only the flattened on-screen preview.
+        private Bitmap compositeCanvasBitmap;
+
+        // Performance: avoid rebuilding the full layer composite for every
+        // mouse-move while a drawing tool is active.
+        private bool compositeDirty = true;
+        private bool suppressCompositeDuringToolStroke = false;
+
+        private sealed class LayerCanvasState : IDisposable
+        {
+            public string LayerKey { get; }
+            public Bitmap Bitmap { get; }
+            public Size Size { get; }
+
+            public LayerCanvasState(string layerKey, Bitmap bitmap, Size size)
+            {
+                LayerKey = layerKey;
+                Bitmap = bitmap;
+                Size = size;
+            }
+
+            public void Dispose()
+            {
+                Bitmap?.Dispose();
+            }
+        }
+
         CancellationTokenSource cts = new CancellationTokenSource();
         enum TextToolAlign
         {
@@ -289,11 +349,13 @@ namespace Carpathia
 
         private void RefreshCanvasAfterTransform(bool markModified = true)
         {
-            originalSize = MainBitmap.Size; pictureBoxCanvas.Image = MainBitmap;
+            originalSize = MainBitmap.Size;
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
             canvasPanel.Size = new Size((int)Math.Round(MainBitmap.Width * zoom) + 20, (int)Math.Round(MainBitmap.Height * zoom) + 20);
             pictureBoxCanvas.Size = panelResizer.Size; UIPanel.AutoScrollMinSize = canvasPanel.Size;
             labelSize.Text = $"{MainBitmap.Width} X {MainBitmap.Height}px"; labelZoom.Text = $"{Math.Round(zoom * 100)}%";
-            if (markModified) { isModified = true; isSaved = false; }
+            if (markModified) { isModified = true; isSaved = false; MarkLayerThumbnailDirty(); RefreshActiveLayerThumbnail(); }
             CenterCanvasPanel(); pictureBoxCanvas.Invalidate(); UpdateUndoRedoButtons();
         }
 
@@ -393,6 +455,14 @@ namespace Carpathia
                 toolStrip.BackColor = Color.Transparent;
                 toolStrip.ForeColor = ToolStrip.DefaultForeColor;
             }
+            foreach (TabPage pages in tabControl1.TabPages)
+            {
+                pages.BackColor = TabPage.DefaultBackColor;
+                pages.ForeColor = TabPage.DefaultForeColor;
+            }
+            listView1.BackColor = ListView.DefaultBackColor;
+            listView1.ForeColor = ListView.DefaultForeColor;
+            toolStrip1.BackgroundImage = Resources.toolstrip_light;
             TitleBarHelper.ApplyCustomTitleBar(this, false);
         }
         private void DarkTheme()
@@ -450,6 +520,14 @@ namespace Carpathia
                 toolStrip.BackColor = Color.Black;
                 toolStrip.ForeColor = Color.White;
             }
+            foreach (TabPage pages in tabControl1.TabPages)
+            {
+                pages.BackColor = Color.FromArgb(32, 32, 32);
+                pages.ForeColor = Color.White;
+            }
+            listView1.BackColor = Color.Black;
+            listView1.ForeColor = Color.White;
+            toolStrip1.BackgroundImage = Resources.toolstrip_dark;
             TitleBarHelper.ApplyCustomTitleBar(this, true);
         }
         private void InitializeSelectionPen()
@@ -475,7 +553,6 @@ namespace Carpathia
         private void InitializeComponentAndFont()
         {
             InitializeComponent();
-
             // Animate only the dash phase. 60 ms gives a smooth but lightweight motion.
             marchingAntsTimer.Interval = 60;
             marchingAntsTimer.Tick += MarchingAntsTimer_Tick;
@@ -499,6 +576,7 @@ namespace Carpathia
             }
             SetTheme();
             SetFonts();
+            InitializeLayerSystem();
             // Set the default selected font to the first one in the list
             if (fontsComboBox.Items.Count > 0)
             {
@@ -644,8 +722,515 @@ namespace Carpathia
                 }
             }
         }
+        private void InitializeLayerSystem()
+        {
+            // Compact layer list: one layer per row with a small thumbnail on the left
+            // and the layer name on the right. imageListLayerThumbnails remains the
+            // single thumbnail source for listView1.
+            imageListLayerThumbnails.ImageSize = new Size(40, 40);
+            imageListLayerThumbnails.ColorDepth = ColorDepth.Depth32Bit;
+
+            listView1.LargeImageList = null;
+            listView1.SmallImageList = imageListLayerThumbnails;
+            listView1.View = View.Details;
+            listView1.HeaderStyle = ColumnHeaderStyle.None;
+            listView1.FullRowSelect = true;
+            listView1.MultiSelect = false;
+            listView1.HideSelection = false;
+
+            listView1.Columns.Clear();
+            listView1.Columns.Add("Layer");
+            UpdateLayerListColumnWidth();
+
+            listView1.Resize -= listView1_LayerListResize;
+            listView1.Resize += listView1_LayerListResize;
+            listView1.SelectedIndexChanged -= listView1_SelectedIndexChanged_Layers;
+            listView1.SelectedIndexChanged += listView1_SelectedIndexChanged_Layers;
+
+            // Refresh thumbnails after edits finish. MouseUp covers brush/pen/eraser/shape
+            // workflows; other editing commands call MarkLayerThumbnailDirty and refresh
+            // through the shared canvas refresh/undo/redo paths below.
+            pictureBoxCanvas.MouseUp -= pictureBoxCanvas_MouseUp_LayerThumbnail;
+            pictureBoxCanvas.MouseUp += pictureBoxCanvas_MouseUp_LayerThumbnail;
+
+            layerThumbnailRefreshTimer.Stop();
+            layerThumbnailRefreshTimer.Interval = 300;
+            layerThumbnailRefreshTimer.Tick -= layerThumbnailRefreshTimer_Tick;
+            layerThumbnailRefreshTimer.Tick += layerThumbnailRefreshTimer_Tick;
+        }
+
+        private void listView1_LayerListResize(object sender, EventArgs e)
+        {
+            UpdateLayerListColumnWidth();
+        }
+
+        private void UpdateLayerListColumnWidth()
+        {
+            if (listView1.Columns.Count == 0)
+                return;
+
+            // Keep the single details column stretched across the ListView so each
+            // layer is visually a full-width row instead of a tiled icon entry.
+            int width = Math.Max(40, listView1.ClientSize.Width - 4);
+            listView1.Columns[0].Width = width;
+        }
+
+
+        private int FindLayerIndexByKey(string layerKey)
+        {
+            if (string.IsNullOrEmpty(layerKey))
+                return -1;
+
+            for (int i = 0; i < editorLayers.Count; i++)
+            {
+                if (editorLayers[i].ThumbnailKey == layerKey)
+                    return i;
+            }
+
+            return -1;
+        }
+
+        private Bitmap GetLayerBitmapForRender(int index)
+        {
+            if (index < 0 || index >= editorLayers.Count)
+                return null;
+
+            // MainBitmap may contain edits that have not yet been copied back into
+            // EditorLayer.Bitmap, so always use it for the active layer.
+            if (index == activeLayerIndex && MainBitmap != null)
+                return MainBitmap;
+
+            return editorLayers[index].Bitmap;
+        }
+
+        private Bitmap CreateCompositeBitmap()
+        {
+            Size canvasSize;
+
+            if (MainBitmap != null)
+                canvasSize = MainBitmap.Size;
+            else if (editorLayers.Count > 0 && editorLayers[0].Bitmap != null)
+                canvasSize = editorLayers[0].Bitmap.Size;
+            else
+                canvasSize = Settings1.Default.DefaultCanvasSize;
+
+            var composite = new Bitmap(
+                Math.Max(1, canvasSize.Width),
+                Math.Max(1, canvasSize.Height),
+                PixelFormat.Format32bppArgb);
+
+            using (Graphics g = Graphics.FromImage(composite))
+            {
+                g.Clear(Color.Transparent);
+                g.CompositingMode = CompositingMode.SourceOver;
+                // Layers are normally canvas-sized and drawn unscaled. Expensive
+                // interpolation/smoothing settings do not improve DrawImageUnscaled.
+                g.CompositingQuality = CompositingQuality.HighSpeed;
+                g.InterpolationMode = InterpolationMode.NearestNeighbor;
+                g.PixelOffsetMode = PixelOffsetMode.HighSpeed;
+                g.SmoothingMode = SmoothingMode.HighSpeed;
+
+                // Photoshop-style layer order: row 0 is the topmost layer.
+                // Draw from the bottom of the list toward the top.
+                for (int i = editorLayers.Count - 1; i >= 0; i--)
+                {
+                    Bitmap layerBitmap = GetLayerBitmapForRender(i);
+                    if (layerBitmap == null)
+                        continue;
+
+                    g.DrawImageUnscaled(layerBitmap, 0, 0);
+                }
+            }
+
+            return composite;
+        }
+
+        private void RenderCompositeToCanvas(bool force = false)
+        {
+            if (editorLayers.Count == 0)
+            {
+                pictureBoxCanvas.Image = MainBitmap;
+                pictureBoxCanvas.Invalidate();
+                compositeDirty = false;
+                return;
+            }
+
+            if (!force && !compositeDirty)
+            {
+                pictureBoxCanvas.Invalidate();
+                return;
+            }
+
+            Bitmap nextComposite = CreateCompositeBitmap();
+            Bitmap oldComposite = compositeCanvasBitmap;
+
+            compositeCanvasBitmap = nextComposite;
+            pictureBoxCanvas.Image = compositeCanvasBitmap;
+            compositeDirty = false;
+
+            if (oldComposite != null &&
+                !ReferenceEquals(oldComposite, MainBitmap) &&
+                !ReferenceEquals(oldComposite, compositeCanvasBitmap))
+            {
+                oldComposite.Dispose();
+            }
+
+            pictureBoxCanvas.Invalidate();
+        }
+
+        private void MarkCompositeDirty()
+        {
+            compositeDirty = true;
+        }
+
+        private void ShowActiveLayerDuringStroke()
+        {
+            // During continuous painting, avoid flattening all layers on each move.
+            // The active layer is shown directly; on MouseUp the real composite
+            // is rebuilt once.
+            if (!suppressCompositeDuringToolStroke || MainBitmap == null)
+                return;
+
+            if (!ReferenceEquals(pictureBoxCanvas.Image, MainBitmap))
+                pictureBoxCanvas.Image = MainBitmap;
+
+            pictureBoxCanvas.Invalidate();
+        }
+
+        private void BeginToolStrokePreview()
+        {
+            suppressCompositeDuringToolStroke = true;
+            ShowActiveLayerDuringStroke();
+        }
+
+        private void EndToolStrokePreview()
+        {
+            suppressCompositeDuringToolStroke = false;
+            SyncActiveLayerFromCanvas();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+        }
+
+        private void RefreshLayerThumbnail(int layerIndex)
+        {
+            if (layerIndex < 0 || layerIndex >= editorLayers.Count)
+                return;
+
+            EditorLayer layer = editorLayers[layerIndex];
+            Bitmap source = GetLayerBitmapForRender(layerIndex);
+
+            if (source == null)
+                return;
+
+            // Persist only this layer before generating its thumbnail.
+            if (layerIndex == activeLayerIndex && MainBitmap != null)
+            {
+                layer.Bitmap?.Dispose();
+                layer.Bitmap = new Bitmap(MainBitmap);
+                source = layer.Bitmap;
+            }
+
+            imageListLayerThumbnails.Images.RemoveByKey(layer.ThumbnailKey);
+
+            using (Bitmap thumbnail = CreateLayerThumbnail(source))
+                imageListLayerThumbnails.Images.Add(layer.ThumbnailKey, new Bitmap(thumbnail));
+
+            if (layerIndex < listView1.Items.Count)
+            {
+                listView1.Items[layerIndex].ImageKey = layer.ThumbnailKey;
+                listView1.Items[layerIndex].Text = layer.Name;
+            }
+
+            dirtyLayerThumbnailKeys.Remove(layer.ThumbnailKey);
+            listView1.Invalidate();
+        }
+
+        private void RefreshLayerThumbnailByKey(string layerKey)
+        {
+            int index = FindLayerIndexByKey(layerKey);
+            if (index >= 0)
+                RefreshLayerThumbnail(index);
+        }
+
+        private void RefreshDirtyLayerThumbnails()
+        {
+            if (dirtyLayerThumbnailKeys.Count == 0)
+                return;
+
+            string[] changedKeys = dirtyLayerThumbnailKeys.ToArray();
+            foreach (string key in changedKeys)
+                RefreshLayerThumbnailByKey(key);
+        }
+
+        private void ResetLayers(string initialLayerName)
+        {
+            suppressLayerSelectionChanged = true;
+            try
+            {
+                foreach (EditorLayer layer in editorLayers)
+                    layer.Dispose();
+
+                editorLayers.Clear();
+                activeLayerIndex = -1;
+                listView1.Items.Clear();
+                imageListLayerThumbnails.Images.Clear();
+                dirtyLayerThumbnailKeys.Clear();
+
+                compositeCanvasBitmap?.Dispose();
+                compositeCanvasBitmap = null;
+
+                if (MainBitmap == null)
+                    return;
+
+                AddLayerInternal(initialLayerName, MainBitmap, selectLayer: true);
+                MarkCompositeDirty();
+                RenderCompositeToCanvas(force: true);
+            }
+            finally
+            {
+                suppressLayerSelectionChanged = false;
+            }
+        }
+
+        private void AddLayerInternal(string layerName, Bitmap source, bool selectLayer)
+        {
+            if (source == null)
+                return;
+
+            var layer = new EditorLayer(layerName, new Bitmap(source));
+            editorLayers.Add(layer);
+
+            using (Bitmap thumbnail = CreateLayerThumbnail(source))
+                imageListLayerThumbnails.Images.Add(layer.ThumbnailKey, new Bitmap(thumbnail));
+
+            var item = new ListViewItem(layer.Name)
+            {
+                ImageKey = layer.ThumbnailKey,
+                Tag = layer
+            };
+            listView1.Items.Add(item);
+
+            if (selectLayer)
+            {
+                activeLayerIndex = editorLayers.Count - 1;
+                item.Selected = true;
+                item.Focused = true;
+            }
+        }
+
+        // Add a transparent layer directly above the currently active layer,
+        // matching Photoshop's stacking behavior.
+        private void AddNewLayer()
+        {
+            if (MainBitmap == null)
+                return;
+
+            SyncActiveLayerFromCanvas();
+
+            int nextNumber = editorLayers.Count + 1;
+            var blank = new Bitmap(MainBitmap.Width, MainBitmap.Height, PixelFormat.Format32bppArgb);
+            using (Graphics g = Graphics.FromImage(blank))
+                g.Clear(Color.Transparent);
+
+            var layer = new EditorLayer($"Layer {nextNumber}", new Bitmap(blank));
+            using (Bitmap thumbnail = CreateLayerThumbnail(blank))
+                imageListLayerThumbnails.Images.Add(layer.ThumbnailKey, new Bitmap(thumbnail));
+
+            var item = new ListViewItem(layer.Name)
+            {
+                ImageKey = layer.ThumbnailKey,
+                Tag = layer
+            };
+
+            int insertIndex = activeLayerIndex >= 0 ? activeLayerIndex : 0;
+            editorLayers.Insert(insertIndex, layer);
+            listView1.Items.Insert(insertIndex, item);
+
+            activeLayerIndex = insertIndex;
+
+            MainBitmap?.Dispose();
+            MainBitmap = new Bitmap(layer.Bitmap);
+            originalSize = MainBitmap.Size;
+
+            suppressLayerSelectionChanged = true;
+            try
+            {
+                listView1.SelectedItems.Clear();
+                item.Selected = true;
+                item.Focused = true;
+                item.EnsureVisible();
+            }
+            finally
+            {
+                suppressLayerSelectionChanged = false;
+            }
+
+            blank.Dispose();
+            SetAsUnselected();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+
+            isModified = true;
+            isSaved = false;
+        }
+
+        private void SyncActiveLayerFromCanvas()
+        {
+            if (MainBitmap == null || activeLayerIndex < 0 || activeLayerIndex >= editorLayers.Count)
+                return;
+
+            EditorLayer layer = editorLayers[activeLayerIndex];
+            layer.Bitmap?.Dispose();
+            layer.Bitmap = new Bitmap(MainBitmap);
+            MarkCompositeDirty();
+        }
+
+        private void SwitchToLayer(int newIndex)
+        {
+            if (newIndex < 0 || newIndex >= editorLayers.Count || newIndex == activeLayerIndex)
+                return;
+
+            // Persist the previous active layer, but do not regenerate its thumbnail
+            // just because the user selected another row.
+            SyncActiveLayerFromCanvas();
+
+            activeLayerIndex = newIndex;
+            EditorLayer layer = editorLayers[activeLayerIndex];
+
+            MainBitmap?.Dispose();
+            MainBitmap = new Bitmap(layer.Bitmap);
+            originalSize = MainBitmap.Size;
+
+            canvasPanel.Size = new Size(
+                (int)Math.Round(MainBitmap.Width * zoom) + 20,
+                (int)Math.Round(MainBitmap.Height * zoom) + 20);
+            pictureBoxCanvas.Size = panelResizer.Size;
+            UIPanel.AutoScrollMinSize = canvasPanel.Size;
+            labelSize.Text = $"{MainBitmap.Width} X {MainBitmap.Height}px";
+
+            SetAsUnselected();
+            CenterCanvasPanel();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+        }
+
+        private void listView1_SelectedIndexChanged_Layers(object sender, EventArgs e)
+        {
+            if (suppressLayerSelectionChanged || listView1.SelectedIndices.Count == 0)
+                return;
+
+            int selectedIndex = listView1.SelectedIndices[0];
+            SwitchToLayer(selectedIndex);
+        }
+
+        private void pictureBoxCanvas_MouseUp_LayerThumbnail(object sender, MouseEventArgs e)
+        {
+            // The main MouseUp handler ends the fast stroke/composite path.
+            // This subscriber only updates the thumbnail of the layer that changed.
+            RefreshActiveLayerThumbnail();
+        }
+
+        private void MarkLayerThumbnailDirty()
+        {
+            if (activeLayerIndex < 0 || activeLayerIndex >= editorLayers.Count)
+                return;
+
+            dirtyLayerThumbnailKeys.Add(editorLayers[activeLayerIndex].ThumbnailKey);
+
+            // Debounce rapid edits. The queue is keyed by layer, so switching layers
+            // cannot accidentally refresh the wrong thumbnail.
+            layerThumbnailRefreshTimer.Stop();
+            layerThumbnailRefreshTimer.Start();
+        }
+
+        private void layerThumbnailRefreshTimer_Tick(object sender, EventArgs e)
+        {
+            layerThumbnailRefreshTimer.Stop();
+            RefreshDirtyLayerThumbnails();
+        }
+
+        private void RefreshActiveLayerThumbnail(bool force = false)
+        {
+            if (activeLayerIndex < 0 || activeLayerIndex >= editorLayers.Count)
+                return;
+
+            string key = editorLayers[activeLayerIndex].ThumbnailKey;
+
+            if (!force && !dirtyLayerThumbnailKeys.Contains(key))
+                return;
+
+            RefreshLayerThumbnail(activeLayerIndex);
+        }
+
+        private Bitmap CreateLayerThumbnail(Image source)
+        {
+            Size size = imageListLayerThumbnails.ImageSize;
+            if (size.Width < 16 || size.Height < 16)
+                size = new Size(40, 40);
+
+            var thumbnail = new Bitmap(
+                size.Width,
+                size.Height,
+                PixelFormat.Format32bppArgb);
+
+            using (Graphics g = Graphics.FromImage(thumbnail))
+            {
+                g.Clear(Color.Transparent);
+
+                // Photoshop-style transparency checkerboard.
+                // This is drawn only into the thumbnail preview and never changes
+                // the actual layer bitmap.
+                const int checkerSize = 5;
+                using (Brush lightBrush = new SolidBrush(Color.FromArgb(238, 238, 238)))
+                using (Brush darkBrush = new SolidBrush(Color.FromArgb(200, 200, 200)))
+                {
+                    for (int y = 0; y < size.Height; y += checkerSize)
+                    {
+                        for (int x = 0; x < size.Width; x += checkerSize)
+                        {
+                            bool light = ((x / checkerSize) + (y / checkerSize)) % 2 == 0;
+                            g.FillRectangle(
+                                light ? lightBrush : darkBrush,
+                                x,
+                                y,
+                                Math.Min(checkerSize, size.Width - x),
+                                Math.Min(checkerSize, size.Height - y));
+                        }
+                    }
+                }
+
+                g.InterpolationMode = InterpolationMode.HighQualityBilinear;
+                g.PixelOffsetMode = PixelOffsetMode.HighSpeed;
+                g.SmoothingMode = SmoothingMode.HighSpeed;
+                g.CompositingMode = CompositingMode.SourceOver;
+                g.CompositingQuality = CompositingQuality.HighSpeed;
+
+                float scale = Math.Min(
+                    (float)size.Width / source.Width,
+                    (float)size.Height / source.Height);
+
+                int width = Math.Max(1, (int)Math.Round(source.Width * scale));
+                int height = Math.Max(1, (int)Math.Round(source.Height * scale));
+                int left = (size.Width - width) / 2;
+                int top = (size.Height - height) / 2;
+
+                // Transparent portions of the layer reveal the checkerboard.
+                g.DrawImage(
+                    source,
+                    new Rectangle(left, top, width, height),
+                    0,
+                    0,
+                    source.Width,
+                    source.Height,
+                    GraphicsUnit.Pixel);
+            }
+
+            return thumbnail;
+        }
+
         private void createNewFile()
         {
+            listView1.Items.Clear();
             aiGenerated = false; // Reset AI generated flag
             isModified = false;
             SetAsUnselected();
@@ -669,7 +1254,7 @@ namespace Carpathia
             MainBitmap = new Bitmap(Settings1.Default.DefaultCanvasSize.Width,
                 Settings1.Default.DefaultCanvasSize.Height);
             originalSize = MainBitmap.Size;
-            pictureBoxCanvas.Image = MainBitmap;
+            ResetLayers("Layer 1");
             labelSize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height}px";
             labelFileName.Text = "Unnamed File";
             undoStack.Clear();
@@ -706,6 +1291,7 @@ namespace Carpathia
             pictureBoxCanvas.Image = image;
             MainBitmap = new Bitmap(image);
             originalSize = MainBitmap.Size;
+            ResetLayers(Path.GetFileName(fileName));
             canvasPanel.Refresh();
             labelSize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height}px";
             labelFileName.Text = fileName;
@@ -743,6 +1329,7 @@ namespace Carpathia
             pictureBoxCanvas.Image = image;
             MainBitmap = new Bitmap(image);
             originalSize = MainBitmap.Size;
+            ResetLayers("Layer 1");
             canvasPanel.Refresh();
             labelSize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height}px";
             switch (isAIGenerated)
@@ -993,7 +1580,7 @@ namespace Carpathia
                             {
                                 SelectedBitmap = (Bitmap)image;
                                 MergeMainBitmapWithSelected();
-                                isModified = true; // Mark the image as modified
+                                isModified = true; MarkLayerThumbnailDirty(); // Mark the image as modified
                             }
                             else
                             {
@@ -1079,7 +1666,7 @@ namespace Carpathia
                                     GraphicsUnit.Pixel);
                             }
                         }
-                        var imageTask = ImageGenerationCore.GenerateImage("Isolate the main object or person precisely and remove the entire background. Return the result as a PNG with a true transparent alpha channel (RGBA). All background pixels must have alpha 0. Do not replace the background with white, black, gray, any solid color, blur, studio backdrop, gradient, or checkerboard pattern. Preserve the subject’s original colors, edges, fine details, hair, and semi-transparent areas.", 
+                        var imageTask = ImageGenerationCore.GenerateImage("Isolate the main object or person precisely and remove the entire background. Return the result as a PNG with a true transparent alpha channel (RGBA). All background pixels must have alpha 0. Do not replace the background with white, black, gray, any solid color, blur, studio backdrop, gradient, or checkerboard pattern. Preserve the subject’s original colors, edges, fine details, hair, and semi-transparent areas.",
                             SelectedBitmap, SelectedBitmap.Width, SelectedBitmap.Height, cts.Token);
                         var image = await imageTask; // Await the task to get the result
                         if (image != null)
@@ -1104,7 +1691,9 @@ namespace Carpathia
                         {
                             image = RemoveGeneratedCheckerboard(image);
                             MainBitmap = new Bitmap(image); // Convert Image to Bitmap  
-                            pictureBoxCanvas.Image = MainBitmap;
+                            RenderCompositeToCanvas();
+                            MarkLayerThumbnailDirty();
+                            RefreshActiveLayerThumbnail();
                             pictureBoxCanvas.Invalidate();
                         }
                         else
@@ -1362,6 +1951,8 @@ namespace Carpathia
         }
         private async void saveFile(string targetFilePath)
         {
+            SyncActiveLayerFromCanvas();
+            RefreshActiveLayerThumbnail(force: true);
             fileSaved = false;
             string tempFilePath = Path.Combine(Path.GetDirectoryName(targetFilePath), Path.GetRandomFileName());
             string backupFilePath = Path.Combine(Path.GetDirectoryName(targetFilePath), Path.GetRandomFileName());
@@ -1384,7 +1975,10 @@ namespace Carpathia
                 {
                     try
                     {
-                        MainBitmap.Save(targetFilePath, format);
+                        using (Bitmap flattened = CreateCompositeBitmap())
+                        {
+                            flattened.Save(targetFilePath, format);
+                        }
                         SaveMetaDataToImage(targetFilePath);
                     }
                     catch (Exception ex)
@@ -1509,7 +2103,7 @@ namespace Carpathia
         {
             originalSize = MainBitmap.Size;
             pictureBoxCanvas.Size = panelResizer.Size;
-            pictureBoxCanvas.Image = MainBitmap;
+            RenderCompositeToCanvas();
             labelSize.Text = $"{canvasPanel.Width} X {canvasPanel.Height}px";
             UIPanel.AutoScrollMinSize = canvasPanel.Size;
             toolStripResize.Visible = false;
@@ -1815,6 +2409,9 @@ namespace Carpathia
             {
                 if (isdrawing)
                 {
+                    if (suppressCompositeDuringToolStroke)
+                        EndToolStrokePreview();
+
                     isdrawing = false;
 
                     if (isSelected && !SelectionRectangle.IsEmpty &&
@@ -1838,42 +2435,42 @@ namespace Carpathia
                                 {
                                     DrawShapes.DrawLineOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, endPointImage);
                                 }
-                                isModified = true;
+                                isModified = true; MarkLayerThumbnailDirty();
                                 break;
                             case Tools.Round:
                                 using (Graphics graphics = Graphics.FromImage(MainBitmap))
                                 {
                                     DrawShapes.DrawRoundOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, endPointImage);
                                 }
-                                isModified = true;
+                                isModified = true; MarkLayerThumbnailDirty();
                                 break;
                             case Tools.Rectangle:
                                 using (Graphics graphics = Graphics.FromImage(MainBitmap))
                                 {
                                     DrawShapes.DrawRectangleOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, endPointImage);
                                 }
-                                isModified = true;
+                                isModified = true; MarkLayerThumbnailDirty();
                                 break;
                             case Tools.RoundedRectangle:
                                 using (Graphics graphics = Graphics.FromImage(MainBitmap))
                                 {
                                     DrawShapes.DrawRoundedRectangleOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, endPointImage, radius);
                                 }
-                                isModified = true;
+                                isModified = true; MarkLayerThumbnailDirty();
                                 break;
                             case Tools.Triangle:
                                 using (Graphics graphics = Graphics.FromImage(MainBitmap))
                                 {
                                     DrawShapes.DrawTriangleOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, endPointImage);
                                 }
-                                isModified = true;
+                                isModified = true; MarkLayerThumbnailDirty();
                                 break;
                             case Tools.Hexagon:
                                 using (Graphics graphics = Graphics.FromImage(MainBitmap))
                                 {
                                     DrawShapes.DrawHexagonOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, points, startPoint, endPointImage);
                                 }
-                                isModified = true;
+                                isModified = true; MarkLayerThumbnailDirty();
                                 break;
                             default:
                                 drawIntoCanvas(e);
@@ -1916,7 +2513,7 @@ namespace Carpathia
                     }
 
                     // Update the PictureBox with the new bitmap
-                    pictureBoxCanvas.Image = MainBitmap;
+                    RenderCompositeToCanvas();
                     pictureBoxCanvas.Invalidate();
                 }
             }
@@ -2345,22 +2942,22 @@ namespace Carpathia
                                     case 0: // Regular brush
                                         DrawBrush(graphics, BrushShapes.DrawCircleBrush, color1, brushSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
-                                        isModified = true;
+                                        isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     case 1: // Oil brush
                                         DrawBrush(graphics, BrushShapes.DrawOilBrush, color1, brushSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
-                                        isModified = true;
+                                        isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     case 2: // Calligraphy brush
                                         DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, color1, brushSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
-                                        isModified = true;
+                                        isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     case 3:
                                         DrawBrush(graphics, BrushShapes.DrawWatercolorBrush, color1, brushSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
-                                        isModified = true;
+                                        isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     default:
                                         break;
@@ -2372,22 +2969,22 @@ namespace Carpathia
                                     case 0: // Regular pen
                                         DrawBrush(graphics, BrushShapes.DrawSquareBrush, color1, penSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
-                                        isModified = true;
+                                        isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     case 1:
                                         DrawBrush(graphics, BrushShapes.DrawMarkerBrush, color1, penSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
-                                        isModified = true;
+                                        isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     case 2:
                                         DrawBrush(graphics, BrushShapes.DrawCrayonBrush, color1, penSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
-                                        isModified = true;
+                                        isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     case 3: // Calligraphy pen
                                         DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, color1, penSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
-                                        isModified = true;
+                                        isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     default:
                                         break;
@@ -2397,12 +2994,12 @@ namespace Carpathia
                                 graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
                                 DrawBrush(graphics, BrushShapes.DrawCircleBrush, Color.FromArgb(0, 0, 0, 0), eraserSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
-                                isModified = true;
+                                isModified = true; MarkLayerThumbnailDirty();
                                 break;
                             case Tools.Spray:
                                 DrawBrush(graphics, BrushShapes.DrawSprayBrush, color1, sprayToolSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
-                                isModified = true;
+                                isModified = true; MarkLayerThumbnailDirty();
                                 break;
                             case Tools.ColorDrop:
                                 Color pixelColor = MainBitmap.GetPixel((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
@@ -2465,19 +3062,19 @@ namespace Carpathia
                                     {
                                         case 0:
                                             DrawBrush(g, BrushShapes.DrawCircleBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
-                                            isModified = true;
+                                            isModified = true; MarkLayerThumbnailDirty();
                                             break;
                                         case 1:
                                             DrawBrush(g, BrushShapes.DrawOilBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
-                                            isModified = true;
+                                            isModified = true; MarkLayerThumbnailDirty();
                                             break;
                                         case 2:
                                             DrawBrush(g, BrushShapes.DrawCalligraphyBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
-                                            isModified = true;
+                                            isModified = true; MarkLayerThumbnailDirty();
                                             break;
                                         case 3:
                                             DrawBrush(g, BrushShapes.DrawWatercolorBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
-                                            isModified = true;
+                                            isModified = true; MarkLayerThumbnailDirty();
                                             break;
                                     }
                                     break;
@@ -2486,30 +3083,30 @@ namespace Carpathia
                                     {
                                         case 0:
                                             DrawBrush(g, BrushShapes.DrawSquareBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
-                                            isModified = true;
+                                            isModified = true; MarkLayerThumbnailDirty();
                                             break;
                                         case 1:
                                             DrawBrush(g, BrushShapes.DrawMarkerBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
-                                            isModified = true;
+                                            isModified = true; MarkLayerThumbnailDirty();
                                             break;
                                         case 2:
                                             DrawBrush(g, BrushShapes.DrawCrayonBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
-                                            isModified = true;
+                                            isModified = true; MarkLayerThumbnailDirty();
                                             break;
                                         case 3:
                                             DrawBrush(g, BrushShapes.DrawCalligraphyBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
-                                            isModified = true;
+                                            isModified = true; MarkLayerThumbnailDirty();
                                             break;
                                     }
                                     break;
                                 case Tools.Eraser:
                                     g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
                                     DrawBrush(g, BrushShapes.DrawCircleBrush, Color.FromArgb(0, 0, 0, 0), eraserSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
-                                    isModified = true;
+                                    isModified = true; MarkLayerThumbnailDirty();
                                     break;
                                 case Tools.Spray:
                                     DrawBrush(g, BrushShapes.DrawSprayBrush, color1, sprayToolSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
-                                    isModified = true;
+                                    isModified = true; MarkLayerThumbnailDirty();
                                     break;
                                 case Tools.ColorDrop:
                                     Color pixelColor = MainBitmap.GetPixel((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom));
@@ -2542,19 +3139,19 @@ namespace Carpathia
                                 {
                                     case 0: // Regular brush
                                         DrawBrush(graphics, BrushShapes.DrawCircleBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
-                                        isModified = true;
+                                        isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     case 1: // Oil brush
                                         DrawBrush(graphics, BrushShapes.DrawOilBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
-                                        isModified = true;
+                                        isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     case 2: // Calligraphy brush
                                         DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
-                                        isModified = true;
+                                        isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     case 3:
                                         DrawBrush(graphics, BrushShapes.DrawWatercolorBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
-                                        isModified = true;
+                                        isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     default:
                                         break;
@@ -2565,19 +3162,19 @@ namespace Carpathia
                                 {
                                     case 0: // Regular pen
                                         DrawBrush(graphics, BrushShapes.DrawSquareBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
-                                        isModified = true;
+                                        isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     case 1:
                                         DrawBrush(graphics, BrushShapes.DrawMarkerBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
-                                        isModified = true;
+                                        isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     case 2:
                                         DrawBrush(graphics, BrushShapes.DrawCrayonBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
-                                        isModified = true;
+                                        isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     case 3: // Calligraphy pen
                                         DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
-                                        isModified = true;
+                                        isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     default:
                                         break;
@@ -2586,11 +3183,11 @@ namespace Carpathia
                             case Tools.Eraser:
                                 graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
                                 DrawBrush(graphics, BrushShapes.DrawCircleBrush, Color.FromArgb(0, 0, 0, 0), eraserSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
-                                isModified = true;
+                                isModified = true; MarkLayerThumbnailDirty();
                                 break;
                             case Tools.Spray:
                                 DrawBrush(graphics, BrushShapes.DrawSprayBrush, color1, sprayToolSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
-                                isModified = true;
+                                isModified = true; MarkLayerThumbnailDirty();
                                 break;
                             case Tools.ColorDrop:
                                 Color pixelColor = MainBitmap.GetPixel((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom));
@@ -2607,7 +3204,7 @@ namespace Carpathia
                 }
             }
 
-            pictureBoxCanvas.Image = MainBitmap;
+            RenderCompositeToCanvas();
             pictureBoxCanvas.Invalidate();
         }
         private (Pen blackPen, Pen whitePen) CreateMarchingAntsPens()
@@ -2790,8 +3387,8 @@ namespace Carpathia
         private Point startPoint;
         private Point previewStartPoint; // Origin of the preview shape
         private Bitmap previewBitmap;    // Temporary bitmap for previewing shapes
-        private Stack<CanvasState> undoStack = new Stack<CanvasState>();
-        private Stack<CanvasState> redoStack = new Stack<CanvasState>();
+        private Stack<LayerCanvasState> undoStack = new Stack<LayerCanvasState>();
+        private Stack<LayerCanvasState> redoStack = new Stack<LayerCanvasState>();
         private void pictureBoxCanvas_MouseDown(object sender, MouseEventArgs e)
         {
             if (!isImageCurrentlyCreating)
@@ -2800,6 +3397,21 @@ namespace Carpathia
                 x = -1;
                 y = -1;
                 CancelFilters();
+
+                if (selectedTool == Tools.Brush ||
+                    selectedTool == Tools.Pen ||
+                    selectedTool == Tools.Eraser ||
+                    selectedTool == Tools.Spray ||
+                    selectedTool == Tools.Line ||
+                    selectedTool == Tools.Round ||
+                    selectedTool == Tools.Rectangle ||
+                    selectedTool == Tools.RoundedRectangle ||
+                    selectedTool == Tools.Triangle ||
+                    selectedTool == Tools.Hexagon)
+                {
+                    BeginToolStrokePreview();
+                }
+
                 switch (selectedTool)
                 {
                     case Tools.Line:
@@ -3047,7 +3659,7 @@ namespace Carpathia
 
                                     }
                                     MergeMainBitmapWithSelected();
-                                    isModified = true;
+                                    isModified = true; MarkLayerThumbnailDirty();
                                 }
                                 else
                                 {
@@ -3088,9 +3700,9 @@ namespace Carpathia
                                 pictureBoxCanvas.Controls.Remove(textBox);
 
                                 // Update the PictureBox with the updated bitmap  
-                                pictureBoxCanvas.Image = MainBitmap;
+                                RenderCompositeToCanvas();
                                 pictureBoxCanvas.Invalidate(); // Force a redraw  
-                                isModified = true;
+                                isModified = true; MarkLayerThumbnailDirty();
                             };
                             textBox.TextChanged += (s, args) =>
                             {
@@ -3124,7 +3736,7 @@ namespace Carpathia
                             int adjustedY = (int)(unzoomedLocation.Y / zoom);
                             Point adjustedLocation = new Point(adjustedX, adjustedY);
                             FloodFill(MainBitmap, adjustedLocation, color1, tolerance);
-                            isModified = true;
+                            isModified = true; MarkLayerThumbnailDirty();
                         }
                         break;
                 }
@@ -3854,61 +4466,110 @@ namespace Carpathia
 
         private void SaveStateForUndo()
         {
-            if (MainBitmap != null)
+            if (MainBitmap != null &&
+                activeLayerIndex >= 0 &&
+                activeLayerIndex < editorLayers.Count)
             {
                 if (undoStack.Count >= MaxStackSize)
                 {
-                    // Remove the oldest state
-                    var tempList = undoStack.ToList();
-                    tempList.RemoveAt(0);
-                    undoStack = new Stack<CanvasState>(tempList);
+                    var tempList = undoStack.Reverse().ToList();
+                    if (tempList.Count > 0)
+                    {
+                        tempList[0].Dispose();
+                        tempList.RemoveAt(0);
+                    }
+                    undoStack = new Stack<LayerCanvasState>(tempList);
                 }
-                undoStack.Push(new CanvasState(new Bitmap(MainBitmap), new Size(MainBitmap.Width, MainBitmap.Height)));
-                redoStack.Clear(); // Clear redo stack on new action
+
+                string layerKey = editorLayers[activeLayerIndex].ThumbnailKey;
+                undoStack.Push(new LayerCanvasState(
+                    layerKey,
+                    new Bitmap(MainBitmap),
+                    MainBitmap.Size));
+
+                ClearRedoStack();
             }
-            UpdateUndoRedoButtons(); // Update buttons
+
+            UpdateUndoRedoButtons();
+        }
+
+        private void RestoreHistoryState(LayerCanvasState state, Stack<LayerCanvasState> oppositeStack)
+        {
+            if (state == null)
+                return;
+
+            int targetIndex = FindLayerIndexByKey(state.LayerKey);
+            if (targetIndex < 0)
+            {
+                state.Dispose();
+                return;
+            }
+
+            EditorLayer targetLayer = editorLayers[targetIndex];
+
+            Bitmap currentTarget;
+            if (targetIndex == activeLayerIndex && MainBitmap != null)
+                currentTarget = new Bitmap(MainBitmap);
+            else
+                currentTarget = new Bitmap(targetLayer.Bitmap);
+
+            oppositeStack.Push(new LayerCanvasState(
+                targetLayer.ThumbnailKey,
+                currentTarget,
+                currentTarget.Size));
+
+            targetLayer.Bitmap?.Dispose();
+            targetLayer.Bitmap = new Bitmap(state.Bitmap);
+
+            if (targetIndex == activeLayerIndex)
+            {
+                MainBitmap?.Dispose();
+                MainBitmap = new Bitmap(state.Bitmap);
+                originalSize = MainBitmap.Size;
+
+                canvasPanel.Size = new Size(
+                    (int)Math.Round(MainBitmap.Width * zoom) + 20,
+                    (int)Math.Round(MainBitmap.Height * zoom) + 20);
+                pictureBoxCanvas.Size = panelResizer.Size;
+                UIPanel.AutoScrollMinSize = canvasPanel.Size;
+                labelSize.Text = $"{MainBitmap.Width} x {MainBitmap.Height} px";
+            }
+
+            // Undo/redo changes only this layer, so only this thumbnail is rebuilt.
+            dirtyLayerThumbnailKeys.Add(targetLayer.ThumbnailKey);
+            RefreshLayerThumbnail(targetIndex);
+
+            SetAsUnselected();
+            CenterCanvasPanel();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+
+            state.Dispose();
         }
 
         private void Undo()
         {
             if (undoStack.Count > 0)
             {
-                SelectedBitmap = null; // Clear selected bitmap
-                redoStack.Push(new CanvasState(new Bitmap(MainBitmap), originalSize)); // Save current state to redo stack
-                var previousState = undoStack.Pop(); // Get the last state
-                MainBitmap = previousState.Bitmap;
-                canvasPanel.Size = new Size((int)Math.Round(MainBitmap.Width * zoom) + 20, (int)Math.Round(MainBitmap.Height * zoom) + 20);
-                pictureBoxCanvas.Size = panelResizer.Size;
-                pictureBoxCanvas.Image = MainBitmap;
-                pictureBoxCanvas.Invalidate();
-                CenterCanvasPanel(); // Center the canvas panel
-                originalSize = MainBitmap.Size; // Update original size
-                labelSize.Text = $"{MainBitmap.Width} x {MainBitmap.Height} px"; // Update size label
-                if (undoStack.Count == 0)
-                {
-                    isModified = false; // If no more undo states, mark as unmodified
-                }
+                LayerCanvasState previousState = undoStack.Pop();
+                RestoreHistoryState(previousState, redoStack);
+                isModified = undoStack.Count > 0;
             }
-            UpdateUndoRedoButtons(); // Update buttons
+
+            UpdateUndoRedoButtons();
         }
+
         private void Redo()
         {
             if (redoStack.Count > 0)
             {
-                SelectedBitmap = null; // Clear selected bitmap
-                undoStack.Push(new CanvasState(new Bitmap(MainBitmap), originalSize)); // Save current state to undo stack
-                var nextState = redoStack.Pop(); // Get the next state
-                MainBitmap = nextState.Bitmap;
-                canvasPanel.Size = new Size((int)Math.Round(MainBitmap.Width * zoom) + 20, (int)Math.Round(MainBitmap.Height * zoom) + 20);
-                pictureBoxCanvas.Size = panelResizer.Size;
-                pictureBoxCanvas.Image = MainBitmap;
-                pictureBoxCanvas.Invalidate();
-                CenterCanvasPanel(); // Center the canvas panel
-                originalSize = MainBitmap.Size; // Update original size
-                labelSize.Text = $"{MainBitmap.Width} x {MainBitmap.Height} px"; // Update size label
-                isModified = true; // Mark as modified on redo
+                LayerCanvasState nextState = redoStack.Pop();
+                RestoreHistoryState(nextState, undoStack);
+                isModified = true;
+                isSaved = false;
             }
-            UpdateUndoRedoButtons(); // Update buttons
+
+            UpdateUndoRedoButtons();
         }
 
         private void geriAlToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4040,7 +4701,7 @@ namespace Carpathia
                 magicSelectionOutlineSegments.Clear();
                 if (artisticFilters == ArtisticFilters.None || blurEffect == BlurEffect.None)
                 {
-                    pictureBoxCanvas.Image = MainBitmap;
+                    RenderCompositeToCanvas();
                 }
                 else
                 {
@@ -4150,11 +4811,11 @@ namespace Carpathia
             MainBitmap = Filters.BasicFilters.MirrorEffect(MainBitmap);
             canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
             pictureBoxCanvas.Size = panelResizer.Size;
-            pictureBoxCanvas.Image = MainBitmap;
+            RenderCompositeToCanvas();
             labelSize.Text = $"{MainBitmap.Width} x {MainBitmap.Height} px";
             pictureBoxCanvas.Invalidate();
             CenterCanvasPanel();
-            isModified = true;
+            isModified = true; MarkLayerThumbnailDirty();
         }
 
         private void flashToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4195,9 +4856,9 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.Flash(MainBitmap);
             }
-            pictureBoxCanvas.Image = MainBitmap;
+            RenderCompositeToCanvas();
             pictureBoxCanvas.Invalidate();
-            isModified = true;
+            isModified = true; MarkLayerThumbnailDirty();
         }
 
 
@@ -4239,9 +4900,9 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.Frozen(MainBitmap);
             }
-            pictureBoxCanvas.Image = MainBitmap;
+            RenderCompositeToCanvas();
             pictureBoxCanvas.Invalidate();
-            isModified = true;
+            isModified = true; MarkLayerThumbnailDirty();
         }
 
         private void winterToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4282,9 +4943,9 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.Winter(MainBitmap);
             }
-            pictureBoxCanvas.Image = MainBitmap;
+            RenderCompositeToCanvas();
             pictureBoxCanvas.Invalidate();
-            isModified = true;
+            isModified = true; MarkLayerThumbnailDirty();
         }
 
         private void blackAndWhiteToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4325,9 +4986,9 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.BlackAndWhite(MainBitmap);
             }
-            pictureBoxCanvas.Image = MainBitmap;
+            RenderCompositeToCanvas();
             pictureBoxCanvas.Invalidate();
-            isModified = true;
+            isModified = true; MarkLayerThumbnailDirty();
         }
 
         private void oldPictureToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4368,9 +5029,9 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.OldImage(MainBitmap);
             }
-            pictureBoxCanvas.Image = MainBitmap;
+            RenderCompositeToCanvas();
             pictureBoxCanvas.Invalidate();
-            isModified = true;
+            isModified = true; MarkLayerThumbnailDirty();
         }
 
         private void cherryToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4411,9 +5072,9 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.CherryFilter(MainBitmap);
             }
-            pictureBoxCanvas.Image = MainBitmap;
+            RenderCompositeToCanvas();
             pictureBoxCanvas.Invalidate();
-            isModified = true;
+            isModified = true; MarkLayerThumbnailDirty();
         }
 
         private void lightAddToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4454,9 +5115,9 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.LightAdd(MainBitmap);
             }
-            pictureBoxCanvas.Image = MainBitmap;
+            RenderCompositeToCanvas();
             pictureBoxCanvas.Invalidate();
-            isModified = true;
+            isModified = true; MarkLayerThumbnailDirty();
         }
 
         private void purpleToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4497,9 +5158,9 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.PurpleEffect(MainBitmap);
             }
-            pictureBoxCanvas.Image = MainBitmap;
+            RenderCompositeToCanvas();
             pictureBoxCanvas.Invalidate();
-            isModified = true;
+            isModified = true; MarkLayerThumbnailDirty();
         }
 
         private void fogToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4540,9 +5201,9 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.FogEffect(MainBitmap);
             }
-            pictureBoxCanvas.Image = MainBitmap;
+            RenderCompositeToCanvas();
             pictureBoxCanvas.Invalidate();
-            isModified = true;
+            isModified = true; MarkLayerThumbnailDirty();
         }
         private void RefreshFiltersPreview()
         {
@@ -4658,10 +5319,10 @@ namespace Carpathia
             SaveStateForUndo();
             MainBitmap = previewBitmap;
             artisticFilters = ArtisticFilters.None;
-            pictureBoxCanvas.Image = MainBitmap;
+            RenderCompositeToCanvas();
             pictureBoxCanvas.Invalidate();
             toolStripArtisticFilters.Visible = false;
-            isModified = true;
+            isModified = true; MarkLayerThumbnailDirty();
         }
 
         private void buttonArtisticFiltersCancel_Click(object sender, EventArgs e)
@@ -4706,7 +5367,7 @@ namespace Carpathia
                 }
             }
 
-            pictureBoxCanvas.Image = MainBitmap;
+            RenderCompositeToCanvas();
             pictureBoxCanvas.Invalidate();
             pictureBoxCanvas.Refresh();
         }
@@ -5017,7 +5678,7 @@ namespace Carpathia
                 canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
                 pictureBoxCanvas.Invalidate();
                 CenterCanvasPanel();
-                isModified = true;
+                isModified = true; MarkLayerThumbnailDirty();
             }
             else
             {
@@ -5031,7 +5692,7 @@ namespace Carpathia
             try
             {
                 CutOrCopy();
-                isModified = true;
+                isModified = true; MarkLayerThumbnailDirty();
             }
             catch (Exception ex)
             {
@@ -5105,9 +5766,9 @@ namespace Carpathia
                 {
                     MainBitmap = new Bitmap(MainBitmap.Width, MainBitmap.Height);
                 }
-                pictureBoxCanvas.Image = MainBitmap;
+                RenderCompositeToCanvas();
                 pictureBoxCanvas.Invalidate();
-                isModified = true;
+                isModified = true; MarkLayerThumbnailDirty();
             }
             catch (Exception ex)
             {
@@ -5154,9 +5815,9 @@ namespace Carpathia
             {
                 MainBitmap = Filters.AmbientFilters.Chloe(MainBitmap);
             }
-            pictureBoxCanvas.Image = MainBitmap;
+            RenderCompositeToCanvas();
             pictureBoxCanvas.Invalidate();
-            isModified = true;
+            isModified = true; MarkLayerThumbnailDirty();
         }
 
         private void zoomInToolStripMenuItem_Click(object sender, EventArgs e)
@@ -5365,7 +6026,7 @@ namespace Carpathia
                         {
                             SelectedBitmap = new Bitmap(image); // Convert Image to Bitmap  
                             MergeMainBitmapWithSelected();
-                            isModified = true;
+                            isModified = true; MarkLayerThumbnailDirty();
                         }
                         else
                         {
@@ -5377,14 +6038,14 @@ namespace Carpathia
                     }
                     else
                     {
-                        var imageTask = ImageGenerationCore.GenerateImage(textBoxPrompt.Text, MainBitmap, 
+                        var imageTask = ImageGenerationCore.GenerateImage(textBoxPrompt.Text, MainBitmap,
                             MainBitmap.Width, MainBitmap.Height, cts.Token);
                         var image = await imageTask; // Await the task to get the result
                         if (image != null)
                         {
                             MainBitmap = new Bitmap(image); // Convert Image to Bitmap  
                             pictureBoxCanvas.Invalidate();
-                            isModified = true;
+                            isModified = true; MarkLayerThumbnailDirty();
                         }
                         else
                         {
@@ -5454,10 +6115,10 @@ namespace Carpathia
             SaveStateForUndo();
             blurEffect = BlurEffect.None;
             MainBitmap = previewBitmap;
-            pictureBoxCanvas.Image = MainBitmap;
+            RenderCompositeToCanvas();
             pictureBoxCanvas.Invalidate();
             toolStripPixelate.Visible = false;
-            isModified = true;
+            isModified = true; MarkLayerThumbnailDirty();
         }
 
         private void buttonCancelPixelation_Click(object sender, EventArgs e)
@@ -5621,10 +6282,10 @@ namespace Carpathia
             SaveStateForUndo();
             blurEffect = BlurEffect.None;
             MainBitmap = previewBitmap;
-            pictureBoxCanvas.Image = MainBitmap;
+            RenderCompositeToCanvas();
             pictureBoxCanvas.Invalidate();
             toolStripGaussianBlur.Visible = false;
-            isModified = true;
+            isModified = true; MarkLayerThumbnailDirty();
         }
 
         private void buttonCancelGaussianBlur_Click(object sender, EventArgs e)
@@ -5784,6 +6445,295 @@ namespace Carpathia
         private void toolStripTextBox1_Leave_1(object sender, EventArgs e)
         {
             setMagicSelectionToolTolerance();
+        }
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            Keys key = keyData & Keys.KeyCode;
+
+            if (key == Keys.Escape)
+            {
+                if (isSelected)
+                {
+                    SetAsUnselected();
+                    pictureBoxCanvas.Invalidate();
+                }
+
+                return true;
+            }
+
+            if (key == Keys.Delete)
+            {
+                if (isSelected)
+                {
+                    DeleteCurrentSelection();
+                }
+                else
+                {
+                    // Photoshop-style Delete behavior:
+                    // without an active selection, clear the entire active layer
+                    // to transparency while leaving every other layer untouched.
+                    ClearActiveLayer();
+                }
+
+                return true;
+            }
+
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+        private void ClearActiveLayer()
+        {
+            if (MainBitmap == null ||
+                activeLayerIndex < 0 ||
+                activeLayerIndex >= editorLayers.Count)
+            {
+                return;
+            }
+
+            // Keep this operation independently undoable for the active layer.
+            SaveStateForUndo();
+
+            // Clear every pixel of the selected/active layer to transparent.
+            // SourceCopy is important here: normal SourceOver drawing with a
+            // transparent brush would not actually erase existing pixels.
+            using (Graphics g = Graphics.FromImage(MainBitmap))
+            {
+                g.CompositingMode =
+                    System.Drawing.Drawing2D.CompositingMode.SourceCopy;
+                g.Clear(Color.Transparent);
+            }
+
+            // Persist only the active layer, then rebuild the visible stack.
+            SyncActiveLayerFromCanvas();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+
+            // Only the layer that was cleared needs a new thumbnail.
+            MarkLayerThumbnailDirty();
+            RefreshActiveLayerThumbnail();
+
+            SetAsUnselected();
+
+            isModified = true;
+            isSaved = false;
+
+            pictureBoxCanvas.Invalidate();
+            UpdateUndoRedoButtons();
+        }
+
+        private void DeleteCurrentSelection()
+        {
+            if (!isSelected || MainBitmap == null)
+                return;
+
+            SaveStateForUndo();
+
+            // Magic selection
+            if (magicSelectionMask != null &&
+                magicSelectionMaskWidth > 0 &&
+                magicSelectionMaskHeight > 0 &&
+                !magicSelectionBounds.IsEmpty)
+            {
+                Rectangle bounds = magicSelectionBounds;
+
+                bounds.Intersect(
+                    new Rectangle(0, 0, MainBitmap.Width, MainBitmap.Height));
+
+                for (int y = bounds.Top; y < bounds.Bottom; y++)
+                {
+                    for (int x = bounds.Left; x < bounds.Right; x++)
+                    {
+                        int index = y * magicSelectionMaskWidth + x;
+
+                        if (index >= 0 &&
+                            index < magicSelectionMask.Length &&
+                            magicSelectionMask[index])
+                        {
+                            MainBitmap.SetPixel(x, y, Color.Transparent);
+                        }
+                    }
+                }
+            }
+            // Rectangular selection
+            else if (!SelectionRectangle.IsEmpty)
+            {
+                Rectangle rect = new Rectangle(
+                    originalSelectionRectangleLocation,
+                    originalSelectionRectangleSize);
+
+                rect.Intersect(
+                    new Rectangle(Point.Empty, MainBitmap.Size));
+
+                if (!rect.IsEmpty)
+                {
+                    using (Graphics g = Graphics.FromImage(MainBitmap))
+                    {
+                        g.CompositingMode =
+                            System.Drawing.Drawing2D.CompositingMode.SourceCopy;
+
+                        using (Brush brush =
+                            new SolidBrush(Color.Transparent))
+                        {
+                            g.FillRectangle(brush, rect);
+                        }
+                    }
+                }
+            }
+
+            SetAsUnselected();
+
+            SyncActiveLayerFromCanvas();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+
+            isModified = true;
+            isSaved = false;
+
+            MarkLayerThumbnailDirty();
+            RefreshActiveLayerThumbnail();
+
+            pictureBoxCanvas.Invalidate();
+            UpdateUndoRedoButtons();
+        }
+
+        private Image CreateThumbnail(Image originalImage)
+        {
+            if (originalImage == null)
+                return null;
+            if (originalImage.Width > originalImage.Height)
+            {
+                int newHeight = (int)(originalImage.Height * 64 / originalImage.Width);
+                return originalImage.GetThumbnailImage(64, newHeight, null, IntPtr.Zero);
+            }
+            else
+            {
+                int newWidth = (int)(originalImage.Width * 64 / originalImage.Height);
+                return originalImage.GetThumbnailImage(newWidth, 64, null, IntPtr.Zero);
+            }
+        }
+
+        private void toolStripButtonAddLayer_Click(object sender, EventArgs e)
+        {
+            AddNewLayer();
+            isModified = true;
+            isSaved = false;
+        }
+
+        private void toolStripButtonMoveToUp_Click(object sender, EventArgs e)
+        {
+            if (listView1.SelectedIndices.Count == 0)
+                return;
+
+            int oldIndex = listView1.SelectedIndices[0];
+            if (oldIndex <= 0 || oldIndex >= editorLayers.Count)
+                return;
+
+            MoveLayer(oldIndex, oldIndex - 1);
+        }
+
+        private void toolStripButtonMoveToDown_Click(object sender, EventArgs e)
+        {
+            if (listView1.SelectedIndices.Count == 0)
+                return;
+
+            int oldIndex = listView1.SelectedIndices[0];
+            if (oldIndex < 0 || oldIndex >= editorLayers.Count - 1)
+                return;
+
+            MoveLayer(oldIndex, oldIndex + 1);
+        }
+
+        private void MoveLayer(int oldIndex, int newIndex)
+        {
+            if (oldIndex < 0 || oldIndex >= editorLayers.Count ||
+                newIndex < 0 || newIndex >= editorLayers.Count ||
+                oldIndex == newIndex)
+                return;
+
+            // Persist edits before changing stack order. Reordering changes the
+            // composite only; it must not regenerate any thumbnail.
+            SyncActiveLayerFromCanvas();
+
+            EditorLayer layer = editorLayers[oldIndex];
+            editorLayers.RemoveAt(oldIndex);
+            editorLayers.Insert(newIndex, layer);
+
+            suppressLayerSelectionChanged = true;
+            try
+            {
+                ListViewItem item = listView1.Items[oldIndex];
+                listView1.Items.RemoveAt(oldIndex);
+                listView1.Items.Insert(newIndex, item);
+
+                activeLayerIndex = newIndex;
+                listView1.SelectedItems.Clear();
+                item.Selected = true;
+                item.Focused = true;
+                item.EnsureVisible();
+            }
+            finally
+            {
+                suppressLayerSelectionChanged = false;
+            }
+
+            isModified = true;
+            isSaved = false;
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+            listView1.Invalidate();
+        }
+
+        private void toolStripButtonDeleteLayer_Click(object sender, EventArgs e)
+        {
+            if (listView1.SelectedIndices.Count == 0)
+                return;
+
+            // Keep at least one editable layer in every document.
+            if (editorLayers.Count <= 1)
+            {
+                SystemSounds.Beep.Play();
+                return;
+            }
+
+            int deleteIndex = listView1.SelectedIndices[0];
+            if (deleteIndex < 0 || deleteIndex >= editorLayers.Count)
+                return;
+
+            SyncActiveLayerFromCanvas();
+
+            EditorLayer deletedLayer = editorLayers[deleteIndex];
+            string thumbnailKey = deletedLayer.ThumbnailKey;
+            dirtyLayerThumbnailKeys.Remove(thumbnailKey);
+
+            suppressLayerSelectionChanged = true;
+            try
+            {
+                editorLayers.RemoveAt(deleteIndex);
+                listView1.Items.RemoveAt(deleteIndex);
+                imageListLayerThumbnails.Images.RemoveByKey(thumbnailKey);
+                deletedLayer.Dispose();
+
+                int newIndex = Math.Min(deleteIndex, editorLayers.Count - 1);
+
+                // Force SwitchToLayer to load the newly selected layer rather than
+                // treating the numerically identical index as the old active one.
+                activeLayerIndex = -1;
+                SwitchToLayer(newIndex);
+
+                listView1.SelectedItems.Clear();
+                listView1.Items[newIndex].Selected = true;
+                listView1.Items[newIndex].Focused = true;
+                listView1.Items[newIndex].EnsureVisible();
+            }
+            finally
+            {
+                suppressLayerSelectionChanged = false;
+            }
+
+            isModified = true;
+            isSaved = false;
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+            listView1.Invalidate();
         }
     }
 }
