@@ -1,4 +1,4 @@
-// LibreCanvas - The AI-enabled simple image editor for everyone, born as a school project by GeniusPilot2016
+ï»¿// LibreCanvas - The AI-enabled simple image editor for everyone, born as a school project by GeniusPilot2016
 // Copyright (C) 2025 GeniusPilot2016
 //
 // This program is free software: you can redistribute it and/or modify
@@ -25,6 +25,7 @@ using System.Drawing.Text;
 using System.Media;
 using System.Runtime.Serialization;
 using static System.Windows.Forms.DataFormats;
+using System.ComponentModel;
 
 namespace Carpathia
 {
@@ -89,6 +90,7 @@ namespace Carpathia
         {
             public string Name { get; set; }
             public Bitmap Bitmap { get; set; }
+            public bool Visible { get; set; } = true;
             public string ThumbnailKey { get; } = Guid.NewGuid().ToString("N");
 
             public EditorLayer(string name, Bitmap bitmap)
@@ -284,7 +286,7 @@ namespace Carpathia
             SetInitialValues();
             InitializeSelectionPen(); // Initialize the SelectionPen
             createNewFile();
-            UpdateUndoRedoButtons(); // Baþlangýçta tuþlarý güncelle
+            UpdateUndoRedoButtons(); // BaÅŸlangÄ±Ã§ta tuÅŸlarÄ± gÃ¼ncelle
         }
         public ImageEditor(String fileName)
         {
@@ -460,8 +462,7 @@ namespace Carpathia
                 pages.BackColor = TabPage.DefaultBackColor;
                 pages.ForeColor = TabPage.DefaultForeColor;
             }
-            listView1.BackColor = ListView.DefaultBackColor;
-            listView1.ForeColor = ListView.DefaultForeColor;
+            listView1.ApplyListViewTheme(ListView.DefaultBackColor, ListView.DefaultForeColor);
             toolStrip1.BackgroundImage = Resources.toolstrip_light;
             TitleBarHelper.ApplyCustomTitleBar(this, false);
         }
@@ -525,8 +526,7 @@ namespace Carpathia
                 pages.BackColor = Color.FromArgb(32, 32, 32);
                 pages.ForeColor = Color.White;
             }
-            listView1.BackColor = Color.Black;
-            listView1.ForeColor = Color.White;
+            listView1.ApplyListViewTheme(Color.Black, Color.White);
             toolStrip1.BackgroundImage = Resources.toolstrip_dark;
             TitleBarHelper.ApplyCustomTitleBar(this, true);
         }
@@ -834,6 +834,11 @@ namespace Carpathia
                 // Draw from the bottom of the list toward the top.
                 for (int i = editorLayers.Count - 1; i >= 0; i--)
                 {
+                    // Photoshop-style visibility: hiding a layer only removes it from
+                    // the composite. The layer bitmap remains intact and editable.
+                    if (!editorLayers[i].Visible)
+                        continue;
+
                     Bitmap layerBitmap = GetLayerBitmapForRender(i);
                     if (layerBitmap == null)
                         continue;
@@ -883,24 +888,14 @@ namespace Carpathia
             compositeDirty = true;
         }
 
-        private void ShowActiveLayerDuringStroke()
-        {
-            // During continuous painting, avoid flattening all layers on each move.
-            // The active layer is shown directly; on MouseUp the real composite
-            // is rebuilt once.
-            if (!suppressCompositeDuringToolStroke || MainBitmap == null)
-                return;
-
-            if (!ReferenceEquals(pictureBoxCanvas.Image, MainBitmap))
-                pictureBoxCanvas.Image = MainBitmap;
-
-            pictureBoxCanvas.Invalidate();
-        }
-
         private void BeginToolStrokePreview()
         {
+            // Keep the canvas displaying the full composite while a tool is used.
+            // Never swap pictureBoxCanvas.Image to MainBitmap: doing that temporarily
+            // reveals only the active layer and makes hidden/other layers disappear.
             suppressCompositeDuringToolStroke = true;
-            ShowActiveLayerDuringStroke();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
         }
 
         private void EndToolStrokePreview()
@@ -1123,6 +1118,30 @@ namespace Carpathia
             SwitchToLayer(selectedIndex);
         }
 
+        private void listView1_LayerVisibilityToggled(object sender, LayerVisibilityToggledEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= editorLayers.Count)
+                return;
+
+            // Persist unsaved pixels first. Visibility itself never changes the bitmap.
+            if (e.RowIndex == activeLayerIndex)
+                SyncActiveLayerFromCanvas();
+
+            EditorLayer layer = editorLayers[e.RowIndex];
+            if (layer.Visible == e.Visible)
+                return;
+
+            layer.Visible = e.Visible;
+            listView1.SetLayerVisibility(e.RowIndex, layer.Visible);
+
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+            listView1.InvalidateRow(e.RowIndex);
+
+            isModified = true;
+            isSaved = false;
+        }
+
         private void pictureBoxCanvas_MouseUp_LayerThumbnail(object sender, MouseEventArgs e)
         {
             // The main MouseUp handler ends the fast stroke/composite path.
@@ -1135,6 +1154,9 @@ namespace Carpathia
             if (activeLayerIndex < 0 || activeLayerIndex >= editorLayers.Count)
                 return;
 
+            // The active layer changed, so the flattened preview must be rebuilt too.
+            // This keeps all currently visible layers on-screen while drawing.
+            MarkCompositeDirty();
             dirtyLayerThumbnailKeys.Add(editorLayers[activeLayerIndex].ThumbnailKey);
 
             // Debounce rapid edits. The queue is keyed by layer, so switching layers
@@ -1235,18 +1257,18 @@ namespace Carpathia
             isModified = false;
             SetAsUnselected();
             pictureBoxCanvas.Image = null;
-            // panel1'in AutoScroll özelliðini true yaparak kaydýrma çubuklarýný etkinleþtiriyoruz
+            // panel1'in AutoScroll Ã¶zelliÄŸini true yaparak kaydÄ±rma Ã§ubuklarÄ±nÄ± etkinleÅŸtiriyoruz
             UIPanel.AutoScroll = true;
 
-            // canvasPanel'in boyutlarýný ayarlýyoruz
+            // canvasPanel'in boyutlarÄ±nÄ± ayarlÄ±yoruz
             canvasPanel.Size = new Size(Settings1.Default.DefaultCanvasSize.Width + 20,
                 Settings1.Default.DefaultCanvasSize.Height + 20);
             pictureBoxCanvas.Size = panelResizer.Size;
 
-            // panel1'in AutoScrollMinSize özelliðini canvasPanel'in boyutlarýna ayarlýyoruz
+            // panel1'in AutoScrollMinSize Ã¶zelliÄŸini canvasPanel'in boyutlarÄ±na ayarlÄ±yoruz
             UIPanel.AutoScrollMinSize = canvasPanel.Size;
 
-            // Paneli merkezi konumda yerleþtiriyoruz
+            // Paneli merkezi konumda yerleÅŸtiriyoruz
             CenterCanvasPanel();
 
             // Paneli hemen yenile (Refresh kullan)
@@ -1263,7 +1285,7 @@ namespace Carpathia
             yineleToolStripMenuItem.Enabled = false;
             isSaved = false;
             openedFilePath = string.Empty;
-            farklýKaydetToolStripMenuItem.Enabled = false;
+            farklÄ±KaydetToolStripMenuItem.Enabled = false;
             zoom = 1;
             labelZoom.Text = "100%";
         }
@@ -1274,17 +1296,17 @@ namespace Carpathia
             SetAsUnselected();
             pictureBoxCanvas.Image = null;
             Bitmap image = SecurityGuard.LoadLocalImage(fileName);
-            // panel1'in AutoScroll özelliðini true yaparak kaydýrma çubuklarýný etkinleþtiriyoruz
+            // panel1'in AutoScroll Ã¶zelliÄŸini true yaparak kaydÄ±rma Ã§ubuklarÄ±nÄ± etkinleÅŸtiriyoruz
             UIPanel.AutoScroll = true;
 
-            // canvasPanel'in boyutlarýný ayarlýyoruz
+            // canvasPanel'in boyutlarÄ±nÄ± ayarlÄ±yoruz
             canvasPanel.Size = new Size(image.Size.Width + 20, image.Size.Height + 20);
             pictureBoxCanvas.Size = panelResizer.Size;
 
-            // panel1'in AutoScrollMinSize özelliðini canvasPanel'in boyutlarýna ayarlýyoruz
+            // panel1'in AutoScrollMinSize Ã¶zelliÄŸini canvasPanel'in boyutlarÄ±na ayarlÄ±yoruz
             UIPanel.AutoScrollMinSize = canvasPanel.Size;
 
-            // Paneli merkezi konumda yerleþtiriyoruz
+            // Paneli merkezi konumda yerleÅŸtiriyoruz
             CenterCanvasPanel();
 
             // Paneli hemen yenile (Refresh kullan)
@@ -1301,7 +1323,7 @@ namespace Carpathia
             yineleToolStripMenuItem.Enabled = false;
             isSaved = true;
             openedFilePath = fileName;
-            farklýKaydetToolStripMenuItem.Enabled = true;
+            farklÄ±KaydetToolStripMenuItem.Enabled = true;
             zoom = 1;
             labelZoom.Text = "100%";
         }
@@ -1312,17 +1334,17 @@ namespace Carpathia
             SetAsUnselected();
             pictureBoxCanvas.Image = null;
             Image image = generatedImage;
-            // panel1'in AutoScroll özelliðini true yaparak kaydýrma çubuklarýný etkinleþtiriyoruz
+            // panel1'in AutoScroll Ã¶zelliÄŸini true yaparak kaydÄ±rma Ã§ubuklarÄ±nÄ± etkinleÅŸtiriyoruz
             UIPanel.AutoScroll = true;
 
-            // canvasPanel'in boyutlarýný ayarlýyoruz
+            // canvasPanel'in boyutlarÄ±nÄ± ayarlÄ±yoruz
             canvasPanel.Size = new Size(generatedImage.Width + 20, generatedImage.Height + 20);
             pictureBoxCanvas.Size = panelResizer.Size;
 
-            // panel1'in AutoScrollMinSize özelliðini canvasPanel'in boyutlarýna ayarlýyoruz
+            // panel1'in AutoScrollMinSize Ã¶zelliÄŸini canvasPanel'in boyutlarÄ±na ayarlÄ±yoruz
             UIPanel.AutoScrollMinSize = canvasPanel.Size;
 
-            // Paneli merkezi konumda yerleþtiriyoruz
+            // Paneli merkezi konumda yerleÅŸtiriyoruz
             CenterCanvasPanel();
 
             // Paneli hemen yenile (Refresh kullan)
@@ -1347,7 +1369,7 @@ namespace Carpathia
             yineleToolStripMenuItem.Enabled = false;
             isSaved = false;
             openedFilePath = string.Empty;
-            farklýKaydetToolStripMenuItem.Enabled = false;
+            farklÄ±KaydetToolStripMenuItem.Enabled = false;
             zoom = 1;
             labelZoom.Text = "100%";
         }
@@ -1385,7 +1407,7 @@ namespace Carpathia
             }
         }
 
-        private void hakkýndaToolStripMenuItem_Click(object sender, EventArgs e)
+        private void hakkÄ±ndaToolStripMenuItem_Click(object sender, EventArgs e)
         {
             About about = new About();
             about.ShowDialog();
@@ -1666,7 +1688,7 @@ namespace Carpathia
                                     GraphicsUnit.Pixel);
                             }
                         }
-                        var imageTask = ImageGenerationCore.GenerateImage("Isolate the main object or person precisely and remove the entire background. Return the result as a PNG with a true transparent alpha channel (RGBA). All background pixels must have alpha 0. Do not replace the background with white, black, gray, any solid color, blur, studio backdrop, gradient, or checkerboard pattern. Preserve the subject’s original colors, edges, fine details, hair, and semi-transparent areas.",
+                        var imageTask = ImageGenerationCore.GenerateImage("Isolate the main object or person precisely and remove the entire background. Return the result as a PNG with a true transparent alpha channel (RGBA). All background pixels must have alpha 0. Do not replace the background with white, black, gray, any solid color, blur, studio backdrop, gradient, or checkerboard pattern. Preserve the subjectâ€™s original colors, edges, fine details, hair, and semi-transparent areas.",
                             SelectedBitmap, SelectedBitmap.Width, SelectedBitmap.Height, cts.Token);
                         var image = await imageTask; // Await the task to get the result
                         if (image != null)
@@ -2046,7 +2068,7 @@ namespace Carpathia
                 if (dialogResult == DialogResult.OK)
                 {
                     saveFile(saveFileDialog1.FileName);
-                    farklýKaydetToolStripMenuItem.Enabled = true;
+                    farklÄ±KaydetToolStripMenuItem.Enabled = true;
                 }
             }
             catch
@@ -2080,13 +2102,13 @@ namespace Carpathia
         }
         /*private void PositionResizeHandles()
         {
-            // Panelin yeni boyutlarýný al
+            // Panelin yeni boyutlarÄ±nÄ± al
             int panelLeft = canvasPanel.Left;
             int panelTop = canvasPanel.Top;
             int panelWidth = canvasPanel.Width;
             int panelHeight = canvasPanel.Height;
 
-            // Tutmaçlarýn konumlarýný panelin boyutlarýna göre güncelle
+            // TutmaÃ§larÄ±n konumlarÄ±nÄ± panelin boyutlarÄ±na gÃ¶re gÃ¼ncelle
             resize_top_left.Location = new Point(panelLeft - resize_top_left.Width / 2, panelTop - resize_top_left.Height / 2);
             resize_top.Location = new Point(panelLeft + (panelWidth / 2) - resize_top.Width / 2, panelTop - resize_top.Height / 2);
             resize_top_right.Location = new Point(panelLeft + panelWidth - resize_top_right.Width / 2, panelTop - resize_top_right.Height / 2);
@@ -2159,11 +2181,11 @@ namespace Carpathia
                         break;
                 }
 
-                // Minimum boyutlarý kontrol et
+                // Minimum boyutlarÄ± kontrol et
                 newWidth = Math.Max(newWidth, 1);
                 newHeight = Math.Max(newHeight, 1);
 
-                // Bitmap'i yeniden boyutlandýr
+                // Bitmap'i yeniden boyutlandÄ±r
                 Bitmap newBitmap = new Bitmap((int)Math.Round((newWidth - 20) / zoom), (int)Math.Round((newHeight - 20) / zoom));
                 using (Graphics g = Graphics.FromImage(newBitmap))
                 {
@@ -2171,13 +2193,13 @@ namespace Carpathia
                 }
                 MainBitmap = newBitmap;
 
-                // Yeni boyutlarý uygula
+                // Yeni boyutlarÄ± uygula
                 canvasPanel.Size = new Size(newWidth, newHeight);
 
-                // panel1'in AutoScrollMinSize özelliðini güncelle
+                // panel1'in AutoScrollMinSize Ã¶zelliÄŸini gÃ¼ncelle
                 UIPanel.AutoScrollMinSize = canvasPanel.Size;
 
-                // Paneli merkezi konumda yerleþtiriyoruz
+                // Paneli merkezi konumda yerleÅŸtiriyoruz
                 CenterCanvasPanel();
 
                 // Paneli hemen yenile (Refresh kullan)
@@ -2207,7 +2229,7 @@ namespace Carpathia
             else if (sender == resize_bottom_right)
                 resizeDirection = ResizeDirection.BottomRight;
 
-            // Resizing iþlemi baþladýðýnda
+            // Resizing iÅŸlemi baÅŸladÄ±ÄŸÄ±nda
             SaveStateForUndo();
             isResizing = true;
             toolStripResize.Visible = true;
@@ -2483,27 +2505,27 @@ namespace Carpathia
                     {
                         using (Graphics g = Graphics.FromImage(MainBitmap))
                         {
-                            // Seçim koordinatlarýný orijinal bitmap koordinat sistemine dönüþtür
+                            // SeÃ§im koordinatlarÄ±nÄ± orijinal bitmap koordinat sistemine dÃ¶nÃ¼ÅŸtÃ¼r
                             Rectangle targetRect = new Rectangle(
                                 (int)(originalSelectionRectangleLocation.X),
                                 (int)(originalSelectionRectangleLocation.Y),
                                 (int)(originalSelectionRectangleSize.Width),
                                 (int)(originalSelectionRectangleSize.Height));
 
-                            // Hedef dikdörtgenin ana bitmap sýnýrlarý içinde kalmasýný saðla
+                            // Hedef dikdÃ¶rtgenin ana bitmap sÄ±nÄ±rlarÄ± iÃ§inde kalmasÄ±nÄ± saÄŸla
                             targetRect = EnsureRectWithinBounds(targetRect, MainBitmap.Size);
 
-                            // Kaynak dikdörtgenin de SelectedBitmap sýnýrlarý içinde kalmasýný saðla
+                            // Kaynak dikdÃ¶rtgenin de SelectedBitmap sÄ±nÄ±rlarÄ± iÃ§inde kalmasÄ±nÄ± saÄŸla
                             Rectangle sourceRect = new Rectangle(0, 0,
                                 Math.Min(SelectedBitmap.Width, targetRect.Width),
                                 Math.Min(SelectedBitmap.Height, targetRect.Height));
 
-                            // Yüksek kalite ayarlarýný kullan
+                            // YÃ¼ksek kalite ayarlarÄ±nÄ± kullan
                             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
                             g.SmoothingMode = SmoothingMode.AntiAlias;
                             g.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
-                            // Dönüþtürülmüþ alaný ana resme çiz
+                            // DÃ¶nÃ¼ÅŸtÃ¼rÃ¼lmÃ¼ÅŸ alanÄ± ana resme Ã§iz
                             g.DrawImage(SelectedBitmap, targetRect, sourceRect, GraphicsUnit.Pixel);
                         }
 
@@ -2519,18 +2541,18 @@ namespace Carpathia
             }
         }
 
-        // Yardýmcý metot: Dikdörtgenin belirtilen sýnýrlar içinde kalmasýný saðlar
+        // YardÄ±mcÄ± metot: DikdÃ¶rtgenin belirtilen sÄ±nÄ±rlar iÃ§inde kalmasÄ±nÄ± saÄŸlar
         private Rectangle EnsureRectWithinBounds(Rectangle rect, Size bounds)
         {
             Rectangle result = new Rectangle(rect.Location, rect.Size);
 
-            // X koordinatýný kontrol et
+            // X koordinatÄ±nÄ± kontrol et
             if (result.X < 0)
                 result.X = 0;
             if (result.X + result.Width > bounds.Width)
                 result.Width = Math.Max(0, bounds.Width - result.X);
 
-            // Y koordinatýný kontrol et
+            // Y koordinatÄ±nÄ± kontrol et
             if (result.Y < 0)
                 result.Y = 0;
             if (result.Y + result.Height > bounds.Height)
@@ -2815,7 +2837,7 @@ namespace Carpathia
                                     Math.Abs(SelectionStartPoint.X - SelectionEndPoint.X),
                                     Math.Abs(SelectionStartPoint.Y - SelectionEndPoint.Y));
 
-                                // Koordinatlarý zoom'a göre ölçekle
+                                // KoordinatlarÄ± zoom'a gÃ¶re Ã¶lÃ§ekle
                                 originalSelectionRectangleLocation = new Point(
                                     (int)(SelectionRectangle.X / zoom),
                                     (int)(SelectionRectangle.Y / zoom));
@@ -3389,10 +3411,69 @@ namespace Carpathia
         private Bitmap previewBitmap;    // Temporary bitmap for previewing shapes
         private Stack<LayerCanvasState> undoStack = new Stack<LayerCanvasState>();
         private Stack<LayerCanvasState> redoStack = new Stack<LayerCanvasState>();
+
+        private bool EnsureVisibleLayerForTool()
+        {
+            if (editorLayers.Count == 0)
+                return MainBitmap != null;
+
+            if (activeLayerIndex >= 0 && activeLayerIndex < editorLayers.Count &&
+                editorLayers[activeLayerIndex].Visible)
+                return true;
+
+            // A hidden layer must never become the target of a canvas tool. Pick the
+            // topmost visible layer, keep the hidden layer hidden, and make the actual
+            // edit target explicit in the Layers grid.
+            int visibleIndex = -1;
+            for (int i = 0; i < editorLayers.Count; i++)
+            {
+                if (editorLayers[i].Visible)
+                {
+                    visibleIndex = i;
+                    break;
+                }
+            }
+
+            if (visibleIndex < 0)
+                return false;
+
+            SwitchToLayer(visibleIndex);
+
+            suppressLayerSelectionChanged = true;
+            try
+            {
+                listView1.SelectedItems.Clear();
+                if (visibleIndex < listView1.Items.Count)
+                {
+                    ListViewItem item = listView1.Items[visibleIndex];
+                    item.Selected = true;
+                    item.Focused = true;
+                    item.EnsureVisible();
+                }
+            }
+            finally
+            {
+                suppressLayerSelectionChanged = false;
+            }
+
+            return true;
+        }
+
         private void pictureBoxCanvas_MouseDown(object sender, MouseEventArgs e)
         {
             if (!isImageCurrentlyCreating)
             {
+                // Photoshop-style targeting: tools operate on a visible layer. If the
+                // selected layer is hidden, move editing to the topmost visible layer
+                // without turning the hidden layer back on. If every layer is hidden,
+                // ignore the tool action instead of revealing or modifying anything.
+                if (!EnsureVisibleLayerForTool())
+                {
+                    isdrawing = false;
+                    RenderCompositeToCanvas(force: true);
+                    return;
+                }
+
                 isdrawing = true;
                 x = -1;
                 y = -1;
@@ -3551,20 +3632,20 @@ namespace Carpathia
                     case Tools.Text:
                         {
                             SaveStateForUndo();
-                            // MouseEventArgs'den týklama konumunu alýn  
-                            // MouseEventArgs kullanarak týklama konumunu alýn
+                            // MouseEventArgs'den tÄ±klama konumunu alÄ±n  
+                            // MouseEventArgs kullanarak tÄ±klama konumunu alÄ±n
                             MouseEventArgs me = (MouseEventArgs)e;
                             int clickedX = me.X;
                             int clickedY = me.Y;
-                            // Yeni bir TextBox oluþturun  
+                            // Yeni bir TextBox oluÅŸturun  
                             TextBox textBox = new TextBox
                             {
                                 MaximumSize = Size.Empty, // Maksimum boyut  
-                                AutoSize = false, // Otomatik boyutlandýrmayý devre dýþý býrakýn  
-                                Multiline = true, // Çok satýrlý metin desteði  
-                                WordWrap = true, // Metni sarmayý etkinleþtirin  
-                                Font = new Font(fontsComboBox.Text, textSize, fontStyle), // Yazý tipi ayarý  
-                                BorderStyle = BorderStyle.FixedSingle // Kenarlýk stili 
+                                AutoSize = false, // Otomatik boyutlandÄ±rmayÄ± devre dÄ±ÅŸÄ± bÄ±rakÄ±n  
+                                Multiline = true, // Ã‡ok satÄ±rlÄ± metin desteÄŸi  
+                                WordWrap = true, // Metni sarmayÄ± etkinleÅŸtirin  
+                                Font = new Font(fontsComboBox.Text, textSize, fontStyle), // YazÄ± tipi ayarÄ±  
+                                BorderStyle = BorderStyle.FixedSingle // KenarlÄ±k stili 
                             };
                             switch (textToolAlign)
                             {
@@ -3590,13 +3671,13 @@ namespace Carpathia
                                 Math.Min(clickedY, pictureBoxCanvas.Height - textBox.Height)
                             );
 
-                            // TextBox'ý pictureBoxCanvas'a ekleyin  
+                            // TextBox'Ä± pictureBoxCanvas'a ekleyin  
                             pictureBoxCanvas.Controls.Add(textBox);
 
-                            // TextBox'ý odaklayýn  
+                            // TextBox'Ä± odaklayÄ±n  
                             textBox.Focus();
 
-                            // TextBox'ýn metni deðiþtikçe boyutunu ayarlayýn  
+                            // TextBox'Ä±n metni deÄŸiÅŸtikÃ§e boyutunu ayarlayÄ±n  
                             textBox.TextChanged += (s, args) =>
                             {
                                 // Measure the size of the text, including multi-line text  
@@ -3721,8 +3802,8 @@ namespace Carpathia
                     case Tools.Bucket:
                         {
                             SaveStateForUndo();
-                            MouseEventArgs me = (MouseEventArgs)e; // EventArgs yerine MouseEventArgs kullanýmý  
-                                                                   // Fix for CS0246: 'Location' türü veya ad alaný adý bulunamadý  
+                            MouseEventArgs me = (MouseEventArgs)e; // EventArgs yerine MouseEventArgs kullanÄ±mÄ±  
+                                                                   // Fix for CS0246: 'Location' tÃ¼rÃ¼ veya ad alanÄ± adÄ± bulunamadÄ±  
                                                                    // The issue occurs because 'Location' is not a valid type.  
                                                                    // The correct type to use here is 'Point', which represents a location in a two-dimensional plane.  
 
@@ -4058,7 +4139,7 @@ namespace Carpathia
             return normalizedDifference <= (tolerance / 100.0);
         }
 
-        private void çýkýþToolStripMenuItem_Click(object sender, EventArgs e)
+        private void Ã§Ä±kÄ±ÅŸToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
         }
@@ -4071,7 +4152,7 @@ namespace Carpathia
             Application.Exit();
         }
 
-        private void açToolStripMenuItem_Click(object sender, EventArgs e)
+        private void aÃ§ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             AskForSavingOrCancel(new Action(() => openAFile()));
         }
@@ -4583,10 +4664,10 @@ namespace Carpathia
         }
         private void UpdateUndoRedoButtons()
         {
-            // Undo tuþunu yýðýn doluysa etkinleþtir, boþsa devre dýþý býrak
+            // Undo tuÅŸunu yÄ±ÄŸÄ±n doluysa etkinleÅŸtir, boÅŸsa devre dÄ±ÅŸÄ± bÄ±rak
             geriAlToolStripMenuItem.Enabled = undoStack.Count > 0;
 
-            // Redo tuþunu yýðýn doluysa etkinleþtir, boþsa devre dýþý býrak
+            // Redo tuÅŸunu yÄ±ÄŸÄ±n doluysa etkinleÅŸtir, boÅŸsa devre dÄ±ÅŸÄ± bÄ±rak
             yineleToolStripMenuItem.Enabled = redoStack.Count > 0;
         }
 
@@ -4653,7 +4734,7 @@ namespace Carpathia
         {
             if (!isImageCurrentlyCreating)
             {
-                // Seçim kaldýrýlýrken mevcut içeriði koruyarak iþlemi gerçekleþtirin
+                // SeÃ§im kaldÄ±rÄ±lÄ±rken mevcut iÃ§eriÄŸi koruyarak iÅŸlemi gerÃ§ekleÅŸtirin
                 if (isSelected && SelectedBitmap != null && !SelectionRectangle.IsEmpty)
                 {
                     if (artisticFilters != ArtisticFilters.None)
@@ -4673,7 +4754,7 @@ namespace Carpathia
                         g.SmoothingMode = SmoothingMode.AntiAlias;
                         g.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
-                        // Seçili alaný MainBitmap üzerine çizin
+                        // SeÃ§ili alanÄ± MainBitmap Ã¼zerine Ã§izin
                         Rectangle sourceRect = new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height);
                         Rectangle destRect = new Rectangle(
                             originalSelectionRectangleLocation.X,
@@ -4681,17 +4762,17 @@ namespace Carpathia
                             originalSelectionRectangleSize.Width,
                             originalSelectionRectangleSize.Height);
 
-                        // MainBitmap'in mevcut içeriðini koruyarak seçili alaný güncelle
+                        // MainBitmap'in mevcut iÃ§eriÄŸini koruyarak seÃ§ili alanÄ± gÃ¼ncelle
                         g.DrawImage(SelectedBitmap, destRect, sourceRect, GraphicsUnit.Pixel);
                     }
 
-                    // SelectedBitmap'i serbest býrakýn
+                    // SelectedBitmap'i serbest bÄ±rakÄ±n
                     MergeMainBitmapWithSelected();
                     SelectedBitmap.Dispose();
                     SelectedBitmap = null;
                 }
 
-                // Seçim durumunu sýfýrlayýn
+                // SeÃ§im durumunu sÄ±fÄ±rlayÄ±n
                 SelectionRectangle = Rectangle.Empty;
                 isSelected = false;
                 magicSelectionMask = null;
@@ -6375,7 +6456,7 @@ namespace Carpathia
             }
         }
 
-        private void farklýKaydetToolStripMenuItem_Click(object sender, EventArgs e)
+        private void farklÄ±KaydetToolStripMenuItem_Click(object sender, EventArgs e)
         {
             saveFileAs();
         }
@@ -6736,4 +6817,532 @@ namespace Carpathia
             listView1.Invalidate();
         }
     }
+
+    internal sealed class LayerVisibilityToggledEventArgs : EventArgs
+    {
+        public int RowIndex { get; }
+        public bool Visible { get; }
+
+        public LayerVisibilityToggledEventArgs(int rowIndex, bool visible)
+        {
+            RowIndex = rowIndex;
+            Visible = visible;
+        }
+    }
+
+    internal sealed class LayerItemRemovedEventArgs : EventArgs
+    {
+        public ListViewItem? Item { get; }
+
+        public LayerItemRemovedEventArgs(ListViewItem? item)
+        {
+            Item = item;
+        }
+    }
+
+    // A real DataGridView with a small compatibility facade for the existing layer code.
+    // ImageEditor.cs can keep using its current ListView-style Items/SelectedIndices API,
+    // while the actual UI is rendered as a grid with a per-row visibility button.
+    internal sealed class LayerDataGridView : DataGridView
+    {
+        private const string ShowIconBase64 = "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";
+        private const string HideIconBase64 = "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";
+
+        private readonly ListView compatibilityList = new();
+        private readonly LayerListItemCollection itemCollection;
+        private readonly LayerSelectedIndexCollection selectedIndexCollection;
+        private readonly LayerSelectedItemCollection selectedItemCollection;
+        private readonly LayerColumnCollection layerColumns;
+        private readonly HashSet<ListViewItem> hiddenItems = new();
+        private readonly Image showIcon;
+        private readonly Image hideIcon;
+        private bool syncingSelection;
+        private ImageList? smallImageList;
+        private ImageList? largeImageList;
+        private bool useCompatibleStateImageBehavior;
+        private View view = View.Details;
+        private ColumnHeaderStyle headerStyle = ColumnHeaderStyle.None;
+        private bool fullRowSelect = true;
+        private bool hideSelection;
+
+        public event EventHandler? SelectedIndexChanged;
+        public event EventHandler<LayerVisibilityToggledEventArgs>? LayerVisibilityToggled;
+        public event EventHandler<LayerItemRemovedEventArgs>? LayerItemRemoved;
+
+        public LayerDataGridView()
+        {
+            showIcon = DecodeIcon(ShowIconBase64);
+            hideIcon = DecodeIcon(HideIconBase64);
+
+            AllowUserToAddRows = false;
+            AllowUserToDeleteRows = false;
+            AllowUserToResizeRows = false;
+            AutoGenerateColumns = false;
+            BackgroundColor = SystemColors.Window;
+            BorderStyle = BorderStyle.Fixed3D;
+            CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            ColumnHeadersVisible = false;
+            RowHeadersVisible = false;
+            ReadOnly = true;
+            MultiSelect = false;
+            SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            RowTemplate.Height = 68;
+
+            var visibilityColumn = new DataGridViewImageColumn
+            {
+                Name = "Visibility",
+                HeaderText = string.Empty,
+                Width = 32,
+                MinimumWidth = 32,
+                ImageLayout = DataGridViewImageCellLayout.Zoom,
+                SortMode = DataGridViewColumnSortMode.NotSortable,
+                Resizable = DataGridViewTriState.False
+            };
+
+            var thumbnailColumn = new DataGridViewImageColumn
+            {
+                Name = "Thumbnail",
+                HeaderText = string.Empty,
+                Width = 70,
+                MinimumWidth = 70,
+                ImageLayout = DataGridViewImageCellLayout.Zoom,
+                SortMode = DataGridViewColumnSortMode.NotSortable,
+                Resizable = DataGridViewTriState.False
+            };
+
+            var textColumn = new DataGridViewTextBoxColumn
+            {
+                Name = "Layer",
+                HeaderText = "Layer",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+                MinimumWidth = 40,
+                SortMode = DataGridViewColumnSortMode.NotSortable,
+                ReadOnly = true
+            };
+
+            base.Columns.Add(visibilityColumn);
+            base.Columns.Add(thumbnailColumn);
+            base.Columns.Add(textColumn);
+
+            layerColumns = new LayerColumnCollection(this, textColumn);
+            itemCollection = new LayerListItemCollection(this, compatibilityList);
+            selectedIndexCollection = new LayerSelectedIndexCollection(compatibilityList);
+            selectedItemCollection = new LayerSelectedItemCollection(this, compatibilityList);
+
+            compatibilityList.MultiSelect = false;
+            compatibilityList.HideSelection = false;
+            compatibilityList.CreateControl();
+            compatibilityList.SelectedIndexChanged += CompatibilityList_SelectedIndexChanged;
+
+            CellFormatting += LayerDataGridView_CellFormatting;
+            SelectionChanged += LayerDataGridView_SelectionChanged;
+        }
+
+        public LayerListItemCollection Items => itemCollection;
+        public LayerSelectedIndexCollection SelectedIndices => selectedIndexCollection;
+        public LayerSelectedItemCollection SelectedItems => selectedItemCollection;
+        public new LayerColumnCollection Columns => layerColumns;
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public ImageList? SmallImageList
+        {
+            get => smallImageList;
+            set { smallImageList = value; Invalidate(); }
+        }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public ImageList? LargeImageList
+        {
+            get => largeImageList;
+            set => largeImageList = value;
+        }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool UseCompatibleStateImageBehavior
+        {
+            get => useCompatibleStateImageBehavior;
+            set => useCompatibleStateImageBehavior = value;
+        }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public View View
+        {
+            get => view;
+            set => view = value;
+        }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public ColumnHeaderStyle HeaderStyle
+        {
+            get => headerStyle;
+            set
+            {
+                headerStyle = value;
+                ColumnHeadersVisible = value != ColumnHeaderStyle.None;
+            }
+        }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool FullRowSelect
+        {
+            get => fullRowSelect;
+            set
+            {
+                fullRowSelect = value;
+                SelectionMode = value
+                    ? DataGridViewSelectionMode.FullRowSelect
+                    : DataGridViewSelectionMode.CellSelect;
+            }
+        }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool HideSelection
+        {
+            get => hideSelection;
+            set
+            {
+                hideSelection = value;
+                compatibilityList.HideSelection = value;
+            }
+        }
+
+        // DataGridView does not inherit ListView row colors from BackColor/ForeColor.
+        // Apply the same palette the old listView1 used to every layer-grid surface.
+        public void ApplyListViewTheme(Color backColor, Color foreColor)
+        {
+            BackColor = backColor;
+            ForeColor = foreColor;
+            BackgroundColor = backColor;
+            GridColor = backColor;
+
+            DefaultCellStyle.BackColor = backColor;
+            DefaultCellStyle.ForeColor = foreColor;
+            DefaultCellStyle.SelectionBackColor = SystemColors.Highlight;
+            DefaultCellStyle.SelectionForeColor = SystemColors.HighlightText;
+
+            RowsDefaultCellStyle.BackColor = backColor;
+            RowsDefaultCellStyle.ForeColor = foreColor;
+            RowsDefaultCellStyle.SelectionBackColor = SystemColors.Highlight;
+            RowsDefaultCellStyle.SelectionForeColor = SystemColors.HighlightText;
+
+            AlternatingRowsDefaultCellStyle.BackColor = backColor;
+            AlternatingRowsDefaultCellStyle.ForeColor = foreColor;
+            AlternatingRowsDefaultCellStyle.SelectionBackColor = SystemColors.Highlight;
+            AlternatingRowsDefaultCellStyle.SelectionForeColor = SystemColors.HighlightText;
+
+            ColumnHeadersDefaultCellStyle.BackColor = backColor;
+            ColumnHeadersDefaultCellStyle.ForeColor = foreColor;
+            RowHeadersDefaultCellStyle.BackColor = backColor;
+            RowHeadersDefaultCellStyle.ForeColor = foreColor;
+
+            Invalidate();
+        }
+
+        public void SetLayerVisibility(int rowIndex, bool visible)
+        {
+            if (rowIndex < 0 || rowIndex >= compatibilityList.Items.Count)
+                return;
+
+            ListViewItem item = compatibilityList.Items[rowIndex];
+            if (visible)
+                hiddenItems.Remove(item);
+            else
+                hiddenItems.Add(item);
+
+            InvalidateRow(rowIndex);
+        }
+
+        internal void AddCompatibilityItem(ListViewItem item, int? insertIndex = null)
+        {
+            if (insertIndex.HasValue)
+                compatibilityList.Items.Insert(insertIndex.Value, item);
+            else
+                compatibilityList.Items.Add(item);
+
+            int index = insertIndex ?? (compatibilityList.Items.Count - 1);
+            base.Rows.Insert(index, 1);
+            base.Rows[index].Height = 68;
+            InvalidateRow(index);
+        }
+
+        internal void RemoveCompatibilityItemAt(int index)
+        {
+            if (index < 0 || index >= compatibilityList.Items.Count)
+                return;
+
+            ListViewItem item = compatibilityList.Items[index];
+            LayerItemRemoved?.Invoke(this, new LayerItemRemovedEventArgs(item));
+            hiddenItems.Remove(item);
+            compatibilityList.Items.RemoveAt(index);
+
+            if (index < base.Rows.Count)
+                base.Rows.RemoveAt(index);
+        }
+
+        internal void ClearCompatibilityItems()
+        {
+            foreach (ListViewItem item in compatibilityList.Items)
+                LayerItemRemoved?.Invoke(this, new LayerItemRemovedEventArgs(item));
+
+            hiddenItems.Clear();
+            compatibilityList.Items.Clear();
+            base.Rows.Clear();
+        }
+
+        private void CompatibilityList_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            if (syncingSelection)
+                return;
+
+            syncingSelection = true;
+            try
+            {
+                ClearSelection();
+                if (compatibilityList.SelectedIndices.Count > 0)
+                {
+                    int index = compatibilityList.SelectedIndices[0];
+                    if (index >= 0 && index < base.Rows.Count)
+                    {
+                        base.Rows[index].Selected = true;
+                        if (FirstDisplayedScrollingRowIndex < 0 ||
+                            index < FirstDisplayedScrollingRowIndex ||
+                            index >= FirstDisplayedScrollingRowIndex + DisplayedRowCount(false))
+                            FirstDisplayedScrollingRowIndex = index;
+                    }
+                }
+            }
+            finally
+            {
+                syncingSelection = false;
+            }
+
+            SelectedIndexChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void LayerDataGridView_SelectionChanged(object? sender, EventArgs e)
+        {
+            if (syncingSelection)
+                return;
+
+            syncingSelection = true;
+            try
+            {
+                foreach (ListViewItem item in compatibilityList.Items)
+                    item.Selected = false;
+
+                if (SelectedRows.Count > 0)
+                {
+                    int index = SelectedRows[0].Index;
+                    if (index >= 0 && index < compatibilityList.Items.Count)
+                    {
+                        compatibilityList.Items[index].Selected = true;
+                        compatibilityList.Items[index].Focused = true;
+                    }
+                }
+            }
+            finally
+            {
+                syncingSelection = false;
+            }
+
+            SelectedIndexChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        protected override void OnCellMouseDown(DataGridViewCellMouseEventArgs e)
+        {
+            // Photoshop behavior: clicking the eye toggles visibility without making
+            // that row the active editing layer. Selection is handled only by the
+            // thumbnail/name cells.
+            if (e.RowIndex >= 0 && e.ColumnIndex == 0 &&
+                e.RowIndex < compatibilityList.Items.Count && e.Button == MouseButtons.Left)
+            {
+                ListViewItem item = compatibilityList.Items[e.RowIndex];
+                bool nextVisible = hiddenItems.Contains(item);
+                LayerVisibilityToggled?.Invoke(this, new LayerVisibilityToggledEventArgs(e.RowIndex, nextVisible));
+                return;
+            }
+
+            base.OnCellMouseDown(e);
+        }
+
+        private void LayerDataGridView_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= compatibilityList.Items.Count)
+                return;
+
+            ListViewItem item = compatibilityList.Items[e.RowIndex];
+
+            if (e.ColumnIndex == 0)
+            {
+                // Visible layer = open eye. Hidden layer = crossed-out eye.
+                e.Value = hiddenItems.Contains(item) ? hideIcon : showIcon;
+                e.FormattingApplied = true;
+            }
+            else if (e.ColumnIndex == 1)
+            {
+                if (smallImageList != null && !string.IsNullOrEmpty(item.ImageKey) &&
+                    smallImageList.Images.ContainsKey(item.ImageKey))
+                    e.Value = smallImageList.Images[item.ImageKey];
+                else
+                    e.Value = null;
+
+                e.FormattingApplied = true;
+            }
+            else if (e.ColumnIndex == 2)
+            {
+                e.Value = item.Text;
+                e.FormattingApplied = true;
+            }
+        }
+
+        private static Image DecodeIcon(string base64)
+        {
+            byte[] bytes = Convert.FromBase64String(base64);
+            using var stream = new System.IO.MemoryStream(bytes);
+            using var source = Image.FromStream(stream);
+            return new Bitmap(source);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                showIcon.Dispose();
+                hideIcon.Dispose();
+                compatibilityList.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        internal sealed class LayerListItemCollection
+        {
+            private readonly LayerDataGridView owner;
+            private readonly ListView list;
+
+            internal LayerListItemCollection(LayerDataGridView owner, ListView list)
+            {
+                this.owner = owner;
+                this.list = list;
+            }
+
+            public int Count => list.Items.Count;
+            public ListViewItem this[int index] => list.Items[index];
+            public void Add(ListViewItem item) => owner.AddCompatibilityItem(item);
+            public void Insert(int index, ListViewItem item) => owner.AddCompatibilityItem(item, index);
+            public void RemoveAt(int index) => owner.RemoveCompatibilityItemAt(index);
+            public void Clear() => owner.ClearCompatibilityItems();
+        }
+
+        internal sealed class LayerSelectedIndexCollection
+        {
+            private readonly ListView list;
+            internal LayerSelectedIndexCollection(ListView list) => this.list = list;
+            public int Count => list.SelectedIndices.Count;
+            public int this[int index] => list.SelectedIndices[index];
+        }
+
+        internal sealed class LayerSelectedItemCollection
+        {
+            private readonly LayerDataGridView owner;
+            private readonly ListView list;
+
+            internal LayerSelectedItemCollection(LayerDataGridView owner, ListView list)
+            {
+                this.owner = owner;
+                this.list = list;
+            }
+
+            public int Count => list.SelectedItems.Count;
+            public ListViewItem this[int index] => list.SelectedItems[index];
+
+            public void Clear()
+            {
+                owner.syncingSelection = true;
+                try
+                {
+                    foreach (ListViewItem item in list.Items)
+                        item.Selected = false;
+                    owner.ClearSelection();
+                }
+                finally
+                {
+                    owner.syncingSelection = false;
+                }
+
+                owner.SelectedIndexChanged?.Invoke(owner, EventArgs.Empty);
+            }
+        }
+
+        internal sealed class LayerColumnCollection
+        {
+            private readonly LayerDataGridView owner;
+            private readonly DataGridViewTextBoxColumn textColumn;
+            private bool hasLayerColumn;
+
+            internal LayerColumnCollection(LayerDataGridView owner, DataGridViewTextBoxColumn textColumn)
+            {
+                this.owner = owner;
+                this.textColumn = textColumn;
+            }
+
+            public int Count => hasLayerColumn ? 1 : 0;
+            public LayerColumn this[int index]
+            {
+                get
+                {
+                    if (!hasLayerColumn || index != 0)
+                        throw new ArgumentOutOfRangeException(nameof(index));
+                    return new LayerColumn(owner, textColumn);
+                }
+            }
+
+            public LayerColumn Add(string text)
+            {
+                hasLayerColumn = true;
+                textColumn.HeaderText = text;
+                return new LayerColumn(owner, textColumn);
+            }
+
+            public void AddRange(ColumnHeader[] headers)
+            {
+                hasLayerColumn = headers != null && headers.Length > 0;
+                if (hasLayerColumn)
+                    textColumn.HeaderText = headers[0].Text;
+            }
+
+            public void Clear()
+            {
+                hasLayerColumn = false;
+                textColumn.HeaderText = string.Empty;
+            }
+        }
+
+        internal sealed class LayerColumn
+        {
+            private readonly LayerDataGridView owner;
+            private readonly DataGridViewTextBoxColumn textColumn;
+
+            internal LayerColumn(LayerDataGridView owner, DataGridViewTextBoxColumn textColumn)
+            {
+                this.owner = owner;
+                this.textColumn = textColumn;
+            }
+
+            public int Width
+            {
+                get => textColumn.Width;
+                set
+                {
+                    // The old ListView width represented the full row. Keep the visibility
+                    // button and 64px thumbnail fixed, then give the remaining space to text.
+                    int available = Math.Max(40, value - 102);
+                    textColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+                    textColumn.Width = available;
+                    textColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                    owner.Invalidate();
+                }
+            }
+        }
+    }
+
 }

@@ -13,9 +13,10 @@
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing)
             {
-                components.Dispose();
+                if (components != null)
+                    components.Dispose();
             }
             base.Dispose(disposing);
         }
@@ -63,7 +64,7 @@
             panelResizer = new Panel();
             tabControl1 = new TabControl();
             tabPage1 = new TabPage();
-            listView1 = new ListView();
+            listView1 = new LayerDataGridView();
             columnHeader1 = new ColumnHeader();
             imageListLayerThumbnails = new ImageList(components);
             toolStrip1 = new ToolStrip();
@@ -679,6 +680,7 @@
             listView1.TabIndex = 0;
             listView1.UseCompatibleStateImageBehavior = false;
             listView1.View = View.Details;
+            listView1.LayerVisibilityToggled += listView1_LayerVisibilityToggled;
             // 
             // columnHeader1
             // 
@@ -2479,7 +2481,6 @@
             PerformLayout();
         }
 
-        #endregion
 
         private ToolStripContainer toolStripContainer1;
         private ToolStrip toolStripTools;
@@ -2704,7 +2705,7 @@
         private ToolStripTextBox textBoxTolerance2;
         private TabControl tabControl1;
         private TabPage tabPage1;
-        private ListView listView1;
+        private LayerDataGridView listView1;
         private ToolStrip toolStrip1;
         private ToolStripButton toolStripButton1;
         private ToolStripButton toolStripButton2;
@@ -2717,4 +2718,6 @@
         private ToolStripButton toolStripButtonMoveToUp;
         private ToolStripButton toolStripButtonMoveToDown;
     }
+
 }
+    #endregion
