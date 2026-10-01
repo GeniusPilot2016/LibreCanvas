@@ -1154,15 +1154,137 @@ namespace Carpathia
             if (activeLayerIndex < 0 || activeLayerIndex >= editorLayers.Count)
                 return;
 
-            // The active layer changed, so the flattened preview must be rebuilt too.
-            // This keeps all currently visible layers on-screen while drawing.
-            MarkCompositeDirty();
             dirtyLayerThumbnailKeys.Add(editorLayers[activeLayerIndex].ThumbnailKey);
 
-            // Debounce rapid edits. The queue is keyed by layer, so switching layers
+            // During a live freehand stroke, rebuilding the full layer composite and
+            // restarting the thumbnail timer on every mouse move is extremely costly.
+            // The small changed canvas region is refreshed by RefreshLiveStrokeRegion;
+            // EndToolStrokePreview performs one full sync/composite when the stroke ends.
+            if (suppressCompositeDuringToolStroke)
+                return;
+
+            MarkCompositeDirty();
+
+            // Debounce non-stroke edits. The queue is keyed by layer, so switching layers
             // cannot accidentally refresh the wrong thumbnail.
             layerThumbnailRefreshTimer.Stop();
             layerThumbnailRefreshTimer.Start();
+        }
+
+        private bool IsFreehandPaintTool(Tools tool)
+        {
+            return tool == Tools.Brush ||
+                   tool == Tools.Pen ||
+                   tool == Tools.Eraser ||
+                   tool == Tools.Spray;
+        }
+
+        private int GetCurrentPaintToolSize()
+        {
+            switch (selectedTool)
+            {
+                case Tools.Brush: return Math.Max(1, brushSize);
+                case Tools.Pen: return Math.Max(1, penSize);
+                case Tools.Eraser: return Math.Max(1, eraserSize);
+                case Tools.Spray: return Math.Max(1, sprayToolSize);
+                default: return 1;
+            }
+        }
+
+        private Rectangle GetLiveStrokeDirtyRectangle(MouseEventArgs e, int previousX, int previousY)
+        {
+            int cx = (int)Math.Round(e.X / zoom);
+            int cy = (int)Math.Round(e.Y / zoom);
+            int px = previousX >= 0 ? previousX : cx;
+            int py = previousY >= 0 ? previousY : cy;
+
+            // DrawBrush implementations may spread a little outside the nominal radius.
+            // Keep a small safety margin so antialiasing/spray particles are fully refreshed.
+            int margin = Math.Max(3, GetCurrentPaintToolSize() / 2 + 4);
+            int left = Math.Min(px, cx) - margin;
+            int top = Math.Min(py, cy) - margin;
+            int right = Math.Max(px, cx) + margin + 1;
+            int bottom = Math.Max(py, cy) + margin + 1;
+
+            Rectangle dirty = Rectangle.FromLTRB(left, top, right, bottom);
+            dirty.Intersect(new Rectangle(Point.Empty, MainBitmap.Size));
+            return dirty;
+        }
+
+        private void RefreshLiveStrokeRegion(Rectangle imageRect)
+        {
+            if (imageRect.IsEmpty || MainBitmap == null)
+                return;
+
+            // With no layer stack, MainBitmap itself is already the display image.
+            if (editorLayers.Count == 0)
+            {
+                pictureBoxCanvas.Image = MainBitmap;
+            }
+            else
+            {
+                // BeginToolStrokePreview creates a current full composite once. Reuse it
+                // for the entire stroke and rebuild only the pixels touched by the brush.
+                if (compositeCanvasBitmap == null ||
+                    compositeCanvasBitmap.Width != MainBitmap.Width ||
+                    compositeCanvasBitmap.Height != MainBitmap.Height)
+                {
+                    RenderCompositeToCanvas(force: true);
+                }
+
+                using (Graphics g = Graphics.FromImage(compositeCanvasBitmap))
+                {
+                    GraphicsState state = g.Save();
+                    try
+                    {
+                        // First clear only the dirty part to transparent. This is required
+                        // for erasing because lower layers must become visible immediately.
+                        g.CompositingMode = CompositingMode.SourceCopy;
+                        using (Brush clearBrush = new SolidBrush(Color.Transparent))
+                            g.FillRectangle(clearBrush, imageRect);
+
+                        g.CompositingMode = CompositingMode.SourceOver;
+                        g.CompositingQuality = CompositingQuality.HighSpeed;
+                        g.InterpolationMode = InterpolationMode.NearestNeighbor;
+                        g.PixelOffsetMode = PixelOffsetMode.HighSpeed;
+                        g.SmoothingMode = SmoothingMode.HighSpeed;
+
+                        // Same stacking order as CreateCompositeBitmap, but only for the
+                        // changed rectangle instead of allocating/redrawing the full canvas.
+                        for (int i = editorLayers.Count - 1; i >= 0; i--)
+                        {
+                            if (!editorLayers[i].Visible)
+                                continue;
+
+                            Bitmap layerBitmap = GetLayerBitmapForRender(i);
+                            if (layerBitmap == null)
+                                continue;
+
+                            g.DrawImage(
+                                layerBitmap,
+                                imageRect,
+                                imageRect.X, imageRect.Y, imageRect.Width, imageRect.Height,
+                                GraphicsUnit.Pixel);
+                        }
+                    }
+                    finally
+                    {
+                        g.Restore(state);
+                    }
+                }
+
+                pictureBoxCanvas.Image = compositeCanvasBitmap;
+            }
+
+            Rectangle displayRect = new Rectangle(
+                (int)Math.Floor(imageRect.X * zoom) - 2,
+                (int)Math.Floor(imageRect.Y * zoom) - 2,
+                Math.Max(1, (int)Math.Ceiling(imageRect.Width * zoom) + 4),
+                Math.Max(1, (int)Math.Ceiling(imageRect.Height * zoom) + 4));
+
+            displayRect.Intersect(pictureBoxCanvas.ClientRectangle);
+            if (!displayRect.IsEmpty)
+                pictureBoxCanvas.Invalidate(displayRect);
         }
 
         private void layerThumbnailRefreshTimer_Tick(object sender, EventArgs e)
@@ -2532,6 +2654,12 @@ namespace Carpathia
                         // Clear the SelectedBitmap
                         SelectedBitmap.Dispose();
                         SelectedBitmap = null;
+
+                        // The selection was just committed after EndToolStrokePreview may
+                        // already have rendered the old active-layer pixels. Force one final
+                        // composite rebuild so the committed selection is immediately visible.
+                        MarkCompositeDirty();
+                        MarkLayerThumbnailDirty();
                     }
 
                     // Update the PictureBox with the new bitmap
@@ -2922,6 +3050,11 @@ namespace Carpathia
 
         private void drawIntoCanvas(MouseEventArgs e)
         {
+            // Preserve the previous image-space point before DrawBrush/FillGap updates x/y.
+            // It is needed to refresh the complete segment touched by this mouse event.
+            int previousStrokeX = x;
+            int previousStrokeY = y;
+
             if (!isSelected && MainBitmap == null)
             {
                 MainBitmap = new Bitmap(pictureBoxCanvas.Width, pictureBoxCanvas.Height);
@@ -3226,8 +3359,26 @@ namespace Carpathia
                 }
             }
 
-            RenderCompositeToCanvas();
-            pictureBoxCanvas.Invalidate();
+            // Freehand tools run on MouseMove. Never rebuild the complete layer stack
+            // here while a stroke is active; update only the changed pixels instead.
+            if (suppressCompositeDuringToolStroke && isdrawing && IsFreehandPaintTool(selectedTool))
+            {
+                if (isSelected && SelectedBitmap != null && magicSelectionMask == null)
+                {
+                    // Rectangular selections are painted as an overlay by the Paint event.
+                    // Invalidating is enough; no layer composite changes until MouseUp.
+                    pictureBoxCanvas.Invalidate(SelectionRectangle);
+                }
+                else
+                {
+                    RefreshLiveStrokeRegion(GetLiveStrokeDirtyRectangle(e, previousStrokeX, previousStrokeY));
+                }
+            }
+            else
+            {
+                RenderCompositeToCanvas();
+                pictureBoxCanvas.Invalidate();
+            }
         }
         private (Pen blackPen, Pen whitePen) CreateMarchingAntsPens()
         {
