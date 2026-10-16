@@ -343,10 +343,30 @@ namespace Carpathia
 
         private void FitCanvasToWorkspace()
         {
-            if (MainBitmap == null || UIPanel.ClientSize.Width < 1 || UIPanel.ClientSize.Height < 1) return;
+            if (MainBitmap == null || UIPanel.ClientSize.Width < 1 || UIPanel.ClientSize.Height < 1)
+                return;
+
             float zx = Math.Max(.05f, (UIPanel.ClientSize.Width - 60f) / MainBitmap.Width);
             float zy = Math.Max(.05f, (UIPanel.ClientSize.Height - 60f) / MainBitmap.Height);
-            zoom = Math.Min(8f, Math.Min(zx, zy)); RefreshCanvasAfterTransform(false);
+            zoom = Math.Min(5f, Math.Min(zx, zy));
+
+            // Fit is an explicit recenter operation, unlike incremental zoom.
+            // Reset the scroll origin, lay out the new image, then center it.
+            UIPanel.SuspendLayout();
+            try
+            {
+                UIPanel.AutoScrollPosition = Point.Empty;
+                canvasPanel.Location = Point.Empty;
+                SetZoomedCanvasBounds();
+            }
+            finally
+            {
+                UIPanel.ResumeLayout(true);
+            }
+            CenterCanvasPanel();
+            PositionZoomResizeHandles();
+            labelZoom.Text = $"{Math.Round(zoom * 100)}%";
+            pictureBoxCanvas.Invalidate();
         }
 
         private void RefreshCanvasAfterTransform(bool markModified = true)
@@ -558,6 +578,16 @@ namespace Carpathia
             marchingAntsTimer.Tick += MarchingAntsTimer_Tick;
             marchingAntsTimer.Start();
             this.MouseWheel += ImageEditor_MouseWheel;
+            // Native WinForms scroll blitting can leave old child-window fragments on
+            // screen (including resize handles). Buffer the entire canvas subtree.
+            EnableCanvasDoubleBuffering();
+            // AutoScroll performs its own child-window movement and invalidation.
+            // Forcing a second repaint on every scroll message causes flashing.
+            UIPanel.Resize += (s, e) =>
+            {
+                if (!updatingCanvasZoom)
+                    CenterCanvasPanel();
+            };
             SystemThemeUtility.RegisterForm(this);
             if (fontsComboBox.Items.Count > 0)
             {
@@ -584,31 +614,16 @@ namespace Carpathia
             }
             toolStripSample.Font = new Font(fontFamilies[fontsComboBox.SelectedIndex], toolStripSample.Font.Size, toolStripSample.Font.Style);
 
-            // --- BEGIN: focus & mouse-wheel forwarding fix (prevents Ctrl+Wheel zoom being swallowed when scrollbars present) ---
-            // Make sure controls that can be hovered receive focus so MouseWheel events reach the form handler when Ctrl is pressed.
-            // PictureBox and panels may handle mouse wheel for scrolling; forwarding ensures consistent zoom behavior.
-            try
-            {
-                // Allow these controls to receive focus
-                pictureBoxCanvas.TabStop = true;
-                canvasPanel.TabStop = true;
-                UIPanel.TabStop = true;
-
-                // When mouse enters the canvas or panels, give focus to that control (so MouseWheel events bubble predictably).
-                pictureBoxCanvas.MouseEnter += (s, ev) => this.ActiveControl = pictureBoxCanvas;
-                canvasPanel.MouseEnter += (s, ev) => this.ActiveControl = canvasPanel;
-                UIPanel.MouseEnter += (s, ev) => this.ActiveControl = UIPanel;
-
-                // Forward MouseWheel from inner controls to the same handler (some controls consume wheel for scrolling).
-                pictureBoxCanvas.MouseWheel += ImageEditor_MouseWheel;
-                canvasPanel.MouseWheel += ImageEditor_MouseWheel;
-                UIPanel.MouseWheel += ImageEditor_MouseWheel;
-            }
-            catch
-            {
-                // Defensive: if designer-generated controls are not yet initialized this will fail silently.
-            }
-            // --- END ---
+            // Do not change ActiveControl on MouseEnter. WinForms automatically calls
+            // ScrollControlIntoView for newly focused child controls, which can
+            // snap UIPanel back to its origin after the user scrolls a zoomed image.
+            // Forward Ctrl+wheel without stealing focus or modifying scroll offsets.
+            pictureBoxCanvas.TabStop = false;
+            canvasPanel.TabStop = false;
+            UIPanel.TabStop = false;
+            pictureBoxCanvas.MouseWheel += ImageEditor_MouseWheel;
+            canvasPanel.MouseWheel += ImageEditor_MouseWheel;
+            UIPanel.MouseWheel += ImageEditor_MouseWheel;
         }
 
         private void MarchingAntsTimer_Tick(object sender, EventArgs e)
@@ -641,28 +656,13 @@ namespace Carpathia
             // provide smaller deltas and therefore get proportionally smaller
             // zoom changes.
             float wheelSteps = e.Delta / 120f;
-            float requestedZoom = zoom + (0.05f * wheelSteps);
-
-            zoom = Math.Max(0.05f, Math.Min(5f, requestedZoom));
-            UpdatePictureBoxZoom();
-            ScaleSelection();
+            RequestSmoothZoom(0.05f * wheelSteps);
         }
 
-        private void ZoomIn()
-        {
-            zoom += 0.05f;
-            if (zoom > 5f) zoom = 5f;
-            UpdatePictureBoxZoom();
-            ScaleSelection();
-        }
+        private void ZoomIn() => RequestSmoothZoom(0.05f);
 
-        private void ZoomOut()
-        {
-            zoom -= 0.05f;
-            if (zoom < 0.05f) zoom = 0.05f;
-            UpdatePictureBoxZoom();
-            ScaleSelection();
-        }
+        private void ZoomOut() => RequestSmoothZoom(-0.05f);
+
         private void SetFonts()
         {
             UIFonts uiFonts = UIFonts.Instance;
@@ -1495,11 +1495,130 @@ namespace Carpathia
             zoom = 1;
             labelZoom.Text = "100%";
         }
+        // WinForms uses ScrollWindowEx when moving child controls during scrolling.
+        // Force a complete child repaint after the scroll finishes so old canvas
+        // pixels and resize handles cannot remain as ghost strips.
+        private bool canvasRepaintQueued;
+        private bool updatingCanvasZoom;
+        // Fixed for the whole gesture; never derive the anchor from a rounded
+        // intermediate control position, which makes animated zoom jitter.
+        private double zoomAnchorImageX, zoomAnchorImageY;
+        private double zoomAnchorViewportX, zoomAnchorViewportY;
+
+
+        // WinForms AutoScroll and nested child HWNDs cannot reliably be animated by
+        // resizing/repositioning them every 16 ms. Apply each fine-grained zoom
+        // increment in one layout transaction instead of running a timer. This
+        // avoids subpixel rounding feedback and resize-handle oscillation.
+        private void RequestSmoothZoom(float delta)
+        {
+            if (MainBitmap == null || Math.Abs(delta) < 0.00001f)
+                return;
+
+            float nextZoom = Math.Max(0.05f, Math.Min(5f, zoom + delta));
+            if (Math.Abs(nextZoom - zoom) < 0.000001f)
+                return;
+
+            // Capture BEFORE changing zoom; use one stable image-space anchor
+            // throughout this single operation.
+            CaptureZoomAnchor();
+            zoom = nextZoom;
+            UpdatePictureBoxZoom(keepGestureAnchor: true);
+            ScaleSelection();
+        }
+
+        private void CaptureZoomAnchor()
+        {
+            zoomAnchorViewportX = UIPanel.ClientSize.Width / 2.0;
+            zoomAnchorViewportY = UIPanel.ClientSize.Height / 2.0;
+            Point origin = UIPanel.PointToClient(pictureBoxCanvas.PointToScreen(Point.Empty));
+            zoomAnchorImageX = (zoomAnchorViewportX - origin.X) /
+                Math.Max(0.00001, (double)pictureBoxCanvas.Width / Math.Max(1, MainBitmap.Width));
+            zoomAnchorImageY = (zoomAnchorViewportY - origin.Y) /
+                Math.Max(0.00001, (double)pictureBoxCanvas.Height / Math.Max(1, MainBitmap.Height));
+        }
+
+        // Force Windows to redraw child HWNDs as well as the parent. Invalidate()
+        // by itself does not clear stale pixels left by ScrollWindowEx on children.
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool RedrawWindow(IntPtr hwnd, IntPtr updateRect,
+            IntPtr updateRegion, uint flags);
+        private const uint RDW_INVALIDATE = 0x0001;
+        private const uint RDW_ERASE = 0x0004;
+        private const uint RDW_ALLCHILDREN = 0x0080;
+        private const uint RDW_UPDATENOW = 0x0100;
+
+
+        private static void EnableControlDoubleBuffering(Control control)
+        {
+            // Panel.DoubleBuffered is protected; use its existing WinForms property.
+            var property = typeof(Control).GetProperty("DoubleBuffered",
+                System.Reflection.BindingFlags.Instance |
+                System.Reflection.BindingFlags.NonPublic);
+            property?.SetValue(control, true);
+        }
+
+        private void EnableCanvasDoubleBuffering()
+        {
+            // Do not buffer the scrolling parent: it has separate child HWNDs.
+            // Buffering it can retain displaced child pixels when scrolling.
+            EnableControlDoubleBuffering(canvasPanel);
+            EnableControlDoubleBuffering(panelResizer);
+            EnableControlDoubleBuffering(pictureBoxCanvas);
+            // Do not invalidate UIPanel here: it has separate native child windows.
+            // Their ordinary resize/scroll paint messages handle exposed regions.
+        }
+
+        private void QueueCanvasRepaint()
+        {
+            if (canvasRepaintQueued || !UIPanel.IsHandleCreated || UIPanel.IsDisposed)
+                return;
+
+            canvasRepaintQueued = true;
+            // Defer only until the scroll message has completed. Avoid calling
+            // Update() repeatedly on nested windows: doing so inside the scroll
+            // blit/layout sequence can paint at two different canvas positions.
+            UIPanel.BeginInvoke(new Action(() =>
+            {
+                canvasRepaintQueued = false;
+                if (UIPanel.IsDisposed) return;
+                if (UIPanel.IsHandleCreated)
+                    RedrawWindow(UIPanel.Handle, IntPtr.Zero, IntPtr.Zero,
+                        RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN);
+            }));
+        }
+
         private void CenterCanvasPanel()
         {
-            int centerX = (UIPanel.ClientSize.Width - canvasPanel.Width) / 2;
-            int centerY = (UIPanel.ClientSize.Height - canvasPanel.Height) / 2;
-            canvasPanel.Location = new Point(Math.Max(centerX, 0), Math.Max(centerY, 0));
+            if (updatingCanvasZoom || !UIPanel.IsHandleCreated ||
+                UIPanel.ClientSize.Width <= 0 || UIPanel.ClientSize.Height <= 0)
+                return;
+
+            // Center the VISIBLE IMAGE, not the canvas wrapper. The wrapper's
+            // padding and WinForms' retained AutoScroll offset are not symmetric.
+            bool fitsX = canvasPanel.Width <= UIPanel.ClientSize.Width;
+            bool fitsY = canvasPanel.Height <= UIPanel.ClientSize.Height;
+            if (!fitsX && !fitsY) return;
+
+            // A previously scrolled canvas may still have a negative scroll offset
+            // even after shrinking below the viewport. Clear it before centering.
+            if ((fitsX && UIPanel.AutoScrollPosition.X != 0) ||
+                (fitsY && UIPanel.AutoScrollPosition.Y != 0))
+            {
+                Point scroll = UIPanel.AutoScrollPosition;
+                UIPanel.AutoScrollPosition = new Point(
+                    fitsX ? 0 : -scroll.X, fitsY ? 0 : -scroll.Y);
+            }
+
+            Point imageOrigin = UIPanel.PointToClient(
+                pictureBoxCanvas.PointToScreen(Point.Empty));
+            int dx = fitsX ? (int)Math.Round((UIPanel.ClientSize.Width -
+                pictureBoxCanvas.Width) / 2.0 - imageOrigin.X) : 0;
+            int dy = fitsY ? (int)Math.Round((UIPanel.ClientSize.Height -
+                pictureBoxCanvas.Height) / 2.0 - imageOrigin.Y) : 0;
+            if (dx != 0 || dy != 0)
+                canvasPanel.Location = new Point(canvasPanel.Left + dx,
+                    canvasPanel.Top + dy);
         }
 
         private void removeObjectToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1834,11 +1953,7 @@ namespace Carpathia
                         if (image != null)
                         {
                             image = RemoveGeneratedCheckerboard(image);
-                            MainBitmap = new Bitmap(image); // Convert Image to Bitmap  
-                            RenderCompositeToCanvas();
-                            MarkLayerThumbnailDirty();
-                            RefreshActiveLayerThumbnail();
-                            pictureBoxCanvas.Invalidate();
+                            ApplyGeneratedImageToCanvas(image);
                         }
                         else
                         {
@@ -6054,33 +6169,14 @@ namespace Carpathia
 
         private void zoomInToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (zoom < 5)
-            {
-                zoom += 0.05f;
-                UpdatePictureBoxZoom();
-                ScaleSelection();
-            }
-            else
-            {
-                zoom = 5;
-                SystemSounds.Beep.Play(); // Play a beep sound when the zoom limit is reached
-            }
+            RequestSmoothZoom(0.05f);
         }
 
         private void zoomOutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (zoom > 0.05f)
-            {
-                zoom -= 0.05f;
-                UpdatePictureBoxZoom();
-                ScaleSelection();
-            }
-            else
-            {
-                zoom = 0.05f;
-                SystemSounds.Beep.Play(); // Play a beep sound when the zoom limit is reached
-            }
+            RequestSmoothZoom(-0.05f);
         }
+
         private void ScaleSelection()
         {
             if (isSelected && (SelectionRectangle != Rectangle.Empty))
@@ -6102,24 +6198,190 @@ namespace Carpathia
             SettingsWindow settingsWindow = new SettingsWindow();
             settingsWindow.ShowDialog();
         }
-        private void UpdatePictureBoxZoom()
+        // Keep the three nested surfaces in a single coordinate system.
+        // The canvas has a 10 px resize-handle gutter on each edge; the resizer
+        // and picture box must always have precisely the zoomed image dimensions.
+        private void SetZoomedCanvasBounds()
         {
             if (MainBitmap == null) return;
+            Size imageSize = new Size(
+                Math.Max(1, (int)Math.Round(MainBitmap.Width * zoom)),
+                Math.Max(1, (int)Math.Round(MainBitmap.Height * zoom)));
 
-            // Preserve the original canvas sizing/centering behavior.
-            canvasPanel.Size = new Size(
-                (int)(originalSize.Width * zoom) + 20,
-                (int)(originalSize.Height * zoom) + 20);
-
-            pictureBoxCanvas.Size = panelResizer.Size;
-
-            // The scroll extent must describe the NEW canvas size, not the
-            // previous zoom step's size.
+            panelResizer.Size = imageSize;
+            pictureBoxCanvas.Size = imageSize;
+            pictureBoxCanvas.SizeMode = PictureBoxSizeMode.StretchImage;
+            canvasPanel.Size = new Size(imageSize.Width + 20, imageSize.Height + 20);
+            if (panelResizer.Parent == canvasPanel)
+                panelResizer.Location = new Point(10, 10);
+            if (pictureBoxCanvas.Parent == panelResizer)
+                pictureBoxCanvas.Location = Point.Empty;
             UIPanel.AutoScrollMinSize = canvasPanel.Size;
+        }
+
+        // Place all eight handle controls at the actual image corners/edge centers.
+        // Convert positions into each handle's own parent coordinates, so this
+        // works even when handles are not children of canvasPanel.
+        private void PositionZoomResizeHandles()
+        {
+            if (!canvasPanel.IsHandleCreated || !pictureBoxCanvas.IsHandleCreated) return;
+            Control[] corners = { resize_top_left, resize_top, resize_top_right,
+                resize_left, resize_right, resize_bottom_left, resize_bottom,
+                resize_bottom_right };
+            int w = pictureBoxCanvas.Width, h = pictureBoxCanvas.Height;
+            Point[] points = {
+                new Point(0, 0), new Point(w / 2, 0), new Point(w, 0),
+                new Point(0, h / 2), new Point(w, h / 2),
+                new Point(0, h), new Point(w / 2, h), new Point(w, h)
+            };
+            for (int i = 0; i < corners.Length; i++)
+            {
+                Control handle = corners[i];
+                if (handle == null || handle.Parent == null) continue;
+                Point screen = pictureBoxCanvas.PointToScreen(points[i]);
+                Point center = handle.Parent.PointToClient(screen);
+                Point loc = new Point(center.X - handle.Width / 2,
+                                      center.Y - handle.Height / 2);
+                if (handle.Location != loc) handle.Location = loc;
+            }
+        }
+
+        private void RepaintZoomSurface()
+        {
+            // Do not issue synchronous RDW_UPDATENOW/ERASE on multiple child HWNDs.
+            // Each child buffers its own frame. Invalidating once after final
+            // layout avoids painting partially-resized intermediate states.
+            UIPanel.Invalidate(true);
+        }
+
+        private void UpdatePictureBoxZoom(bool keepGestureAnchor = false)
+        {
+            if (MainBitmap == null || UIPanel.ClientSize.Width <= 0 ||
+                UIPanel.ClientSize.Height <= 0)
+                return;
+
+            // The image-space coordinate beneath the *old* visible viewport
+            // center is the point to keep centered after zooming.
+            if (!keepGestureAnchor)
+                CaptureZoomAnchor();
+
+            double anchorX = zoomAnchorImageX;
+            double anchorY = zoomAnchorImageY;
+            bool previouslyFitX = canvasPanel.Width <= UIPanel.ClientSize.Width;
+            bool previouslyFitY = canvasPanel.Height <= UIPanel.ClientSize.Height;
+
+            updatingCanvasZoom = true;
+            try
+            {
+                // Update nested controls as a single layout change. Never rely
+                // on panelResizer's previous size to size pictureBoxCanvas.
+                UIPanel.SuspendLayout();
+                canvasPanel.SuspendLayout();
+                panelResizer.SuspendLayout();
+                try
+                {
+                    SetZoomedCanvasBounds();
+                }
+                finally
+                {
+                    panelResizer.ResumeLayout(false);
+                    canvasPanel.ResumeLayout(false);
+                    UIPanel.ResumeLayout(true);
+                }
+
+                // Scrollbars may have appeared/disappeared when the canvas grew.
+                // Take the viewport center AFTER the new layout, never reuse the
+                // previous viewport's center stored by CaptureZoomAnchor().
+                int viewportW = UIPanel.ClientSize.Width;
+                int viewportH = UIPanel.ClientSize.Height;
+                bool fitsX = canvasPanel.Width <= viewportW;
+                bool fitsY = canvasPanel.Height <= viewportH;
+
+                // When a previously centered image becomes scrollable, WinForms
+                // otherwise retains its positive Left/Top as a virtual origin.
+                // Reset only the axes that just crossed into scrollable mode.
+                if ((previouslyFitX && !fitsX) || (previouslyFitY && !fitsY))
+                {
+                    UIPanel.SuspendLayout();
+                    try
+                    {
+                        Point location = canvasPanel.Location;
+                        if (previouslyFitX && !fitsX)
+                            location.X = UIPanel.AutoScrollPosition.X;
+                        if (previouslyFitY && !fitsY)
+                            location.Y = UIPanel.AutoScrollPosition.Y;
+                        canvasPanel.Location = location;
+                    }
+                    finally
+                    {
+                        UIPanel.ResumeLayout(true);
+                    }
+                    // Normalizing the scroll origin may change scrollbar
+                    // visibility; always use the final effective viewport.
+                    viewportW = UIPanel.ClientSize.Width;
+                    viewportH = UIPanel.ClientSize.Height;
+                    fitsX = canvasPanel.Width <= viewportW;
+                    fitsY = canvasPanel.Height <= viewportH;
+                }
+
+                int insetX = canvasPanel.PointToClient(
+                    pictureBoxCanvas.PointToScreen(Point.Empty)).X;
+                int insetY = canvasPanel.PointToClient(
+                    pictureBoxCanvas.PointToScreen(Point.Empty)).Y;
+
+                // Use effective pixel ratios, not the unrounded requested zoom;
+                // pictureBoxCanvas dimensions are integer pixels in WinForms.
+                double scaleX = (double)pictureBoxCanvas.Width / MainBitmap.Width;
+                double scaleY = (double)pictureBoxCanvas.Height / MainBitmap.Height;
+                int maxX = Math.Max(0, canvasPanel.Width - viewportW);
+                int maxY = Math.Max(0, canvasPanel.Height - viewportH);
+                int desiredX = fitsX ? 0 : Math.Max(0, Math.Min(maxX,
+                    (int)Math.Round(insetX + anchorX * scaleX - viewportW / 2.0)));
+                int desiredY = fitsY ? 0 : Math.Max(0, Math.Min(maxY,
+                    (int)Math.Round(insetY + anchorY * scaleY - viewportH / 2.0)));
+
+                // Scroll only once after sizes/scrollbars settle. WinForms uses
+                // positive setter arguments and negative values when reading.
+                UIPanel.AutoScrollPosition = new Point(desiredX, desiredY);
+
+                // WinForms may clamp or offset AutoScrollPosition when the child
+                // was previously centered. Correct using the ACTUAL image position
+                // on screen, not the requested scrollbar value.
+                for (int pass = 0; pass < 3; pass++)
+                {
+                    if (fitsX || fitsY)
+                        CenterCanvasPanel();
+
+                    Point actual = UIPanel.PointToClient(
+                        pictureBoxCanvas.PointToScreen(Point.Empty));
+                    int errorX = fitsX ? 0 : (int)Math.Round(
+                        actual.X + anchorX * scaleX - UIPanel.ClientSize.Width / 2.0);
+                    int errorY = fitsY ? 0 : (int)Math.Round(
+                        actual.Y + anchorY * scaleY - UIPanel.ClientSize.Height / 2.0);
+                    if (Math.Abs(errorX) <= 1 && Math.Abs(errorY) <= 1)
+                        break;
+
+                    Point current = UIPanel.AutoScrollPosition;
+                    int nextX = fitsX ? 0 : Math.Max(0, Math.Min(
+                        UIPanel.HorizontalScroll.Maximum,
+                        -current.X + errorX));
+                    int nextY = fitsY ? 0 : Math.Max(0, Math.Min(
+                        UIPanel.VerticalScroll.Maximum,
+                        -current.Y + errorY));
+                    if (nextX == -current.X && nextY == -current.Y)
+                        break;
+                    UIPanel.AutoScrollPosition = new Point(nextX, nextY);
+                }
+            }
+            finally
+            {
+                updatingCanvasZoom = false;
+            }
 
             CenterCanvasPanel();
-            pictureBoxCanvas.Invalidate();
-            labelZoom.Text = $"{(int)Math.Round(zoom * 100)}%";
+            PositionZoomResizeHandles();
+            labelZoom.Text = $"{Math.Round(zoom * 100)}%";
+            RepaintZoomSurface();
         }
 
         private void buttonBold_CheckedChanged(object sender, EventArgs e)
@@ -6212,6 +6474,51 @@ namespace Carpathia
                 UpdateUndoRedoButtons();
             }
         }
+        // Generated pixels must be installed into the editable layer AND the
+        // flattened preview. Changing MainBitmap alone leaves the old composite
+        // in pictureBoxCanvas.Image, even though undo/history has the new state.
+        private void ApplyGeneratedImageToCanvas(Image generatedImage)
+        {
+            if (generatedImage == null)
+                throw new ArgumentNullException(nameof(generatedImage));
+
+            Bitmap replacement = new Bitmap(generatedImage);
+            Bitmap previous = MainBitmap;
+            bool canvasSizeChanged = previous == null || previous.Size != replacement.Size;
+            MainBitmap = replacement;
+
+            try
+            {
+                if (canvasSizeChanged)
+                {
+                    // Some AI providers return a different resolution. Keep the
+                    // bitmap, the zoomed controls and the scroll extent in sync.
+                    originalSize = replacement.Size;
+                    SetZoomedCanvasBounds();
+                    CenterCanvasPanel();
+                    PositionZoomResizeHandles();
+                    labelSize.Text = $"{replacement.Width} X {replacement.Height}px";
+                }
+
+                // Persist the generated pixels in the current layer. The thumbnail
+                // and visible composite are independent copies of MainBitmap.
+                SyncActiveLayerFromCanvas();
+                MarkCompositeDirty();
+                RenderCompositeToCanvas(force: true);
+                MarkLayerThumbnailDirty();
+                RefreshActiveLayerThumbnail();
+
+                isModified = true;
+                isSaved = false;
+                pictureBoxCanvas.Invalidate();
+            }
+            finally
+            {
+                if (!ReferenceEquals(previous, replacement))
+                    previous?.Dispose();
+            }
+        }
+
         private async void buttonCreate_Click(object sender, EventArgs e)
         {
             if (CheckIfInternetConnectionAvailable.IsInternetAvailable())
@@ -6275,9 +6582,9 @@ namespace Carpathia
                         var image = await imageTask; // Await the task to get the result
                         if (image != null)
                         {
-                            MainBitmap = new Bitmap(image); // Convert Image to Bitmap  
-                            pictureBoxCanvas.Invalidate();
-                            isModified = true; MarkLayerThumbnailDirty();
+                            // Rebuild the layer composite; Invalidate() alone
+                            // repaints the old cached preview.
+                            ApplyGeneratedImageToCanvas(image);
                         }
                         else
                         {
