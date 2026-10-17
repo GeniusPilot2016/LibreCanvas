@@ -52,6 +52,25 @@ namespace Carpathia
             gaussianBlurSize = Settings1.Default.DefaultGaussianBlurRadius;
         bool isResizing = false, isSelected = false, backgroundFilling = false,
             isImageCurrentlyCreating = false, isSaved = false;
+
+        // --- Paint-style canvas resize state ---
+        private List<Bitmap> resizeOriginalLayers;
+        private Size resizeOriginalSize;
+        private Point resizeStartCursor;      // screen coordinates
+        private Point resizeAnchorScreen;     // screen position of the edge that must not move
+        private const int MaxCanvasDimension = 16000;
+        // true  = expanded area of the bottom layer gets the secondary colour (like Paint)
+        // false = expanded area is fully transparent
+        private bool fillExpandedAreaWithBackgroundColor = true;
+
+        private bool ResizeAffectsLeft =>
+            resizeDirection is ResizeDirection.Left or ResizeDirection.TopLeft or ResizeDirection.BottomLeft;
+        private bool ResizeAffectsRight =>
+            resizeDirection is ResizeDirection.Right or ResizeDirection.TopRight or ResizeDirection.BottomRight;
+        private bool ResizeAffectsTop =>
+            resizeDirection is ResizeDirection.Top or ResizeDirection.TopLeft or ResizeDirection.TopRight;
+        private bool ResizeAffectsBottom =>
+            resizeDirection is ResizeDirection.Bottom or ResizeDirection.BottomLeft or ResizeDirection.BottomRight;
         private ResizeDirection resizeDirection;
         private BasicFilters basicFilters;
         private ArtisticFilters artisticFilters = ArtisticFilters.None;
@@ -129,17 +148,24 @@ namespace Carpathia
             public string LayerKey { get; }
             public Bitmap Bitmap { get; }
             public Size Size { get; }
+            public List<Bitmap> LayerBitmaps { get; }
 
-            public LayerCanvasState(string layerKey, Bitmap bitmap, Size size)
+            public LayerCanvasState(string layerKey, Bitmap bitmap, Size size, List<Bitmap> layerBitmaps = null)
             {
                 LayerKey = layerKey;
                 Bitmap = bitmap;
                 Size = size;
+                LayerBitmaps = layerBitmaps;
             }
 
             public void Dispose()
             {
                 Bitmap?.Dispose();
+                if (LayerBitmaps != null)
+                {
+                    foreach (Bitmap layerBitmap in LayerBitmaps)
+                        layerBitmap?.Dispose();
+                }
             }
         }
 
@@ -355,7 +381,7 @@ namespace Carpathia
             UIPanel.SuspendLayout();
             try
             {
-                UIPanel.AutoScrollPosition = Point.Empty;
+                //UIPanel.AutoScrollPosition = Point.Empty;
                 canvasPanel.Location = Point.Empty;
                 SetZoomedCanvasBounds();
             }
@@ -374,6 +400,8 @@ namespace Carpathia
             originalSize = MainBitmap.Size;
             MarkCompositeDirty();
             RenderCompositeToCanvas(force: true);
+            pictureBoxCanvas.Invalidate();
+            pictureBoxCanvas.Update();
             canvasPanel.Size = new Size((int)Math.Round(MainBitmap.Width * zoom) + 20, (int)Math.Round(MainBitmap.Height * zoom) + 20);
             pictureBoxCanvas.Size = panelResizer.Size; UIPanel.AutoScrollMinSize = canvasPanel.Size;
             labelSize.Text = $"{MainBitmap.Width} X {MainBitmap.Height}px"; labelZoom.Text = $"{Math.Round(zoom * 100)}%";
@@ -896,6 +924,8 @@ namespace Carpathia
             suppressCompositeDuringToolStroke = true;
             MarkCompositeDirty();
             RenderCompositeToCanvas(force: true);
+            pictureBoxCanvas.Invalidate();
+            pictureBoxCanvas.Update();
         }
 
         private void EndToolStrokePreview()
@@ -904,6 +934,8 @@ namespace Carpathia
             SyncActiveLayerFromCanvas();
             MarkCompositeDirty();
             RenderCompositeToCanvas(force: true);
+            pictureBoxCanvas.Invalidate();
+            pictureBoxCanvas.Update();
         }
 
         private void RefreshLayerThumbnail(int layerIndex)
@@ -980,6 +1012,8 @@ namespace Carpathia
                 AddLayerInternal(initialLayerName, MainBitmap, selectLayer: true);
                 MarkCompositeDirty();
                 RenderCompositeToCanvas(force: true);
+                pictureBoxCanvas.Invalidate();
+                pictureBoxCanvas.Update();
             }
             finally
             {
@@ -1021,6 +1055,7 @@ namespace Carpathia
                 return;
 
             SyncActiveLayerFromCanvas();
+            SaveStateForUndo(includeAllLayers: true); // Link layer creation to history
 
             int nextNumber = editorLayers.Count + 1;
             var blank = new Bitmap(MainBitmap.Width, MainBitmap.Height, PixelFormat.Format32bppArgb);
@@ -1064,7 +1099,8 @@ namespace Carpathia
             SetAsUnselected();
             MarkCompositeDirty();
             RenderCompositeToCanvas(force: true);
-
+            pictureBoxCanvas.Invalidate();
+            pictureBoxCanvas.Update();
             isModified = true;
             isSaved = false;
         }
@@ -1078,6 +1114,8 @@ namespace Carpathia
             layer.Bitmap?.Dispose();
             layer.Bitmap = new Bitmap(MainBitmap);
             MarkCompositeDirty();
+            pictureBoxCanvas.Invalidate();
+            pictureBoxCanvas.Update();
         }
 
         private void SwitchToLayer(int newIndex)
@@ -1107,6 +1145,8 @@ namespace Carpathia
             CenterCanvasPanel();
             MarkCompositeDirty();
             RenderCompositeToCanvas(force: true);
+            pictureBoxCanvas.Invalidate();
+            pictureBoxCanvas.Update();
         }
 
         private void listView1_SelectedIndexChanged_Layers(object sender, EventArgs e)
@@ -1136,6 +1176,8 @@ namespace Carpathia
 
             MarkCompositeDirty();
             RenderCompositeToCanvas(force: true);
+            pictureBoxCanvas.Invalidate();
+            pictureBoxCanvas.Update();
             listView1.InvalidateRow(e.RowIndex);
 
             isModified = true;
@@ -1372,33 +1414,45 @@ namespace Carpathia
             return thumbnail;
         }
 
+        private void CenterCanvasPanel()
+        {
+            Rectangle area = UIPanel.DisplayRectangle;
+
+            canvasPanel.Location = new Point(
+                area.X + Math.Max(0, (area.Width - canvasPanel.Width) / 2),
+                area.Y + Math.Max(0, (area.Height - canvasPanel.Height) / 2)
+            ); 
+        }
+        private void CenterScrollbars()
+        {
+            int x = Math.Max(0,
+                (canvasPanel.Width - UIPanel.ClientSize.Width) / 2);
+
+            int y = Math.Max(0,
+                (canvasPanel.Height - UIPanel.ClientSize.Height) / 2);
+
+            UIPanel.AutoScrollPosition = new Point(x, y);
+        }
+
         private void createNewFile()
         {
             listView1.Items.Clear();
-            aiGenerated = false; // Reset AI generated flag
+            aiGenerated = false;
             isModified = false;
             SetAsUnselected();
             pictureBoxCanvas.Image = null;
-            // panel1'in AutoScroll özelliğini true yaparak kaydırma çubuklarını etkinleştiriyoruz
             UIPanel.AutoScroll = true;
 
-            // canvasPanel'in boyutlarını ayarlıyoruz
             canvasPanel.Size = new Size(Settings1.Default.DefaultCanvasSize.Width + 20,
                 Settings1.Default.DefaultCanvasSize.Height + 20);
             pictureBoxCanvas.Size = panelResizer.Size;
-
-            // panel1'in AutoScrollMinSize özelliğini canvasPanel'in boyutlarına ayarlıyoruz
             UIPanel.AutoScrollMinSize = canvasPanel.Size;
 
-            // Paneli merkezi konumda yerleştiriyoruz
-            CenterCanvasPanel();
-
-            // Paneli hemen yenile (Refresh kullan)
-            canvasPanel.Refresh();
             MainBitmap = new Bitmap(Settings1.Default.DefaultCanvasSize.Width,
                 Settings1.Default.DefaultCanvasSize.Height);
             originalSize = MainBitmap.Size;
             ResetLayers("Layer 1");
+            canvasPanel.Refresh();
             labelSize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height}px";
             labelFileName.Text = "Unnamed File";
             undoStack.Clear();
@@ -1410,28 +1464,24 @@ namespace Carpathia
             farklıKaydetToolStripMenuItem.Enabled = false;
             zoom = 1;
             labelZoom.Text = "100%";
+
+            BeginInvoke(new Action(CenterCanvasPanel));
+            BeginInvoke(new Action(CenterScrollbars));
         }
+
         private void openAFile(string fileName)
         {
-            aiGenerated = false; // Reset AI generated flag
+            aiGenerated = false;
             isModified = false;
             SetAsUnselected();
             pictureBoxCanvas.Image = null;
             Bitmap image = SecurityGuard.LoadLocalImage(fileName);
-            // panel1'in AutoScroll özelliğini true yaparak kaydırma çubuklarını etkinleştiriyoruz
             UIPanel.AutoScroll = true;
 
-            // canvasPanel'in boyutlarını ayarlıyoruz
             canvasPanel.Size = new Size(image.Size.Width + 20, image.Size.Height + 20);
             pictureBoxCanvas.Size = panelResizer.Size;
-
-            // panel1'in AutoScrollMinSize özelliğini canvasPanel'in boyutlarına ayarlıyoruz
             UIPanel.AutoScrollMinSize = canvasPanel.Size;
 
-            // Paneli merkezi konumda yerleştiriyoruz
-            CenterCanvasPanel();
-
-            // Paneli hemen yenile (Refresh kullan)
             pictureBoxCanvas.Image = image;
             MainBitmap = new Bitmap(image);
             originalSize = MainBitmap.Size;
@@ -1448,30 +1498,25 @@ namespace Carpathia
             farklıKaydetToolStripMenuItem.Enabled = true;
             zoom = 1;
             labelZoom.Text = "100%";
+
+            BeginInvoke(new Action(CenterCanvasPanel));
+            BeginInvoke(new Action(CenterScrollbars));
         }
+
         private void createFileWithAIorWebcam(Image generatedImage, bool isAIGenerated)
         {
             aiGenerated = isAIGenerated;
             isModified = false;
             SetAsUnselected();
             pictureBoxCanvas.Image = null;
-            Image image = generatedImage;
-            // panel1'in AutoScroll özelliğini true yaparak kaydırma çubuklarını etkinleştiriyoruz
             UIPanel.AutoScroll = true;
 
-            // canvasPanel'in boyutlarını ayarlıyoruz
             canvasPanel.Size = new Size(generatedImage.Width + 20, generatedImage.Height + 20);
             pictureBoxCanvas.Size = panelResizer.Size;
-
-            // panel1'in AutoScrollMinSize özelliğini canvasPanel'in boyutlarına ayarlıyoruz
             UIPanel.AutoScrollMinSize = canvasPanel.Size;
 
-            // Paneli merkezi konumda yerleştiriyoruz
-            CenterCanvasPanel();
-
-            // Paneli hemen yenile (Refresh kullan)
-            pictureBoxCanvas.Image = image;
-            MainBitmap = new Bitmap(image);
+            pictureBoxCanvas.Image = generatedImage;
+            MainBitmap = new Bitmap(generatedImage);
             originalSize = MainBitmap.Size;
             ResetLayers("Layer 1");
             canvasPanel.Refresh();
@@ -1494,7 +1539,11 @@ namespace Carpathia
             farklıKaydetToolStripMenuItem.Enabled = false;
             zoom = 1;
             labelZoom.Text = "100%";
+
+            BeginInvoke(new Action(CenterCanvasPanel)); 
+            BeginInvoke(new Action(CenterScrollbars));
         }
+
         // WinForms uses ScrollWindowEx when moving child controls during scrolling.
         // Force a complete child repaint after the scroll finishes so old canvas
         // pixels and resize handles cannot remain as ghost strips.
@@ -1523,6 +1572,10 @@ namespace Carpathia
             // throughout this single operation.
             CaptureZoomAnchor();
             zoom = nextZoom;
+
+            RebuildZoomBuffer();
+
+            pictureBoxCanvas.Invalidate();
             UpdatePictureBoxZoom(keepGestureAnchor: true);
             ScaleSelection();
         }
@@ -1586,39 +1639,6 @@ namespace Carpathia
                     RedrawWindow(UIPanel.Handle, IntPtr.Zero, IntPtr.Zero,
                         RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN);
             }));
-        }
-
-        private void CenterCanvasPanel()
-        {
-            if (updatingCanvasZoom || !UIPanel.IsHandleCreated ||
-                UIPanel.ClientSize.Width <= 0 || UIPanel.ClientSize.Height <= 0)
-                return;
-
-            // Center the VISIBLE IMAGE, not the canvas wrapper. The wrapper's
-            // padding and WinForms' retained AutoScroll offset are not symmetric.
-            bool fitsX = canvasPanel.Width <= UIPanel.ClientSize.Width;
-            bool fitsY = canvasPanel.Height <= UIPanel.ClientSize.Height;
-            if (!fitsX && !fitsY) return;
-
-            // A previously scrolled canvas may still have a negative scroll offset
-            // even after shrinking below the viewport. Clear it before centering.
-            if ((fitsX && UIPanel.AutoScrollPosition.X != 0) ||
-                (fitsY && UIPanel.AutoScrollPosition.Y != 0))
-            {
-                Point scroll = UIPanel.AutoScrollPosition;
-                UIPanel.AutoScrollPosition = new Point(
-                    fitsX ? 0 : -scroll.X, fitsY ? 0 : -scroll.Y);
-            }
-
-            Point imageOrigin = UIPanel.PointToClient(
-                pictureBoxCanvas.PointToScreen(Point.Empty));
-            int dx = fitsX ? (int)Math.Round((UIPanel.ClientSize.Width -
-                pictureBoxCanvas.Width) / 2.0 - imageOrigin.X) : 0;
-            int dy = fitsY ? (int)Math.Round((UIPanel.ClientSize.Height -
-                pictureBoxCanvas.Height) / 2.0 - imageOrigin.Y) : 0;
-            if (dx != 0 || dy != 0)
-                canvasPanel.Location = new Point(canvasPanel.Left + dx,
-                    canvasPanel.Top + dy);
         }
 
         private void removeObjectToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2358,122 +2378,206 @@ namespace Carpathia
             resize_bottom_right.Location = new Point(panelLeft + panelWidth - resize_bottom_right.Width / 2, panelTop + panelHeight - resize_bottom_right.Height / 2);
         }*/
 
-        private void resize_MouseUp(object sender, MouseEventArgs e)
-        {
-            originalSize = MainBitmap.Size;
-            pictureBoxCanvas.Size = panelResizer.Size;
-            RenderCompositeToCanvas();
-            labelSize.Text = $"{canvasPanel.Width} X {canvasPanel.Height}px";
-            UIPanel.AutoScrollMinSize = canvasPanel.Size;
-            toolStripResize.Visible = false;
-            toolStripSeparator16.Visible = false;
-            isResizing = false;
-        }
-
-        private void resize_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (isResizing)
-            {
-                int deltaX = e.X - lastMousePos.X;
-                int deltaY = e.Y - lastMousePos.Y;
-
-                int newWidth = canvasPanel.Width;
-                int newHeight = canvasPanel.Height;
-
-                switch (resizeDirection)
-                {
-                    case ResizeDirection.TopLeft:
-                        newWidth = canvasPanel.Width - deltaX;
-                        newHeight = canvasPanel.Height - deltaY;
-                        canvasPanel.Location = new Point(canvasPanel.Left + deltaX, canvasPanel.Top + deltaY);
-                        break;
-                    case ResizeDirection.Top:
-                        newHeight = canvasPanel.Height - deltaY;
-                        canvasPanel.Location = new Point(canvasPanel.Left, canvasPanel.Top + deltaY);
-                        break;
-                    case ResizeDirection.TopRight:
-                        newWidth = canvasPanel.Width + deltaX;
-                        newHeight = canvasPanel.Height - deltaY;
-                        canvasPanel.Location = new Point(canvasPanel.Left, canvasPanel.Top + deltaY);
-                        break;
-                    case ResizeDirection.Left:
-                        newWidth = canvasPanel.Width - deltaX;
-                        canvasPanel.Location = new Point(canvasPanel.Left + deltaX, canvasPanel.Top);
-                        break;
-                    case ResizeDirection.Right:
-                        newWidth = canvasPanel.Width + deltaX;
-                        newHeight = canvasPanel.Height;
-                        break;
-                    case ResizeDirection.BottomLeft:
-                        newWidth = canvasPanel.Width - deltaX;
-                        newHeight = canvasPanel.Height + deltaY;
-                        canvasPanel.Location = new Point(canvasPanel.Left + deltaX, canvasPanel.Top);
-                        break;
-                    case ResizeDirection.Bottom:
-                        newHeight = canvasPanel.Height + deltaY;
-                        break;
-                    case ResizeDirection.BottomRight:
-                        newWidth = canvasPanel.Width + deltaX;
-                        newHeight = canvasPanel.Height + deltaY;
-                        break;
-                }
-
-                // Minimum boyutları kontrol et
-                newWidth = Math.Max(newWidth, 1);
-                newHeight = Math.Max(newHeight, 1);
-
-                // Bitmap'i yeniden boyutlandır
-                Bitmap newBitmap = new Bitmap((int)Math.Round((newWidth - 20) / zoom), (int)Math.Round((newHeight - 20) / zoom));
-                using (Graphics g = Graphics.FromImage(newBitmap))
-                {
-                    g.DrawImage(MainBitmap, 0, 0);
-                }
-                MainBitmap = newBitmap;
-
-                // Yeni boyutları uygula
-                canvasPanel.Size = new Size(newWidth, newHeight);
-
-                // panel1'in AutoScrollMinSize özelliğini güncelle
-                UIPanel.AutoScrollMinSize = canvasPanel.Size;
-
-                // Paneli merkezi konumda yerleştiriyoruz
-                CenterCanvasPanel();
-
-                // Paneli hemen yenile (Refresh kullan)
-                canvasPanel.Refresh();
-
-                lastMousePos = e.Location;
-                toolStripResize.Text = $"{MainBitmap.Width} X {MainBitmap.Height}px";
-            }
-        }
-
         private void resize_MouseDown(object sender, MouseEventArgs e)
         {
-            if (sender == resize_top_left)
-                resizeDirection = ResizeDirection.TopLeft;
-            else if (sender == resize_top)
-                resizeDirection = ResizeDirection.Top;
-            else if (sender == resize_top_right)
-                resizeDirection = ResizeDirection.TopRight;
-            else if (sender == resize_left)
-                resizeDirection = ResizeDirection.Left;
-            else if (sender == resize_right)
-                resizeDirection = ResizeDirection.Right;
-            else if (sender == resize_bottom_left)
-                resizeDirection = ResizeDirection.BottomLeft;
-            else if (sender == resize_bottom)
-                resizeDirection = ResizeDirection.Bottom;
-            else if (sender == resize_bottom_right)
-                resizeDirection = ResizeDirection.BottomRight;
+            if (MainBitmap == null || e.Button != MouseButtons.Left)
+                return;
 
-            // Resizing işlemi başladığında
-            SaveStateForUndo();
+            if (sender == resize_top_left) resizeDirection = ResizeDirection.TopLeft;
+            else if (sender == resize_top) resizeDirection = ResizeDirection.Top;
+            else if (sender == resize_top_right) resizeDirection = ResizeDirection.TopRight;
+            else if (sender == resize_left) resizeDirection = ResizeDirection.Left;
+            else if (sender == resize_right) resizeDirection = ResizeDirection.Right;
+            else if (sender == resize_bottom_left) resizeDirection = ResizeDirection.BottomLeft;
+            else if (sender == resize_bottom) resizeDirection = ResizeDirection.Bottom;
+            else if (sender == resize_bottom_right) resizeDirection = ResizeDirection.BottomRight;
+            else return;
+
+            SetAsUnselected();
+            SyncActiveLayerFromCanvas();
+            SaveStateForUndo(includeAllLayers: true);
+
+            // Snapshot every layer. Each mouse move rebuilds from these originals,
+            // so shrinking and re-expanding during one drag restores cropped pixels.
+            DisposeResizeSnapshot();
+            resizeOriginalLayers = new List<Bitmap>();
+            if (editorLayers.Count > 0)
+            {
+                foreach (EditorLayer layer in editorLayers)
+                    resizeOriginalLayers.Add(new Bitmap(layer.Bitmap));
+            }
+            else
+            {
+                resizeOriginalLayers.Add(new Bitmap(MainBitmap));
+            }
+
+            resizeOriginalSize = MainBitmap.Size;
+            resizeStartCursor = Cursor.Position;
+
+            // The edge opposite to the dragged handle must stay where it is on screen.
+            Point pic = pictureBoxCanvas.PointToScreen(Point.Empty);
+            resizeAnchorScreen = new Point(
+                ResizeAffectsLeft ? pic.X + pictureBoxCanvas.Width : pic.X,
+                ResizeAffectsTop ? pic.Y + pictureBoxCanvas.Height : pic.Y);
+
             isResizing = true;
             toolStripResize.Visible = true;
             toolStripSeparator16.Visible = true;
             toolStripResize.Text = $"{MainBitmap.Width} X {MainBitmap.Height}px";
-            lastMousePos = e.Location;
         }
+
+        private void resize_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!isResizing || resizeOriginalLayers == null || MainBitmap == null)
+                return;
+
+            // Use screen coordinates: the handle itself moves while dragging, so
+            // e.Location would feed back into itself.
+            Point cursor = Cursor.Position;
+            int dx = (int)Math.Round((cursor.X - resizeStartCursor.X) / zoom);
+            int dy = (int)Math.Round((cursor.Y - resizeStartCursor.Y) / zoom);
+
+            int newWidth = resizeOriginalSize.Width;
+            int newHeight = resizeOriginalSize.Height;
+
+            if (ResizeAffectsLeft) newWidth -= dx;
+            else if (ResizeAffectsRight) newWidth += dx;
+
+            if (ResizeAffectsTop) newHeight -= dy;
+            else if (ResizeAffectsBottom) newHeight += dy;
+
+            newWidth = Math.Max(1, Math.Min(MaxCanvasDimension, newWidth));
+            newHeight = Math.Max(1, Math.Min(MaxCanvasDimension, newHeight));
+
+            if (newWidth == MainBitmap.Width && newHeight == MainBitmap.Height)
+                return;
+
+            // Left/top handles anchor the right/bottom edge: the original content is
+            // shifted so it keeps its distance from that edge.
+            int offsetX = ResizeAffectsLeft ? newWidth - resizeOriginalSize.Width : 0;
+            int offsetY = ResizeAffectsTop ? newHeight - resizeOriginalSize.Height : 0;
+
+            ApplyCanvasResize(newWidth, newHeight, offsetX, offsetY);
+            toolStripResize.Text = $"{MainBitmap.Width} X {MainBitmap.Height}px";
+        }
+
+        private void resize_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (!isResizing)
+                return;
+
+            isResizing = false;
+            toolStripResize.Visible = false;
+            toolStripSeparator16.Visible = false;
+
+            bool changed = MainBitmap != null && MainBitmap.Size != resizeOriginalSize;
+            DisposeResizeSnapshot();
+
+            if (changed)
+            {
+                foreach (EditorLayer layer in editorLayers)
+                    dirtyLayerThumbnailKeys.Add(layer.ThumbnailKey);
+                RefreshDirtyLayerThumbnails();
+
+                isModified = true;
+                isSaved = false;
+            }
+
+            originalSize = MainBitmap.Size;
+            labelSize.Text = $"{MainBitmap.Width} X {MainBitmap.Height}px";
+            CenterCanvasPanel();
+            PositionZoomResizeHandles();
+            RenderCompositeToCanvas(force: true);
+            UpdateUndoRedoButtons();
+        }
+
+        private void ApplyCanvasResize(int newWidth, int newHeight, int offsetX, int offsetY)
+        {
+            int count = resizeOriginalLayers.Count;
+            var rebuilt = new List<Bitmap>(count);
+
+            for (int i = 0; i < count; i++)
+            {
+                Bitmap original = resizeOriginalLayers[i];
+                var bmp = new Bitmap(newWidth, newHeight, PixelFormat.Format32bppArgb);
+
+                using (Graphics g = Graphics.FromImage(bmp))
+                {
+                    // Index count-1 is the bottom layer (row 0 is the top layer).
+                    bool isBottomLayer = i == count - 1;
+                    g.Clear(fillExpandedAreaWithBackgroundColor && isBottomLayer
+                        ? color2
+                        : Color.Transparent);
+
+                    // SourceCopy: original pixels (including transparent ones) replace
+                    // the fill, so only the newly exposed area keeps the fill colour.
+                    g.CompositingMode = CompositingMode.SourceCopy;
+                    g.InterpolationMode = InterpolationMode.NearestNeighbor;
+                    g.PixelOffsetMode = PixelOffsetMode.Half;
+                    g.DrawImage(original,
+                        new Rectangle(offsetX, offsetY, original.Width, original.Height),
+                        0, 0, original.Width, original.Height, GraphicsUnit.Pixel);
+                }
+                rebuilt.Add(bmp);
+            }
+
+            // Swap in the new bitmaps.
+            if (editorLayers.Count > 0)
+            {
+                for (int i = 0; i < editorLayers.Count; i++)
+                {
+                    editorLayers[i].Bitmap?.Dispose();
+                    editorLayers[i].Bitmap = rebuilt[i];
+                }
+                MainBitmap?.Dispose();
+                MainBitmap = new Bitmap(editorLayers[activeLayerIndex >= 0 ? activeLayerIndex : 0].Bitmap);
+            }
+            else
+            {
+                pictureBoxCanvas.Image = null; // don't leave a disposed bitmap on the control
+                MainBitmap?.Dispose();
+                MainBitmap = rebuilt[0];
+            }
+
+            originalSize = MainBitmap.Size;
+
+            // Resize the nested controls without recentering during the drag.
+            updatingCanvasZoom = true;
+            try
+            {
+                SetZoomedCanvasBounds();
+
+                // Keep the edge opposite to the dragged handle fixed on screen.
+                Point pic = pictureBoxCanvas.PointToScreen(Point.Empty);
+                int anchorX = ResizeAffectsLeft ? pic.X + pictureBoxCanvas.Width : pic.X;
+                int anchorY = ResizeAffectsTop ? pic.Y + pictureBoxCanvas.Height : pic.Y;
+                canvasPanel.Location = new Point(
+                    canvasPanel.Left + (resizeAnchorScreen.X - anchorX),
+                    canvasPanel.Top + (resizeAnchorScreen.Y - anchorY));
+            }
+            finally
+            {
+                updatingCanvasZoom = false;
+            }
+
+            PositionZoomResizeHandles();
+            labelSize.Text = $"{MainBitmap.Width} X {MainBitmap.Height}px";
+            RenderCompositeToCanvas(force: true);
+            pictureBoxCanvas.Invalidate();
+            pictureBoxCanvas.Update();
+            this.Invalidate();
+            this.Update();
+        }
+
+        private void DisposeResizeSnapshot()
+        {
+            if (resizeOriginalLayers == null)
+                return;
+            foreach (Bitmap b in resizeOriginalLayers)
+                b.Dispose();
+            resizeOriginalLayers = null;
+        }
+
         private void brushTool_CheckedChanged(object sender, EventArgs e)
         {
             if (brushTool.Checked)
@@ -2780,6 +2884,8 @@ namespace Carpathia
                     // Update the PictureBox with the new bitmap
                     RenderCompositeToCanvas();
                     pictureBoxCanvas.Invalidate();
+                    this.Invalidate();
+                    this.Update();
                 }
             }
         }
@@ -3543,6 +3649,18 @@ namespace Carpathia
         {
             if (pictureBoxCanvas.Image != null)
             {
+                // Draw the current image instead of the zoom snapshot. The snapshot is
+                // rebuilt only when zoom changes, so drawing it here hides edits made by
+                // tools until the next zoom operation.
+                e.Graphics.InterpolationMode = zoom >= 1f
+                    ? InterpolationMode.NearestNeighbor
+                    : InterpolationMode.HighQualityBicubic;
+                e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                e.Graphics.DrawImage(
+                    pictureBoxCanvas.Image,
+                    new Rectangle(0, 0, pictureBoxCanvas.ClientSize.Width, pictureBoxCanvas.ClientSize.Height),
+                    new Rectangle(0, 0, pictureBoxCanvas.Image.Width, pictureBoxCanvas.Image.Height),
+                    GraphicsUnit.Pixel);
                 // Draw the SelectedBitmap if it exists
                 if (SelectedBitmap != null && !SelectionRectangle.IsEmpty && magicSelectionMask == null)
                 {
@@ -4811,11 +4929,11 @@ namespace Carpathia
 
         private Tools selectedTool; // Rename the variable from `currentTool` to `selectedTool`
 
-        private void SaveStateForUndo()
+        private void SaveStateForUndo(bool includeAllLayers = false)
         {
             if (MainBitmap != null &&
-                activeLayerIndex >= 0 &&
-                activeLayerIndex < editorLayers.Count)
+                (includeAllLayers ||
+                 (activeLayerIndex >= 0 && activeLayerIndex < editorLayers.Count)))
             {
                 if (undoStack.Count >= MaxStackSize)
                 {
@@ -4828,11 +4946,22 @@ namespace Carpathia
                     undoStack = new Stack<LayerCanvasState>(tempList);
                 }
 
-                string layerKey = editorLayers[activeLayerIndex].ThumbnailKey;
+                string layerKey = activeLayerIndex >= 0 && activeLayerIndex < editorLayers.Count
+                    ? editorLayers[activeLayerIndex].ThumbnailKey
+                    : string.Empty;
+                List<Bitmap> layerBitmaps = null;
+                if (includeAllLayers)
+                {
+                    layerBitmaps = editorLayers.Count > 0
+                        ? editorLayers.Select(layer => new Bitmap(layer.Bitmap)).ToList()
+                        : new List<Bitmap> { new Bitmap(MainBitmap) };
+                }
+
                 undoStack.Push(new LayerCanvasState(
                     layerKey,
                     new Bitmap(MainBitmap),
-                    MainBitmap.Size));
+                    MainBitmap.Size,
+                    layerBitmaps));
 
                 ClearRedoStack();
             }
@@ -4844,6 +4973,87 @@ namespace Carpathia
         {
             if (state == null)
                 return;
+
+            if (state.LayerBitmaps != null)
+            {
+                int currentIndex = activeLayerIndex >= 0 && activeLayerIndex < editorLayers.Count
+                    ? activeLayerIndex
+                    : 0;
+                if (currentIndex >= state.LayerBitmaps.Count)
+                    currentIndex = state.LayerBitmaps.Count - 1;
+
+                Bitmap fullCurrentTarget = new Bitmap(MainBitmap ?? (editorLayers.Count > 0 ? editorLayers[Math.Max(0, Math.Min(activeLayerIndex, editorLayers.Count - 1))].Bitmap : new Bitmap(1, 1)));
+                List<Bitmap> fullCurrentLayerBitmaps = editorLayers
+                    .Select(layer => new Bitmap(layer.Bitmap))
+                    .ToList();
+
+                oppositeStack.Push(new LayerCanvasState(
+                    editorLayers.Count > 0 && currentIndex < editorLayers.Count ? editorLayers[currentIndex].ThumbnailKey : string.Empty,
+                    fullCurrentTarget,
+                    fullCurrentTarget.Size,
+                    fullCurrentLayerBitmaps));
+
+                suppressLayerSelectionChanged = true;
+                try
+                {
+                    foreach (var layer in editorLayers)
+                        layer.Dispose();
+                    editorLayers.Clear();
+                    listView1.Items.Clear();
+                    imageListLayerThumbnails.Images.Clear();
+                    dirtyLayerThumbnailKeys.Clear();
+
+                    for (int i = 0; i < state.LayerBitmaps.Count; i++)
+                    {
+                        string layerName = $"Layer {i + 1}";
+                        var layer = new EditorLayer(layerName, new Bitmap(state.LayerBitmaps[i]));
+                        editorLayers.Add(layer);
+
+                        using (Bitmap thumbnail = CreateLayerThumbnail(layer.Bitmap))
+                            imageListLayerThumbnails.Images.Add(layer.ThumbnailKey, new Bitmap(thumbnail));
+
+                        var item = new ListViewItem(layer.Name)
+                        {
+                            ImageKey = layer.ThumbnailKey,
+                            Tag = layer
+                        };
+                        listView1.Items.Add(item);
+                    }
+
+                    activeLayerIndex = Math.Max(0, Math.Min(currentIndex, editorLayers.Count - 1));
+                    if (editorLayers.Count > 0)
+                    {
+                        MainBitmap?.Dispose();
+                        MainBitmap = new Bitmap(editorLayers[activeLayerIndex].Bitmap);
+                        listView1.SelectedItems.Clear();
+                        listView1.Items[activeLayerIndex].Selected = true;
+                        listView1.Items[activeLayerIndex].Focused = true;
+                        listView1.Items[activeLayerIndex].EnsureVisible();
+                    }
+                }
+                finally
+                {
+                    suppressLayerSelectionChanged = false;
+                }
+
+                if (editorLayers.Count > 0)
+                {
+                    originalSize = MainBitmap.Size;
+                    SetZoomedCanvasBounds();
+                    UIPanel.AutoScrollMinSize = canvasPanel.Size;
+                    labelSize.Text = $"{MainBitmap.Width} x {MainBitmap.Height} px";
+                }
+
+                RefreshDirtyLayerThumbnails();
+                SetAsUnselected();
+                CenterCanvasPanel();
+                MarkCompositeDirty();
+                RenderCompositeToCanvas(force: true);
+                pictureBoxCanvas.Invalidate();
+                pictureBoxCanvas.Update();
+                state.Dispose();
+                return;
+            }
 
             int targetIndex = FindLayerIndexByKey(state.LayerKey);
             if (targetIndex < 0)
@@ -4890,7 +5100,8 @@ namespace Carpathia
             CenterCanvasPanel();
             MarkCompositeDirty();
             RenderCompositeToCanvas(force: true);
-
+            pictureBoxCanvas.Invalidate();
+            pictureBoxCanvas.Update();
             state.Dispose();
         }
 
@@ -6193,6 +6404,28 @@ namespace Carpathia
                 pictureBoxCanvas.Invalidate();
             }
         }
+        private Bitmap zoomBuffer; private void RebuildZoomBuffer()
+        {
+            zoomBuffer?.Dispose();
+
+            int width = Math.Max(1, (int)Math.Round(MainBitmap.Width * zoom));
+            int height = Math.Max(1, (int)Math.Round(MainBitmap.Height * zoom));
+
+            zoomBuffer = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+
+            using (Graphics g = Graphics.FromImage(zoomBuffer))
+            {
+                g.InterpolationMode = zoom >= 1f
+                    ? InterpolationMode.NearestNeighbor
+                    : InterpolationMode.HighQualityBicubic;
+
+                g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                g.DrawImage(
+                    pictureBoxCanvas.Image,
+                    new Rectangle(0, 0, width, height));
+            }
+        }
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SettingsWindow settingsWindow = new SettingsWindow();
@@ -6210,7 +6443,6 @@ namespace Carpathia
 
             panelResizer.Size = imageSize;
             pictureBoxCanvas.Size = imageSize;
-            pictureBoxCanvas.SizeMode = PictureBoxSizeMode.StretchImage;
             canvasPanel.Size = new Size(imageSize.Width + 20, imageSize.Height + 20);
             if (panelResizer.Parent == canvasPanel)
                 panelResizer.Location = new Point(10, 10);
@@ -6281,6 +6513,8 @@ namespace Carpathia
                 try
                 {
                     SetZoomedCanvasBounds();
+                    pictureBoxCanvas.Invalidate();
+                    pictureBoxCanvas.Update();
                 }
                 finally
                 {
@@ -6342,7 +6576,7 @@ namespace Carpathia
 
                 // Scroll only once after sizes/scrollbars settle. WinForms uses
                 // positive setter arguments and negative values when reading.
-                UIPanel.AutoScrollPosition = new Point(desiredX, desiredY);
+                //UIPanel.AutoScrollPosition = new Point(desiredX, desiredY);
 
                 // WinForms may clamp or offset AutoScrollPosition when the child
                 // was previously centered. Correct using the ACTUAL image position
@@ -6370,7 +6604,7 @@ namespace Carpathia
                         -current.Y + errorY));
                     if (nextX == -current.X && nextY == -current.Y)
                         break;
-                    UIPanel.AutoScrollPosition = new Point(nextX, nextY);
+                    //UIPanel.AutoScrollPosition = new Point(nextX, nextY);
                 }
             }
             finally
@@ -6505,6 +6739,8 @@ namespace Carpathia
                 SyncActiveLayerFromCanvas();
                 MarkCompositeDirty();
                 RenderCompositeToCanvas(force: true);
+                pictureBoxCanvas.Invalidate();
+                pictureBoxCanvas.Update();
                 MarkLayerThumbnailDirty();
                 RefreshActiveLayerThumbnail();
 
@@ -7045,7 +7281,8 @@ namespace Carpathia
             SyncActiveLayerFromCanvas();
             MarkCompositeDirty();
             RenderCompositeToCanvas(force: true);
-
+            pictureBoxCanvas.Invalidate();
+            pictureBoxCanvas.Update();
             // Only the layer that was cleared needs a new thumbnail.
             MarkLayerThumbnailDirty();
             RefreshActiveLayerThumbnail();
@@ -7123,7 +7360,8 @@ namespace Carpathia
             SyncActiveLayerFromCanvas();
             MarkCompositeDirty();
             RenderCompositeToCanvas(force: true);
-
+            pictureBoxCanvas.Invalidate();
+            pictureBoxCanvas.Update();
             isModified = true;
             isSaved = false;
 
@@ -7188,9 +7426,8 @@ namespace Carpathia
                 oldIndex == newIndex)
                 return;
 
-            // Persist edits before changing stack order. Reordering changes the
-            // composite only; it must not regenerate any thumbnail.
             SyncActiveLayerFromCanvas();
+            SaveStateForUndo(includeAllLayers: true); // Link layer reordering to history
 
             EditorLayer layer = editorLayers[oldIndex];
             editorLayers.RemoveAt(oldIndex);
@@ -7218,6 +7455,8 @@ namespace Carpathia
             isSaved = false;
             MarkCompositeDirty();
             RenderCompositeToCanvas(force: true);
+            pictureBoxCanvas.Invalidate();
+            pictureBoxCanvas.Update();
             listView1.Invalidate();
         }
 
@@ -7226,7 +7465,6 @@ namespace Carpathia
             if (listView1.SelectedIndices.Count == 0)
                 return;
 
-            // Keep at least one editable layer in every document.
             if (editorLayers.Count <= 1)
             {
                 SystemSounds.Beep.Play();
@@ -7238,6 +7476,7 @@ namespace Carpathia
                 return;
 
             SyncActiveLayerFromCanvas();
+            SaveStateForUndo(includeAllLayers: true); // Link layer deletion to history
 
             EditorLayer deletedLayer = editorLayers[deleteIndex];
             string thumbnailKey = deletedLayer.ThumbnailKey;
@@ -7272,6 +7511,8 @@ namespace Carpathia
             isSaved = false;
             MarkCompositeDirty();
             RenderCompositeToCanvas(force: true);
+            pictureBoxCanvas.Invalidate();
+            pictureBoxCanvas.Update();
             listView1.Invalidate();
         }
     }
