@@ -68,8 +68,6 @@
             dataGridViewImageColumn1 = new DataGridViewImageColumn();
             dataGridViewImageColumn2 = new DataGridViewImageColumn();
             dataGridViewTextBoxColumn1 = new DataGridViewTextBoxColumn();
-            columnHeader1 = new ColumnHeader();
-            imageListLayerThumbnails = new ImageList(components);
             toolStrip1 = new ToolStrip();
             toolStripButtonAddLayer = new ToolStripButton();
             toolStripButtonMoveToUp = new ToolStripButton();
@@ -211,6 +209,8 @@
             toolStripMagicSelection = new ToolStrip();
             toolStripLabel19 = new ToolStripLabel();
             textBoxTolerance2 = new ToolStripTextBox();
+            columnHeader1 = new ColumnHeader();
+            imageListLayerThumbnails = new ImageList(components);
             menuStrip1 = new MenuStrip();
             dosyaToolStripMenuItem = new ToolStripMenuItem();
             yeniToolStripMenuItem = new ToolStripMenuItem();
@@ -305,7 +305,7 @@
             // 
             toolStripContainer1.ContentPanel.Controls.Add(UIPanel);
             toolStripContainer1.ContentPanel.Controls.Add(tabControl1);
-            toolStripContainer1.ContentPanel.Size = new Size(1250, 736);
+            toolStripContainer1.ContentPanel.Size = new Size(1250, 763);
             toolStripContainer1.Dock = DockStyle.Fill;
             // 
             // toolStripContainer1.LeftToolStripPanel
@@ -476,7 +476,7 @@
             UIPanel.Dock = DockStyle.Fill;
             UIPanel.Location = new Point(0, 0);
             UIPanel.Name = "UIPanel";
-            UIPanel.Size = new Size(1003, 736);
+            UIPanel.Size = new Size(1003, 763);
             UIPanel.TabIndex = 3;
             UIPanel.Click += panel1_Click;
             UIPanel.Paint += panel1_Paint;
@@ -495,7 +495,7 @@
             canvasPanel.Controls.Add(resize_top);
             canvasPanel.Controls.Add(pictureBoxCanvas);
             canvasPanel.Controls.Add(panelResizer);
-            canvasPanel.Location = new Point(86, 77);
+            canvasPanel.Location = new Point(86, 90);
             canvasPanel.Name = "canvasPanel";
             canvasPanel.Size = new Size(820, 620);
             canvasPanel.TabIndex = 2;
@@ -630,7 +630,7 @@
             pictureBoxCanvas.MinimumSize = new Size(1, 1);
             pictureBoxCanvas.Name = "pictureBoxCanvas";
             pictureBoxCanvas.Size = new Size(800, 600);
-            pictureBoxCanvas.SizeMode = PictureBoxSizeMode.StretchImage;
+            pictureBoxCanvas.SizeMode = PictureBoxSizeMode.CenterImage;
             pictureBoxCanvas.TabIndex = 0;
             pictureBoxCanvas.TabStop = false;
             pictureBoxCanvas.Click += pictureBoxCanvas_Click;
@@ -657,7 +657,7 @@
             tabControl1.Location = new Point(1003, 0);
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(247, 736);
+            tabControl1.Size = new Size(247, 763);
             tabControl1.TabIndex = 3;
             // 
             // tabPage1
@@ -667,7 +667,7 @@
             tabPage1.Location = new Point(4, 25);
             tabPage1.Name = "tabPage1";
             tabPage1.Padding = new Padding(3);
-            tabPage1.Size = new Size(239, 707);
+            tabPage1.Size = new Size(239, 734);
             tabPage1.TabIndex = 0;
             tabPage1.Text = "Layers";
             tabPage1.UseVisualStyleBackColor = true;
@@ -688,7 +688,7 @@
             listView1.ReadOnly = true;
             listView1.RowHeadersVisible = false;
             listView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            listView1.Size = new Size(233, 676);
+            listView1.Size = new Size(233, 703);
             listView1.TabIndex = 0;
             listView1.LayerVisibilityToggled += listView1_LayerVisibilityToggled;
             // 
@@ -721,24 +721,13 @@
             dataGridViewTextBoxColumn1.ReadOnly = true;
             dataGridViewTextBoxColumn1.SortMode = DataGridViewColumnSortMode.NotSortable;
             // 
-            // columnHeader1
-            // 
-            columnHeader1.Text = "Layer";
-            columnHeader1.Width = 180;
-            // 
-            // imageListLayerThumbnails
-            // 
-            imageListLayerThumbnails.ColorDepth = ColorDepth.Depth32Bit;
-            imageListLayerThumbnails.ImageSize = new Size(64, 64);
-            imageListLayerThumbnails.TransparentColor = Color.Transparent;
-            // 
             // toolStrip1
             // 
             toolStrip1.BackgroundImageLayout = ImageLayout.Stretch;
             toolStrip1.Dock = DockStyle.Bottom;
             toolStrip1.GripStyle = ToolStripGripStyle.Hidden;
             toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripButtonAddLayer, toolStripButtonMoveToUp, toolStripButtonMoveToDown, toolStripButtonDeleteLayer });
-            toolStrip1.Location = new Point(3, 679);
+            toolStrip1.Location = new Point(3, 706);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new Size(233, 25);
             toolStrip1.Stretch = true;
@@ -795,7 +784,7 @@
             toolStripTools.Items.AddRange(new ToolStripItem[] { mouseTool, toolStripSeparator11, selectTool, magicSelectTool, toolStripSeparator10, brushTool, penTool, eraserTool, bucketTool, sprayTool, addTextTool, drawShapeTool, toolStripSeparator6, createWithAITool, colorDropTool, zoomTool, toolStripSeparator9, foregroundColorButton, backgroundColorButton, toolStripSeparator7, pasteTool, copyTool, cutTool, toolStripButton9, toolStripSeparatorProfessional, cropTool, rotateTool, flipHTool, flipVTool, grayscaleTool, fitTool });
             toolStripTools.Location = new Point(0, 0);
             toolStripTools.Name = "toolStripTools";
-            toolStripTools.Size = new Size(39, 736);
+            toolStripTools.Size = new Size(39, 763);
             toolStripTools.Stretch = true;
             toolStripTools.TabIndex = 0;
             // 
@@ -1421,7 +1410,7 @@
             toolStripAICreateImage.Items.AddRange(new ToolStripItem[] { labelPrompt, textBoxPrompt, toolStripSeparator34, buttonCreate, buttonClose });
             toolStripAICreateImage.Location = new Point(0, 0);
             toolStripAICreateImage.Name = "toolStripAICreateImage";
-            toolStripAICreateImage.Size = new Size(1289, 27);
+            toolStripAICreateImage.Size = new Size(605, 27);
             toolStripAICreateImage.Stretch = true;
             toolStripAICreateImage.TabIndex = 14;
             toolStripAICreateImage.Visible = false;
@@ -2052,6 +2041,17 @@
             textBoxTolerance2.Name = "textBoxTolerance2";
             textBoxTolerance2.Size = new Size(100, 25);
             textBoxTolerance2.Text = "50";
+            // 
+            // columnHeader1
+            // 
+            columnHeader1.Text = "Layer";
+            columnHeader1.Width = 180;
+            // 
+            // imageListLayerThumbnails
+            // 
+            imageListLayerThumbnails.ColorDepth = ColorDepth.Depth32Bit;
+            imageListLayerThumbnails.ImageSize = new Size(64, 64);
+            imageListLayerThumbnails.TransparentColor = Color.Transparent;
             // 
             // menuStrip1
             // 
