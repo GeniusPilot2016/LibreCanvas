@@ -15,6 +15,10 @@ LibreCanvas is a creative image editor inspired by classic paint applications an
 
 After a period of reduced AI functionality caused by backend migration and API limitations, **AI features are functional again with the new backend integration**.
 
+> LibreCanvas is currently in active development. The first public release will be published once the core editing workflow is nearly complete.
+
+This repository currently contains the latest development version. Features, interfaces, and AI integrations may change before the first release.
+
 ## Why "LibreCanvas"? (Rebranding from ArtFusion)
 
 Previously, this project was named **ArtFusion**. However, a search for "ArtFusion" reveals numerous existing products, services, and digital platforms using the same name—especially apps, web tools, and design platforms.
