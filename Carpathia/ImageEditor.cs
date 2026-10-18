@@ -2929,16 +2929,25 @@ namespace Carpathia
                         case Tools.Hexagon:
                             if (isSelected && !SelectionRectangle.IsEmpty)
                             {
-                                // Calculate relative coordinates
-                                int relativeStartX = previewStartPoint.X - (int)(SelectionRectangle.X / zoom);
-                                int relativeStartY = previewStartPoint.Y - (int)(SelectionRectangle.Y / zoom);
-                                int relativeEndX = (int)Math.Round(e.X / zoom) - (int)(SelectionRectangle.X / zoom);
-                                int relativeEndY = (int)Math.Round(e.Y / zoom) - (int)(SelectionRectangle.Y / zoom);
+                                int relativeStartX =
+    previewStartPoint.X - originalSelectionRectangleLocation.X;
 
-                                // Create a completely fresh bitmap rather than modifying the existing one
+                                int relativeStartY =
+                                    previewStartPoint.Y - originalSelectionRectangleLocation.Y;
+
+                                int relativeEndX =
+                                    (int)Math.Round(e.X / (double)zoom) -
+                                    originalSelectionRectangleLocation.X;
+
+                                int relativeEndY =
+                                    (int)Math.Round(e.Y / (double)zoom) -
+                                    originalSelectionRectangleLocation.Y;
+
+                                // Use the same pixel dimensions as the source rectangle.
+                                // Do not recalculate them from the displayed selection.
                                 Bitmap newSelectedBitmap = new Bitmap(
-                                    (int)(SelectionRectangle.Width / zoom),
-                                    (int)(SelectionRectangle.Height / zoom));
+                                    originalSelectionRectangleSize.Width,
+                                    originalSelectionRectangleSize.Height);
 
                                 // Copy the original content from MainBitmap to the new bitmap
                                 using (Graphics g = Graphics.FromImage(newSelectedBitmap))
@@ -3171,31 +3180,61 @@ namespace Carpathia
                             break;
 
                         case Tools.Selection:
-                            // Selection code remains the same
-                            if (e.Button != MouseButtons.Left)
                             {
-                                return;
-                            }
-                            if (selectedTool == Tools.Selection && e.Button == MouseButtons.Left)
-                            {
-                                Point SelectionEndPoint = e.Location;
-                                SelectionRectangle.Location = new Point(
-                                    Math.Min(SelectionStartPoint.X, SelectionEndPoint.X),
-                                    Math.Min(SelectionStartPoint.Y, SelectionEndPoint.Y));
-                                SelectionRectangle.Size = new Size(
-                                    Math.Abs(SelectionStartPoint.X - SelectionEndPoint.X),
-                                    Math.Abs(SelectionStartPoint.Y - SelectionEndPoint.Y));
+                                if (e.Button != MouseButtons.Left || MainBitmap == null)
+                                    return;
 
-                                // Koordinatları zoom'a göre ölçekle
-                                originalSelectionRectangleLocation = new Point(
-                                    (int)(SelectionRectangle.X / zoom),
-                                    (int)(SelectionRectangle.Y / zoom));
-                                originalSelectionRectangleSize = new Size(
-                                    (int)(SelectionRectangle.Width / zoom),
-                                    (int)(SelectionRectangle.Height / zoom));
+                                double scale = (double)zoom;
+
+                                if (scale <= 0 || double.IsNaN(scale) || double.IsInfinity(scale))
+                                    return;
+
+                                // Convert the selection's edges to image pixels once.
+                                // Assumes the image is drawn at (0, 0), scaled by zoom.
+                                int left = (int)Math.Max(0, Math.Min(
+                                    MainBitmap.Width,
+                                    Math.Floor(Math.Min(SelectionStartPoint.X, e.X) / scale)));
+
+                                int top = (int)Math.Max(0, Math.Min(
+                                    MainBitmap.Height,
+                                    Math.Floor(Math.Min(SelectionStartPoint.Y, e.Y) / scale)));
+
+                                int right = (int)Math.Max(0, Math.Min(
+                                    MainBitmap.Width,
+                                    Math.Ceiling(Math.Max(SelectionStartPoint.X, e.X) / scale)));
+
+                                int bottom = (int)Math.Max(0, Math.Min(
+                                    MainBitmap.Height,
+                                    Math.Ceiling(Math.Max(SelectionStartPoint.Y, e.Y) / scale)));
+
+                                if (SelectionStartPoint.X == e.X ||
+                                    SelectionStartPoint.Y == e.Y ||
+                                    right <= left || bottom <= top)
+                                {
+                                    SelectionRectangle = Rectangle.Empty;
+                                    originalSelectionRectangleLocation = Point.Empty;
+                                    originalSelectionRectangleSize = Size.Empty;
+                                }
+                                else
+                                {
+                                    // Authoritative bounds for cropping and applying the result.
+                                    Rectangle imageRectangle =
+                                        Rectangle.FromLTRB(left, top, right, bottom);
+
+                                    originalSelectionRectangleLocation = imageRectangle.Location;
+                                    originalSelectionRectangleSize = imageRectangle.Size;
+
+                                    // These bounds are only for displaying the selection.
+                                    SelectionRectangle = Rectangle.FromLTRB(
+                                        (int)Math.Floor(left * scale),
+                                        (int)Math.Floor(top * scale),
+                                        (int)Math.Ceiling(right * scale),
+                                        (int)Math.Ceiling(bottom * scale));
+                                }
+
                                 pictureBoxCanvas.Invalidate();
+                                break;
                             }
-                            break;
 
                         default:
                             drawIntoCanvas(e);
@@ -6759,7 +6798,7 @@ namespace Carpathia
         {
             if (CheckIfInternetConnectionAvailable.IsInternetAvailable())
             {
-                string systemInstruction = "Treat the input image as a fixed, registered canvas. Make only the requested edit within the selected area. Do not shift, skew, shear, stretch, rotate, warp, resize, or reframe the image or its contents. Keep existing landmarks—including edges, facial features, whiskers, and object boundaries—at their original positions and proportions. Preserve the original alignment across the selection boundary; do not create doubled edges, displaced details, gaps, or rectangular seams. Leave unrequested content unchanged.";
+                string systemInstruction = "Fix the selection-editing pipeline by identifying whether the seam comes from coordinate mapping or generated content.\r\n\r\nFirst, bypass generation and reinsert the unchanged input crop through the exact same processing pipeline. Verify that it aligns with the original without displacement, stretching, or visible seams. Correct any failed mapping before continuing.\r\n\r\nTreat surrounding context as protected reference content. Keep the editable mask separate from the context crop. Composite only through the selection mask, preserving all pixels outside it.\r\n\r\nDo not assume that image-to-image generation preserves geometry or honors a mask. Verify that the backend actually forwards a mask and that the selected model supports masked editing. If either is missing, implement a supported inpainting workflow before claiming seamless selection editing.\r\n\r\nRequest edits only within the mask. Preserve the position and shape of structures crossing its boundary. Reject results that shift those structures; feathering cannot repair displaced sunglasses, whiskers, or contours.\r\n\r\nInspect the actual returned image dimensions and reverse recorded crop, resize, and padding transforms before compositing. Never substitute requested dimensions for measured dimensions.";
                 try
                 {
                     SaveStateForUndo();
