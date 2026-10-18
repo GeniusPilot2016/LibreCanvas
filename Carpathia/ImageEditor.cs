@@ -6759,6 +6759,7 @@ namespace Carpathia
         {
             if (CheckIfInternetConnectionAvailable.IsInternetAvailable())
             {
+                string systemInstruction = "Treat the input image as a fixed, registered canvas. Make only the requested edit within the selected area. Do not shift, skew, shear, stretch, rotate, warp, resize, or reframe the image or its contents. Keep existing landmarks—including edges, facial features, whiskers, and object boundaries—at their original positions and proportions. Preserve the original alignment across the selection boundary; do not create doubled edges, displaced details, gaps, or rectangular seams. Leave unrequested content unchanged.";
                 try
                 {
                     SaveStateForUndo();
@@ -6794,7 +6795,7 @@ namespace Carpathia
                                     GraphicsUnit.Pixel);
                             }
                         }
-                        var imageTask = ImageGenerationCore.GenerateImage(textBoxPrompt.Text, SelectedBitmap,
+                        var imageTask = ImageGenerationCore.GenerateImage(systemInstruction + "\n" + textBoxPrompt.Text, SelectedBitmap,
                             SelectedBitmap.Width, SelectedBitmap.Height, cts.Token);
                         var image = await imageTask; // Await the task to get the result
                         if (image != null)
