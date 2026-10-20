@@ -15,17 +15,21 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 using Carpathia.Properties;
-using System.Collections;
 using ExifLibrary;
+using System.Collections;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.Media;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using Windows.ApplicationModel.DataTransfer;
+using Windows.Storage;
+using Windows.Storage.Streams;
 using static System.Windows.Forms.DataFormats;
-using System.ComponentModel;
 
 namespace Carpathia
 {
@@ -35,6 +39,9 @@ namespace Carpathia
         int x = -1, y = -1;
         bool isdrawing = false;
         Color color1 = Color.Black, color2 = Color.White;
+        // The button that began the current drawing gesture determines its color.
+        private MouseButtons paintingMouseButton = MouseButtons.Left;
+        private Color ActivePaintColor => paintingMouseButton == MouseButtons.Right ? color2 : color1;
         int brushSize = Settings1.Default.DefaultBrushSize,
             penSize = Settings1.Default.DefaultPenSize,
             eraserSize = Settings1.Default.DefaultEraserSize,
@@ -1421,7 +1428,7 @@ namespace Carpathia
             canvasPanel.Location = new Point(
                 area.X + Math.Max(0, (area.Width - canvasPanel.Width) / 2),
                 area.Y + Math.Max(0, (area.Height - canvasPanel.Height) / 2)
-            ); 
+            );
         }
         private void CenterScrollbars()
         {
@@ -1540,7 +1547,7 @@ namespace Carpathia
             zoom = 1;
             labelZoom.Text = "100%";
 
-            BeginInvoke(new Action(CenterCanvasPanel)); 
+            BeginInvoke(new Action(CenterCanvasPanel));
             BeginInvoke(new Action(CenterScrollbars));
         }
 
@@ -2796,42 +2803,42 @@ namespace Carpathia
                             case Tools.Line:
                                 using (Graphics graphics = Graphics.FromImage(MainBitmap))
                                 {
-                                    DrawShapes.DrawLineOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, endPointImage);
+                                    DrawShapes.DrawLineOnCanvas(MainBitmap, pictureBoxCanvas, ActivePaintColor, shapeThickness, startPoint, endPointImage);
                                 }
                                 isModified = true; MarkLayerThumbnailDirty();
                                 break;
                             case Tools.Round:
                                 using (Graphics graphics = Graphics.FromImage(MainBitmap))
                                 {
-                                    DrawShapes.DrawRoundOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, endPointImage);
+                                    DrawShapes.DrawRoundOnCanvas(MainBitmap, pictureBoxCanvas, ActivePaintColor, shapeThickness, startPoint, endPointImage);
                                 }
                                 isModified = true; MarkLayerThumbnailDirty();
                                 break;
                             case Tools.Rectangle:
                                 using (Graphics graphics = Graphics.FromImage(MainBitmap))
                                 {
-                                    DrawShapes.DrawRectangleOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, endPointImage);
+                                    DrawShapes.DrawRectangleOnCanvas(MainBitmap, pictureBoxCanvas, ActivePaintColor, shapeThickness, startPoint, endPointImage);
                                 }
                                 isModified = true; MarkLayerThumbnailDirty();
                                 break;
                             case Tools.RoundedRectangle:
                                 using (Graphics graphics = Graphics.FromImage(MainBitmap))
                                 {
-                                    DrawShapes.DrawRoundedRectangleOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, endPointImage, radius);
+                                    DrawShapes.DrawRoundedRectangleOnCanvas(MainBitmap, pictureBoxCanvas, ActivePaintColor, shapeThickness, startPoint, endPointImage, radius);
                                 }
                                 isModified = true; MarkLayerThumbnailDirty();
                                 break;
                             case Tools.Triangle:
                                 using (Graphics graphics = Graphics.FromImage(MainBitmap))
                                 {
-                                    DrawShapes.DrawTriangleOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, startPoint, endPointImage);
+                                    DrawShapes.DrawTriangleOnCanvas(MainBitmap, pictureBoxCanvas, ActivePaintColor, shapeThickness, startPoint, endPointImage);
                                 }
                                 isModified = true; MarkLayerThumbnailDirty();
                                 break;
                             case Tools.Hexagon:
                                 using (Graphics graphics = Graphics.FromImage(MainBitmap))
                                 {
-                                    DrawShapes.DrawHexagonOnCanvas(MainBitmap, pictureBoxCanvas, color1, shapeThickness, points, startPoint, endPointImage);
+                                    DrawShapes.DrawHexagonOnCanvas(MainBitmap, pictureBoxCanvas, ActivePaintColor, shapeThickness, points, startPoint, endPointImage);
                                 }
                                 isModified = true; MarkLayerThumbnailDirty();
                                 break;
@@ -2972,13 +2979,13 @@ namespace Carpathia
                                     switch (selectedTool)
                                     {
                                         case Tools.Line:
-                                            using (Pen pen = new Pen(color1, shapeThickness))
+                                            using (Pen pen = new Pen(ActivePaintColor, shapeThickness))
                                             {
                                                 g.DrawLine(pen, relativeStartX, relativeStartY, relativeEndX, relativeEndY);
                                             }
                                             break;
                                         case Tools.Round:
-                                            using (Pen pen = new Pen(color1, shapeThickness))
+                                            using (Pen pen = new Pen(ActivePaintColor, shapeThickness))
                                             {
                                                 Rectangle rect = new Rectangle(
                                                     Math.Min(relativeStartX, relativeEndX),
@@ -2990,7 +2997,7 @@ namespace Carpathia
                                             }
                                             break;
                                         case Tools.Rectangle:
-                                            using (Pen pen = new Pen(color1, shapeThickness))
+                                            using (Pen pen = new Pen(ActivePaintColor, shapeThickness))
                                             {
                                                 Rectangle rect = new Rectangle(
                                                     Math.Min(relativeStartX, relativeEndX),
@@ -3002,7 +3009,7 @@ namespace Carpathia
                                             }
                                             break;
                                         case Tools.RoundedRectangle:
-                                            using (Pen pen = new Pen(color1, shapeThickness))
+                                            using (Pen pen = new Pen(ActivePaintColor, shapeThickness))
                                             {
                                                 Rectangle rect = new Rectangle(
                                                     Math.Min(relativeStartX, relativeEndX),
@@ -3022,7 +3029,7 @@ namespace Carpathia
                                             }
                                             break;
                                         case Tools.Triangle:
-                                            using (Pen pen = new Pen(color1, shapeThickness))
+                                            using (Pen pen = new Pen(ActivePaintColor, shapeThickness))
                                             {
                                                 Point[] points = new Point[]
                                                 {
@@ -3034,7 +3041,7 @@ namespace Carpathia
                                             }
                                             break;
                                         case Tools.Hexagon:
-                                            using (Pen pen = new Pen(color1, shapeThickness))
+                                            using (Pen pen = new Pen(ActivePaintColor, shapeThickness))
                                             {
                                                 Point[] hexagonPoints = new Point[points];
                                                 double angle = 2 * Math.PI / points;
@@ -3086,13 +3093,13 @@ namespace Carpathia
                                     switch (selectedTool)
                                     {
                                         case Tools.Line:
-                                            using (Pen pen = new Pen(color1, shapeThickness))
+                                            using (Pen pen = new Pen(ActivePaintColor, shapeThickness))
                                             {
                                                 g.DrawLine(pen, startX, startY, endX, endY);
                                             }
                                             break;
                                         case Tools.Round:
-                                            using (Pen pen = new Pen(color1, shapeThickness))
+                                            using (Pen pen = new Pen(ActivePaintColor, shapeThickness))
                                             {
                                                 Rectangle rect = new Rectangle(
                                                     Math.Min(startX, endX),
@@ -3104,7 +3111,7 @@ namespace Carpathia
                                             }
                                             break;
                                         case Tools.Rectangle:
-                                            using (Pen pen = new Pen(color1, shapeThickness))
+                                            using (Pen pen = new Pen(ActivePaintColor, shapeThickness))
                                             {
                                                 Rectangle rect = new Rectangle(
                                                     Math.Min(startX, endX),
@@ -3116,7 +3123,7 @@ namespace Carpathia
                                             }
                                             break;
                                         case Tools.RoundedRectangle:
-                                            using (Pen pen = new Pen(color1, shapeThickness))
+                                            using (Pen pen = new Pen(ActivePaintColor, shapeThickness))
                                             {
                                                 Rectangle rect = new Rectangle(
                                                     Math.Min(startX, endX),
@@ -3136,7 +3143,7 @@ namespace Carpathia
                                             }
                                             break;
                                         case Tools.Triangle:
-                                            using (Pen pen = new Pen(color1, shapeThickness))
+                                            using (Pen pen = new Pen(ActivePaintColor, shapeThickness))
                                             {
                                                 Point[] points = new Point[]
                                                 {
@@ -3148,7 +3155,7 @@ namespace Carpathia
                                             }
                                             break;
                                         case Tools.Hexagon:
-                                            using (Pen pen = new Pen(color1, shapeThickness))
+                                            using (Pen pen = new Pen(ActivePaintColor, shapeThickness))
                                             {
                                                 Point[] hexagonPoints = new Point[points];
                                                 double angle = 2 * Math.PI / points;
@@ -3355,22 +3362,22 @@ namespace Carpathia
                                 switch (comboBoxBrushType.SelectedIndex)
                                 {
                                     case 0: // Regular brush
-                                        DrawBrush(graphics, BrushShapes.DrawCircleBrush, color1, brushSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
+                                        DrawBrush(graphics, BrushShapes.DrawCircleBrush, ActivePaintColor, brushSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
                                         isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     case 1: // Oil brush
-                                        DrawBrush(graphics, BrushShapes.DrawOilBrush, color1, brushSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
+                                        DrawBrush(graphics, BrushShapes.DrawOilBrush, ActivePaintColor, brushSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
                                         isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     case 2: // Calligraphy brush
-                                        DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, color1, brushSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
+                                        DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, ActivePaintColor, brushSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
                                         isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     case 3:
-                                        DrawBrush(graphics, BrushShapes.DrawWatercolorBrush, color1, brushSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
+                                        DrawBrush(graphics, BrushShapes.DrawWatercolorBrush, ActivePaintColor, brushSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
                                         isModified = true; MarkLayerThumbnailDirty();
                                         break;
@@ -3382,22 +3389,22 @@ namespace Carpathia
                                 switch (comboBoxPenType.SelectedIndex)
                                 {
                                     case 0: // Regular pen
-                                        DrawBrush(graphics, BrushShapes.DrawSquareBrush, color1, penSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
+                                        DrawBrush(graphics, BrushShapes.DrawSquareBrush, ActivePaintColor, penSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
                                         isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     case 1:
-                                        DrawBrush(graphics, BrushShapes.DrawMarkerBrush, color1, penSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
+                                        DrawBrush(graphics, BrushShapes.DrawMarkerBrush, ActivePaintColor, penSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
                                         isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     case 2:
-                                        DrawBrush(graphics, BrushShapes.DrawCrayonBrush, color1, penSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
+                                        DrawBrush(graphics, BrushShapes.DrawCrayonBrush, ActivePaintColor, penSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
                                         isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     case 3: // Calligraphy pen
-                                        DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, color1, penSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
+                                        DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, ActivePaintColor, penSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
                                         isModified = true; MarkLayerThumbnailDirty();
                                         break;
@@ -3412,7 +3419,7 @@ namespace Carpathia
                                 isModified = true; MarkLayerThumbnailDirty();
                                 break;
                             case Tools.Spray:
-                                DrawBrush(graphics, BrushShapes.DrawSprayBrush, color1, sprayToolSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
+                                DrawBrush(graphics, BrushShapes.DrawSprayBrush, ActivePaintColor, sprayToolSize, new Point((int)Math.Round((e.X - SelectionRectangle.X) / zoom),
                                             (int)Math.Round((e.Y - SelectionRectangle.Y) / zoom)));
                                 isModified = true; MarkLayerThumbnailDirty();
                                 break;
@@ -3476,19 +3483,19 @@ namespace Carpathia
                                     switch (comboBoxBrushType.SelectedIndex)
                                     {
                                         case 0:
-                                            DrawBrush(g, BrushShapes.DrawCircleBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                            DrawBrush(g, BrushShapes.DrawCircleBrush, ActivePaintColor, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
                                             isModified = true; MarkLayerThumbnailDirty();
                                             break;
                                         case 1:
-                                            DrawBrush(g, BrushShapes.DrawOilBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                            DrawBrush(g, BrushShapes.DrawOilBrush, ActivePaintColor, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
                                             isModified = true; MarkLayerThumbnailDirty();
                                             break;
                                         case 2:
-                                            DrawBrush(g, BrushShapes.DrawCalligraphyBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                            DrawBrush(g, BrushShapes.DrawCalligraphyBrush, ActivePaintColor, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
                                             isModified = true; MarkLayerThumbnailDirty();
                                             break;
                                         case 3:
-                                            DrawBrush(g, BrushShapes.DrawWatercolorBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                            DrawBrush(g, BrushShapes.DrawWatercolorBrush, ActivePaintColor, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
                                             isModified = true; MarkLayerThumbnailDirty();
                                             break;
                                     }
@@ -3497,19 +3504,19 @@ namespace Carpathia
                                     switch (comboBoxPenType.SelectedIndex)
                                     {
                                         case 0:
-                                            DrawBrush(g, BrushShapes.DrawSquareBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                            DrawBrush(g, BrushShapes.DrawSquareBrush, ActivePaintColor, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
                                             isModified = true; MarkLayerThumbnailDirty();
                                             break;
                                         case 1:
-                                            DrawBrush(g, BrushShapes.DrawMarkerBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                            DrawBrush(g, BrushShapes.DrawMarkerBrush, ActivePaintColor, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
                                             isModified = true; MarkLayerThumbnailDirty();
                                             break;
                                         case 2:
-                                            DrawBrush(g, BrushShapes.DrawCrayonBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                            DrawBrush(g, BrushShapes.DrawCrayonBrush, ActivePaintColor, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
                                             isModified = true; MarkLayerThumbnailDirty();
                                             break;
                                         case 3:
-                                            DrawBrush(g, BrushShapes.DrawCalligraphyBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                            DrawBrush(g, BrushShapes.DrawCalligraphyBrush, ActivePaintColor, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
                                             isModified = true; MarkLayerThumbnailDirty();
                                             break;
                                     }
@@ -3520,7 +3527,7 @@ namespace Carpathia
                                     isModified = true; MarkLayerThumbnailDirty();
                                     break;
                                 case Tools.Spray:
-                                    DrawBrush(g, BrushShapes.DrawSprayBrush, color1, sprayToolSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                    DrawBrush(g, BrushShapes.DrawSprayBrush, ActivePaintColor, sprayToolSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
                                     isModified = true; MarkLayerThumbnailDirty();
                                     break;
                                 case Tools.ColorDrop:
@@ -3553,19 +3560,19 @@ namespace Carpathia
                                 switch (comboBoxBrushType.SelectedIndex)
                                 {
                                     case 0: // Regular brush
-                                        DrawBrush(graphics, BrushShapes.DrawCircleBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                        DrawBrush(graphics, BrushShapes.DrawCircleBrush, ActivePaintColor, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
                                         isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     case 1: // Oil brush
-                                        DrawBrush(graphics, BrushShapes.DrawOilBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                        DrawBrush(graphics, BrushShapes.DrawOilBrush, ActivePaintColor, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
                                         isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     case 2: // Calligraphy brush
-                                        DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                        DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, ActivePaintColor, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
                                         isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     case 3:
-                                        DrawBrush(graphics, BrushShapes.DrawWatercolorBrush, color1, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                        DrawBrush(graphics, BrushShapes.DrawWatercolorBrush, ActivePaintColor, brushSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
                                         isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     default:
@@ -3576,19 +3583,19 @@ namespace Carpathia
                                 switch (comboBoxPenType.SelectedIndex)
                                 {
                                     case 0: // Regular pen
-                                        DrawBrush(graphics, BrushShapes.DrawSquareBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                        DrawBrush(graphics, BrushShapes.DrawSquareBrush, ActivePaintColor, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
                                         isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     case 1:
-                                        DrawBrush(graphics, BrushShapes.DrawMarkerBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                        DrawBrush(graphics, BrushShapes.DrawMarkerBrush, ActivePaintColor, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
                                         isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     case 2:
-                                        DrawBrush(graphics, BrushShapes.DrawCrayonBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                        DrawBrush(graphics, BrushShapes.DrawCrayonBrush, ActivePaintColor, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
                                         isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     case 3: // Calligraphy pen
-                                        DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, color1, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                        DrawBrush(graphics, BrushShapes.DrawCalligraphyBrush, ActivePaintColor, penSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
                                         isModified = true; MarkLayerThumbnailDirty();
                                         break;
                                     default:
@@ -3601,7 +3608,7 @@ namespace Carpathia
                                 isModified = true; MarkLayerThumbnailDirty();
                                 break;
                             case Tools.Spray:
-                                DrawBrush(graphics, BrushShapes.DrawSprayBrush, color1, sprayToolSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
+                                DrawBrush(graphics, BrushShapes.DrawSprayBrush, ActivePaintColor, sprayToolSize, new Point((int)Math.Round(e.X / zoom), (int)Math.Round(e.Y / zoom)));
                                 isModified = true; MarkLayerThumbnailDirty();
                                 break;
                             case Tools.ColorDrop:
@@ -3760,11 +3767,11 @@ namespace Carpathia
                         // Use specialized preview renderers to better emulate brush/pen/spray appearance
                         if (selectedTool == Tools.Brush)
                         {
-                            DrawBrushPreview(e.Graphics, center, displaySize, styleIndex, color1, zoom);
+                            DrawBrushPreview(e.Graphics, center, displaySize, styleIndex, ActivePaintColor, zoom);
                         }
                         else if (selectedTool == Tools.Pen)
                         {
-                            DrawPenPreview(e.Graphics, center, displaySize, styleIndex, color1, zoom);
+                            DrawPenPreview(e.Graphics, center, displaySize, styleIndex, ActivePaintColor, zoom);
                         }
                         else if (selectedTool == Tools.Eraser)
                         {
@@ -3772,7 +3779,7 @@ namespace Carpathia
                         }
                         else if (selectedTool == Tools.Spray)
                         {
-                            DrawSprayPreview(e.Graphics, center, displaySize, color1, zoom);
+                            DrawSprayPreview(e.Graphics, center, displaySize, ActivePaintColor, zoom);
                         }
                     }
                 }
@@ -3884,6 +3891,10 @@ namespace Carpathia
 
         private void pictureBoxCanvas_MouseDown(object sender, MouseEventArgs e)
         {
+            if (e.Button != MouseButtons.Left && e.Button != MouseButtons.Right)
+                return;
+
+            paintingMouseButton = e.Button;
             if (!isImageCurrentlyCreating)
             {
                 // Photoshop-style targeting: tools operate on a visible layer. If the
@@ -4153,7 +4164,7 @@ namespace Carpathia
                                         graphics.DrawString(
                                         textBox.Text,
                                         textBox.Font,
-                                        new SolidBrush(color1),
+                                        new SolidBrush(ActivePaintColor),
                                         GetAlignedTextPosition(textBox, zoom, SelectionRectangle),
                                         new StringFormat
                                         {
@@ -4189,7 +4200,7 @@ namespace Carpathia
                                         graphics.DrawString(
                                         textBox.Text,
                                         textBox.Font,
-                                        new SolidBrush(color1),
+                                        new SolidBrush(ActivePaintColor),
                                         GetAlignedTextPosition(textBox, zoom, SelectionRectangle),
                                         new StringFormat
                                         {
@@ -4239,7 +4250,7 @@ namespace Carpathia
                             int adjustedX = (int)(unzoomedLocation.X / zoom);
                             int adjustedY = (int)(unzoomedLocation.Y / zoom);
                             Point adjustedLocation = new Point(adjustedX, adjustedY);
-                            FloodFill(MainBitmap, adjustedLocation, color1, tolerance);
+                            FloodFill(MainBitmap, adjustedLocation, ActivePaintColor, tolerance);
                             isModified = true; MarkLayerThumbnailDirty();
                         }
                         break;
@@ -6267,8 +6278,65 @@ namespace Carpathia
 
         private void Paste_Click(object sender, EventArgs e)
         {
+            Paste();
+        }
+
+        private void Copy_Click(object sender, EventArgs e)
+        {
+            Copy();
+        }
+
+        private void Cut()
+        {
+            try
+            {
+                SaveStateForUndo();
+                CutOrCopy();
+                if (magicSelectionMask != null && !magicSelectionBounds.IsEmpty)
+                {
+                    for (int y = magicSelectionBounds.Top; y < magicSelectionBounds.Bottom; y++)
+                    {
+                        for (int x = magicSelectionBounds.Left; x < magicSelectionBounds.Right; x++)
+                        {
+                            if (magicSelectionMask[y * magicSelectionMaskWidth + x])
+                                MainBitmap.SetPixel(x, y, Color.Transparent);
+                        }
+                    }
+                    SetAsUnselected();
+                }
+                else
+                {
+                    MainBitmap = new Bitmap(MainBitmap.Width, MainBitmap.Height);
+                }
+                RenderCompositeToCanvas();
+                pictureBoxCanvas.Invalidate();
+                isModified = true; MarkLayerThumbnailDirty();
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("Error cutting image: " + ex.Message, Logger.LogTypes.Error);
+                MessageForm.Show("Error cutting image: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void Copy()
+        {
+            try
+            {
+                CutOrCopy();
+                isModified = true; MarkLayerThumbnailDirty();
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("Error copying image: " + ex.Message, Logger.LogTypes.Error);
+                MessageForm.Show("Error copying image: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void Paste()
+        {
             SaveStateForUndo();
-            Bitmap bmp = Clipboard.GetImage() as Bitmap;
+            Bitmap bmp = System.Windows.Forms.Clipboard.GetImage() as Bitmap;
             if (bmp != null)
             {
                 pictureBoxCanvas.Image = bmp;
@@ -6281,20 +6349,6 @@ namespace Carpathia
             {
                 Logger.Log("No image in clipboard.", Logger.LogTypes.Error);
                 MessageForm.Show("No image in clipboard.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void Copy_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                CutOrCopy();
-                isModified = true; MarkLayerThumbnailDirty();
-            }
-            catch (Exception ex)
-            {
-                Logger.Log("Error copying image: " + ex.Message, Logger.LogTypes.Error);
-                MessageForm.Show("Error copying image: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -6337,41 +6391,13 @@ namespace Carpathia
                 dataObject.SetData("PNG", false, pngStream);
             }
             dataObject.SetData(DataFormats.Bitmap, true, copyBitmap);
-            Clipboard.SetDataObject(dataObject, true);
+            System.Windows.Forms.Clipboard.SetDataObject(dataObject, true);
             copyBitmap.Dispose();
         }
 
         private void Cut_Click(object sender, EventArgs e)
         {
-            try
-            {
-                SaveStateForUndo();
-                CutOrCopy();
-                if (magicSelectionMask != null && !magicSelectionBounds.IsEmpty)
-                {
-                    for (int y = magicSelectionBounds.Top; y < magicSelectionBounds.Bottom; y++)
-                    {
-                        for (int x = magicSelectionBounds.Left; x < magicSelectionBounds.Right; x++)
-                        {
-                            if (magicSelectionMask[y * magicSelectionMaskWidth + x])
-                                MainBitmap.SetPixel(x, y, Color.Transparent);
-                        }
-                    }
-                    SetAsUnselected();
-                }
-                else
-                {
-                    MainBitmap = new Bitmap(MainBitmap.Width, MainBitmap.Height);
-                }
-                RenderCompositeToCanvas();
-                pictureBoxCanvas.Invalidate();
-                isModified = true; MarkLayerThumbnailDirty();
-            }
-            catch (Exception ex)
-            {
-                Logger.Log("Error cutting image: " + ex.Message, Logger.LogTypes.Error);
-                MessageForm.Show("Error cutting image: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            Cut();
         }
 
         private void chloeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -7554,6 +7580,211 @@ namespace Carpathia
             pictureBoxCanvas.Invalidate();
             pictureBoxCanvas.Update();
             listView1.Invalidate();
+        }
+
+        private async void shareToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // A real StorageFile is more widely supported by Windows share targets
+                // than a bitmap-only, memory-backed DataPackage.
+                byte[] pngBytes = CreateShareImagePng();
+                // Keep a unique directory per share so the attachment can use the
+                // document's visible name without colliding with older shares.
+                string shareDirectory = Path.Combine(Path.GetTempPath(), "LibreCanvas", "Share",
+                    Guid.NewGuid().ToString("N"));
+                Directory.CreateDirectory(shareDirectory);
+                string sharePath = Path.Combine(shareDirectory, GetShareFileName());
+                await File.WriteAllBytesAsync(sharePath, pngBytes);
+                StorageFile shareFile = await StorageFile.GetFileFromPathAsync(sharePath);
+
+                DataTransferManager manager = DataTransferManagerInterop.GetForWindow(Handle);
+                Windows.Foundation.TypedEventHandler<DataTransferManager, DataRequestedEventArgs> handler = null;
+                handler = (senderManager, args) =>
+                {
+                    manager.DataRequested -= handler;
+                    DataRequest request = args.Request;
+                    try
+                    {
+                        request.Data.Properties.Title = "LibreCanvas image";
+                        request.Data.Properties.Description = "PNG image from LibreCanvas";
+                        request.Data.Properties.FileTypes.Add(".png");
+                        request.Data.SetStorageItems(new[] { shareFile });
+                        request.Data.SetBitmap(RandomAccessStreamReference.CreateFromFile(shareFile));
+                    }
+                    catch (Exception ex)
+                    {
+                        request.FailWithDisplayText("Unable to prepare the image for sharing: " + ex.Message);
+                    }
+                };
+                manager.DataRequested += handler;
+                try
+                {
+                    DataTransferManagerInterop.ShowShareUIForWindow(Handle);
+                }
+                catch
+                {
+                    manager.DataRequested -= handler;
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageForm.Show("Unable to share the image: " + ex.Message,
+                    "Share", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private string GetShareFileName()
+        {
+            // The label may contain an absolute path, a filename, or a placeholder.
+            string displayedName = labelFileName.Text?.Trim() ?? string.Empty;
+            string baseName = Path.GetFileNameWithoutExtension(
+                displayedName.Replace('\\', '/').Split('/').Last());
+
+            if (string.IsNullOrWhiteSpace(baseName) ||
+                baseName.Equals("Unnamed File", StringComparison.OrdinalIgnoreCase) ||
+                baseName.Equals("AI Generated File", StringComparison.OrdinalIgnoreCase))
+                baseName = "LibreCanvas";
+
+            foreach (char invalid in Path.GetInvalidFileNameChars())
+                baseName = baseName.Replace(invalid, '_');
+
+            // Also replace characters forbidden by Windows when built elsewhere.
+            foreach (char invalid in "<>:\"/\\|?*")
+                baseName = baseName.Replace(invalid, '_');
+
+            baseName = baseName.Trim().TrimEnd('.', ' ');
+            if (baseName.Length == 0)
+                baseName = "LibreCanvas";
+            return baseName + ".png";
+        }
+
+        private byte[] CreateShareImagePng()
+        {
+            Bitmap image = editorLayers.Count > 0
+                ? CreateCompositeBitmap()
+                : MainBitmap != null
+                    ? (Bitmap)MainBitmap.Clone()
+                    : throw new InvalidOperationException("No image available to share.");
+
+            using (image)
+            using (MemoryStream stream = new())
+            {
+                image.Save(stream, ImageFormat.Png);
+                return stream.ToArray();
+            }
+        }
+
+        private static class DataTransferManagerInterop
+        {
+            private const string RuntimeClassId = "Windows.ApplicationModel.DataTransfer.DataTransferManager";
+            private static readonly Guid InterfaceId = new("3A3DCD6C-3EAB-43DC-BCDE-45671CE800C8");
+            // IID_IDataTransferManager (the runtime class GUID is not the
+            // interface IID expected by IDataTransferManagerInterop).
+            private static readonly Guid DataTransferManagerId = new("A5CAEE9B-8708-49D1-8D36-67D25A8DA00C");
+
+            public static DataTransferManager GetForWindow(IntPtr windowHandle)
+            {
+                IDataTransferManagerInterop interop = GetInterop();
+                Guid dataTransferManagerId = DataTransferManagerId;
+                int result = interop.GetForWindow(windowHandle, ref dataTransferManagerId, out IntPtr managerAbi);
+                Marshal.ThrowExceptionForHR(result);
+                try
+                {
+                    return WinRT.MarshalInterface<DataTransferManager>.FromAbi(managerAbi);
+                }
+                finally
+                {
+                    Marshal.Release(managerAbi);
+                }
+            }
+
+            public static void ShowShareUIForWindow(IntPtr windowHandle)
+            {
+                int result = GetInterop().ShowShareUIForWindow(windowHandle);
+                Marshal.ThrowExceptionForHR(result);
+            }
+
+            private static IDataTransferManagerInterop GetInterop()
+            {
+                Guid interfaceId = InterfaceId;
+                int result = WindowsCreateString(RuntimeClassId, (uint)RuntimeClassId.Length, out IntPtr runtimeClassId);
+                Marshal.ThrowExceptionForHR(result);
+
+                try
+                {
+                    result = RoGetActivationFactory(runtimeClassId, ref interfaceId, out IDataTransferManagerInterop interop);
+                    Marshal.ThrowExceptionForHR(result);
+                    return interop;
+                }
+                finally
+                {
+                    WindowsDeleteString(runtimeClassId);
+                }
+            }
+
+            [DllImport("combase.dll", ExactSpelling = true, PreserveSig = true)]
+            private static extern int RoGetActivationFactory(
+                IntPtr runtimeClassId,
+                ref Guid interfaceId,
+                [MarshalAs(UnmanagedType.Interface)] out IDataTransferManagerInterop factory);
+
+            [DllImport("combase.dll", ExactSpelling = true, PreserveSig = true)]
+            private static extern int WindowsCreateString(
+                [MarshalAs(UnmanagedType.LPWStr)] string sourceString,
+                uint length,
+                out IntPtr stringHandle);
+
+            [DllImport("combase.dll", ExactSpelling = true, PreserveSig = true)]
+            private static extern int WindowsDeleteString(IntPtr stringHandle);
+
+            [ComImport]
+            [Guid("3A3DCD6C-3EAB-43DC-BCDE-45671CE800C8")]
+            [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+            private interface IDataTransferManagerInterop
+            {
+                [PreserveSig]
+                int GetForWindow(
+                    IntPtr appWindow,
+                    ref Guid interfaceId,
+                    out IntPtr dataTransferManager);
+
+                [PreserveSig]
+                int ShowShareUIForWindow(IntPtr appWindow);
+            }
+        }
+
+        private void cutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Cut();
+        }
+
+        private void copyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Copy();
+        }
+
+        private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Paste();
+        }
+
+        private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
+        {
+            Control tetikleyenKontrol = contextMenuStrip1.SourceControl;
+
+            if (tetikleyenKontrol == pictureBoxCanvas ||
+                pictureBoxCanvas.ClientRectangle.Contains(pictureBoxCanvas.PointToClient(Cursor.Position)))
+            {
+                if ((selectedTool == Tools.Cursor)
+                    || (selectedTool == Tools.Selection)
+                    || (selectedTool == Tools.Text))
+                {
+                    return; // If the selected tool is Cursor, allow the context menu to open on the PictureBox
+                }
+                e.Cancel = true; // Prevent the context menu from opening
+            }
         }
     }
 
