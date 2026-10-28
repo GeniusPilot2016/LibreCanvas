@@ -65,6 +65,17 @@ namespace Carpathia
         private Size resizeOriginalSize;
         private Point resizeStartCursor;      // screen coordinates
         private Point resizeAnchorScreen;     // screen position of the edge that must not move
+
+        // Resize animation only draws a preview while the mouse is held down.
+        // The original layer bitmaps stay untouched until MouseUp, avoiding
+        // repeated large allocations and preventing irreversible interim crops.
+        private readonly System.Windows.Forms.Timer resizePreviewTimer = new System.Windows.Forms.Timer();
+        private readonly Stopwatch resizePreviewClock = new Stopwatch();
+        private ResizePreviewOverlay resizePreviewOverlay;
+        private double resizePreviewWidth, resizePreviewHeight;
+        private int resizeTargetWidth, resizeTargetHeight;
+        private double resizePreviewLastMs;
+        private const double ResizePreviewResponseMs = 42.0;
         private const int MaxCanvasDimension = 16000;
         // true  = expanded area of the bottom layer gets the secondary colour (like Paint)
         // false = expanded area is fully transparent
@@ -381,29 +392,16 @@ namespace Carpathia
 
             float zx = Math.Max(.05f, (UIPanel.ClientSize.Width - 60f) / MainBitmap.Width);
             float zy = Math.Max(.05f, (UIPanel.ClientSize.Height - 60f) / MainBitmap.Height);
-            zoom = Math.Min(5f, Math.Min(zx, zy));
+            float fitZoom = Math.Min(5f, Math.Min(zx, zy));
 
-            // Fit is an explicit recenter operation, unlike incremental zoom.
-            // Reset the scroll origin, lay out the new image, then center it.
-            UIPanel.SuspendLayout();
-            try
-            {
-                //UIPanel.AutoScrollPosition = Point.Empty;
-                canvasPanel.Location = Point.Empty;
-                SetZoomedCanvasBounds();
-            }
-            finally
-            {
-                UIPanel.ResumeLayout(true);
-            }
-            CenterCanvasPanel();
-            PositionZoomResizeHandles();
-            labelZoom.Text = $"{Math.Round(zoom * 100)}%";
-            pictureBoxCanvas.Invalidate();
+            // Fit uses the same animation, but anchors the center of the image
+            // rather than preserving the previous viewport position.
+            StartZoomAnimation(fitZoom, centerOnImage: true);
         }
 
         private void RefreshCanvasAfterTransform(bool markModified = true)
         {
+            CancelZoomAnimation();
             originalSize = MainBitmap.Size;
             MarkCompositeDirty();
             RenderCompositeToCanvas(force: true);
@@ -608,6 +606,12 @@ namespace Carpathia
         private void InitializeComponentAndFont()
         {
             InitializeComponent();
+            // The timer changes only the on-screen preview. The expensive WinForms
+            // AutoScroll/control layout is committed once, after the transition.
+            zoomAnimationTimer.Interval = 16;
+            zoomAnimationTimer.Tick += ZoomAnimationTimer_Tick;
+            resizePreviewTimer.Interval = 16;
+            resizePreviewTimer.Tick += ResizePreviewTimer_Tick;
             // Animate only the dash phase. 60 ms gives a smooth but lightweight motion.
             marchingAntsTimer.Interval = 60;
             marchingAntsTimer.Tick += MarchingAntsTimer_Tick;
@@ -659,6 +663,13 @@ namespace Carpathia
             pictureBoxCanvas.MouseWheel += ImageEditor_MouseWheel;
             canvasPanel.MouseWheel += ImageEditor_MouseWheel;
             UIPanel.MouseWheel += ImageEditor_MouseWheel;
+
+            // A mouse click outside a floating image commits it to the active
+            // layer. WinForms sends MouseDown to the innermost child, so attach
+            // to each of the canvas's otherwise empty surfaces.
+            UIPanel.MouseDown += CommitFloatingImagesOnWorkspaceMouseDown;
+            canvasPanel.MouseDown += CommitFloatingImagesOnWorkspaceMouseDown;
+            panelResizer.MouseDown += CommitFloatingImagesOnWorkspaceMouseDown;
         }
 
         private void MarchingAntsTimer_Tick(object sender, EventArgs e)
@@ -1130,6 +1141,8 @@ namespace Carpathia
             if (newIndex < 0 || newIndex >= editorLayers.Count || newIndex == activeLayerIndex)
                 return;
 
+            CompleteZoomAnimation();
+
             // Persist the previous active layer, but do not regenerate its thumbnail
             // just because the user selected another row.
             SyncActiveLayerFromCanvas();
@@ -1443,6 +1456,7 @@ namespace Carpathia
 
         private void createNewFile()
         {
+            CancelZoomAnimation();
             listView1.Items.Clear();
             aiGenerated = false;
             isModified = false;
@@ -1478,6 +1492,7 @@ namespace Carpathia
 
         private void openAFile(string fileName)
         {
+            CancelZoomAnimation();
             aiGenerated = false;
             isModified = false;
             SetAsUnselected();
@@ -1512,6 +1527,7 @@ namespace Carpathia
 
         private void createFileWithAIorWebcam(Image generatedImage, bool isAIGenerated)
         {
+            CancelZoomAnimation();
             aiGenerated = isAIGenerated;
             isModified = false;
             SetAsUnselected();
@@ -1562,29 +1578,338 @@ namespace Carpathia
         private double zoomAnchorViewportX, zoomAnchorViewportY;
 
 
-        // WinForms AutoScroll and nested child HWNDs cannot reliably be animated by
-        // resizing/repositioning them every 16 ms. Apply each fine-grained zoom
-        // increment in one layout transaction instead of running a timer. This
-        // avoids subpixel rounding feedback and resize-handle oscillation.
+        // WinForms AutoScroll moves native child windows. Resizing and scrolling
+        // those HWNDs every 16 ms flickers and causes resize handles to oscillate.
+        // Animate a lightweight, double-buffered preview ABOVE the viewport, then
+        // commit the actual zoom and scrollbar layout once at the final frame.
+        private readonly System.Windows.Forms.Timer zoomAnimationTimer = new System.Windows.Forms.Timer();
+        private readonly Stopwatch zoomAnimationClock = new Stopwatch();
+        private ZoomAnimationOverlay zoomAnimationOverlay;
+        private float zoomAnimationFrom;
+        private float zoomAnimationTo;
+        private float zoomAnimationShown;
+        private const int ZoomAnimationDurationMs = 180;
+
+        private sealed class ZoomAnimationOverlay : Control
+        {
+            private readonly ImageEditor editor;
+
+            [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+            public float DisplayZoom { get; set; }
+
+            public ZoomAnimationOverlay(ImageEditor owner)
+            {
+                editor = owner;
+                SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint |
+                         ControlStyles.OptimizedDoubleBuffer, true);
+                TabStop = false;
+            }
+
+            protected override void OnPaint(PaintEventArgs e)
+            {
+                editor.PaintZoomAnimationFrame(e.Graphics, ClientSize, DisplayZoom);
+            }
+
+            // Rapid wheel gestures may arrive while the preview is still visible.
+            // Retarget the animation rather than dropping the additional input.
+            protected override void OnMouseWheel(MouseEventArgs e)
+            {
+                editor.ImageEditor_MouseWheel(this, e);
+            }
+        }
+
         private void RequestSmoothZoom(float delta)
         {
             if (MainBitmap == null || Math.Abs(delta) < 0.00001f)
                 return;
 
-            float nextZoom = Math.Max(0.05f, Math.Min(5f, zoom + delta));
-            if (Math.Abs(nextZoom - zoom) < 0.000001f)
+            // Accumulate wheel/button steps against the TARGET, not the currently
+            // displayed frame; consecutive notches must not get lost.
+            float baseZoom = zoomAnimationTimer.Enabled ? zoomAnimationTo : zoom;
+            float target = Math.Max(0.05f, Math.Min(5f, baseZoom + delta));
+            StartZoomAnimation(target);
+        }
+
+        private void StartZoomAnimation(float targetZoom, bool centerOnImage = false)
+        {
+            if (MainBitmap == null || IsDisposed || Disposing)
                 return;
 
-            // Capture BEFORE changing zoom; use one stable image-space anchor
-            // throughout this single operation.
-            CaptureZoomAnchor();
-            zoom = nextZoom;
+            // A resize gesture keeps its own fixed screen-space edge anchor.
+            // Ignore zoom requests until that gesture has been committed.
+            if (isResizing)
+                return;
 
-            RebuildZoomBuffer();
+            targetZoom = Math.Max(0.05f, Math.Min(5f, targetZoom));
+            if (isdrawing)
+            {
+                // Editing gestures depend on the actual pictureBox coordinates.
+                // Never put a preview in front of an active brush/resize drag.
+                CancelZoomAnimation();
+                CaptureZoomAnchor();
+                zoom = targetZoom;
+                if (centerOnImage)
+                {
+                    zoomAnchorImageX = MainBitmap.Width / 2.0;
+                    zoomAnchorImageY = MainBitmap.Height / 2.0;
+                }
+                UpdatePictureBoxZoom(keepGestureAnchor: true);
+                ScaleSelection();
+                return;
+            }
 
-            pictureBoxCanvas.Invalidate();
+            bool running = zoomAnimationTimer.Enabled;
+            if (!running)
+            {
+                CaptureZoomAnchor();
+                zoomAnimationShown = zoom;
+            }
+
+            if (centerOnImage)
+            {
+                zoomAnchorImageX = MainBitmap.Width / 2.0;
+                zoomAnchorImageY = MainBitmap.Height / 2.0;
+            }
+
+            if (Math.Abs(targetZoom - zoomAnimationShown) < 0.00001f)
+            {
+                if (running)
+                {
+                    zoomAnimationTo = targetZoom;
+                    CompleteZoomAnimation();
+                }
+                else if (centerOnImage)
+                    UpdatePictureBoxZoom(keepGestureAnchor: true);
+                return;
+            }
+
+            zoomAnimationFrom = zoomAnimationShown;
+            zoomAnimationTo = targetZoom;
+
+            if (zoomAnimationOverlay == null || zoomAnimationOverlay.IsDisposed)
+            {
+                zoomAnimationOverlay = new ZoomAnimationOverlay(this);
+                Controls.Add(zoomAnimationOverlay);
+            }
+            UpdateZoomAnimationOverlayBounds();
+            zoomAnimationOverlay.DisplayZoom = zoomAnimationShown;
+            zoomAnimationOverlay.Visible = true;
+            zoomAnimationOverlay.BringToFront();
+            zoomAnimationOverlay.Invalidate();
+            zoomAnimationClock.Restart();
+            zoomAnimationTimer.Start();
+        }
+
+        private void UpdateZoomAnimationOverlayBounds()
+        {
+            if (zoomAnimationOverlay == null || UIPanel.IsDisposed || !UIPanel.IsHandleCreated)
+                return;
+
+            // Use the FORM as the parent, not the AutoScroll panel: the latter
+            // would move an overlay child when its own scrollbar position changes.
+            Point topLeft = PointToClient(UIPanel.PointToScreen(Point.Empty));
+            Rectangle bounds = new Rectangle(topLeft, UIPanel.ClientSize);
+            if (zoomAnimationOverlay.Bounds != bounds)
+                zoomAnimationOverlay.Bounds = bounds;
+        }
+
+        private void ZoomAnimationTimer_Tick(object sender, EventArgs e)
+        {
+            if (IsDisposed || Disposing || MainBitmap == null ||
+                pictureBoxCanvas.Image == null)
+            {
+                CancelZoomAnimation();
+                return;
+            }
+
+            double t = Math.Min(1.0,
+                zoomAnimationClock.Elapsed.TotalMilliseconds / ZoomAnimationDurationMs);
+            // Cubic ease-out: quick initial response and a gentle stop.
+            double eased = 1.0 - Math.Pow(1.0 - t, 3);
+            zoomAnimationShown = (float)(zoomAnimationFrom +
+                (zoomAnimationTo - zoomAnimationFrom) * eased);
+
+            UpdateZoomAnimationOverlayBounds();
+            if (zoomAnimationOverlay != null && !zoomAnimationOverlay.IsDisposed)
+            {
+                zoomAnimationOverlay.DisplayZoom = zoomAnimationShown;
+                zoomAnimationOverlay.Invalidate();
+            }
+            labelZoom.Text = $"{Math.Round(zoomAnimationShown * 100)}%";
+
+            if (t >= 1.0)
+                CompleteZoomAnimation();
+        }
+
+        private void CompleteZoomAnimation()
+        {
+            if (!zoomAnimationTimer.Enabled)
+                return;
+
+            float target = zoomAnimationTo;
+            zoomAnimationTimer.Stop();
+            zoomAnimationClock.Stop();
+            zoom = target;
+            // Layout once underneath the overlay, so only the completed result
+            // becomes visible; the canvas and resize handles stay in sync.
             UpdatePictureBoxZoom(keepGestureAnchor: true);
             ScaleSelection();
+            CancelZoomAnimation();
+        }
+
+        private void CancelZoomAnimation()
+        {
+            zoomAnimationTimer.Stop();
+            zoomAnimationClock.Reset();
+            if (zoomAnimationOverlay != null)
+            {
+                Controls.Remove(zoomAnimationOverlay);
+                zoomAnimationOverlay.Dispose();
+                zoomAnimationOverlay = null;
+            }
+            if (MainBitmap != null && !labelZoom.IsDisposed)
+                labelZoom.Text = $"{Math.Round(zoom * 100)}%";
+        }
+
+        private void PaintZoomAnimationFrame(Graphics g, Size viewport, float animatedZoom)
+        {
+            g.Clear(UIPanel.BackColor);
+            Image image = pictureBoxCanvas.Image;
+            if (MainBitmap == null || image == null || viewport.Width < 1 || viewport.Height < 1)
+                return;
+
+            int imageWidth = Math.Max(1, (int)Math.Round(MainBitmap.Width * animatedZoom));
+            int imageHeight = Math.Max(1, (int)Math.Round(MainBitmap.Height * animatedZoom));
+            double scaleX = (double)imageWidth / MainBitmap.Width;
+            double scaleY = (double)imageHeight / MainBitmap.Height;
+
+            // The canvas has a 10px handle gutter on each side. On an axis that
+            // fits, center the whole canvas; otherwise keep the original image
+            // coordinate at the viewport center, within the scrollable bounds.
+            double left = imageWidth + 20 <= viewport.Width
+                ? (viewport.Width - imageWidth) / 2.0
+                : Math.Max(viewport.Width - imageWidth - 10.0,
+                    Math.Min(10.0, viewport.Width / 2.0 - zoomAnchorImageX * scaleX));
+            double top = imageHeight + 20 <= viewport.Height
+                ? (viewport.Height - imageHeight) / 2.0
+                : Math.Max(viewport.Height - imageHeight - 10.0,
+                    Math.Min(10.0, viewport.Height / 2.0 - zoomAnchorImageY * scaleY));
+
+            int x = (int)Math.Round(left);
+            int y = (int)Math.Round(top);
+            Rectangle imageRect = new Rectangle(x, y, imageWidth, imageHeight);
+            using (Brush gutter = new SolidBrush(canvasPanel.BackColor))
+                g.FillRectangle(gutter, new Rectangle(x - 10, y - 10,
+                    imageWidth + 20, imageHeight + 20));
+            // Preserve the PictureBox background behind transparent pixels.
+            using (Brush imageBackground = new SolidBrush(pictureBoxCanvas.BackColor))
+                g.FillRectangle(imageBackground, imageRect);
+
+            g.InterpolationMode = animatedZoom >= 1f
+                ? InterpolationMode.NearestNeighbor
+                : InterpolationMode.HighQualityBicubic;
+            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            g.DrawImage(image, imageRect,
+                new Rectangle(0, 0, image.Width, image.Height), GraphicsUnit.Pixel);
+
+            // The zoom overlay covers child controls. Render dropped images
+            // into that preview too so they never disappear mid-animation.
+            // Their 4px handle margin stays SCREEN-sized, not zoom-scaled.
+            foreach (MovingImageControl floating in
+                pictureBoxCanvas.Controls.OfType<MovingImageControl>().Reverse())
+            {
+                if (!floating.Visible || floating.IsDisposed || floating.DisplayImage == null)
+                    continue;
+
+                PointF logicalLocation = floating.UnzoomedImageLocation;
+                SizeF logicalSize = floating.UnzoomedContentSize;
+                Rectangle floatingImageRect = new Rectangle(
+                    x + (int)Math.Round(logicalLocation.X * scaleX),
+                    y + (int)Math.Round(logicalLocation.Y * scaleY),
+                    Math.Max(1, (int)Math.Round(logicalSize.Width * scaleX)),
+                    Math.Max(1, (int)Math.Round(logicalSize.Height * scaleY)));
+
+                g.InterpolationMode = animatedZoom >= 1f
+                    ? InterpolationMode.HighQualityBilinear
+                    : InterpolationMode.HighQualityBicubic;
+                g.DrawImage(floating.DisplayImage, floatingImageRect);
+                Rectangle floatingFrame = Rectangle.Inflate(floatingImageRect, 4, 4);
+                using (Pen framePen = new Pen(SystemColors.Highlight, 1f))
+                    g.DrawRectangle(framePen, floatingFrame);
+                using (Brush gripBrush = new SolidBrush(SystemColors.Highlight))
+                {
+                    int[] xx = { floatingFrame.Left, floatingFrame.Left + floatingFrame.Width / 2,
+                                 floatingFrame.Right };
+                    int[] yy = { floatingFrame.Top, floatingFrame.Top + floatingFrame.Height / 2,
+                                 floatingFrame.Bottom };
+                    for (int xi = 0; xi < 3; xi++)
+                        for (int yi = 0; yi < 3; yi++)
+                            if (xi != 1 || yi != 1)
+                                g.FillRectangle(gripBrush, xx[xi] - 4, yy[yi] - 4, 8, 8);
+                }
+            }
+
+            // Paint the floating selection in image-space coordinates, just like
+            // pictureBoxCanvas_Paint does after the real layout is updated.
+            if (isSelected && magicSelectionMask == null &&
+                originalSelectionRectangleSize.Width > 0 && originalSelectionRectangleSize.Height > 0)
+            {
+                Rectangle selection = new Rectangle(
+                    x + (int)Math.Round(originalSelectionRectangleLocation.X * scaleX),
+                    y + (int)Math.Round(originalSelectionRectangleLocation.Y * scaleY),
+                    Math.Max(1, (int)Math.Round(originalSelectionRectangleSize.Width * scaleX)),
+                    Math.Max(1, (int)Math.Round(originalSelectionRectangleSize.Height * scaleY)));
+                if (SelectedBitmap != null)
+                {
+                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    g.DrawImage(SelectedBitmap, selection);
+                }
+                using (Pen outline = new Pen(Color.Black, 2f))
+                using (Pen ants = new Pen(Color.White, 1.5f))
+                {
+                    ants.DashPattern = new float[] { 3f, 3f };
+                    ants.DashOffset = marchingAntsOffset;
+                    g.DrawRectangle(outline, selection);
+                    g.DrawRectangle(ants, selection);
+                }
+            }
+            else if (magicSelectionMask != null && magicSelectionOutlineSegments.Count > 0)
+            {
+                using (Pen outline = new Pen(Color.Black, 2f))
+                using (Pen ants = new Pen(Color.White, 1.5f))
+                {
+                    ants.DashPattern = new float[] { 3f, 3f };
+                    ants.DashOffset = marchingAntsOffset;
+                    foreach (var segment in magicSelectionOutlineSegments)
+                    {
+                        PointF a = new PointF(x + (float)(segment.Start.X * scaleX),
+                                              y + (float)(segment.Start.Y * scaleY));
+                        PointF b = new PointF(x + (float)(segment.End.X * scaleX),
+                                              y + (float)(segment.End.Y * scaleY));
+                        g.DrawLine(outline, a, b);
+                        g.DrawLine(ants, a, b);
+                    }
+                }
+            }
+
+            // Preview resize handles so they do not disappear during the animation.
+            Point[] handles = {
+                new Point(x, y), new Point(x + imageWidth / 2, y),
+                new Point(x + imageWidth, y), new Point(x, y + imageHeight / 2),
+                new Point(x + imageWidth, y + imageHeight / 2),
+                new Point(x, y + imageHeight), new Point(x + imageWidth / 2, y + imageHeight),
+                new Point(x + imageWidth, y + imageHeight)
+            };
+            using (Brush handleFill = new SolidBrush(SystemColors.Window))
+            using (Pen handleBorder = new Pen(SystemColors.WindowText))
+            {
+                foreach (Point handle in handles)
+                {
+                    Rectangle r = new Rectangle(handle.X - 3, handle.Y - 3, 7, 7);
+                    g.FillRectangle(handleFill, r);
+                    g.DrawRectangle(handleBorder, r);
+                }
+            }
         }
 
         private void CaptureZoomAnchor()
@@ -1682,6 +2007,7 @@ namespace Carpathia
         }
         private void ToolStripButtonsClick(ToolStripButton toolStripButton)
         {
+            CommitFloatingImagesToActiveLayer();
             // Uncheck all ToolStripMenuItems when the ToolStripButton is checked
             if (toolStripButton.Checked)
             {
@@ -1709,6 +2035,7 @@ namespace Carpathia
 
         private void ToolStripMenuItemsClick(object sender)
         {
+            CommitFloatingImagesToActiveLayer();
             ToolStripMenuItem clickedMenuItem = (ToolStripMenuItem)sender;
 
             // Uncheck other ToolStripMenuItems
@@ -2385,10 +2712,230 @@ namespace Carpathia
             resize_bottom_right.Location = new Point(panelLeft + panelWidth - resize_bottom_right.Width / 2, panelTop + panelHeight - resize_bottom_right.Height / 2);
         }*/
 
+        // The resize preview is in form coordinates, not in the scrolling canvas:
+        // the real controls and their Win32 scroll positions never change mid-drag.
+        private sealed class ResizePreviewOverlay : Control
+        {
+            private readonly ImageEditor editor;
+
+            public ResizePreviewOverlay(ImageEditor owner)
+            {
+                editor = owner;
+                SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint |
+                    ControlStyles.OptimizedDoubleBuffer, true);
+                TabStop = false;
+            }
+
+            // Don't intercept the ongoing handle drag or subsequent mouse input.
+            protected override CreateParams CreateParams
+            {
+                get
+                {
+                    CreateParams cp = base.CreateParams;
+                    cp.ExStyle |= 0x00000020; // WS_EX_TRANSPARENT
+                    return cp;
+                }
+            }
+
+            protected override void WndProc(ref Message m)
+            {
+                if (m.Msg == 0x0084) // WM_NCHITTEST
+                {
+                    m.Result = new IntPtr(-1); // HTTRANSPARENT
+                    return;
+                }
+                base.WndProc(ref m);
+            }
+
+            protected override void OnPaint(PaintEventArgs e)
+            {
+                editor.PaintResizePreview(e.Graphics, ClientSize);
+            }
+        }
+
+        private void StartResizePreview(Control dragHandle)
+        {
+            resizeTargetWidth = resizeOriginalSize.Width;
+            resizeTargetHeight = resizeOriginalSize.Height;
+            resizePreviewWidth = resizeTargetWidth;
+            resizePreviewHeight = resizeTargetHeight;
+            resizePreviewLastMs = 0;
+
+            if (resizePreviewOverlay == null || resizePreviewOverlay.IsDisposed)
+            {
+                resizePreviewOverlay = new ResizePreviewOverlay(this);
+                Controls.Add(resizePreviewOverlay);
+            }
+
+            UpdateResizePreviewBounds();
+            resizePreviewOverlay.Visible = true;
+            resizePreviewOverlay.BringToFront();
+            resizePreviewOverlay.Invalidate();
+            resizePreviewClock.Restart();
+            resizePreviewTimer.Start();
+
+            // The real resize handle must continue receiving MouseMove and MouseUp,
+            // even when the pointer moves beyond the old image rectangle.
+            if (dragHandle != null)
+                dragHandle.Capture = true;
+        }
+
+        private void UpdateResizePreviewBounds()
+        {
+            if (resizePreviewOverlay == null || resizePreviewOverlay.IsDisposed ||
+                UIPanel.IsDisposed || !UIPanel.IsHandleCreated)
+                return;
+
+            Point topLeft = PointToClient(UIPanel.PointToScreen(Point.Empty));
+            Rectangle desired = new Rectangle(topLeft, UIPanel.ClientSize);
+            if (resizePreviewOverlay.Bounds != desired)
+                resizePreviewOverlay.Bounds = desired;
+        }
+
+        private Size GetResizeSizeAtCursor(Point cursor)
+        {
+            // Screen coordinates are independent of the moving resize handles.
+            int dx = (int)Math.Round((cursor.X - resizeStartCursor.X) / zoom);
+            int dy = (int)Math.Round((cursor.Y - resizeStartCursor.Y) / zoom);
+            int width = resizeOriginalSize.Width;
+            int height = resizeOriginalSize.Height;
+
+            if (ResizeAffectsLeft) width -= dx;
+            else if (ResizeAffectsRight) width += dx;
+            if (ResizeAffectsTop) height -= dy;
+            else if (ResizeAffectsBottom) height += dy;
+
+            return new Size(
+                Math.Max(1, Math.Min(MaxCanvasDimension, width)),
+                Math.Max(1, Math.Min(MaxCanvasDimension, height)));
+        }
+
+        private void ResizePreviewTimer_Tick(object sender, EventArgs e)
+        {
+            if (!isResizing || MainBitmap == null || resizeOriginalLayers == null ||
+                IsDisposed || Disposing || resizePreviewOverlay == null ||
+                resizePreviewOverlay.IsDisposed)
+            {
+                StopResizePreview();
+                return;
+            }
+
+            // Exponential ease-out that follows the changing cursor target without
+            // accumulating the lag of many queued UI timer ticks.
+            double nowMs = resizePreviewClock.Elapsed.TotalMilliseconds;
+            double dtMs = Math.Max(1.0, Math.Min(100.0, nowMs - resizePreviewLastMs));
+            resizePreviewLastMs = nowMs;
+            double alpha = 1.0 - Math.Exp(-dtMs / ResizePreviewResponseMs);
+            resizePreviewWidth += (resizeTargetWidth - resizePreviewWidth) * alpha;
+            resizePreviewHeight += (resizeTargetHeight - resizePreviewHeight) * alpha;
+
+            if (Math.Abs(resizeTargetWidth - resizePreviewWidth) < 0.03)
+                resizePreviewWidth = resizeTargetWidth;
+            if (Math.Abs(resizeTargetHeight - resizePreviewHeight) < 0.03)
+                resizePreviewHeight = resizeTargetHeight;
+
+            UpdateResizePreviewBounds();
+            resizePreviewOverlay.Invalidate();
+        }
+
+        private void PaintResizePreview(Graphics g, Size viewport)
+        {
+            g.Clear(UIPanel.BackColor);
+            Image source = pictureBoxCanvas.Image ?? MainBitmap;
+            if (source == null || resizePreviewOverlay == null ||
+                viewport.Width < 1 || viewport.Height < 1)
+                return;
+
+            int imageW = Math.Max(1, (int)Math.Round(resizePreviewWidth * zoom));
+            int imageH = Math.Max(1, (int)Math.Round(resizePreviewHeight * zoom));
+            Point anchor = resizePreviewOverlay.PointToClient(resizeAnchorScreen);
+            int imageX = anchor.X - (ResizeAffectsLeft ? imageW : 0);
+            int imageY = anchor.Y - (ResizeAffectsTop ? imageH : 0);
+            Rectangle imageRect = new Rectangle(imageX, imageY, imageW, imageH);
+            Rectangle gutterRect = new Rectangle(imageX - 10, imageY - 10,
+                imageW + 20, imageH + 20);
+
+            using (Brush gutter = new SolidBrush(canvasPanel.BackColor))
+                g.FillRectangle(gutter, gutterRect);
+
+            // New pixels match ApplyCanvasResize: the visible bottom layer is
+            // extended with secondary color, or with transparency otherwise.
+            bool showExpansionColor = fillExpandedAreaWithBackgroundColor &&
+                (editorLayers.Count == 0 || editorLayers[editorLayers.Count - 1].Visible);
+            using (Brush expansion = new SolidBrush(showExpansionColor
+                ? color2 : pictureBoxCanvas.BackColor))
+                g.FillRectangle(expansion, imageRect);
+
+            double xOffset = ResizeAffectsLeft
+                ? resizePreviewWidth - resizeOriginalSize.Width : 0.0;
+            double yOffset = ResizeAffectsTop
+                ? resizePreviewHeight - resizeOriginalSize.Height : 0.0;
+            Rectangle originalRect = new Rectangle(
+                imageX + (int)Math.Round(xOffset * zoom),
+                imageY + (int)Math.Round(yOffset * zoom),
+                Math.Max(1, (int)Math.Round(resizeOriginalSize.Width * zoom)),
+                Math.Max(1, (int)Math.Round(resizeOriginalSize.Height * zoom)));
+
+            GraphicsState state = g.Save();
+            try
+            {
+                g.SetClip(imageRect, CombineMode.Intersect);
+                // Restore the PictureBox's real transparency background inside
+                // the original image. Its transparent pixels must not be replaced
+                // by the fill used only for the newly expanded area.
+                using (Brush imageBackground = new SolidBrush(pictureBoxCanvas.BackColor))
+                    g.FillRectangle(imageBackground, originalRect);
+                g.InterpolationMode = zoom >= 1f
+                    ? InterpolationMode.NearestNeighbor : InterpolationMode.HighQualityBicubic;
+                g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                g.DrawImage(source, originalRect,
+                    new Rectangle(0, 0, source.Width, source.Height), GraphicsUnit.Pixel);
+            }
+            finally
+            {
+                g.Restore(state);
+            }
+
+            // Draw the same eight resize-handle positions as the real canvas.
+            Point[] handles = {
+                new Point(imageX, imageY), new Point(imageX + imageW / 2, imageY),
+                new Point(imageX + imageW, imageY),
+                new Point(imageX, imageY + imageH / 2),
+                new Point(imageX + imageW, imageY + imageH / 2),
+                new Point(imageX, imageY + imageH),
+                new Point(imageX + imageW / 2, imageY + imageH),
+                new Point(imageX + imageW, imageY + imageH)
+            };
+            using (Brush fill = new SolidBrush(SystemColors.Window))
+            using (Pen border = new Pen(SystemColors.WindowText))
+            {
+                foreach (Point point in handles)
+                {
+                    Rectangle box = new Rectangle(point.X - 3, point.Y - 3, 7, 7);
+                    g.FillRectangle(fill, box);
+                    g.DrawRectangle(border, box);
+                }
+            }
+        }
+
+        private void StopResizePreview()
+        {
+            resizePreviewTimer.Stop();
+            resizePreviewClock.Reset();
+            if (resizePreviewOverlay != null)
+            {
+                Controls.Remove(resizePreviewOverlay);
+                resizePreviewOverlay.Dispose();
+                resizePreviewOverlay = null;
+            }
+        }
+
         private void resize_MouseDown(object sender, MouseEventArgs e)
         {
-            if (MainBitmap == null || e.Button != MouseButtons.Left)
+            if (MainBitmap == null || e.Button != MouseButtons.Left || isResizing)
                 return;
+
+            CompleteZoomAnimation();
 
             if (sender == resize_top_left) resizeDirection = ResizeDirection.TopLeft;
             else if (sender == resize_top) resizeDirection = ResizeDirection.Top;
@@ -2402,10 +2949,10 @@ namespace Carpathia
 
             SetAsUnselected();
             SyncActiveLayerFromCanvas();
-            SaveStateForUndo(includeAllLayers: true);
+            RenderCompositeToCanvas(force: true);
 
-            // Snapshot every layer. Each mouse move rebuilds from these originals,
-            // so shrinking and re-expanding during one drag restores cropped pixels.
+            // Keep every original layer unchanged during the animated drag.
+            // Resizing back outward restores all pixels, including cropped ones.
             DisposeResizeSnapshot();
             resizeOriginalLayers = new List<Bitmap>();
             if (editorLayers.Count > 0)
@@ -2414,14 +2961,10 @@ namespace Carpathia
                     resizeOriginalLayers.Add(new Bitmap(layer.Bitmap));
             }
             else
-            {
                 resizeOriginalLayers.Add(new Bitmap(MainBitmap));
-            }
 
             resizeOriginalSize = MainBitmap.Size;
             resizeStartCursor = Cursor.Position;
-
-            // The edge opposite to the dragged handle must stay where it is on screen.
             Point pic = pictureBoxCanvas.PointToScreen(Point.Empty);
             resizeAnchorScreen = new Point(
                 ResizeAffectsLeft ? pic.X + pictureBoxCanvas.Width : pic.X,
@@ -2431,6 +2974,7 @@ namespace Carpathia
             toolStripResize.Visible = true;
             toolStripSeparator16.Visible = true;
             toolStripResize.Text = $"{MainBitmap.Width} X {MainBitmap.Height}px";
+            StartResizePreview(sender as Control);
         }
 
         private void resize_MouseMove(object sender, MouseEventArgs e)
@@ -2438,34 +2982,16 @@ namespace Carpathia
             if (!isResizing || resizeOriginalLayers == null || MainBitmap == null)
                 return;
 
-            // Use screen coordinates: the handle itself moves while dragging, so
-            // e.Location would feed back into itself.
-            Point cursor = Cursor.Position;
-            int dx = (int)Math.Round((cursor.X - resizeStartCursor.X) / zoom);
-            int dy = (int)Math.Round((cursor.Y - resizeStartCursor.Y) / zoom);
-
-            int newWidth = resizeOriginalSize.Width;
-            int newHeight = resizeOriginalSize.Height;
-
-            if (ResizeAffectsLeft) newWidth -= dx;
-            else if (ResizeAffectsRight) newWidth += dx;
-
-            if (ResizeAffectsTop) newHeight -= dy;
-            else if (ResizeAffectsBottom) newHeight += dy;
-
-            newWidth = Math.Max(1, Math.Min(MaxCanvasDimension, newWidth));
-            newHeight = Math.Max(1, Math.Min(MaxCanvasDimension, newHeight));
-
-            if (newWidth == MainBitmap.Width && newHeight == MainBitmap.Height)
+            Size target = GetResizeSizeAtCursor(Cursor.Position);
+            if (target.Width == resizeTargetWidth && target.Height == resizeTargetHeight)
                 return;
 
-            // Left/top handles anchor the right/bottom edge: the original content is
-            // shifted so it keeps its distance from that edge.
-            int offsetX = ResizeAffectsLeft ? newWidth - resizeOriginalSize.Width : 0;
-            int offsetY = ResizeAffectsTop ? newHeight - resizeOriginalSize.Height : 0;
-
-            ApplyCanvasResize(newWidth, newHeight, offsetX, offsetY);
-            toolStripResize.Text = $"{MainBitmap.Width} X {MainBitmap.Height}px";
+            resizeTargetWidth = target.Width;
+            resizeTargetHeight = target.Height;
+            toolStripResize.Text = $"{target.Width} X {target.Height}px";
+            // The timer eases the visual bounds toward this exact mouse target.
+            // No bitmap resizing or scrollbar layout occurs on MouseMove.
+            resizePreviewOverlay?.Invalidate();
         }
 
         private void resize_MouseUp(object sender, MouseEventArgs e)
@@ -2473,23 +2999,40 @@ namespace Carpathia
             if (!isResizing)
                 return;
 
-            isResizing = false;
-            toolStripResize.Visible = false;
-            toolStripSeparator16.Visible = false;
-
-            bool changed = MainBitmap != null && MainBitmap.Size != resizeOriginalSize;
-            DisposeResizeSnapshot();
-
-            if (changed)
+            // A final pointer position may arrive without a matching MouseMove.
+            Size finalSize = GetResizeSizeAtCursor(Cursor.Position);
+            StopResizePreview();
+            try
             {
-                foreach (EditorLayer layer in editorLayers)
-                    dirtyLayerThumbnailKeys.Add(layer.ThumbnailKey);
-                RefreshDirtyLayerThumbnails();
+                if (MainBitmap != null && resizeOriginalLayers != null &&
+                    finalSize != resizeOriginalSize)
+                {
+                    // Snapshot history only for actual edits. The animated
+                    // preview itself never modifies the document or undo stack.
+                    SaveStateForUndo(includeAllLayers: true);
+                    int offsetX = ResizeAffectsLeft
+                        ? finalSize.Width - resizeOriginalSize.Width : 0;
+                    int offsetY = ResizeAffectsTop
+                        ? finalSize.Height - resizeOriginalSize.Height : 0;
+                    ApplyCanvasResize(finalSize.Width, finalSize.Height, offsetX, offsetY);
 
-                isModified = true;
-                isSaved = false;
+                    foreach (EditorLayer layer in editorLayers)
+                        dirtyLayerThumbnailKeys.Add(layer.ThumbnailKey);
+                    RefreshDirtyLayerThumbnails();
+                    isModified = true;
+                    isSaved = false;
+                }
+            }
+            finally
+            {
+                isResizing = false;
+                toolStripResize.Visible = false;
+                toolStripSeparator16.Visible = false;
+                DisposeResizeSnapshot();
             }
 
+            if (MainBitmap == null)
+                return;
             originalSize = MainBitmap.Size;
             labelSize.Text = $"{MainBitmap.Width} X {MainBitmap.Height}px";
             CenterCanvasPanel();
@@ -3894,6 +4437,11 @@ namespace Carpathia
             if (e.Button != MouseButtons.Left && e.Button != MouseButtons.Right)
                 return;
 
+            // Clicking uncovered canvas space commits the floating object first,
+            // so the chosen paint/selection tool operates on the merged pixels.
+            if (e.Button == MouseButtons.Left)
+                CommitFloatingImagesToActiveLayer();
+
             paintingMouseButton = e.Button;
             if (!isImageCurrentlyCreating)
             {
@@ -4580,6 +5128,13 @@ namespace Carpathia
 
         private void ImageEditor_FormClosed(object sender, FormClosedEventArgs e)
         {
+            CancelZoomAnimation();
+            zoomAnimationTimer.Tick -= ZoomAnimationTimer_Tick;
+            zoomAnimationTimer.Dispose();
+            StopResizePreview();
+            resizePreviewTimer.Tick -= ResizePreviewTimer_Tick;
+            resizePreviewTimer.Dispose();
+            DisposeResizeSnapshot();
             marchingAntsTimer.Stop();
             marchingAntsTimer.Tick -= MarchingAntsTimer_Tick;
             marchingAntsTimer.Dispose();
@@ -5221,8 +5776,99 @@ namespace Carpathia
 
         }
 
+        private bool committingFloatingImages;
+
+        private void CommitFloatingImagesOnWorkspaceMouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+                CommitFloatingImagesToActiveLayer();
+        }
+
+        /// <summary>
+        /// Flatten all floating MovingImageControl objects into the currently
+        /// active bitmap, preserving their exact image-space positions and
+        /// sizes (zoom and the 4px resize gutter are NOT written into pixels).
+        /// One operation creates one undo snapshot for all floating images.
+        /// </summary>
+        private bool CommitFloatingImagesToActiveLayer()
+        {
+            if (committingFloatingImages || MainBitmap == null ||
+                activeLayerIndex < 0 || activeLayerIndex >= editorLayers.Count ||
+                isImageCurrentlyCreating)
+                return false;
+
+            MovingImageControl[] floatingImages = pictureBoxCanvas.Controls
+                .OfType<MovingImageControl>()
+                .Where(item => !item.IsDisposed && item.DisplayImage != null)
+                .Reverse() // back to front, matching WinForms child z-order
+                .ToArray();
+            if (floatingImages.Length == 0)
+                return false;
+
+            committingFloatingImages = true;
+            try
+            {
+                CompleteZoomAnimation();
+                foreach (MovingImageControl floating in floatingImages)
+                    floating.CompleteInteraction();
+
+                // Finalize any transformable selection before taking the undo
+                // snapshot. Otherwise a selection can be painted over the new image.
+                SetAsUnselected();
+                SaveStateForUndo();
+
+                using (Graphics g = Graphics.FromImage(MainBitmap))
+                {
+                    g.CompositingMode = CompositingMode.SourceOver;
+                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                    g.SmoothingMode = SmoothingMode.HighQuality;
+                    g.SetClip(new Rectangle(Point.Empty, MainBitmap.Size));
+
+                    foreach (MovingImageControl floating in floatingImages)
+                    {
+                        PointF location = floating.UnzoomedImageLocation;
+                        SizeF contentSize = floating.UnzoomedContentSize;
+                        // RectangleF avoids discarding subpixel placement when an
+                        // object is moved/resized under a non-integral zoom.
+                        RectangleF destination = new RectangleF(
+                            location.X, location.Y,
+                            Math.Max(1f / zoom, contentSize.Width),
+                            Math.Max(1f / zoom, contentSize.Height));
+                        g.DrawImage(floating.DisplayImage, destination);
+                    }
+                }
+
+                foreach (MovingImageControl floating in floatingImages)
+                {
+                    Image ownedImage = floating.DisplayImage;
+                    pictureBoxCanvas.Controls.Remove(floating);
+                    floating.Dispose();
+                    // Images dropped from files are owned by these floating
+                    // controls; PictureBox.Dispose does not release Image.
+                    ownedImage?.Dispose();
+                }
+
+                SyncActiveLayerFromCanvas();
+                MarkCompositeDirty();
+                RenderCompositeToCanvas(force: true);
+                MarkLayerThumbnailDirty();
+                RefreshActiveLayerThumbnail();
+                isModified = true;
+                isSaved = false;
+                pictureBoxCanvas.Invalidate();
+                pictureBoxCanvas.Update();
+                return true;
+            }
+            finally
+            {
+                committingFloatingImages = false;
+            }
+        }
+
         private void panel1_Click(object sender, EventArgs e)
         {
+            CommitFloatingImagesToActiveLayer();
             SetAsUnselected();
             HideAddTextTextBoxes();
         }
@@ -5244,6 +5890,7 @@ namespace Carpathia
 
         private void canvasPanel_Click(object sender, EventArgs e)
         {
+            CommitFloatingImagesToActiveLayer();
             SetAsUnselected();
             HideAddTextTextBoxes();
         }
@@ -6445,11 +7092,25 @@ namespace Carpathia
 
         private void zoomInToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            float baseZoom = zoomAnimationTimer.Enabled ? zoomAnimationTo : zoom;
+            float target = Math.Max(0.05f, baseZoom + 0.05f);
+            if ((target > 5f))
+            {
+                SystemSounds.Beep.Play();
+                return;
+            }
             RequestSmoothZoom(0.05f);
         }
 
         private void zoomOutToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            float baseZoom = zoomAnimationTimer.Enabled ? zoomAnimationTo : zoom;
+            float target = Math.Max(0.05f, baseZoom + 0.05f);
+            if ((target <= 0.1f))
+            {
+                SystemSounds.Beep.Play();
+                return;
+            }
             RequestSmoothZoom(-0.05f);
         }
 
@@ -6469,28 +7130,6 @@ namespace Carpathia
                 pictureBoxCanvas.Invalidate();
             }
         }
-        private Bitmap zoomBuffer; private void RebuildZoomBuffer()
-        {
-            zoomBuffer?.Dispose();
-
-            int width = Math.Max(1, (int)Math.Round(MainBitmap.Width * zoom));
-            int height = Math.Max(1, (int)Math.Round(MainBitmap.Height * zoom));
-
-            zoomBuffer = new Bitmap(width, height, PixelFormat.Format32bppArgb);
-
-            using (Graphics g = Graphics.FromImage(zoomBuffer))
-            {
-                g.InterpolationMode = zoom >= 1f
-                    ? InterpolationMode.NearestNeighbor
-                    : InterpolationMode.HighQualityBicubic;
-
-                g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-
-                g.DrawImage(
-                    pictureBoxCanvas.Image,
-                    new Rectangle(0, 0, width, height));
-            }
-        }
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SettingsWindow settingsWindow = new SettingsWindow();
@@ -6508,6 +7147,15 @@ namespace Carpathia
 
             panelResizer.Size = imageSize;
             pictureBoxCanvas.Size = imageSize;
+
+            // A dropped image is a child of pictureBoxCanvas, so it will not
+            // scale automatically when the parent PictureBox is zoomed.
+            // Retain its unzoomed image geometry while keeping a fixed 4 px
+            // resize border/handle gutter on all four sides at every zoom.
+            foreach (MovingImageControl floating in
+                pictureBoxCanvas.Controls.OfType<MovingImageControl>())
+                floating.ApplyZoom(zoom);
+
             canvasPanel.Size = new Size(imageSize.Width + 20, imageSize.Height + 20);
             if (panelResizer.Parent == canvasPanel)
                 panelResizer.Location = new Point(10, 10);
@@ -6641,7 +7289,7 @@ namespace Carpathia
 
                 // Scroll only once after sizes/scrollbars settle. WinForms uses
                 // positive setter arguments and negative values when reading.
-                //UIPanel.AutoScrollPosition = new Point(desiredX, desiredY);
+                UIPanel.AutoScrollPosition = new Point(desiredX, desiredY);
 
                 // WinForms may clamp or offset AutoScrollPosition when the child
                 // was previously centered. Correct using the ACTUAL image position
@@ -6669,7 +7317,7 @@ namespace Carpathia
                         -current.Y + errorY));
                     if (nextX == -current.X && nextY == -current.Y)
                         break;
-                    //UIPanel.AutoScrollPosition = new Point(nextX, nextY);
+                    UIPanel.AutoScrollPosition = new Point(nextX, nextY);
                 }
             }
             finally
@@ -6677,7 +7325,9 @@ namespace Carpathia
                 updatingCanvasZoom = false;
             }
 
-            CenterCanvasPanel();
+            if (canvasPanel.Width <= UIPanel.ClientSize.Width ||
+                canvasPanel.Height <= UIPanel.ClientSize.Height)
+                CenterCanvasPanel();
             PositionZoomResizeHandles();
             labelZoom.Text = $"{Math.Round(zoom * 100)}%";
             RepaintZoomSurface();
@@ -7291,6 +7941,15 @@ namespace Carpathia
         {
             Keys key = keyData & Keys.KeyCode;
 
+            // Ctrl+D: commit floating images and deselect the current selection.
+            if (keyData == (Keys.Control | Keys.D))
+            {
+                CommitFloatingImagesToActiveLayer();
+                SetAsUnselected();
+                HideAddTextTextBoxes();
+                return true;
+            }
+
             if (key == Keys.Escape)
             {
                 if (isSelected)
@@ -7784,6 +8443,76 @@ namespace Carpathia
                     return; // If the selected tool is Cursor, allow the context menu to open on the PictureBox
                 }
                 e.Cancel = true; // Prevent the context menu from opening
+            }
+        }
+
+        private void textBoxTolerance2_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                setMagicSelectionToolTolerance();
+            }
+        }
+
+        private void textBoxTolerance2_Leave(object sender, EventArgs e)
+        {
+            setMagicSelectionToolTolerance();
+        }
+
+        private bool IsImageFile(string filePath)
+        {
+            try
+            {
+                // Validate without retaining a file lock on the dropped image.
+                using (Image test = Image.FromFile(filePath))
+                    return test.Width > 0 && test.Height > 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private void ImageEditor_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Copy;
+            }
+            else
+            {
+                e.Effect = DragDropEffects.None;
+            }
+        }
+
+        private void ImageEditor_DragDrop(object sender, DragEventArgs e)
+        {
+            string file = ((string[])e.Data.GetData(DataFormats.FileDrop))[0];
+            if (IsImageFile(file))
+            {
+                // Clone the source to avoid keeping the original file locked.
+                Bitmap image;
+                using (Image loaded = Image.FromFile(file))
+                    image = new Bitmap(loaded);
+
+                MovingImageControl movingImageControl = new MovingImageControl(image);
+                // The editor zooms the canvas, but WinForms does NOT scale its
+                // child controls. Apply the current zoom before placing it.
+                movingImageControl.ApplyZoom(zoom);
+                pictureBoxCanvas.Controls.Add(movingImageControl);
+
+                // Drop at the cursor, in the zoomed pictureBox coordinates.
+                Point drop = pictureBoxCanvas.PointToClient(new Point(e.X, e.Y));
+                drop.X = Math.Max(0, Math.Min(pictureBoxCanvas.Width - 1, drop.X));
+                drop.Y = Math.Max(0, Math.Min(pictureBoxCanvas.Height - 1, drop.Y));
+                // Leave the 4px resize gutter around the image, including at
+                // non-100% zoom. MoveSurface handlers remain on the child.
+                movingImageControl.SetImageDisplayLocation(drop);
+                movingImageControl.BringToFront();
+            }
+            else
+            {
+                MessageForm.Show("The dropped file is not a valid image.", "Invalid File", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }
