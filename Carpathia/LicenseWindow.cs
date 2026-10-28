@@ -35,25 +35,32 @@ namespace Carpathia
         }
         private void SetTheme()
         {
+            bool darkTheme = false;
             switch (Settings1.Default.PreferredTheme)
             {
                 case 0: // System theme
                     if (CheckSystemTheme.IsDarkTheme())
                     {
                         DarkTheme();
+                        darkTheme = true;
                     }
                     else
                     {
                         LightTheme();
+                        darkTheme = false;
                     }
                     break;
                 case 1: // Light theme
                     LightTheme();
+                    darkTheme = false;
                     break;
                 case 2: // Dark theme
                     DarkTheme();
+                    darkTheme = true;
                     break;
             }
+            UIHelper.ApplyCustomTitleBar(this, darkTheme);
+            UIHelper.SetFormBackgroundFluent(this, darkTheme);
         }
         private void LightTheme()
         {
@@ -63,7 +70,7 @@ namespace Carpathia
             richTextBox1.ForeColor = RichTextBox.DefaultForeColor;
             button1.BackColor = Color.Transparent;
             button1.ForeColor = Button.DefaultForeColor;
-            TitleBarHelper.ApplyCustomTitleBar(this, false);
+            UIHelper.ApplyCustomTitleBar(this, false);
         }
         private void DarkTheme()
         {
@@ -73,7 +80,7 @@ namespace Carpathia
             richTextBox1.ForeColor = Color.White;
             button1.BackColor = Color.FromArgb(32, 32, 32);
             button1.ForeColor = Color.White;
-            TitleBarHelper.ApplyCustomTitleBar(this, true);
+            UIHelper.ApplyCustomTitleBar(this, true);
         }
 
         private void richTextBox1_LinkClicked(object sender, LinkClickedEventArgs e)

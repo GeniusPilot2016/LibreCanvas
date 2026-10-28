@@ -49,25 +49,32 @@ namespace Carpathia
         }
         private void SetTheme()
         {
+            bool darkTheme = false;
             switch (Settings1.Default.PreferredTheme)
             {
                 case 0: // System theme
                     if (CheckSystemTheme.IsDarkTheme())
                     {
                         DarkTheme();
+                        darkTheme = true;
                     }
                     else
                     {
                         LightTheme();
+                        darkTheme = false;
                     }
                     break;
                 case 1: // Light theme
                     LightTheme();
+                    darkTheme = false;
                     break;
                 case 2: // Dark theme
                     DarkTheme();
+                    darkTheme = true;
                     break;
             }
+            UIHelper.ApplyCustomTitleBar(this, darkTheme);
+            UIHelper.SetFormBackgroundFluent(this, darkTheme);
         }
         private void LightTheme()
         {
@@ -76,7 +83,7 @@ namespace Carpathia
             comboBox1.BackColor = ComboBox.DefaultBackColor;
             comboBox1.ForeColor = ComboBox.DefaultForeColor;
             button1.BackColor = Color.Transparent;
-            TitleBarHelper.ApplyCustomTitleBar(this, false);
+            UIHelper.ApplyCustomTitleBar(this, false);
         }
         private void DarkTheme()
         {
@@ -85,7 +92,7 @@ namespace Carpathia
             comboBox1.BackColor = Color.Black;
             comboBox1.ForeColor = Color.White;
             button1.BackColor = Color.FromArgb(32, 32, 32);
-            TitleBarHelper.ApplyCustomTitleBar(this, true);
+            UIHelper.ApplyCustomTitleBar(this, true);
         }
         private void LoadVideoDevices()
         {

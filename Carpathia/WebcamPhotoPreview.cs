@@ -39,25 +39,32 @@ namespace Carpathia
         }
         private void SetTheme()
         {
+            bool darkTheme = false;
             switch (Settings1.Default.PreferredTheme)
             {
                 case 0: // System theme
                     if (CheckSystemTheme.IsDarkTheme())
                     {
                         DarkTheme();
+                        darkTheme = true;
                     }
                     else
                     {
                         LightTheme();
+                        darkTheme = false;
                     }
                     break;
                 case 1: // Light theme
                     LightTheme();
+                    darkTheme = false;
                     break;
                 case 2: // Dark theme
                     DarkTheme();
+                    darkTheme = true;
                     break;
             }
+            UIHelper.ApplyCustomTitleBar(this, darkTheme);
+            UIHelper.SetFormBackgroundFluent(this, darkTheme);
         }
         private void LightTheme()
         {
@@ -65,7 +72,7 @@ namespace Carpathia
             this.ForeColor = Form.DefaultForeColor;
             buttonAccept.BackColor = Color.Transparent;
             buttonDiscard.BackColor = Color.Transparent;
-            TitleBarHelper.ApplyCustomTitleBar(this, false);
+            UIHelper.ApplyCustomTitleBar(this, false);
         }
         private void DarkTheme()
         {
@@ -73,7 +80,7 @@ namespace Carpathia
             this.ForeColor = Color.White;
             buttonAccept.BackColor = Color.FromArgb(32, 32, 32);
             buttonDiscard.BackColor = Color.FromArgb(32, 32, 32);
-            TitleBarHelper.ApplyCustomTitleBar(this, true);
+            UIHelper.ApplyCustomTitleBar(this, true);
         }
         private void buttonAccept_Click(object sender, EventArgs e)
         {

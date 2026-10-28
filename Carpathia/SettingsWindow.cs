@@ -108,25 +108,32 @@ namespace Carpathia
         }
         private void SetTheme()
         {
+            bool darkTheme = false;
             switch (Settings1.Default.PreferredTheme)
             {
                 case 0: // System theme
                     if (CheckSystemTheme.IsDarkTheme())
                     {
                         DarkTheme();
+                        darkTheme = true;
                     }
                     else
                     {
                         LightTheme();
+                        darkTheme = false;
                     }
                     break;
                 case 1: // Light theme
                     LightTheme();
+                    darkTheme = false;
                     break;
                 case 2: // Dark theme
                     DarkTheme();
+                    darkTheme = true;
                     break;
             }
+            UIHelper.ApplyCustomTitleBar(this, darkTheme);
+            UIHelper.SetFormBackgroundFluent(this, darkTheme);
         }
         public void LightTheme()
         {
@@ -198,7 +205,7 @@ namespace Carpathia
                     }
                 }
             }
-            TitleBarHelper.ApplyCustomTitleBar(this, false);
+            UIHelper.ApplyCustomTitleBar(this, false);
         }
         public void DarkTheme()
         {
@@ -270,7 +277,7 @@ namespace Carpathia
                     }
                 }
             }
-            TitleBarHelper.ApplyCustomTitleBar(this, true);
+            UIHelper.ApplyCustomTitleBar(this, true);
         }
         private void comboBoxTheme_SelectedIndexChanged(object sender, EventArgs e)
         {

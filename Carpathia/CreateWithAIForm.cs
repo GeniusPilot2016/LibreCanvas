@@ -18,10 +18,12 @@ namespace Carpathia
         Image image;
         CancellationTokenSource cts = new CancellationTokenSource();
         bool imageIsCompleted = false; // To track if the image generation is completed
+        int queryCount = 0; // To track the number of queries made to the AI
         String filePath;
         public CreateWithAIForm()
         {
             InitializeComponent();
+            HandleQuota(); // Check the quota for image generation
             SystemThemeUtility.RegisterForm(this);
             SetTheme();
             SetFonts();
@@ -29,6 +31,62 @@ namespace Carpathia
             numericUpDownHeight.Value = Settings1.Default.DefaultAIGeneratedImageSize.Height;
             SelectRandomPrompt(); // Select a random prompt from the resources
         }
+
+        private async void HandleQuota()
+        {
+            try
+            {
+                queryCount = await ImageGenerationCore.GetRemainingUsage();
+
+                if (queryCount == 0)
+                {
+                    MessageForm.Show(
+                        this,
+                        "You have reached the quota for image generation. Please try again tomorrow.",
+                        "Daily Limit Reached",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning
+                    );
+
+                    Close();
+                    return;
+                }
+                else if (queryCount == -1)
+                {
+                    MessageForm.Show(
+                        this,
+                        "Failed to retrieve AI usage. Please check your internet connection and try again.",
+                        "AI Usage Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                    );
+                    Close();
+                    return;
+                }
+                else if (queryCount <= 5)
+                {
+                    labelOnlyFewUsagesLeft.Text =
+                        labelOnlyFewUsagesLeft.Text.Replace(
+                            "{number}",
+                            queryCount.ToString()
+                        );
+
+                    labelOnlyFewUsagesLeft.Visible = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageForm.Show(
+                    this,
+                    $"Failed to retrieve AI usage: {ex.Message}",
+                    "AI Usage Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+                Close();
+            }
+        }
+
         private void SetFonts()
         {
             UIFonts uiFonts = UIFonts.Instance;
@@ -39,25 +97,32 @@ namespace Carpathia
         }
         private void SetTheme()
         {
+            bool darkTheme = false;
             switch (Settings1.Default.PreferredTheme)
             {
                 case 0: // System theme
                     if (CheckSystemTheme.IsDarkTheme())
                     {
                         DarkTheme();
+                        darkTheme = true;
                     }
                     else
                     {
                         LightTheme();
+                        darkTheme = false;
                     }
                     break;
                 case 1: // Light theme
                     LightTheme();
+                    darkTheme = false;
                     break;
                 case 2: // Dark theme
                     DarkTheme();
+                    darkTheme = true;
                     break;
             }
+            UIHelper.ApplyCustomTitleBar(this, darkTheme);
+            UIHelper.SetFormBackgroundFluent(this, darkTheme);
         }
         private void LightTheme()
         {
@@ -81,7 +146,6 @@ namespace Carpathia
                     control.ForeColor = SystemColors.WindowText;
                 }
             }
-            TitleBarHelper.ApplyCustomTitleBar(this, false);
         }
         private void DarkTheme()
         {
@@ -105,7 +169,7 @@ namespace Carpathia
                     control.ForeColor = Color.White;
                 }
             }
-            TitleBarHelper.ApplyCustomTitleBar(this, true);
+
         }
         Image generatedImage = null; // To hold the generated image from the AI
         private async void button1_Click(object sender, EventArgs e)

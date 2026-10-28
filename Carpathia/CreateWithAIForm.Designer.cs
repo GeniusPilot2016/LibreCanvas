@@ -44,6 +44,7 @@
             buttonUploadImage = new Button();
             labelUploadedImage = new Label();
             fileBrowser = new OpenFileDialog();
+            labelOnlyFewUsagesLeft = new Label();
             ((System.ComponentModel.ISupportInitialize)numericUpDownWidth).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDownHeight).BeginInit();
             SuspendLayout();
@@ -104,7 +105,7 @@
             label2.ImageAlign = ContentAlignment.MiddleLeft;
             label2.ImageIndex = 1;
             label2.ImageList = icons;
-            label2.Location = new Point(34, 130);
+            label2.Location = new Point(34, 143);
             label2.Margin = new Padding(2, 0, 2, 0);
             label2.Name = "label2";
             label2.Size = new Size(457, 16);
@@ -165,7 +166,7 @@
             // progressBarImageCreating
             // 
             progressBarImageCreating.Anchor = AnchorStyles.Bottom;
-            progressBarImageCreating.Location = new Point(126, 159);
+            progressBarImageCreating.Location = new Point(126, 172);
             progressBarImageCreating.Margin = new Padding(4);
             progressBarImageCreating.MarqueeAnimationSpeed = 10;
             progressBarImageCreating.Name = "progressBarImageCreating";
@@ -179,7 +180,7 @@
             labelImageCreating.Anchor = AnchorStyles.Bottom;
             labelImageCreating.AutoSize = true;
             labelImageCreating.Font = new Font("HarmonyOS Sans", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            labelImageCreating.Location = new Point(16, 159);
+            labelImageCreating.Location = new Point(16, 172);
             labelImageCreating.Margin = new Padding(4, 0, 4, 0);
             labelImageCreating.Name = "labelImageCreating";
             labelImageCreating.Size = new Size(100, 16);
@@ -193,7 +194,7 @@
             buttonUploadImage.Font = new Font("HarmonyOS Sans", 8.999999F);
             buttonUploadImage.ImageIndex = 2;
             buttonUploadImage.ImageList = icons;
-            buttonUploadImage.Location = new Point(151, 94);
+            buttonUploadImage.Location = new Point(142, 90);
             buttonUploadImage.Name = "buttonUploadImage";
             buttonUploadImage.Size = new Size(108, 29);
             buttonUploadImage.TabIndex = 1;
@@ -208,11 +209,23 @@
             labelUploadedImage.Anchor = AnchorStyles.None;
             labelUploadedImage.AutoSize = true;
             labelUploadedImage.Font = new Font("HarmonyOS Sans", 8.999999F);
-            labelUploadedImage.Location = new Point(265, 100);
+            labelUploadedImage.Location = new Point(256, 96);
             labelUploadedImage.Name = "labelUploadedImage";
             labelUploadedImage.Size = new Size(126, 16);
             labelUploadedImage.TabIndex = 8;
             labelUploadedImage.Text = "No image is uploaded";
+            // 
+            // labelOnlyFewUsagesLeft
+            // 
+            labelOnlyFewUsagesLeft.AutoSize = true;
+            labelOnlyFewUsagesLeft.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            labelOnlyFewUsagesLeft.ForeColor = Color.FromArgb(192, 0, 0);
+            labelOnlyFewUsagesLeft.Location = new Point(158, 125);
+            labelOnlyFewUsagesLeft.Name = "labelOnlyFewUsagesLeft";
+            labelOnlyFewUsagesLeft.Size = new Size(209, 16);
+            labelOnlyFewUsagesLeft.TabIndex = 9;
+            labelOnlyFewUsagesLeft.Text = "Only {number} daily usages are left";
+            labelOnlyFewUsagesLeft.Visible = false;
             // 
             // CreateWithAIForm
             // 
@@ -220,7 +233,8 @@
             AutoScaleDimensions = new SizeF(96F, 96F);
             AutoScaleMode = AutoScaleMode.Dpi;
             AutoSize = true;
-            ClientSize = new Size(528, 188);
+            ClientSize = new Size(528, 201);
+            Controls.Add(labelOnlyFewUsagesLeft);
             Controls.Add(labelUploadedImage);
             Controls.Add(buttonUploadImage);
             Controls.Add(labelImageCreating);
@@ -265,5 +279,6 @@
         private Button buttonUploadImage;
         private Label labelUploadedImage;
         private OpenFileDialog fileBrowser;
+        private Label labelOnlyFewUsagesLeft;
     }
 }

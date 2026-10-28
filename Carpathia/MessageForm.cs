@@ -78,27 +78,34 @@ namespace Carpathia
         }
         private void SetTheme()
         {
+            bool darkTheme = false;
             switch (Settings1.Default.PreferredTheme)
             {
                 case 0: // System theme
                     if (CheckSystemTheme.IsDarkTheme())
                     {
                         DarkTheme();
+                        darkTheme = true;
                     }
                     else
                     {
                         LightTheme();
+                        darkTheme = false;
                     }
                     break;
                 case 1: // Light theme
                     LightTheme();
+                    darkTheme = false;
                     break;
                 case 2: // Dark theme
                     DarkTheme();
+                    darkTheme = true;
                     break;
             }
+            UIHelper.ApplyCustomTitleBar(this, darkTheme);
+            UIHelper.SetFormBackgroundFluent(this, darkTheme);
         }
-        
+
         private void DarkTheme()
         {
             darkTheme = true;
@@ -110,7 +117,7 @@ namespace Carpathia
             button2.ForeColor = Color.White;
             button3.BackColor = Color.FromArgb(32, 32, 32);
             button3.ForeColor = Color.White;
-            TitleBarHelper.ApplyCustomTitleBar(this, darkTheme);
+            UIHelper.ApplyCustomTitleBar(this, darkTheme);
         }
 
 
@@ -125,7 +132,7 @@ namespace Carpathia
             button2.ForeColor = SystemColors.ControlText;
             button3.BackColor = Color.Transparent;
             button3.ForeColor = SystemColors.ControlText;
-            TitleBarHelper.ApplyCustomTitleBar(this, darkTheme);
+            UIHelper.ApplyCustomTitleBar(this, darkTheme);
         }
 
         private void PlaySound(MessageBoxIcon icon)

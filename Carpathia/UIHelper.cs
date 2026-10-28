@@ -14,9 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+using Carpathia;
 using System.Runtime.InteropServices;
 
-public static class TitleBarHelper
+public static class UIHelper
 {
     // The feauture that I added to change the title bar color of the form after graduated from my school.
     [DllImport("dwmapi.dll")]
@@ -88,5 +89,75 @@ public static class TitleBarHelper
                 form.Refresh();
             }
         }
+    }
+    private const int DWMWA_SYSTEMBACKDROP_TYPE = 38;
+    private const int DWMWA_IMMERSIVE_DARK_MODE = 20;
+    public static void SetFormBackgroundFluent(Form form, bool darkMode)
+    {
+        if (!OperatingSystem.IsWindows() || Environment.OSVersion.Version.Major < 10 || Environment.OSVersion.Version.Build < 22523)
+            return;
+        if (form == null || form.IsDisposed || form.Disposing) return;
+        if (!form.IsHandleCreated)
+            form.CreateControl();
+
+        // Set the backdrop type to mica 
+        int dark = darkMode ? 1 : 0;
+        int backdropType = 2;
+        DwmSetWindowAttribute(form.Handle, DWMWA_SYSTEMBACKDROP_TYPE, ref backdropType, 4);
+        DwmSetWindowAttribute(form.Handle, DWMWA_IMMERSIVE_DARK_MODE, ref dark, 4);
+        DwmSetWindowAttribute(form.Handle, 35, ref cachedColorRef, 4);
+
+        // Set the form's BackColor to a darker shade to enhance the acrylic effect, especially in dark mode. The TransparencyKey is set to the same color to make it fully transparent.
+        form.BackColor = darkMode ? Color.FromArgb(30, 30, 31) :
+            Color.FromArgb(SystemColors.Control.R - 16, SystemColors.Control.G - 16, SystemColors.Control.B - 17);
+        form.TransparencyKey = form.BackColor;
+        form.FormClosing += (s, e) =>
+        {
+            RemoveFluentBackground(form, darkMode);
+        };
+    }
+
+    private static void ChangeTrackbarColors(Form form)
+    {
+        foreach (Control ctrl in form.Controls)
+        {
+            if (ctrl is TrackBar trackBar)
+            {
+                trackBar.BackColor = form.BackColor;
+            }
+            if (ctrl.HasChildren)
+            {
+                ChangeTrackbarColorsRecursive(ctrl, form.BackColor);
+            }
+        }
+    }
+
+    private static void ChangeTrackbarColorsRecursive(Control ctrl, Color backColor)
+    {
+        foreach (Control child in ctrl.Controls)
+        {
+            if (child is TrackBar trackBar)
+            {
+                trackBar.BackColor = backColor;
+            }
+            if (child.HasChildren)
+            {
+                ChangeTrackbarColorsRecursive(child, backColor);
+            }
+        }
+    }
+    public static void RemoveFluentBackground(Form form, bool darkMode)
+    {
+        if (!OperatingSystem.IsWindows() || Environment.OSVersion.Version.Major < 10 || Environment.OSVersion.Version.Build < 22523)
+            return;
+        if (form == null || form.IsDisposed || form.Disposing) return;
+        if (!form.IsHandleCreated)
+            form.CreateControl();
+        int backdropType = 0; // Default
+        DwmSetWindowAttribute(form.Handle, DWMWA_SYSTEMBACKDROP_TYPE, ref backdropType, 4);
+        DwmSetWindowAttribute(form.Handle, DWMWA_IMMERSIVE_DARK_MODE, ref backdropType, 4);
+        DwmSetWindowAttribute(form.Handle, 35, ref cachedColorRef, 4);
+        form.BackColor = darkMode ? Color.FromArgb(32, 32, 32) : SystemColors.Control;
+        form.TransparencyKey = Color.Empty;
     }
 }

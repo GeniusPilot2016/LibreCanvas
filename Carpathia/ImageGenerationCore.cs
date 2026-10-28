@@ -335,5 +335,23 @@ namespace Carpathia
                     .ToLowerInvariant();
             }
         }
+
+        public static async Task<int> GetRemainingUsage()
+        {
+            try
+            {
+                using var client = new HttpClient();
+                string response = await client.GetStringAsync(
+                    "https://librecanvas-backend.wasmer.app/api/remaining-usage");
+
+                return int.TryParse(response.Trim(), out int remainingUsage)
+                    ? remainingUsage
+                    : -1;
+            }
+            catch
+            {
+                return -1;
+            }
+        }
     }
 }
