@@ -5865,7 +5865,19 @@ namespace Carpathia
                 committingFloatingImages = false;
             }
         }
-
+        private void CancelFloatingImages()
+        {
+            foreach (MovingImageControl floating in
+                pictureBoxCanvas.Controls.OfType<MovingImageControl>().ToArray())
+            {
+                floating.CompleteInteraction();
+                Image owned = floating.DisplayImage;
+                pictureBoxCanvas.Controls.Remove(floating);
+                floating.Dispose();
+                owned?.Dispose();
+            }
+            pictureBoxCanvas.Invalidate();
+        }
         private void panel1_Click(object sender, EventArgs e)
         {
             CommitFloatingImagesToActiveLayer();
@@ -6982,21 +6994,70 @@ namespace Carpathia
 
         private void Paste()
         {
-            SaveStateForUndo();
-            Bitmap bmp = System.Windows.Forms.Clipboard.GetImage() as Bitmap;
-            if (bmp != null)
-            {
-                pictureBoxCanvas.Image = bmp;
-                canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
-                pictureBoxCanvas.Invalidate();
-                CenterCanvasPanel();
-                isModified = true; MarkLayerThumbnailDirty();
-            }
-            else
+            if (MainBitmap == null)
+                return;
+
+            Bitmap bmp = GetClipboardBitmap();
+            if (bmp == null)
             {
                 Logger.Log("No image in clipboard.", Logger.LogTypes.Error);
                 MessageForm.Show("No image in clipboard.", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
+
+            // Center of what the user is currently looking at, in canvas (zoomed) coordinates.
+            Point viewportCenter = UIPanel.PointToScreen(new Point(
+                UIPanel.ClientSize.Width / 2, UIPanel.ClientSize.Height / 2));
+            Point center = pictureBoxCanvas.PointToClient(viewportCenter);
+            center.X = Math.Max(0, Math.Min(pictureBoxCanvas.Width, center.X));
+            center.Y = Math.Max(0, Math.Min(pictureBoxCanvas.Height, center.Y));
+
+            AddFloatingImage(bmp, center);
+        }
+
+        /// <summary>
+        /// Reads an image from the clipboard, preferring PNG so transparency survives.
+        /// Falls back to the normal bitmap format, then to a copied image file.
+        /// </summary>
+        private Bitmap GetClipboardBitmap()
+        {
+            try
+            {
+                System.Windows.Forms.IDataObject data = System.Windows.Forms.Clipboard.GetDataObject();
+                if (data == null)
+                    return null;
+
+                if (data.GetDataPresent("PNG") && data.GetData("PNG") is MemoryStream pngStream)
+                {
+                    try
+                    {
+                        using (pngStream)
+                        using (Image png = Image.FromStream(pngStream))
+                            return new Bitmap(png);   // copy: the stream must not outlive the image
+                    }
+                    catch { /* fall through to the next format */ }
+                }
+
+                if (System.Windows.Forms.Clipboard.ContainsImage())
+                {
+                    using (Image clip = System.Windows.Forms.Clipboard.GetImage())
+                        if (clip != null)
+                            return new Bitmap(clip);
+                }
+
+                if (data.GetDataPresent(DataFormats.FileDrop) &&
+                    data.GetData(DataFormats.FileDrop) is string[] files &&
+                    files.Length > 0 && IsImageFile(files[0]))
+                {
+                    using (Image loaded = Image.FromFile(files[0]))
+                        return new Bitmap(loaded);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("Error reading clipboard: " + ex.Message, Logger.LogTypes.Error);
+            }
+            return null;
         }
 
         private void CutOrCopy()
@@ -7032,11 +7093,14 @@ namespace Carpathia
             }
 
             DataObject dataObject = new DataObject();
+            byte[] pngBytes;
             using (MemoryStream pngStream = new MemoryStream())
             {
                 copyBitmap.Save(pngStream, ImageFormat.Png);
-                dataObject.SetData("PNG", false, pngStream);
+                pngBytes = pngStream.ToArray();
             }
+            // The stream stays alive and is owned by the clipboard data.
+            dataObject.SetData("PNG", false, new MemoryStream(pngBytes));
             dataObject.SetData(DataFormats.Bitmap, true, copyBitmap);
             System.Windows.Forms.Clipboard.SetDataObject(dataObject, true);
             copyBitmap.Dispose();
@@ -7949,7 +8013,30 @@ namespace Carpathia
                 HideAddTextTextBoxes();
                 return true;
             }
+            MovingImageControl topFloating = pictureBoxCanvas.Controls
+    .OfType<MovingImageControl>().FirstOrDefault();   // index 0 = frontmost
+            if (topFloating != null &&
+                !(ActiveControl is TextBoxBase) && !(ActiveControl is ToolStrip))
+            {
+                if (key == Keys.Enter) { CommitFloatingImagesToActiveLayer(); return true; }
 
+                // Esc, Delete and Backspace all discard the floating image without
+                // touching the layer (nothing was committed, so there is nothing to undo).
+                if (key == Keys.Escape || key == Keys.Delete || key == Keys.Back)
+                {
+                    CancelFloatingImages();
+                    return true;
+                }
+
+                int step = (keyData & Keys.Shift) != 0 ? 10 : 1;
+                switch (key)
+                {
+                    case Keys.Left: topFloating.Nudge(-step, 0); return true;
+                    case Keys.Right: topFloating.Nudge(step, 0); return true;
+                    case Keys.Up: topFloating.Nudge(0, -step); return true;
+                    case Keys.Down: topFloating.Nudge(0, step); return true;
+                }
+            }
             if (key == Keys.Escape)
             {
                 if (isSelected)
@@ -8490,25 +8577,12 @@ namespace Carpathia
             string file = ((string[])e.Data.GetData(DataFormats.FileDrop))[0];
             if (IsImageFile(file))
             {
-                // Clone the source to avoid keeping the original file locked.
                 Bitmap image;
                 using (Image loaded = Image.FromFile(file))
                     image = new Bitmap(loaded);
 
-                MovingImageControl movingImageControl = new MovingImageControl(image);
-                // The editor zooms the canvas, but WinForms does NOT scale its
-                // child controls. Apply the current zoom before placing it.
-                movingImageControl.ApplyZoom(zoom);
-                pictureBoxCanvas.Controls.Add(movingImageControl);
-
-                // Drop at the cursor, in the zoomed pictureBox coordinates.
                 Point drop = pictureBoxCanvas.PointToClient(new Point(e.X, e.Y));
-                drop.X = Math.Max(0, Math.Min(pictureBoxCanvas.Width - 1, drop.X));
-                drop.Y = Math.Max(0, Math.Min(pictureBoxCanvas.Height - 1, drop.Y));
-                // Leave the 4px resize gutter around the image, including at
-                // non-100% zoom. MoveSurface handlers remain on the child.
-                movingImageControl.SetImageDisplayLocation(drop);
-                movingImageControl.BringToFront();
+                AddFloatingImage(image, drop);
             }
             else
             {
@@ -8551,6 +8625,26 @@ namespace Carpathia
             {
                 queryTheAIUsageToolStripMenuItem.Enabled = true;
             }
+        }/// <summary>
+         /// Places a bitmap on the canvas as a floating, movable/resizable image.
+         /// Any image that is already floating is committed first (like placing a
+         /// second object in Photoshop). The control takes ownership of the bitmap.
+         /// </summary>
+        private MovingImageControl AddFloatingImage(Bitmap image, Point displayCenter)
+        {
+            // Make sure zoom is the final value, not a mid-animation one.
+            CompleteZoomAnimation();
+            CommitFloatingImagesToActiveLayer();
+
+            MovingImageControl floating = new MovingImageControl(image);
+            floating.CommitRequested += (s, _) => CommitFloatingImagesToActiveLayer();
+            floating.ApplyZoom(zoom);
+            pictureBoxCanvas.Controls.Add(floating);
+
+            floating.FitInside(MainBitmap.Size);        // only shrinks, never enlarges
+            floating.CenterAtDisplayPoint(displayCenter);
+            floating.BringToFront();
+            return floating;
         }
     }
 

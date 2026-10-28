@@ -8,21 +8,27 @@ using System.Windows.Forms;
 namespace Carpathia
 {
     /// <summary>
-    /// An image control with eight animated resize handles. Resizing changes the
-    /// control's bounds; it never destroys or resamples the source image.
+    /// A floating (placed) image that behaves like Photoshop / Paint.NET / GIMP:
+    ///  - Resizing tracks the cursor immediately (no easing lag).
+    ///  - Corner handles keep the aspect ratio; hold Shift to scale freely.
+    ///  - Edge handles scale one axis; hold Shift to keep the aspect ratio.
+    ///  - Hold Alt to resize around the center.
+    ///  - Moving can overhang the canvas, but part of the image always stays
+    ///    reachable; Shift locks movement to one axis.
+    ///  - Right-click / double-click raise CommitRequested; Nudge() moves by image pixels.
     /// Requires pictureBoxCanvas in MovingImageControl.Designer.cs.
-    /// Existing resize_* designer controls are reused when present, or created
-    /// automatically when absent.
     /// </summary>
     public partial class MovingImageControl : UserControl
     {
         private const int BorderPadding = 4;
         private const int HandleSize = 8;
-        private const int MinControlDimension = 32;
+        // Smallest control: 16x16 content px plus the border, so handles never overlap.
+        private const int MinControlDimension = 24;
         private const int MaxControlDimension = 16008;
+        // Image pixels that must remain on the canvas while moving (screen px).
+        private const int MinVisiblePx = 16;
 
-        // A value around 18 gives a responsive ease-out without sudden jumps.
-        // Timer cadence is approximately 60 fps, but elapsed time determines speed.
+        // Only used by AnimateToSize(); mouse resizing is immediate.
         private const double ResizeResponsePerSecond = 18.0;
 
         [Flags]
@@ -49,31 +55,24 @@ namespace Carpathia
         private bool updatingHandleLayout;
         private bool resizeSetupComplete;
 
-        // The original image-space geometry never changes when the canvas zooms.
-        // The 4 px border is SCREEN-space padding, applied AFTER scaling.
         private float zoomFactor = 1f;
         private SizeF logicalContentSize;
         private PointF logicalImageLocation;
         private bool applyingZoomBounds;
 
         private bool moving;
-        // Track the previous visible area so dragging reveals the freshly painted
-        // canvas, instead of leaving fragments of the image at old positions.
         private Rectangle lastVisualBounds;
         private bool refreshingParentCanvas;
         private Control activeMoveSurface;
         private Point moveStartScreen;
         private Point moveStartLocation;
 
-        /// <summary>
-        /// Fires once when a user finishes dragging the image.
-        /// </summary>
+        /// <summary>Fires once when a user finishes dragging the image.</summary>
         public event EventHandler MoveCompleted;
 
-        /// <summary>
-        /// Display zoom (0.05 to 5). At every zoom the frame adds 4 px per side.
-        /// Set this when the parent canvas zoom changes.
-        /// </summary>
+        /// <summary>Raised on double-click or right-click so the editor can commit the image.</summary>
+        public event EventHandler CommitRequested;
+
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public float Zoom
@@ -82,23 +81,15 @@ namespace Carpathia
             set { ApplyZoom(value); }
         }
 
-        /// <summary>Content dimensions in original/unzoomed image pixels.</summary>
         [Browsable(false)]
         public SizeF UnzoomedContentSize { get { return logicalContentSize; } }
 
-        /// <summary>
-        /// Original-image coordinates of the TOP-LEFT of the displayed image
-        /// (not the outer resize border). Useful for zoom animation previews.
-        /// </summary>
         [Browsable(false)]
         public PointF UnzoomedImageLocation { get { return logicalImageLocation; } }
 
         [Browsable(false)]
         public Image DisplayImage { get { return pictureBoxCanvas.Image; } }
 
-        /// <summary>
-        /// Raised after an animated resize reaches its exact final bounds.
-        /// </summary>
         public event EventHandler ResizeAnimationCompleted;
 
         public MovingImageControl(Image image)
@@ -122,7 +113,6 @@ namespace Carpathia
             pictureBoxCanvas.Image = image;
             pictureBoxCanvas.TabStop = false;
 
-            // Match the original +8 px border, subject to room for the handles.
             Size = new Size(
                 Clamp(image.Width + BorderPadding * 2,
                       MinControlDimension, MaxControlDimension),
@@ -135,17 +125,17 @@ namespace Carpathia
                 Size.Height - BorderPadding * 2);
             UpdateLogicalLocation();
 
-            // PictureBox owns the image area; mouse dragging there moves the
-            // whole floating object instead of interfering with resize handles.
             pictureBoxCanvas.Cursor = Cursors.SizeAll;
             pictureBoxCanvas.MouseDown += MoveSurface_MouseDown;
             pictureBoxCanvas.MouseMove += MoveSurface_MouseMove;
             pictureBoxCanvas.MouseUp += MoveSurface_MouseUp;
             pictureBoxCanvas.MouseCaptureChanged += MoveSurface_MouseCaptureChanged;
+            pictureBoxCanvas.MouseDoubleClick += MoveSurface_MouseDoubleClick;
             MouseDown += MoveSurface_MouseDown;
             MouseMove += MoveSurface_MouseMove;
             MouseUp += MoveSurface_MouseUp;
             MouseCaptureChanged += MoveSurface_MouseCaptureChanged;
+            MouseDoubleClick += MoveSurface_MouseDoubleClick;
 
             resizeTimer.Interval = 16;
             resizeTimer.Tick += ResizeTimer_Tick;
@@ -155,10 +145,6 @@ namespace Carpathia
             UpdateHandleLayout();
         }
 
-        /// <summary>
-        /// Synchronize the image object with its parent canvas's zoom, without
-        /// losing the unzoomed size/position after repeated zoom-in/out cycles.
-        /// </summary>
         public void ApplyZoom(float newZoom)
         {
             if (float.IsNaN(newZoom) || float.IsInfinity(newZoom) ||
@@ -168,7 +154,6 @@ namespace Carpathia
             if (Math.Abs(zoomFactor - newZoom) < 0.000001f)
                 return;
 
-            // Finish an active resize before changing coordinate systems.
             if (dragging)
                 EndDrag();
             FinishPendingResize();
@@ -203,14 +188,59 @@ namespace Carpathia
             UpdateHandleLayout();
         }
 
-        /// <summary>
-        /// Position the top-left IMAGE pixel at the given location in the
-        /// parent PictureBox's CURRENT zoomed coordinate system.
-        /// </summary>
         public void SetImageDisplayLocation(Point imageTopLeft)
         {
-            Location = new Point(imageTopLeft.X - BorderPadding,
-                                 imageTopLeft.Y - BorderPadding);
+            Location = ClampLocationToParent(new Point(imageTopLeft.X - BorderPadding,
+                                                       imageTopLeft.Y - BorderPadding));
+        }
+
+        /// <summary>Center the image on a point in the parent's (zoomed) coordinates.</summary>
+        public void CenterAtDisplayPoint(Point center)
+        {
+            Location = ClampLocationToParent(new Point(center.X - Width / 2,
+                                                       center.Y - Height / 2));
+            UpdateLogicalLocation();
+        }
+
+        /// <summary>
+        /// Shrink (never enlarge) so the image fits inside the canvas, keeping its aspect
+        /// ratio. canvasImageSize is the document size in unzoomed image pixels.
+        /// </summary>
+        public void FitInside(Size canvasImageSize)
+        {
+            float s = Math.Min(1f, Math.Min(
+                canvasImageSize.Width / Math.Max(1f, logicalContentSize.Width),
+                canvasImageSize.Height / Math.Max(1f, logicalContentSize.Height)));
+            if (s >= 1f)
+                return;
+
+            logicalContentSize = new SizeF(logicalContentSize.Width * s,
+                                           logicalContentSize.Height * s);
+            int w = Math.Max(1, (int)Math.Round(logicalContentSize.Width * zoomFactor));
+            int h = Math.Max(1, (int)Math.Round(logicalContentSize.Height * zoomFactor));
+            applyingZoomBounds = true;
+            try
+            {
+                Size = new Size(Clamp(w + BorderPadding * 2, MinControlDimension, MaxControlDimension),
+                                Clamp(h + BorderPadding * 2, MinControlDimension, MaxControlDimension));
+            }
+            finally { applyingZoomBounds = false; }
+            targetBounds = Bounds;
+            UpdateHandleLayout();
+        }
+
+        /// <summary>Move by whole IMAGE pixels (arrow keys). Always at least 1 screen px.</summary>
+        public void Nudge(int dxImagePx, int dyImagePx)
+        {
+            if (dragging || moving) return;
+            FinishPendingResize();
+            int dx = dxImagePx == 0 ? 0 : (int)Math.Round(dxImagePx * zoomFactor);
+            int dy = dyImagePx == 0 ? 0 : (int)Math.Round(dyImagePx * zoomFactor);
+            if (dxImagePx != 0 && dx == 0) dx = Math.Sign(dxImagePx);
+            if (dyImagePx != 0 && dy == 0) dy = Math.Sign(dyImagePx);
+            Location = ClampLocationToParent(new Point(Left + dx, Top + dy));
+            targetBounds = Bounds;
+            UpdateLogicalLocation();
         }
 
         private void UpdateLogicalLocation()
@@ -238,10 +268,6 @@ namespace Carpathia
             CommitLogicalGeometry();
         }
 
-        /// <summary>
-        /// Stop any mouse gesture and finish its animation before compositing
-        /// this floating image into the underlying document layer.
-        /// </summary>
         public void CompleteInteraction()
         {
             if (moving)
@@ -258,8 +284,51 @@ namespace Carpathia
             CommitLogicalGeometry();
         }
 
+        // Allow the image to overhang the canvas, but keep MinVisiblePx of it on screen.
+        private Point ClampLocationToParent(Point controlLocation)
+        {
+            Control parent = Parent;
+            if (parent == null)
+                return controlLocation;
+
+            int imgW = Math.Max(1, Width - BorderPadding * 2);
+            int imgH = Math.Max(1, Height - BorderPadding * 2);
+            int visW = Math.Min(MinVisiblePx, imgW);
+            int visH = Math.Min(MinVisiblePx, imgH);
+
+            int imageLeft = controlLocation.X + BorderPadding;
+            int imageTop = controlLocation.Y + BorderPadding;
+            imageLeft = Math.Max(visW - imgW, Math.Min(parent.Width - visW, imageLeft));
+            imageTop = Math.Max(visH - imgH, Math.Min(parent.Height - visH, imageTop));
+            return new Point(imageLeft - BorderPadding, imageTop - BorderPadding);
+        }
+
+        private void RaiseCommitRequested()
+        {
+            // Deferred: the editor disposes this control while handling the event.
+            if (IsHandleCreated)
+                BeginInvoke((MethodInvoker)(() =>
+                {
+                    if (!IsDisposed)
+                        CommitRequested?.Invoke(this, EventArgs.Empty);
+                }));
+            else
+                CommitRequested?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void MoveSurface_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+                RaiseCommitRequested();
+        }
+
         private void MoveSurface_MouseDown(object sender, MouseEventArgs e)
         {
+            if (e.Button == MouseButtons.Right)
+            {
+                RaiseCommitRequested();
+                return;
+            }
             if (e.Button != MouseButtons.Left || moving || dragging ||
                 !(sender is Control source))
                 return;
@@ -283,9 +352,18 @@ namespace Carpathia
         private void MoveToCursor()
         {
             Point p = Cursor.Position;
-            Location = new Point(
-                moveStartLocation.X + p.X - moveStartScreen.X,
-                moveStartLocation.Y + p.Y - moveStartScreen.Y);
+            int dx = p.X - moveStartScreen.X;
+            int dy = p.Y - moveStartScreen.Y;
+
+            // Shift: constrain to the dominant axis, like every image editor.
+            if ((ModifierKeys & Keys.Shift) != 0)
+            {
+                if (Math.Abs(dx) >= Math.Abs(dy)) dy = 0;
+                else dx = 0;
+            }
+
+            Location = ClampLocationToParent(
+                new Point(moveStartLocation.X + dx, moveStartLocation.Y + dy));
             targetBounds = Bounds;
         }
 
@@ -319,7 +397,6 @@ namespace Carpathia
 
         private void SetupResizeHandles()
         {
-            // The names are the same as those in the existing designer.
             RegisterHandle("resize_top", ResizeEdges.Top, Cursors.SizeNS);
             RegisterHandle("resize_bottom", ResizeEdges.Bottom, Cursors.SizeNS);
             RegisterHandle("resize_left", ResizeEdges.Left, Cursors.SizeWE);
@@ -339,7 +416,6 @@ namespace Carpathia
             if (found.Length != 0)
             {
                 handle = found[0];
-                // All coordinates in UpdateHandleLayout are relative to this control.
                 if (handle.Parent != this)
                     handle.Parent = this;
             }
@@ -364,8 +440,6 @@ namespace Carpathia
             handle.BringToFront();
             resizeHandles[handle] = edges;
 
-            // The older designer event handlers remain as compatibility stubs below.
-            // Subscribe to this one shared implementation instead.
             handle.MouseDown += ResizeHandle_MouseDown;
             handle.MouseMove += ResizeHandle_MouseMove;
             handle.MouseUp += ResizeHandle_MouseUp;
@@ -374,12 +448,15 @@ namespace Carpathia
 
         private void ResizeHandle_MouseDown(object sender, MouseEventArgs e)
         {
+            if (e.Button == MouseButtons.Right)
+            {
+                RaiseCommitRequested();
+                return;
+            }
             if (e.Button != MouseButtons.Left || !(sender is Control handle) ||
                 !resizeHandles.TryGetValue(handle, out ResizeEdges edges))
                 return;
 
-            // Snap any previous animation to its exact endpoint before
-            // starting a new drag; keep the opposite resize edge stationary.
             FinishPendingResize();
             dragging = true;
             activeHandle = handle;
@@ -398,40 +475,94 @@ namespace Carpathia
             UpdateTargetFromCursor();
         }
 
+        /// <summary>
+        /// Computes the new bounds from the cursor and applies them IMMEDIATELY.
+        /// Opposite edge stays fixed; aspect lock / center-resize follow modifier keys.
+        /// </summary>
         private void UpdateTargetFromCursor()
         {
             int dx = Cursor.Position.X - dragStartScreen.X;
             int dy = Cursor.Position.Y - dragStartScreen.Y;
-            int left = dragStartBounds.Left;
-            int top = dragStartBounds.Top;
-            int right = dragStartBounds.Right;
-            int bottom = dragStartBounds.Bottom;
 
-            // Opposite edges remain fixed. Using the initial SCREEN cursor position
-            // avoids drift when an animated handle itself moves under the cursor.
-            if ((activeEdges & ResizeEdges.Left) != 0)
-                left = Clamp(dragStartBounds.Left + dx,
-                             right - MaxControlDimension,
-                             right - MinControlDimension);
-            if ((activeEdges & ResizeEdges.Right) != 0)
-                right = Clamp(dragStartBounds.Right + dx,
-                              left + MinControlDimension,
-                              left + MaxControlDimension);
-            if ((activeEdges & ResizeEdges.Top) != 0)
-                top = Clamp(dragStartBounds.Top + dy,
-                            bottom - MaxControlDimension,
-                            bottom - MinControlDimension);
-            if ((activeEdges & ResizeEdges.Bottom) != 0)
-                bottom = Clamp(dragStartBounds.Bottom + dy,
-                               top + MinControlDimension,
-                               top + MaxControlDimension);
+            bool left = (activeEdges & ResizeEdges.Left) != 0;
+            bool right = (activeEdges & ResizeEdges.Right) != 0;
+            bool top = (activeEdges & ResizeEdges.Top) != 0;
+            bool bottom = (activeEdges & ResizeEdges.Bottom) != 0;
+            bool horizontal = left || right;
+            bool vertical = top || bottom;
+            bool corner = horizontal && vertical;
 
-            Rectangle next = Rectangle.FromLTRB(left, top, right, bottom);
-            if (targetBounds == next)
+            Keys mods = ModifierKeys;
+            bool shift = (mods & Keys.Shift) != 0;
+            bool fromCenter = (mods & Keys.Alt) != 0;
+            // Corners keep aspect by default, Shift frees them; edges are free, Shift locks.
+            bool keepAspect = corner ? !shift : shift;
+
+            // Work with the CONTENT rectangle (the control minus its screen-space border).
+            Rectangle start = new Rectangle(
+                dragStartBounds.X + BorderPadding, dragStartBounds.Y + BorderPadding,
+                dragStartBounds.Width - BorderPadding * 2,
+                dragStartBounds.Height - BorderPadding * 2);
+            int minContent = MinControlDimension - BorderPadding * 2;
+            int maxContent = MaxControlDimension - BorderPadding * 2;
+            int mult = fromCenter ? 2 : 1;
+
+            double w = start.Width + (right ? dx * mult : left ? -dx * mult : 0);
+            double h = start.Height + (bottom ? dy * mult : top ? -dy * mult : 0);
+            w = Math.Max(minContent, Math.Min(maxContent, w));
+            h = Math.Max(minContent, Math.Min(maxContent, h));
+
+            if (keepAspect && start.Width > 0 && start.Height > 0)
+            {
+                double aspect = (double)start.Width / start.Height;
+                if (corner)
+                {
+                    // Follow the axis the user has dragged proportionally further.
+                    double sx = w / start.Width, sy = h / start.Height;
+                    double scale = Math.Abs(sx - 1) >= Math.Abs(sy - 1) ? sx : sy;
+                    w = start.Width * scale;
+                    h = w / aspect;
+                }
+                else if (horizontal) h = w / aspect;
+                else w = h * aspect;
+
+                // Keep both sides inside the allowed range without breaking the ratio.
+                double lo = Math.Max(minContent / w, minContent / h);
+                if (lo > 1) { w *= lo; h *= lo; }
+                double hi = Math.Min(maxContent / w, maxContent / h);
+                if (hi < 1) { w *= hi; h *= hi; }
+            }
+
+            int newW = (int)Math.Round(w);
+            int newH = (int)Math.Round(h);
+
+            int x, y;
+            if (fromCenter)
+            {
+                x = start.X + (start.Width - newW) / 2;
+                y = start.Y + (start.Height - newH) / 2;
+            }
+            else
+            {
+                // The edge/corner opposite the grabbed handle stays put. When an edge handle
+                // drives a proportional resize, the other axis grows around its center.
+                x = left ? start.Right - newW : start.X;
+                y = top ? start.Bottom - newH : start.Y;
+                if (!horizontal) x = start.X + (start.Width - newW) / 2;
+                if (!vertical) y = start.Y + (start.Height - newH) / 2;
+            }
+
+            Rectangle next = new Rectangle(
+                x - BorderPadding, y - BorderPadding,
+                newW + BorderPadding * 2, newH + BorderPadding * 2);
+
+            if (targetBounds == next && Bounds == next)
                 return;
 
+            if (resizeTimer.Enabled)
+                resizeTimer.Stop();
             targetBounds = next;
-            StartResizeAnimation();
+            Bounds = next;   // immediate: the image follows the cursor 1:1
         }
 
         private void ResizeHandle_MouseUp(object sender, MouseEventArgs e)
@@ -440,15 +571,12 @@ namespace Carpathia
                 !ReferenceEquals(sender, activeHandle))
                 return;
 
-            // Capture the exact mouse release position before stopping the drag.
             UpdateTargetFromCursor();
             EndDrag();
         }
 
         private void ResizeHandle_MouseCaptureChanged(object sender, EventArgs e)
         {
-            // Losing capture (Alt+Tab, etc.) should not leave the editor stuck
-            // in drag mode. On normal MouseUp, EndDrag already cleared dragging.
             if (dragging && ReferenceEquals(sender, activeHandle))
                 EndDrag();
         }
@@ -462,8 +590,6 @@ namespace Carpathia
             if (captured != null && captured.Capture)
                 captured.Capture = false;
 
-            // The final few pixels remain animated, but commit even when the
-            // current animated frame has already reached the release target.
             if (targetBounds == Bounds)
             {
                 CommitLogicalGeometry();
@@ -514,7 +640,6 @@ namespace Carpathia
             if (elapsedSeconds <= 0)
                 elapsedSeconds = 0.016;
 
-            // Time-based exponential ease-out, independent of system timer jitter.
             double blend = 1.0 - Math.Exp(-ResizeResponsePerSecond * elapsedSeconds);
             Rectangle current = Bounds;
             Rectangle target = targetBounds;
@@ -536,14 +661,8 @@ namespace Carpathia
             int right = Approach(current.Right, target.Right, blend);
             int bottom = Approach(current.Bottom, target.Bottom, blend);
 
-            // Interpolating the edges, rather than Location and Size separately,
-            // prevents opposite-edge jitter when resizing from left/top handles.
             if (right - left < MinControlDimension || bottom - top < MinControlDimension)
-            {
-                // Extremely small intermediate rounding: keep the previous valid
-                // bounds until the next frame rather than invert a rectangle.
                 return;
-            }
 
             Bounds = Rectangle.FromLTRB(left, top, right, bottom);
         }
@@ -602,16 +721,13 @@ namespace Carpathia
             Rectangle previous = lastVisualBounds;
             lastVisualBounds = current;
 
-            // The parent PictureBox already owns the up-to-date layer composite.
-            // Invalidating only the dirty union repaints exposed pixels immediately
-            // without rebuilding or allocating an entire composite per MouseMove.
             Control canvas = Parent;
             if (canvas == null || canvas.IsDisposed || !canvas.IsHandleCreated ||
                 refreshingParentCanvas)
                 return;
 
             Rectangle dirty = Rectangle.Union(previous, current);
-            dirty.Inflate(8, 8); // cover antialiasing and the 4px handle border
+            dirty.Inflate(8, 8);
             dirty.Intersect(canvas.ClientRectangle);
             if (dirty.IsEmpty)
                 return;
@@ -666,9 +782,7 @@ namespace Carpathia
             UpdateHandleLayout();
         }
 
-        // Keep the original method names/signatures so existing designer event
-        // subscriptions still compile. The fully implemented handlers are bound
-        // once to all eight handles by SetupResizeHandles() above.
+        // Kept so existing designer event subscriptions still compile.
         private void resize_top_MouseDown(object sender, MouseEventArgs e) { }
         private void resize_top_MouseUp(object sender, MouseEventArgs e) { }
         private void resize_top_MouseMove(object sender, MouseEventArgs e) { }
@@ -680,8 +794,6 @@ namespace Carpathia
         private void resize_top_left_MouseMove(object sender, MouseEventArgs e) { }
         private void resize_bottom_left_MouseMove(object sender, MouseEventArgs e) { }
 
-        // Do not override Dispose here: WinForms designer already generates that
-        // override in MovingImageControl.Designer.cs.
         private void MovingImageControl_Disposed(object sender, EventArgs e)
         {
             resizeTimer.Stop();
@@ -691,10 +803,12 @@ namespace Carpathia
             pictureBoxCanvas.MouseMove -= MoveSurface_MouseMove;
             pictureBoxCanvas.MouseUp -= MoveSurface_MouseUp;
             pictureBoxCanvas.MouseCaptureChanged -= MoveSurface_MouseCaptureChanged;
+            pictureBoxCanvas.MouseDoubleClick -= MoveSurface_MouseDoubleClick;
             MouseDown -= MoveSurface_MouseDown;
             MouseMove -= MoveSurface_MouseMove;
             MouseUp -= MoveSurface_MouseUp;
             MouseCaptureChanged -= MoveSurface_MouseCaptureChanged;
+            MouseDoubleClick -= MoveSurface_MouseDoubleClick;
         }
     }
 }
