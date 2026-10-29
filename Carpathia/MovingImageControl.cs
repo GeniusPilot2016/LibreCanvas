@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
 namespace Carpathia
@@ -64,6 +65,9 @@ namespace Carpathia
         private Rectangle lastVisualBounds;
         private bool refreshingParentCanvas;
         private Control activeMoveSurface;
+        // Canvas draws the floating pixels in its own paint pass. This control
+        // owns only the selection outline and eight resize handles.
+        private PictureBox backgroundCanvas;
         private Point moveStartScreen;
         private Point moveStartLocation;
 
@@ -112,6 +116,14 @@ namespace Carpathia
             pictureBoxCanvas.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBoxCanvas.Image = image;
             pictureBoxCanvas.TabStop = false;
+            // A child PictureBox cannot alpha-blend with its grandparent's image.
+            // Keep it only as the image holder for the existing editor/commit API.
+            // Drawing and mouse interaction are performed by this UserControl.
+            pictureBoxCanvas.Visible = false;
+            Cursor = Cursors.SizeAll;
+            // A floating image must not steal focus from the editor or cause
+            // AutoScroll to reposition the viewport on MouseDown.
+            TabStop = false;
 
             Size = new Size(
                 Clamp(image.Width + BorderPadding * 2,
@@ -125,12 +137,6 @@ namespace Carpathia
                 Size.Height - BorderPadding * 2);
             UpdateLogicalLocation();
 
-            pictureBoxCanvas.Cursor = Cursors.SizeAll;
-            pictureBoxCanvas.MouseDown += MoveSurface_MouseDown;
-            pictureBoxCanvas.MouseMove += MoveSurface_MouseMove;
-            pictureBoxCanvas.MouseUp += MoveSurface_MouseUp;
-            pictureBoxCanvas.MouseCaptureChanged += MoveSurface_MouseCaptureChanged;
-            pictureBoxCanvas.MouseDoubleClick += MoveSurface_MouseDoubleClick;
             MouseDown += MoveSurface_MouseDown;
             MouseMove += MoveSurface_MouseMove;
             MouseUp += MoveSurface_MouseUp;
@@ -143,6 +149,132 @@ namespace Carpathia
             targetBounds = Bounds;
             lastVisualBounds = Bounds;
             UpdateHandleLayout();
+        }
+
+        // The parent PictureBox is the only surface that draws image pixels.
+        // Rendering translucent pixels inside a moving native child HWND causes
+        // the rectangle/ghosting visible on the canvas. Parent painting ensures
+        // the floating alpha is blended with the actual underlying image once.
+        private void BackgroundCanvas_Paint(object sender, PaintEventArgs e)
+        {
+            Image floating = DisplayImage;
+            if (floating == null || !Visible || IsDisposed)
+                return;
+
+            Rectangle destination = new Rectangle(
+                Left + BorderPadding, Top + BorderPadding,
+                Math.Max(1, Width - BorderPadding * 2),
+                Math.Max(1, Height - BorderPadding * 2));
+            if (!e.ClipRectangle.IntersectsWith(destination))
+                return;
+
+            GraphicsState state = e.Graphics.Save();
+            try
+            {
+                e.Graphics.CompositingMode = CompositingMode.SourceOver;
+                e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                e.Graphics.DrawImage(floating, destination,
+                    new Rectangle(0, 0, floating.Width, floating.Height),
+                    GraphicsUnit.Pixel);
+            }
+            finally
+            {
+                e.Graphics.Restore(state);
+            }
+        }
+
+        // The interior of this control has no window region, so the actual
+        // canvas (including its floating PNG) remains visible without copying
+        // the background into a child window. Only the frame/grips are native.
+        private void UpdateInteractionRegion()
+        {
+            if (!resizeSetupComplete || Width < MinControlDimension ||
+                Height < MinControlDimension || IsDisposed)
+                return;
+
+            Rectangle image = new Rectangle(BorderPadding, BorderPadding,
+                Width - BorderPadding * 2, Height - BorderPadding * 2);
+            using (GraphicsPath path = new GraphicsPath())
+            {
+                path.AddRectangle(new Rectangle(image.Left, image.Top, image.Width, 1));
+                path.AddRectangle(new Rectangle(image.Left, image.Bottom - 1, image.Width, 1));
+                path.AddRectangle(new Rectangle(image.Left, image.Top, 1, image.Height));
+                path.AddRectangle(new Rectangle(image.Right - 1, image.Top, 1, image.Height));
+                foreach (Control handle in resizeHandles.Keys)
+                    path.AddRectangle(handle.Bounds);
+                Region old = Region;
+                Region = new Region(path);
+                old?.Dispose();
+            }
+        }
+
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            // Do not fill the control with a rectangular backdrop.
+            // All opaque content is the frame or child resize-handle panels.
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            Rectangle imageRect = new Rectangle(BorderPadding, BorderPadding,
+                Math.Max(1, ClientSize.Width - BorderPadding * 2),
+                Math.Max(1, ClientSize.Height - BorderPadding * 2));
+            using (Pen frame = new Pen(Color.FromArgb(160, SystemColors.Highlight)))
+                e.Graphics.DrawRectangle(frame, imageRect.X, imageRect.Y,
+                    imageRect.Width - 1, imageRect.Height - 1);
+            base.OnPaint(e);
+        }
+
+        /// <summary>
+        /// Canvas-side hit testing is required because the transparent interior
+        /// is intentionally not part of this child control's window region.
+        /// </summary>
+        public bool ContainsCanvasPoint(Point point)
+        {
+            return !IsDisposed && Visible && Bounds.Contains(point);
+        }
+
+        // Called from ImageEditor.pictureBoxCanvas_MouseDown/Move/Up, before
+        // regular paint-tool processing. Canvas capture keeps movement smooth
+        // even when the pointer crosses holes in the interaction region.
+        public bool TryBeginCanvasDrag(Point point)
+        {
+            if (moving || dragging || backgroundCanvas == null ||
+                !ContainsCanvasPoint(point))
+                return false;
+
+            FinishPendingResize();
+            BringToFront();
+            moving = true;
+            activeMoveSurface = backgroundCanvas;
+            moveStartScreen = Cursor.Position;
+            moveStartLocation = Location;
+            backgroundCanvas.Capture = true;
+            return true;
+        }
+
+        public bool ContinueCanvasDrag()
+        {
+            if (!moving || !ReferenceEquals(activeMoveSurface, backgroundCanvas))
+                return false;
+            MoveToCursor();
+            return true;
+        }
+
+        public bool EndCanvasDrag()
+        {
+            if (!moving || !ReferenceEquals(activeMoveSurface, backgroundCanvas))
+                return false;
+            MoveToCursor();
+            EndMove();
+            return true;
+        }
+
+        private void BackgroundCanvas_MouseCaptureChanged(object sender, EventArgs e)
+        {
+            if (moving && ReferenceEquals(activeMoveSurface, backgroundCanvas))
+                EndMove();
         }
 
         public void ApplyZoom(float newZoom)
@@ -362,8 +494,10 @@ namespace Carpathia
                 else dx = 0;
             }
 
-            Location = ClampLocationToParent(
+            Point nextLocation = ClampLocationToParent(
                 new Point(moveStartLocation.X + dx, moveStartLocation.Y + dy));
+            if (Location != nextLocation)
+                Location = nextLocation;
             targetBounds = Bounds;
         }
 
@@ -690,7 +824,21 @@ namespace Carpathia
 
         protected override void OnParentChanged(EventArgs e)
         {
+            if (backgroundCanvas != null)
+            {
+                backgroundCanvas.Paint -= BackgroundCanvas_Paint;
+                backgroundCanvas.MouseCaptureChanged -= BackgroundCanvas_MouseCaptureChanged;
+                if (!backgroundCanvas.IsDisposed)
+                    backgroundCanvas.Invalidate(lastVisualBounds);
+            }
             base.OnParentChanged(e);
+            backgroundCanvas = Parent as PictureBox;
+            if (backgroundCanvas != null)
+            {
+                backgroundCanvas.Paint += BackgroundCanvas_Paint;
+                backgroundCanvas.MouseCaptureChanged += BackgroundCanvas_MouseCaptureChanged;
+                backgroundCanvas.Invalidate(Bounds);
+            }
             lastVisualBounds = Bounds;
         }
 
@@ -700,6 +848,10 @@ namespace Carpathia
             if (resizeSetupComplete && !applyingZoomBounds && !moving &&
                 !dragging && !resizeTimer.Enabled)
                 UpdateLogicalLocation();
+            // Queue the new image paint; NEVER call Update() here. Calling
+            // Update() inside MouseMove enters WinForms paint/layout while a
+            // captured mouse is moving and makes the image judder.
+            Invalidate();
             RefreshExposedCanvas();
         }
 
@@ -712,6 +864,7 @@ namespace Carpathia
                 if (!applyingZoomBounds && !dragging && !resizeTimer.Enabled)
                     CommitLogicalGeometry();
             }
+            Invalidate();
             RefreshExposedCanvas();
         }
 
@@ -722,26 +875,18 @@ namespace Carpathia
             lastVisualBounds = current;
 
             Control canvas = Parent;
-            if (canvas == null || canvas.IsDisposed || !canvas.IsHandleCreated ||
-                refreshingParentCanvas)
+            if (previous == current || canvas == null || canvas.IsDisposed ||
+                !canvas.IsHandleCreated || refreshingParentCanvas)
                 return;
 
+            // The parent now owns ALL floating-image pixels: repaint the old
+            // AND new position. Queue the WM_PAINT; never call Update/Refresh
+            // from inside mouse movement (the cause of the v1 shaking).
             Rectangle dirty = Rectangle.Union(previous, current);
-            dirty.Inflate(8, 8);
+            dirty.Inflate(2, 2);
             dirty.Intersect(canvas.ClientRectangle);
-            if (dirty.IsEmpty)
-                return;
-
-            refreshingParentCanvas = true;
-            try
-            {
+            if (!dirty.IsEmpty)
                 canvas.Invalidate(dirty, false);
-                canvas.Update();
-            }
-            finally
-            {
-                refreshingParentCanvas = false;
-            }
         }
 
         private void UpdateHandleLayout()
@@ -770,6 +915,7 @@ namespace Carpathia
                             (height - HandleSize) / 2;
                     entry.Key.Bounds = new Rectangle(x, y, HandleSize, HandleSize);
                 }
+                UpdateInteractionRegion();
             }
             finally
             {
@@ -796,14 +942,17 @@ namespace Carpathia
 
         private void MovingImageControl_Disposed(object sender, EventArgs e)
         {
+            if (backgroundCanvas != null)
+            {
+                backgroundCanvas.Paint -= BackgroundCanvas_Paint;
+                backgroundCanvas.MouseCaptureChanged -= BackgroundCanvas_MouseCaptureChanged;
+                if (!backgroundCanvas.IsDisposed)
+                    backgroundCanvas.Invalidate(lastVisualBounds);
+                backgroundCanvas = null;
+            }
             resizeTimer.Stop();
             resizeTimer.Tick -= ResizeTimer_Tick;
             resizeTimer.Dispose();
-            pictureBoxCanvas.MouseDown -= MoveSurface_MouseDown;
-            pictureBoxCanvas.MouseMove -= MoveSurface_MouseMove;
-            pictureBoxCanvas.MouseUp -= MoveSurface_MouseUp;
-            pictureBoxCanvas.MouseCaptureChanged -= MoveSurface_MouseCaptureChanged;
-            pictureBoxCanvas.MouseDoubleClick -= MoveSurface_MouseDoubleClick;
             MouseDown -= MoveSurface_MouseDown;
             MouseMove -= MoveSurface_MouseMove;
             MouseUp -= MoveSurface_MouseUp;

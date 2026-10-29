@@ -29,7 +29,6 @@ using System.Runtime.Serialization;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 using Windows.Storage.Streams;
-using static System.Windows.Forms.DataFormats;
 
 namespace Carpathia
 {
@@ -116,6 +115,16 @@ namespace Carpathia
         Point SelectionStartPoint;
         FontStyle fontStyle = FontStyle.Regular;
         private TextToolAlign textToolAlign = TextToolAlign.Left;
+
+        // One editable text overlay at a time. The backing layer is changed only
+        // on commit, so cancelling an edit cannot leave half-rendered text behind.
+        private TextBox activeTextEditor;
+        private Font activeTextDocumentFont;
+        private PointF activeTextImageLocation;
+        private Color activeTextForeground;
+        private Color activeTextBackground;
+        private bool activeTextFillBackground;
+        private bool completingTextEditor;
         string openedFilePath = string.Empty;
         bool fileSaved = false;
         bool aiGenerated = false;
@@ -661,6 +670,13 @@ namespace Carpathia
             canvasPanel.TabStop = false;
             UIPanel.TabStop = false;
             pictureBoxCanvas.MouseWheel += ImageEditor_MouseWheel;
+            pictureBoxCanvas.MouseDoubleClick += (s, args) =>
+            {
+                if (args.Button == MouseButtons.Left &&
+                    pictureBoxCanvas.Controls.OfType<MovingImageControl>()
+                        .Any(f => f.ContainsCanvasPoint(args.Location)))
+                    CommitFloatingImagesToActiveLayer();
+            };
             canvasPanel.MouseWheel += ImageEditor_MouseWheel;
             UIPanel.MouseWheel += ImageEditor_MouseWheel;
 
@@ -1456,6 +1472,7 @@ namespace Carpathia
 
         private void createNewFile()
         {
+            CommitActiveTextEditor();
             CancelZoomAnimation();
             listView1.Items.Clear();
             aiGenerated = false;
@@ -1492,6 +1509,7 @@ namespace Carpathia
 
         private void openAFile(string fileName)
         {
+            CommitActiveTextEditor();
             CancelZoomAnimation();
             aiGenerated = false;
             isModified = false;
@@ -1527,6 +1545,7 @@ namespace Carpathia
 
         private void createFileWithAIorWebcam(Image generatedImage, bool isAIGenerated)
         {
+            CommitActiveTextEditor();
             CancelZoomAnimation();
             aiGenerated = isAIGenerated;
             isModified = false;
@@ -1622,6 +1641,7 @@ namespace Carpathia
         {
             if (MainBitmap == null || Math.Abs(delta) < 0.00001f)
                 return;
+            CommitActiveTextEditor();
 
             // Accumulate wheel/button steps against the TARGET, not the currently
             // displayed frame; consecutive notches must not get lost.
@@ -2007,6 +2027,7 @@ namespace Carpathia
         }
         private void ToolStripButtonsClick(ToolStripButton toolStripButton)
         {
+            CommitActiveTextEditor();
             CommitFloatingImagesToActiveLayer();
             // Uncheck all ToolStripMenuItems when the ToolStripButton is checked
             if (toolStripButton.Checked)
@@ -2035,6 +2056,7 @@ namespace Carpathia
 
         private void ToolStripMenuItemsClick(object sender)
         {
+            CommitActiveTextEditor();
             CommitFloatingImagesToActiveLayer();
             ToolStripMenuItem clickedMenuItem = (ToolStripMenuItem)sender;
 
@@ -2564,6 +2586,7 @@ namespace Carpathia
         }
         private async void saveFile(string targetFilePath)
         {
+            CommitActiveTextEditor();
             SyncActiveLayerFromCanvas();
             RefreshActiveLayerThumbnail(force: true);
             fileSaved = false;
@@ -3318,6 +3341,11 @@ namespace Carpathia
 
         private void pictureBoxCanvas_MouseUp(object sender, MouseEventArgs e)
         {
+            if (e.Button == MouseButtons.Left)
+                foreach (MovingImageControl floating in pictureBoxCanvas.Controls.OfType<MovingImageControl>())
+                    if (floating.EndCanvasDrag())
+                        return;
+
             if (!isImageCurrentlyCreating)
             {
                 if (isdrawing)
@@ -3462,6 +3490,12 @@ namespace Carpathia
 
         private void pictureBoxCanvas_MouseMove(object sender, MouseEventArgs e)
         {
+            // Canvas captures the pointer while moving a floating PNG.
+            // Do not run drawing/selection tools during that gesture.
+            foreach (MovingImageControl floating in pictureBoxCanvas.Controls.OfType<MovingImageControl>())
+                if (floating.ContinueCanvasDrag())
+                    return;
+
             if (!isImageCurrentlyCreating)
             {
                 // Track mouse position for the brush tip preview
@@ -4437,11 +4471,40 @@ namespace Carpathia
             if (e.Button != MouseButtons.Left && e.Button != MouseButtons.Right)
                 return;
 
+            // v3: Floating PNG pixels are painted directly by the canvas.
+            // The child control has only a frame/grip region, so interior
+            // clicks reach this PictureBox. Route them BEFORE canvas tools or
+            // the click-outside commit logic runs.
+            MovingImageControl floatingHit = pictureBoxCanvas.Controls
+                .OfType<MovingImageControl>()
+                .FirstOrDefault(item => item.ContainsCanvasPoint(e.Location));
+            if (floatingHit != null)
+            {
+                if (e.Button == MouseButtons.Right)
+                    CommitFloatingImagesToActiveLayer();
+                else
+                    floatingHit.TryBeginCanvasDrag(e.Location);
+                return;
+            }
+
             // Clicking uncovered canvas space commits the floating object first,
             // so the chosen paint/selection tool operates on the merged pixels.
             if (e.Button == MouseButtons.Left)
                 CommitFloatingImagesToActiveLayer();
 
+            // Do not set isdrawing or call drawIntoCanvas for text. Creating it
+            // on MouseDown (rather than Click) also works after a previous text
+            // editor loses focus and is committed by the same mouse gesture.
+            if (selectedTool == Tools.Text)
+            {
+                isdrawing = false;
+                if (e.Button == MouseButtons.Left && !isImageCurrentlyCreating &&
+                    EnsureVisibleLayerForTool())
+                    BeginTextEdit(e.Location);
+                return;
+            }
+
+            CommitActiveTextEditor();
             paintingMouseButton = e.Button;
             if (!isImageCurrentlyCreating)
             {
@@ -4611,176 +4674,6 @@ namespace Carpathia
                 toolStripGaussianBlur.Visible = false;
                 switch (selectedTool)
                 {
-                    case Tools.Text:
-                        {
-                            SaveStateForUndo();
-                            // MouseEventArgs'den tıklama konumunu alın  
-                            // MouseEventArgs kullanarak tıklama konumunu alın
-                            MouseEventArgs me = (MouseEventArgs)e;
-                            int clickedX = me.X;
-                            int clickedY = me.Y;
-                            // Yeni bir TextBox oluşturun  
-                            TextBox textBox = new TextBox
-                            {
-                                MaximumSize = Size.Empty, // Maksimum boyut  
-                                AutoSize = false, // Otomatik boyutlandırmayı devre dışı bırakın  
-                                Multiline = true, // Çok satırlı metin desteği  
-                                WordWrap = true, // Metni sarmayı etkinleştirin  
-                                Font = new Font(fontsComboBox.Text, textSize, fontStyle), // Yazı tipi ayarı  
-                                BorderStyle = BorderStyle.FixedSingle // Kenarlık stili 
-                            };
-                            switch (textToolAlign)
-                            {
-                                case TextToolAlign.Left:
-                                    textBox.TextAlign = HorizontalAlignment.Left;
-                                    break;
-                                case TextToolAlign.Middle:
-                                    textBox.TextAlign = HorizontalAlignment.Center;
-                                    break;
-                                case TextToolAlign.Right:
-                                    textBox.TextAlign = HorizontalAlignment.Right;
-                                    break;
-                                default:
-                                    textBox.TextAlign = HorizontalAlignment.Left;
-                                    break;
-                            }
-                            if (backgroundFilling == true)
-                            {
-                                textBox.BackColor = color2;
-                            }
-                            textBox.Location = new Point(
-                                Math.Min(clickedX, pictureBoxCanvas.Width - textBox.Width),
-                                Math.Min(clickedY, pictureBoxCanvas.Height - textBox.Height)
-                            );
-
-                            // TextBox'ı pictureBoxCanvas'a ekleyin  
-                            pictureBoxCanvas.Controls.Add(textBox);
-
-                            // TextBox'ı odaklayın  
-                            textBox.Focus();
-
-                            // TextBox'ın metni değiştikçe boyutunu ayarlayın  
-                            textBox.TextChanged += (s, args) =>
-                            {
-                                // Measure the size of the text, including multi-line text  
-                                Size textSize = TextRenderer.MeasureText(
-                                    textBox.Text,
-                                    textBox.Font,
-                                    new Size(textBox.Width, int.MaxValue), // Allow wrapping by setting a maximum height  
-                                    TextFormatFlags.WordBreak // Enable word wrapping  
-                                );
-
-                                // Adjust the TextBox's height based on the measured size  
-                                textBox.Height = textSize.Height + 5; // Add padding  
-                            };
-                            textBox.TextChanged += (s, args) =>
-                            {
-                                using (Graphics g = textBox.CreateGraphics())
-                                {
-                                    // Measure the size of the text, including multi-line text  
-                                    SizeF textSize = g.MeasureString(textBox.Text, textBox.Font);
-
-                                    // Adjust the TextBox's width and height based on the measured size  
-                                    textBox.Width = Math.Max((int)textSize.Width + 10, textBox.MinimumSize.Width); // Add padding for width  
-                                    textBox.Height = Math.Max((int)textSize.Height + 10, textBox.MinimumSize.Height); // Add padding for height  
-                                }
-                            };
-
-                            textBox.LostFocus += (s, args) =>
-                            {
-                                if (isSelected && !SelectionRectangle.IsEmpty && SelectedBitmap != null)
-                                {
-                                    // Draw the TextBox content onto the bitmap  
-                                    using (Graphics graphics = Graphics.FromImage(SelectedBitmap))
-                                    {
-                                        if (backgroundFilling && !string.IsNullOrEmpty(textBox.Text))
-                                        {
-                                            // Draw background rectangle
-                                            RectangleF backgroundRect = new RectangleF(
-                                                (int)Math.Round(textBox.Location.X / zoom) - SelectionRectangle.X,
-                                                (int)Math.Round(textBox.Location.Y / zoom) - SelectionRectangle.Y,
-                                                textBox.Width / zoom,
-                                                textBox.Height / zoom
-                                            );
-                                            using (Brush backgroundBrush = new SolidBrush(color2))
-                                            {
-                                                graphics.FillRectangle(backgroundBrush, backgroundRect);
-                                            }
-                                        }
-
-                                        // Draw the text
-                                        graphics.DrawString(
-                                        textBox.Text,
-                                        textBox.Font,
-                                        new SolidBrush(ActivePaintColor),
-                                        GetAlignedTextPosition(textBox, zoom, SelectionRectangle),
-                                        new StringFormat
-                                        {
-                                            Alignment = GetHorizontalAlignment(textBox.TextAlign),
-                                            LineAlignment = StringAlignment.Near // Adjust for vertical alignment if needed
-                                        });
-
-                                    }
-                                    MergeMainBitmapWithSelected();
-                                    isModified = true; MarkLayerThumbnailDirty();
-                                }
-                                else
-                                {
-                                    // Draw the TextBox content onto the bitmap  
-                                    using (Graphics graphics = Graphics.FromImage(MainBitmap))
-                                    {
-                                        if (backgroundFilling && !string.IsNullOrEmpty(textBox.Text))
-                                        {
-                                            // Draw background rectangle
-                                            RectangleF backgroundRect = new RectangleF(
-                                                (int)Math.Round(textBox.Location.X / zoom),
-                                                (int)Math.Round(textBox.Location.Y / zoom),
-                                                textBox.Width / zoom,
-                                                textBox.Height / zoom
-                                            );
-                                            using (Brush backgroundBrush = new SolidBrush(color2))
-                                            {
-                                                graphics.FillRectangle(backgroundBrush, backgroundRect);
-                                            }
-                                        }
-
-                                        // Draw the text
-                                        graphics.DrawString(
-                                        textBox.Text,
-                                        textBox.Font,
-                                        new SolidBrush(ActivePaintColor),
-                                        GetAlignedTextPosition(textBox, zoom, SelectionRectangle),
-                                        new StringFormat
-                                        {
-                                            Alignment = GetHorizontalAlignment(textBox.TextAlign),
-                                            LineAlignment = StringAlignment.Near // Adjust for vertical alignment if needed
-                                        });
-
-                                    }
-                                }
-
-                                // Remove the TextBox from the canvas  
-                                pictureBoxCanvas.Controls.Remove(textBox);
-
-                                // Update the PictureBox with the updated bitmap  
-                                RenderCompositeToCanvas();
-                                pictureBoxCanvas.Invalidate(); // Force a redraw  
-                                isModified = true; MarkLayerThumbnailDirty();
-                            };
-                            textBox.TextChanged += (s, args) =>
-                            {
-                                using (Graphics g = textBox.CreateGraphics())
-                                {
-                                    // Measure the size of the text, including multi-line text  
-                                    SizeF textSize = g.MeasureString(textBox.Text, textBox.Font, textBox.Width);
-
-                                    // Adjust the TextBox's width and height based on the measured size  
-                                    textBox.Width = Math.Max((int)textSize.Width + 10, textBox.MinimumSize.Width);
-                                    textBox.Height = Math.Max((int)textSize.Height + 10, textBox.MinimumSize.Height);
-                                }
-                            };
-                        }
-                        break;
                     case Tools.Bucket:
                         {
                             SaveStateForUndo();
@@ -5128,6 +5021,7 @@ namespace Carpathia
 
         private void ImageEditor_FormClosed(object sender, FormClosedEventArgs e)
         {
+            CancelActiveTextEditor();
             CancelZoomAnimation();
             zoomAnimationTimer.Tick -= ZoomAnimationTimer_Tick;
             zoomAnimationTimer.Dispose();
@@ -5689,10 +5583,9 @@ namespace Carpathia
                 MainBitmap = new Bitmap(state.Bitmap);
                 originalSize = MainBitmap.Size;
 
-                canvasPanel.Size = new Size(
-                    (int)Math.Round(MainBitmap.Width * zoom) + 20,
-                    (int)Math.Round(MainBitmap.Height * zoom) + 20);
-                pictureBoxCanvas.Size = panelResizer.Size;
+                // Call SetZoomedCanvasBounds() instead of manually setting partial sizes
+                SetZoomedCanvasBounds();
+
                 UIPanel.AutoScrollMinSize = canvasPanel.Size;
                 labelSize.Text = $"{MainBitmap.Width} x {MainBitmap.Height} px";
             }
@@ -5884,15 +5777,213 @@ namespace Carpathia
             SetAsUnselected();
             HideAddTextTextBoxes();
         }
-        private void HideAddTextTextBoxes()
+        /// <summary>
+        /// Opens a multiline text editor at the clicked *screen* position. Only
+        /// CommitActiveTextEditor writes to the document (and creates an undo step).
+        /// </summary>
+        private void BeginTextEdit(Point displayPoint)
         {
-            foreach (Control control in pictureBoxCanvas.Controls)
+            CommitActiveTextEditor();
+            if (MainBitmap == null || isImageCurrentlyCreating)
+                return;
+
+            // Selections can keep a pending SelectedBitmap. Finalize that first
+            // so text is drawn to the real active layer, not to a disposable copy.
+            if (isSelected)
             {
-                if (control is TextBox textBox)
+                SetAsUnselected();
+                MarkCompositeDirty();
+                RenderCompositeToCanvas(force: true);
+            }
+
+            if (displayPoint.X < 0 || displayPoint.Y < 0 ||
+                displayPoint.X >= pictureBoxCanvas.ClientSize.Width ||
+                displayPoint.Y >= pictureBoxCanvas.ClientSize.Height)
+                return;
+
+            string fontName = fontsComboBox.Text;
+            float pointSize = Math.Max(1f, Math.Min(1000f, textSize));
+            Font documentFont;
+            try
+            {
+                documentFont = new Font(fontName, pointSize, fontStyle, GraphicsUnit.Point);
+            }
+            catch (ArgumentException)
+            {
+                documentFont = new Font(FontFamily.GenericSansSerif, pointSize,
+                    FontStyle.Regular, GraphicsUnit.Point);
+            }
+            activeTextDocumentFont = documentFont;
+            activeTextForeground = color1;
+            activeTextBackground = color2;
+            activeTextFillBackground = backgroundFilling;
+
+            // WinForms text controls are not alpha-transparent. The light backing
+            // exists *only* during editing and is never painted into the image.
+            int left = Math.Max(0, displayPoint.X);
+            int top = Math.Max(0, displayPoint.Y);
+            int availableWidth = Math.Max(1, pictureBoxCanvas.ClientSize.Width - left);
+            int width = Math.Min(Math.Max(70, (int)Math.Round(260 * zoom)), availableWidth);
+            int availableHeight = Math.Max(1, pictureBoxCanvas.ClientSize.Height - top);
+            int height = Math.Min(Math.Max(28, (int)Math.Ceiling(pointSize * zoom * 1.8f)), availableHeight);
+            activeTextImageLocation = new PointF(left / zoom, top / zoom);
+
+            var editor = new TextBox
+            {
+                Multiline = true,
+                AcceptsReturn = true,
+                AcceptsTab = false,
+                WordWrap = true,
+                AutoSize = false,
+                BorderStyle = BorderStyle.FixedSingle,
+                ScrollBars = ScrollBars.None,
+                Location = new Point(left, top),
+                Size = new Size(width, height),
+                ForeColor = activeTextForeground,
+                BackColor = activeTextFillBackground ? activeTextBackground : SystemColors.Window,
+                Font = new Font(documentFont.FontFamily,
+                    Math.Max(1f, pointSize * zoom), documentFont.Style, GraphicsUnit.Point),
+                TextAlign = textToolAlign == TextToolAlign.Middle ? HorizontalAlignment.Center :
+                    textToolAlign == TextToolAlign.Right ? HorizontalAlignment.Right : HorizontalAlignment.Left
+            };
+            activeTextEditor = editor;
+            editor.TextChanged += ActiveTextEditor_TextChanged;
+            editor.LostFocus += ActiveTextEditor_LostFocus;
+            editor.KeyDown += ActiveTextEditor_KeyDown;
+            pictureBoxCanvas.Controls.Add(editor);
+            editor.BringToFront();
+            editor.Focus();
+        }
+
+        private void ActiveTextEditor_TextChanged(object sender, EventArgs e)
+        {
+            TextBox editor = activeTextEditor;
+            if (editor == null || editor.IsDisposed)
+                return;
+            // Keep the editor's width fixed so wrapping is predictable. The
+            // previous code had three conflicting TextChanged resize handlers.
+            int maxHeight = Math.Max(1, pictureBoxCanvas.ClientSize.Height - editor.Top);
+            Size measured = TextRenderer.MeasureText(
+                string.IsNullOrEmpty(editor.Text) ? "Ag" : editor.Text + " ",
+                editor.Font,
+                new Size(Math.Max(1, editor.ClientSize.Width - 4), 16000),
+                TextFormatFlags.WordBreak | TextFormatFlags.TextBoxControl);
+            editor.Height = Math.Min(maxHeight, Math.Max(
+                (int)Math.Ceiling(editor.Font.Height * 1.5), measured.Height + 8));
+        }
+
+        private void ActiveTextEditor_LostFocus(object sender, EventArgs e)
+        {
+            if (ReferenceEquals(sender, activeTextEditor))
+                CommitActiveTextEditor();
+        }
+
+        private void ActiveTextEditor_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Escape)
+            {
+                CancelActiveTextEditor();
+                e.SuppressKeyPress = true;
+            }
+            else if (e.KeyCode == Keys.Enter && e.Control)
+            {
+                CommitActiveTextEditor();
+                e.SuppressKeyPress = true;
+            }
+        }
+
+        /// <summary>Flatten the edited text into the selected editable layer.</summary>
+        private void CommitActiveTextEditor()
+        {
+            if (activeTextEditor == null || completingTextEditor)
+                return;
+
+            completingTextEditor = true;
+            TextBox editor = activeTextEditor;
+            activeTextEditor = null; // Prevent reentry via LostFocus/Dispose.
+            try
+            {
+                editor.LostFocus -= ActiveTextEditor_LostFocus;
+                editor.TextChanged -= ActiveTextEditor_TextChanged;
+                editor.KeyDown -= ActiveTextEditor_KeyDown;
+
+                string content = editor.Text;
+                if (!string.IsNullOrWhiteSpace(content) && MainBitmap != null)
                 {
-                    pictureBoxCanvas.Controls.Remove(textBox);
+                    SaveStateForUndo(); // Exactly one undo step per committed text.
+                    float contentWidth = Math.Max(1f, editor.ClientSize.Width / zoom);
+                    float contentHeight = Math.Max(1f, editor.ClientSize.Height / zoom);
+                    RectangleF layout = new RectangleF(
+                        activeTextImageLocation.X, activeTextImageLocation.Y,
+                        contentWidth, contentHeight);
+                    using (Graphics graphics = Graphics.FromImage(MainBitmap))
+                    using (StringFormat format = new StringFormat(StringFormat.GenericDefault))
+                    using (SolidBrush foreground = new SolidBrush(activeTextForeground))
+                    {
+                        graphics.CompositingMode = CompositingMode.SourceOver;
+                        graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                        graphics.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+                        graphics.SetClip(new Rectangle(Point.Empty, MainBitmap.Size));
+                        format.Alignment = editor.TextAlign == HorizontalAlignment.Center
+                            ? StringAlignment.Center : editor.TextAlign == HorizontalAlignment.Right
+                            ? StringAlignment.Far : StringAlignment.Near;
+                        format.LineAlignment = StringAlignment.Near;
+                        if (activeTextFillBackground)
+                        {
+                            using (SolidBrush background = new SolidBrush(activeTextBackground))
+                                graphics.FillRectangle(background, layout);
+                        }
+                        graphics.DrawString(content, activeTextDocumentFont,
+                            foreground, layout, format);
+                    }
+                    isModified = true;
+                    isSaved = false;
+                    MarkCompositeDirty();
+                    RenderCompositeToCanvas(force: true);
+                    MarkLayerThumbnailDirty();
+                    pictureBoxCanvas.Invalidate();
                 }
             }
+            finally
+            {
+                if (editor.Parent != null)
+                    editor.Parent.Controls.Remove(editor);
+                editor.Dispose();
+                activeTextDocumentFont?.Dispose();
+                activeTextDocumentFont = null;
+                completingTextEditor = false;
+            }
+        }
+
+        private void CancelActiveTextEditor()
+        {
+            if (activeTextEditor == null || completingTextEditor)
+                return;
+            completingTextEditor = true;
+            TextBox editor = activeTextEditor;
+            activeTextEditor = null;
+            try
+            {
+                editor.LostFocus -= ActiveTextEditor_LostFocus;
+                editor.TextChanged -= ActiveTextEditor_TextChanged;
+                editor.KeyDown -= ActiveTextEditor_KeyDown;
+                if (editor.Parent != null)
+                    editor.Parent.Controls.Remove(editor);
+                editor.Dispose();
+            }
+            finally
+            {
+                activeTextDocumentFont?.Dispose();
+                activeTextDocumentFont = null;
+                completingTextEditor = false;
+            }
+        }
+
+        private void HideAddTextTextBoxes()
+        {
+            // The old implementation silently removed typed text without
+            // drawing it into MainBitmap. All hide paths must finalize first.
+            CommitActiveTextEditor();
         }
 
         private void canvasPanel_Paint(object sender, PaintEventArgs e)
@@ -6076,15 +6167,26 @@ namespace Carpathia
             }
             basicFilters = BasicFilters.Mirror;
             MainBitmap = Filters.BasicFilters.MirrorEffect(MainBitmap);
-            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
-            pictureBoxCanvas.Size = panelResizer.Size;
-            RenderCompositeToCanvas();
-            labelSize.Text = $"{MainBitmap.Width} x {MainBitmap.Height} px";
-            pictureBoxCanvas.Invalidate();
-            CenterCanvasPanel();
-            isModified = true; MarkLayerThumbnailDirty();
-        }
 
+            // Update zoomed canvas bounds and scrollbars properly
+            SetZoomedCanvasBounds();
+
+            SyncActiveLayerFromCanvas();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+
+            pictureBoxCanvas.Invalidate();
+            pictureBoxCanvas.Update();
+
+            isModified = true;
+            MarkLayerThumbnailDirty();
+            RefreshActiveLayerThumbnail(force: true);
+            labelSize.Text = $"{MainBitmap.Width} x {MainBitmap.Height} px";
+
+            // Center the canvas and scrollbars
+            CenterCanvasPanel();
+            CenterScrollbars();
+        }
         private void flashToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveStateForUndo();
@@ -6123,9 +6225,17 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.Flash(MainBitmap);
             }
-            RenderCompositeToCanvas();
+
+            SyncActiveLayerFromCanvas();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+
             pictureBoxCanvas.Invalidate();
-            isModified = true; MarkLayerThumbnailDirty();
+            pictureBoxCanvas.Update();
+
+            isModified = true;
+            MarkLayerThumbnailDirty();
+            RefreshActiveLayerThumbnail(force: true);
         }
 
 
@@ -6167,9 +6277,16 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.Frozen(MainBitmap);
             }
-            RenderCompositeToCanvas();
+            SyncActiveLayerFromCanvas();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+
             pictureBoxCanvas.Invalidate();
-            isModified = true; MarkLayerThumbnailDirty();
+            pictureBoxCanvas.Update();
+
+            isModified = true;
+            MarkLayerThumbnailDirty();
+            RefreshActiveLayerThumbnail(force: true);
         }
 
         private void winterToolStripMenuItem_Click(object sender, EventArgs e)
@@ -6210,9 +6327,16 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.Winter(MainBitmap);
             }
-            RenderCompositeToCanvas();
+            SyncActiveLayerFromCanvas();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+
             pictureBoxCanvas.Invalidate();
-            isModified = true; MarkLayerThumbnailDirty();
+            pictureBoxCanvas.Update();
+
+            isModified = true;
+            MarkLayerThumbnailDirty();
+            RefreshActiveLayerThumbnail(force: true);
         }
 
         private void blackAndWhiteToolStripMenuItem_Click(object sender, EventArgs e)
@@ -6253,9 +6377,16 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.BlackAndWhite(MainBitmap);
             }
-            RenderCompositeToCanvas();
+            SyncActiveLayerFromCanvas();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+
             pictureBoxCanvas.Invalidate();
-            isModified = true; MarkLayerThumbnailDirty();
+            pictureBoxCanvas.Update();
+
+            isModified = true;
+            MarkLayerThumbnailDirty();
+            RefreshActiveLayerThumbnail(force: true);
         }
 
         private void oldPictureToolStripMenuItem_Click(object sender, EventArgs e)
@@ -6296,9 +6427,16 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.OldImage(MainBitmap);
             }
-            RenderCompositeToCanvas();
+            SyncActiveLayerFromCanvas();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+
             pictureBoxCanvas.Invalidate();
-            isModified = true; MarkLayerThumbnailDirty();
+            pictureBoxCanvas.Update();
+
+            isModified = true;
+            MarkLayerThumbnailDirty();
+            RefreshActiveLayerThumbnail(force: true);
         }
 
         private void cherryToolStripMenuItem_Click(object sender, EventArgs e)
@@ -6339,9 +6477,16 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.CherryFilter(MainBitmap);
             }
-            RenderCompositeToCanvas();
+            SyncActiveLayerFromCanvas();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+
             pictureBoxCanvas.Invalidate();
-            isModified = true; MarkLayerThumbnailDirty();
+            pictureBoxCanvas.Update();
+
+            isModified = true;
+            MarkLayerThumbnailDirty();
+            RefreshActiveLayerThumbnail(force: true);
         }
 
         private void lightAddToolStripMenuItem_Click(object sender, EventArgs e)
@@ -6382,9 +6527,16 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.LightAdd(MainBitmap);
             }
-            RenderCompositeToCanvas();
+            SyncActiveLayerFromCanvas();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+
             pictureBoxCanvas.Invalidate();
-            isModified = true; MarkLayerThumbnailDirty();
+            pictureBoxCanvas.Update();
+
+            isModified = true;
+            MarkLayerThumbnailDirty();
+            RefreshActiveLayerThumbnail(force: true);
         }
 
         private void purpleToolStripMenuItem_Click(object sender, EventArgs e)
@@ -6425,9 +6577,16 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.PurpleEffect(MainBitmap);
             }
-            RenderCompositeToCanvas();
+            SyncActiveLayerFromCanvas();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+
             pictureBoxCanvas.Invalidate();
-            isModified = true; MarkLayerThumbnailDirty();
+            pictureBoxCanvas.Update();
+
+            isModified = true;
+            MarkLayerThumbnailDirty();
+            RefreshActiveLayerThumbnail(force: true);
         }
 
         private void fogToolStripMenuItem_Click(object sender, EventArgs e)
@@ -6577,9 +6736,13 @@ namespace Carpathia
 
                 previewBitmap = filteredBitmap;
                 pictureBoxCanvas.Image = previewBitmap;
+                MarkCompositeDirty();
+                pictureBoxCanvas.Invalidate();
+                pictureBoxCanvas.Update();
             }
 
             pictureBoxCanvas.Invalidate();
+            pictureBoxCanvas.Update();
         }
         private void buttonArtisticFiltersOK_Click(object sender, EventArgs e)
         {
@@ -6600,43 +6763,68 @@ namespace Carpathia
         }
         private void CancelFilters()
         {
-            if (previewBitmap != null && previewBitmap != MainBitmap)
+            try
             {
-                previewBitmap.Dispose();
-                previewBitmap = null;
-            }
-
-            if (isSelected && SelectedBitmap != null)
-            {
-                SelectedBitmap.Dispose();
-                SelectedBitmap = null;
-
-                if (!SelectionRectangle.IsEmpty && MainBitmap != null)
+                // 1. Önizleme bitkisel belleğini güvenli bir şekilde temizle
+                if (previewBitmap != null)
                 {
-                    SelectedBitmap = new Bitmap(
-                        (int)(SelectionRectangle.Width / zoom),
-                        (int)(SelectionRectangle.Height / zoom));
-
-                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                    if (!ReferenceEquals(previewBitmap, MainBitmap))
                     {
-                        g.Clear(Color.Transparent);
-                        Rectangle sourceRect = new Rectangle(
-                            (int)(originalSelectionRectangleLocation.X),
-                            (int)(originalSelectionRectangleLocation.Y),
-                            (int)(originalSelectionRectangleSize.Width),
-                            (int)(originalSelectionRectangleSize.Height));
+                        try { previewBitmap.Dispose(); } catch { }
+                    }
+                    previewBitmap = null;
+                }
 
-                        g.DrawImage(MainBitmap,
-                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                            sourceRect,
-                            GraphicsUnit.Pixel);
+                // 2. Seçili alan bitmap'ini güvenli bir şekilde sıfırla
+                if (isSelected && SelectedBitmap != null)
+                {
+                    try { SelectedBitmap.Dispose(); } catch { }
+                    SelectedBitmap = null;
+
+                    if (!SelectionRectangle.IsEmpty && MainBitmap != null)
+                    {
+                        int w = Math.Max(1, (int)(SelectionRectangle.Width / zoom));
+                        int h = Math.Max(1, (int)(SelectionRectangle.Height / zoom));
+
+                        SelectedBitmap = new Bitmap(w, h);
+
+                        using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                        {
+                            g.Clear(Color.Transparent);
+                            Rectangle sourceRect = new Rectangle(
+                                (int)(originalSelectionRectangleLocation.X),
+                                (int)(originalSelectionRectangleLocation.Y),
+                                (int)(originalSelectionRectangleSize.Width),
+                                (int)(originalSelectionRectangleSize.Height));
+
+                            g.DrawImage(MainBitmap,
+                                new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                                sourceRect,
+                                GraphicsUnit.Pixel);
+                        }
                     }
                 }
-            }
 
-            RenderCompositeToCanvas();
-            pictureBoxCanvas.Invalidate();
-            pictureBoxCanvas.Refresh();
+                // 3. Arayüzü ve tuvali güvenli bir şekilde yenile (UI Thread garantisiyle)
+                if (InvokeRequired)
+                {
+                    Invoke(new Action(() => {
+                        RenderCompositeToCanvas(force: true);
+                        pictureBoxCanvas.Invalidate();
+                        pictureBoxCanvas.Update();
+                    }));
+                }
+                else
+                {
+                    RenderCompositeToCanvas(force: true);
+                    pictureBoxCanvas.Invalidate();
+                    pictureBoxCanvas.Update();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("CancelFilters Safe Error: " + ex.Message, Logger.LogTypes.Error);
+            }
         }
 
         private void cartoonToolStripMenuItem_Click(object sender, EventArgs e)
@@ -7967,6 +8155,7 @@ namespace Carpathia
 
         private void ImageEditor_FormClosing(object sender, FormClosingEventArgs e)
         {
+            CommitActiveTextEditor();
             if (isModified)
             {
                 DialogResult result = MessageForm.Show("Do you want to save changes to your image?", "Unsaved Changes", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
@@ -8004,6 +8193,23 @@ namespace Carpathia
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             Keys key = keyData & Keys.KeyCode;
+
+            if (activeTextEditor != null)
+            {
+                if (key == Keys.Escape)
+                {
+                    CancelActiveTextEditor();
+                    return true;
+                }
+                if (key == Keys.Enter && (keyData & Keys.Control) != 0)
+                {
+                    CommitActiveTextEditor();
+                    return true;
+                }
+                // TextBox keeps Delete, Backspace, arrows, Ctrl+A, Ctrl+Z,
+                // and ordinary Enter (for multiline text).
+                return base.ProcessCmdKey(ref msg, keyData);
+            }
 
             // Ctrl+D: commit floating images and deselect the current selection.
             if (keyData == (Keys.Control | Keys.D))
@@ -8598,7 +8804,7 @@ namespace Carpathia
             try
             {
                 int queryNumber = await ImageGenerationCore.GetRemainingUsage();
-                if(queryNumber == -1)
+                if (queryNumber == -1)
                 {
                     MessageForm.Show(
                         $"Failed to retrieve AI usage.",
@@ -8675,9 +8881,6 @@ namespace Carpathia
     // while the actual UI is rendered as a grid with a per-row visibility button.
     internal sealed class LayerDataGridView : DataGridView
     {
-        private const string ShowIconBase64 = "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";
-        private const string HideIconBase64 = "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";
-
         private readonly ListView compatibilityList = new();
         private readonly LayerListItemCollection itemCollection;
         private readonly LayerSelectedIndexCollection selectedIndexCollection;
@@ -8701,8 +8904,8 @@ namespace Carpathia
 
         public LayerDataGridView()
         {
-            showIcon = DecodeIcon(ShowIconBase64);
-            hideIcon = DecodeIcon(HideIconBase64);
+            showIcon = Resources.icons8_show_48;
+            hideIcon = Resources.icons8_hide_48;
 
             AllowUserToAddRows = false;
             AllowUserToDeleteRows = false;
@@ -9023,14 +9226,6 @@ namespace Carpathia
                 e.Value = item.Text;
                 e.FormattingApplied = true;
             }
-        }
-
-        private static Image DecodeIcon(string base64)
-        {
-            byte[] bytes = Convert.FromBase64String(base64);
-            using var stream = new System.IO.MemoryStream(bytes);
-            using var source = Image.FromStream(stream);
-            return new Bitmap(source);
         }
 
         protected override void Dispose(bool disposing)
