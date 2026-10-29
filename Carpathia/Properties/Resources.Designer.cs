@@ -778,6 +778,16 @@ namespace Carpathia.Properties {
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
+        internal static System.Drawing.Bitmap icons8_hide_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-hide-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
         internal static System.Drawing.Bitmap icons8_icy_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-icy-48", resourceCulture);
@@ -1111,6 +1121,16 @@ namespace Carpathia.Properties {
         internal static System.Drawing.Bitmap icons8_sheet_of_paper_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-sheet-of-paper-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap icons8_show_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-show-48", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

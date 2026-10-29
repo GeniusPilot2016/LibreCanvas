@@ -5689,10 +5689,9 @@ namespace Carpathia
                 MainBitmap = new Bitmap(state.Bitmap);
                 originalSize = MainBitmap.Size;
 
-                canvasPanel.Size = new Size(
-                    (int)Math.Round(MainBitmap.Width * zoom) + 20,
-                    (int)Math.Round(MainBitmap.Height * zoom) + 20);
-                pictureBoxCanvas.Size = panelResizer.Size;
+                // Call SetZoomedCanvasBounds() instead of manually setting partial sizes
+                SetZoomedCanvasBounds();
+
                 UIPanel.AutoScrollMinSize = canvasPanel.Size;
                 labelSize.Text = $"{MainBitmap.Width} x {MainBitmap.Height} px";
             }
@@ -6076,15 +6075,26 @@ namespace Carpathia
             }
             basicFilters = BasicFilters.Mirror;
             MainBitmap = Filters.BasicFilters.MirrorEffect(MainBitmap);
-            canvasPanel.Size = new Size(MainBitmap.Size.Width + 20, MainBitmap.Size.Height + 20);
-            pictureBoxCanvas.Size = panelResizer.Size;
-            RenderCompositeToCanvas();
-            labelSize.Text = $"{MainBitmap.Width} x {MainBitmap.Height} px";
-            pictureBoxCanvas.Invalidate();
-            CenterCanvasPanel();
-            isModified = true; MarkLayerThumbnailDirty();
-        }
 
+            // Update zoomed canvas bounds and scrollbars properly
+            SetZoomedCanvasBounds();
+
+            SyncActiveLayerFromCanvas();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+
+            pictureBoxCanvas.Invalidate();
+            pictureBoxCanvas.Update();
+
+            isModified = true;
+            MarkLayerThumbnailDirty();
+            RefreshActiveLayerThumbnail(force: true);
+            labelSize.Text = $"{MainBitmap.Width} x {MainBitmap.Height} px";
+
+            // Center the canvas and scrollbars
+            CenterCanvasPanel();
+            CenterScrollbars();
+        }
         private void flashToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveStateForUndo();
@@ -6123,9 +6133,17 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.Flash(MainBitmap);
             }
-            RenderCompositeToCanvas();
+
+            SyncActiveLayerFromCanvas(); 
+            MarkCompositeDirty();        
+            RenderCompositeToCanvas(force: true);
+
             pictureBoxCanvas.Invalidate();
-            isModified = true; MarkLayerThumbnailDirty();
+            pictureBoxCanvas.Update();
+
+            isModified = true;
+            MarkLayerThumbnailDirty();       
+            RefreshActiveLayerThumbnail(force: true); 
         }
 
 
@@ -6167,9 +6185,16 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.Frozen(MainBitmap);
             }
-            RenderCompositeToCanvas();
+            SyncActiveLayerFromCanvas();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+
             pictureBoxCanvas.Invalidate();
-            isModified = true; MarkLayerThumbnailDirty();
+            pictureBoxCanvas.Update();
+
+            isModified = true;
+            MarkLayerThumbnailDirty();
+            RefreshActiveLayerThumbnail(force: true);
         }
 
         private void winterToolStripMenuItem_Click(object sender, EventArgs e)
@@ -6210,9 +6235,16 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.Winter(MainBitmap);
             }
-            RenderCompositeToCanvas();
+            SyncActiveLayerFromCanvas();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+
             pictureBoxCanvas.Invalidate();
-            isModified = true; MarkLayerThumbnailDirty();
+            pictureBoxCanvas.Update();
+
+            isModified = true;
+            MarkLayerThumbnailDirty();
+            RefreshActiveLayerThumbnail(force: true);
         }
 
         private void blackAndWhiteToolStripMenuItem_Click(object sender, EventArgs e)
@@ -6253,9 +6285,16 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.BlackAndWhite(MainBitmap);
             }
-            RenderCompositeToCanvas();
+            SyncActiveLayerFromCanvas();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+
             pictureBoxCanvas.Invalidate();
-            isModified = true; MarkLayerThumbnailDirty();
+            pictureBoxCanvas.Update();
+
+            isModified = true;
+            MarkLayerThumbnailDirty();
+            RefreshActiveLayerThumbnail(force: true);
         }
 
         private void oldPictureToolStripMenuItem_Click(object sender, EventArgs e)
@@ -6296,9 +6335,16 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.OldImage(MainBitmap);
             }
-            RenderCompositeToCanvas();
+            SyncActiveLayerFromCanvas();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+
             pictureBoxCanvas.Invalidate();
-            isModified = true; MarkLayerThumbnailDirty();
+            pictureBoxCanvas.Update();
+
+            isModified = true;
+            MarkLayerThumbnailDirty();
+            RefreshActiveLayerThumbnail(force: true);
         }
 
         private void cherryToolStripMenuItem_Click(object sender, EventArgs e)
@@ -6339,9 +6385,16 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.CherryFilter(MainBitmap);
             }
-            RenderCompositeToCanvas();
+            SyncActiveLayerFromCanvas();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+
             pictureBoxCanvas.Invalidate();
-            isModified = true; MarkLayerThumbnailDirty();
+            pictureBoxCanvas.Update();
+
+            isModified = true;
+            MarkLayerThumbnailDirty();
+            RefreshActiveLayerThumbnail(force: true);
         }
 
         private void lightAddToolStripMenuItem_Click(object sender, EventArgs e)
@@ -6382,9 +6435,16 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.LightAdd(MainBitmap);
             }
-            RenderCompositeToCanvas();
+            SyncActiveLayerFromCanvas();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+
             pictureBoxCanvas.Invalidate();
-            isModified = true; MarkLayerThumbnailDirty();
+            pictureBoxCanvas.Update();
+
+            isModified = true;
+            MarkLayerThumbnailDirty();
+            RefreshActiveLayerThumbnail(force: true);
         }
 
         private void purpleToolStripMenuItem_Click(object sender, EventArgs e)
@@ -6425,9 +6485,16 @@ namespace Carpathia
             {
                 MainBitmap = Filters.BasicFilters.PurpleEffect(MainBitmap);
             }
-            RenderCompositeToCanvas();
+            SyncActiveLayerFromCanvas();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+
             pictureBoxCanvas.Invalidate();
-            isModified = true; MarkLayerThumbnailDirty();
+            pictureBoxCanvas.Update();
+
+            isModified = true;
+            MarkLayerThumbnailDirty();
+            RefreshActiveLayerThumbnail(force: true);
         }
 
         private void fogToolStripMenuItem_Click(object sender, EventArgs e)
@@ -6577,9 +6644,13 @@ namespace Carpathia
 
                 previewBitmap = filteredBitmap;
                 pictureBoxCanvas.Image = previewBitmap;
+                MarkCompositeDirty();
+                pictureBoxCanvas.Invalidate();
+                pictureBoxCanvas.Update();
             }
 
             pictureBoxCanvas.Invalidate();
+            pictureBoxCanvas.Update();
         }
         private void buttonArtisticFiltersOK_Click(object sender, EventArgs e)
         {
@@ -6600,43 +6671,68 @@ namespace Carpathia
         }
         private void CancelFilters()
         {
-            if (previewBitmap != null && previewBitmap != MainBitmap)
+            try
             {
-                previewBitmap.Dispose();
-                previewBitmap = null;
-            }
-
-            if (isSelected && SelectedBitmap != null)
-            {
-                SelectedBitmap.Dispose();
-                SelectedBitmap = null;
-
-                if (!SelectionRectangle.IsEmpty && MainBitmap != null)
+                // 1. Önizleme bitkisel belleğini güvenli bir şekilde temizle
+                if (previewBitmap != null)
                 {
-                    SelectedBitmap = new Bitmap(
-                        (int)(SelectionRectangle.Width / zoom),
-                        (int)(SelectionRectangle.Height / zoom));
-
-                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                    if (!ReferenceEquals(previewBitmap, MainBitmap))
                     {
-                        g.Clear(Color.Transparent);
-                        Rectangle sourceRect = new Rectangle(
-                            (int)(originalSelectionRectangleLocation.X),
-                            (int)(originalSelectionRectangleLocation.Y),
-                            (int)(originalSelectionRectangleSize.Width),
-                            (int)(originalSelectionRectangleSize.Height));
+                        try { previewBitmap.Dispose(); } catch { }
+                    }
+                    previewBitmap = null;
+                }
 
-                        g.DrawImage(MainBitmap,
-                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                            sourceRect,
-                            GraphicsUnit.Pixel);
+                // 2. Seçili alan bitmap'ini güvenli bir şekilde sıfırla
+                if (isSelected && SelectedBitmap != null)
+                {
+                    try { SelectedBitmap.Dispose(); } catch { }
+                    SelectedBitmap = null;
+
+                    if (!SelectionRectangle.IsEmpty && MainBitmap != null)
+                    {
+                        int w = Math.Max(1, (int)(SelectionRectangle.Width / zoom));
+                        int h = Math.Max(1, (int)(SelectionRectangle.Height / zoom));
+
+                        SelectedBitmap = new Bitmap(w, h);
+
+                        using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                        {
+                            g.Clear(Color.Transparent);
+                            Rectangle sourceRect = new Rectangle(
+                                (int)(originalSelectionRectangleLocation.X),
+                                (int)(originalSelectionRectangleLocation.Y),
+                                (int)(originalSelectionRectangleSize.Width),
+                                (int)(originalSelectionRectangleSize.Height));
+
+                            g.DrawImage(MainBitmap,
+                                new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                                sourceRect,
+                                GraphicsUnit.Pixel);
+                        }
                     }
                 }
-            }
 
-            RenderCompositeToCanvas();
-            pictureBoxCanvas.Invalidate();
-            pictureBoxCanvas.Refresh();
+                // 3. Arayüzü ve tuvali güvenli bir şekilde yenile (UI Thread garantisiyle)
+                if (InvokeRequired)
+                {
+                    Invoke(new Action(() => {
+                        RenderCompositeToCanvas(force: true);
+                        pictureBoxCanvas.Invalidate();
+                        pictureBoxCanvas.Update();
+                    }));
+                }
+                else
+                {
+                    RenderCompositeToCanvas(force: true);
+                    pictureBoxCanvas.Invalidate();
+                    pictureBoxCanvas.Update();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("CancelFilters Safe Error: " + ex.Message, Logger.LogTypes.Error);
+            }
         }
 
         private void cartoonToolStripMenuItem_Click(object sender, EventArgs e)
@@ -8675,9 +8771,6 @@ namespace Carpathia
     // while the actual UI is rendered as a grid with a per-row visibility button.
     internal sealed class LayerDataGridView : DataGridView
     {
-        private const string ShowIconBase64 = "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";
-        private const string HideIconBase64 = "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";
-
         private readonly ListView compatibilityList = new();
         private readonly LayerListItemCollection itemCollection;
         private readonly LayerSelectedIndexCollection selectedIndexCollection;
@@ -8701,8 +8794,8 @@ namespace Carpathia
 
         public LayerDataGridView()
         {
-            showIcon = DecodeIcon(ShowIconBase64);
-            hideIcon = DecodeIcon(HideIconBase64);
+            showIcon = Resources.icons8_show_48;
+            hideIcon = Resources.icons8_hide_48;
 
             AllowUserToAddRows = false;
             AllowUserToDeleteRows = false;
@@ -9023,14 +9116,6 @@ namespace Carpathia
                 e.Value = item.Text;
                 e.FormattingApplied = true;
             }
-        }
-
-        private static Image DecodeIcon(string base64)
-        {
-            byte[] bytes = Convert.FromBase64String(base64);
-            using var stream = new System.IO.MemoryStream(bytes);
-            using var source = Image.FromStream(stream);
-            return new Bitmap(source);
         }
 
         protected override void Dispose(bool disposing)
