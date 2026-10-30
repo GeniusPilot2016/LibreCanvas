@@ -30,6 +30,7 @@ The first public release is planned for when the core editing workflow is suffic
 
 - ### 🖌️ Traditional painting and editing tools
   Create and modify images using conventional painting and image-manipulation operations. LibreCanvas is being developed to support the essential tools needed for everyday image creation and editing.
+
   <img width="303" height="670" alt="image" src="https://github.com/user-attachments/assets/9979ff1d-5cd6-4de9-8e72-14c3231d1fed" />
 
 - ### 🖼️ Canvas and image management
