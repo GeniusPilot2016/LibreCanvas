@@ -1,6 +1,11 @@
 # LibreCanvas
 
-![LibreCanvas](https://github.com/user-attachments/assets/adc5ba88-19c2-4056-a875-102f096864a6)
+<img width="1227" height="433" alt="librecanvas_banner" src="https://github.com/user-attachments/assets/bda441aa-5536-4129-bce6-0c7261b658ca" />
+
+
+> **LibreCanvas is an open-source C# image editor that combines traditional painting tools with AI-powered image generation and editing.**
+
+![LibreCanvas](https://github.com/user-attachments/assets/5063a256-fabf-449e-a552-6228e3e6b95a)
 
 [![GitHub stars](https://img.shields.io/github/stars/GeniusPilot2016/LibreCanvas?style=social)](https://github.com/GeniusPilot2016/LibreCanvas/stargazers)
 [![License](https://img.shields.io/github/license/GeniusPilot2016/LibreCanvas?style=flat-square)](https://github.com/GeniusPilot2016/LibreCanvas/blob/main/LICENSE)
@@ -10,8 +15,6 @@
 [![PRs](https://img.shields.io/github/issues-pr/GeniusPilot2016/LibreCanvas?style=flat-square)](https://github.com/GeniusPilot2016/LibreCanvas/pulls)
 [![GitHub forks](https://img.shields.io/github/forks/GeniusPilot2016/LibreCanvas?style=social)](https://github.com/GeniusPilot2016/LibreCanvas/network/members)
 [![Alpha](https://img.shields.io/badge/status-alpha-orange?style=flat-square)](https://github.com/GeniusPilot2016/LibreCanvas)
-
-> **LibreCanvas is an open-source C# image editor that combines traditional painting tools with AI-powered image generation and editing.**
 
 LibreCanvas is inspired by classic paint applications and Photoshop-like workflows. It is designed to let you create, edit, transform, and refine images without constantly switching between separate applications.
 
