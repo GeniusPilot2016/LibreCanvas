@@ -26,12 +26,15 @@ The first public release is planned for when the core editing workflow is suffic
 
 - ### 🖥️ Familiar and flexible image-editing environment
   LibreCanvas is inspired by traditional paint applications and Photoshop-like editing workflows. Its goal is to bring familiar creative tools and AI-assisted operations together in one application, making it easier to move between drawing, editing, and image refinement.
+  <img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/47065738-7070-4a75-a002-3b58fb039ecc" />
 
 - ### 🖌️ Traditional painting and editing tools
   Create and modify images using conventional painting and image-manipulation operations. LibreCanvas is being developed to support the essential tools needed for everyday image creation and editing.
+  <img width="303" height="670" alt="image" src="https://github.com/user-attachments/assets/9979ff1d-5cd6-4de9-8e72-14c3231d1fed" />
 
 - ### 🖼️ Canvas and image management
   The core workflow is being built around creating new canvases, opening existing images, and saving or exporting completed work. Reliable undo and redo behavior is also an important first-release goal.
+  <img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/3617be02-0cbe-4018-9614-5696d075f6dd" />
 
 - ### 🚀 More Than a Traditional Image Editor
   LibreCanvas is designed to go beyond conventional image editing by integrating AI-powered creative workflows directly into the editor.
