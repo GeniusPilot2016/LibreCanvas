@@ -1,79 +1,70 @@
-# LibreCanvas
+![librecanvas_banner](https://github.com/user-attachments/assets/bda441aa-5536-4129-bce6-0c7261b658ca)
 
-<img width="1227" height="433" alt="librecanvas_banner" src="https://github.com/user-attachments/assets/bda441aa-5536-4129-bce6-0c7261b658ca" />
+# 🎨🖌️🖼️🤖 LibreCanvas: Traditional Image Editing Meets Modern AI
 
-
-> **LibreCanvas is an open-source C# image editor that combines traditional painting tools with AI-powered image generation and editing.**
-
-![LibreCanvas](https://github.com/user-attachments/assets/5063a256-fabf-449e-a552-6228e3e6b95a)
+LibreCanvas is an open-source C# image editor that combines traditional painting and image-manipulation tools with modern AI-powered image generation and editing. Inspired by classic paint applications and Photoshop-like workflows, LibreCanvas aims to offer a familiar, flexible creative environment where users can draw, edit, transform, and refine images without constantly switching between separate applications. 🎨🖌️🤖
 
 [![GitHub stars](https://img.shields.io/github/stars/GeniusPilot2016/LibreCanvas?style=social)](https://github.com/GeniusPilot2016/LibreCanvas/stargazers)
 [![License](https://img.shields.io/github/license/GeniusPilot2016/LibreCanvas?style=flat-square)](https://github.com/GeniusPilot2016/LibreCanvas/blob/main/LICENSE)
 [![Top language](https://img.shields.io/github/languages/top/GeniusPilot2016/LibreCanvas?style=flat-square)](https://github.com/GeniusPilot2016/LibreCanvas)
 [![AI Powered](https://img.shields.io/badge/AI-Powered-7C4DFF?style=flat&logo=artificialintelligence&logoColor=white)](https://github.com/GeniusPilot2016/LibreCanvas)
 [![Last commit](https://img.shields.io/github/last-commit/GeniusPilot2016/LibreCanvas?style=flat-square)](https://github.com/GeniusPilot2016/LibreCanvas/commits/master)
+[![Issues](https://img.shields.io/github/issues-raw/GeniusPilot2016/LibreCanvas?style=flat-square)](https://github.com/GeniusPilot2016/LibreCanvas/issues)
 [![PRs](https://img.shields.io/github/issues-pr/GeniusPilot2016/LibreCanvas?style=flat-square)](https://github.com/GeniusPilot2016/LibreCanvas/pulls)
 [![GitHub forks](https://img.shields.io/github/forks/GeniusPilot2016/LibreCanvas?style=social)](https://github.com/GeniusPilot2016/LibreCanvas/network/members)
 [![Alpha](https://img.shields.io/badge/status-alpha-orange?style=flat-square)](https://github.com/GeniusPilot2016/LibreCanvas)
 
-LibreCanvas is inspired by classic paint applications and Photoshop-like workflows. It is designed to let you create, edit, transform, and refine images without constantly switching between separate applications.
+![LibreCanvas](https://github.com/user-attachments/assets/5063a256-fabf-449e-a552-6228e3e6b95a)
 
-> **Development status:** LibreCanvas is currently in active development. The first public release will be published when the core editing workflow is nearly complete. Until then, features, interfaces, and AI integrations may change.
+## 🚧 Status
 
-⭐ Star the repository to follow development and get notified when the first public release is available.
+LibreCanvas is **still in active development** and has **not yet reached its first public release**. The current development version is available for experimentation, but it should not be considered production-ready. Features, interfaces, and AI integrations may change as development progresses.
 
-## Highlights
+The first public release is planned for when the core editing workflow is sufficiently complete and stable. Feedback, bug reports, and suggestions are welcome in the meantime.
 
-- Traditional painting and image-manipulation tools
-- AI text-to-image generation
-- AI image-to-image editing
-- AI-assisted background removal
-- Selection-based AI editing
-- Reference-image support
-- Undo and editing-workflow integration
-- Replaceable, model-agnostic AI backend design
-- Open-source development under the GNU GPL-3.0 license
+## ✨ Features
 
-## AI capabilities
+- ### 🖥️ Familiar and flexible image-editing environment
+  LibreCanvas is inspired by traditional paint applications and Photoshop-like editing workflows. Its goal is to bring familiar creative tools and AI-assisted operations together in one application, making it easier to move between drawing, editing, and image refinement.
 
-LibreCanvas currently aims to support the following AI-assisted workflows:
+- ### 🖌️ Traditional painting and editing tools
+  Create and modify images using conventional painting and image-manipulation operations. LibreCanvas is being developed to support the essential tools needed for everyday image creation and editing.
 
-- **Text-to-image generation** — Generate images from natural-language prompts.
-- **Image-to-image editing** — Transform an existing image using instructions.
-- **Selection-based editing** — Apply AI operations to selected regions instead of replacing the entire canvas.
-- **Background removal** — Isolate a subject and create a transparent-background result.
-- **Reference-image editing** — Use an existing image as guidance for an AI operation.
-- **Integrated editing** — Continue editing generated results with LibreCanvas's normal canvas tools.
+- ### 🖼️ Canvas and image management
+  The core workflow is being built around creating new canvases, opening existing images, and saving or exporting completed work. Reliable undo and redo behavior is also an important first-release goal.
 
-AI functionality depends on the configured backend service, its availability, rate limits, supported image sizes, and model behavior.
+- ### 🚀 More Than a Traditional Image Editor
+  LibreCanvas is designed to go beyond conventional image editing by integrating AI-powered creative workflows directly into the editor.
 
-## Current status
+  - #### 🤖 Turn text into images
+    LibreCanvas aims to support **text-to-image generation**, allowing users to create images from natural-language prompts and continue working with the results in the editor.
+    <img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/23e85323-72a4-481f-a5eb-632167dc2c4c" />
 
-LibreCanvas is intended to become a complete creative image editor with integrated AI features. The current development version is usable for experimentation, but it should not yet be considered production-ready.
+  - #### 🎨 Edit existing images with AI
+    The planned **image-to-image editing** workflow lets users provide an existing image and instructions for transforming or refining it.
+    <img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/d4e1e4c0-d6be-4599-a0ad-f65823320e69" />
+    
+  - #### ✂️ Edit selected regions
+    **Selection-based AI editing** is intended to apply changes to particular areas of an image rather than replacing the entire canvas.
+    <img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/f0c8e233-bf41-4edf-ad5f-6d5461f08623" />
 
-The project is currently focused on completing and stabilizing the core workflow before the first public release.
+  - #### 🪄 Remove backgrounds with AI
+    **AI-assisted background removal** is intended to isolate subjects and produce results with transparent backgrounds.
+    <img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/a453ab84-9135-49b3-9358-428622814a60" />
 
-### First-release goals
+  - #### 🖼️ Use reference images
+    **Reference-image support** is intended to let users guide AI operations with an existing image.
+    <img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/8b97e524-1959-4479-885f-30cd1cc4403f" />
 
-The first public release is planned once the following areas are sufficiently stable:
+  - #### 🔙 Continue editing AI-generated results
+    LibreCanvas aims to integrate AI results into its ordinary editing workflow, including normal canvas operations and undo behavior, rather than treating AI as a separate tool.
+    <img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/964e9688-b58b-474e-9d07-2430fa43e210" />
 
-- Creating a new canvas and opening existing images
-- Core painting and image-editing operations
-- Reliable undo and redo behavior
-- Image export and saving
-- AI operations with useful error handling
-- Initial user documentation
-- A repeatable build and installation process
+**Note:** AI functionality and output depend on its availability, rate limits, supported image sizes, and model behavior. The capabilities above describe development targets and may not all be complete in the current version.
 
-## Why "LibreCanvas"?
+## 🧠 AI Backend Architecture
 
-LibreCanvas was previously named **ArtFusion**. The name was changed because "ArtFusion" is used by multiple existing products and services, creating confusion in search results and online communities.
-
-The name **LibreCanvas** reflects the project's open-source goals and its focus on giving creators a flexible digital canvas.
-
-## Backend architecture
-
-LibreCanvas is designed to avoid being permanently tied to a single AI model or provider. The backend can be replaced or expanded as new models, APIs, and local inference options become available.
+LibreCanvas is intended to support different AI services and models as the ecosystem evolves. Its backend design aims to make integrations replaceable or expandable without requiring the editor to depend permanently on a single provider.
 
 Possible future integrations include:
 
@@ -83,68 +74,110 @@ Possible future integrations include:
 - Open or self-hosted AI APIs
 - Image-to-image and inpainting models
 
-This approach helps the project adapt when a provider changes its API, availability, pricing, or usage limits.
+This approach is intended to make LibreCanvas more adaptable when providers change their APIs, availability, pricing, or usage limits. **These are possible future integrations, not a list of confirmed supported backends.**
 
-## Getting started
+## 🖥️📃 System Requirements
 
-The repository currently contains the latest development version rather than a finalized public release.
+The final minimum and recommended system requirements have **not yet been established**. LibreCanvas is a C#/.NET project; to build the development version, use the .NET SDK and any other dependencies specified in the repository's project files.
 
-### Clone the repository
+AI features may also require access to a compatible backend service, local model, or API credentials, depending on the configured integration.
 
-```bash
-git clone https://github.com/GeniusPilot2016/LibreCanvas.git
-cd LibreCanvas
-```
+## ▶️ Running LibreCanvas (Development Version)
 
-### Build and run
+LibreCanvas does **not yet have a finalized public release**. For now, you can explore its current development version by cloning the source code and building the project.
 
-The exact build and run instructions may evolve while the project is in development. Use the project files and the latest source configuration to determine the required .NET version and startup project.
+### ⚙️ Build and Run Instructions
 
-Typical .NET commands are:
+1. **Get the Source Code**
+   - Clone the repository using the instructions in the [Cloning](#-cloning) section below.
 
-```bash
-dotnet restore
-dotnet build
-dotnet run
-```
+2. **Check the Project Requirements**
+   - Open the repository's project or solution files and check the required .NET version, dependencies, and startup project.
 
-> If the application requires an AI backend, configure the required service or credentials according to the project configuration before using AI features. Never commit private API keys to the repository.
+3. **Restore and Build**
+   - From the appropriate project directory, restore dependencies and build the project using your development environment or the .NET CLI:
 
-## Development roadmap
+   ```bash
+   dotnet restore
+   dotnet build
+   ```
 
-Planned areas of development include:
+4. **Run the Application**
+   - Select the appropriate startup project in your development environment, or use the .NET CLI when supported by the project's configuration:
 
-- Stabilizing the core canvas workflow
+   ```bash
+   dotnet run
+   ```
+
+5. **Configure AI Features (If Required)**
+   - Configure the backend service or credentials according to the project's current configuration before attempting AI operations. **Never commit private API keys to the repository.**
+
+Build and execution instructions may change during development. There is no guaranteed one-command setup for every configuration yet.
+
+## 🌱 Cloning
+
+1. Open Visual Studio or another Git-compatible development environment.
+
+2. Select **Clone a repository**, or open a terminal.
+
+3. Enter the following repository URL or run:
+
+   ```bash
+   git clone https://github.com/GeniusPilot2016/LibreCanvas.git
+   cd LibreCanvas
+   ```
+
+4. Open the project or solution file and follow the source configuration to select the correct startup project and .NET SDK.
+
+5. Build and run the development version. If you plan to contribute, test your changes before opening a pull request.
+
+## 🗺️ Development Roadmap
+
+The main priorities before the first public release are:
+
+- Creating new canvases and opening existing images reliably
+- Completing essential painting and image-editing operations
+- Stabilizing undo and redo behavior
+- Improving image export and saving
+- Adding useful AI error handling and feedback
 - Improving performance and reliability
-- Expanding painting and image-editing tools
-- Improving AI error handling and feedback
-- Adding more backend and model options
-- Improving documentation and onboarding
-- Preparing the first public release
+- Expanding AI backend and model options
+- Preparing initial documentation and a repeatable build process
+- Publishing the first stable public release
 
-Ideas, bug reports, and technical suggestions are welcome through the issue tracker.
+These are development goals, not guarantees that every feature is already implemented.
 
-## Contributing
+## 🤝 Contributing
 
-Contributions, testing, feedback, and ideas are welcome as LibreCanvas approaches its first public release.
+Contributions, testing, bug reports, and technical suggestions are welcome as LibreCanvas progresses toward its first public release.
 
-Before opening an issue, please check whether a similar issue already exists. When reporting a bug, include:
+Before opening an issue, please check whether a similar issue has already been reported. When reporting a bug, include:
 
 - Operating system
 - .NET version
-- Steps to reproduce the issue
+- Steps to reproduce the problem
 - Expected and actual behavior
-- Error messages or screenshots, when available
-- Whether the issue affects normal editing or AI functionality
+- Error messages or screenshots, if available
+- Whether the problem affects ordinary editing or AI functionality
 
-## License
+You can report issues through the [GitHub issue tracker](https://github.com/GeniusPilot2016/LibreCanvas/issues).
 
-LibreCanvas is distributed under the **GNU General Public License v3.0**. See [`LICENSE`](LICENSE) for the full license text.
+## 🏷️ Why "LibreCanvas"?
 
-## Project background
+LibreCanvas was previously known as **ArtFusion**. The project was renamed because “ArtFusion” was already used by multiple existing products and services, making it difficult to distinguish the project in searches and online communities.
 
-LibreCanvas began as a visual-programming course project intended for a school end-of-year exhibition. Development continued after the original academic project and gradually expanded into an open-source creative application with AI-assisted image-editing capabilities.
+The name **LibreCanvas** reflects the project's open-source philosophy and its goal of providing creators with a flexible digital canvas.
 
----
+## 📜 License
 
-If you are interested in the project, consider starring the repository and following its development toward the first public release.
+LibreCanvas is open-source software distributed under the **GNU General Public License v3.0**. See [`LICENSE`](LICENSE) for the complete license text.
+
+## ⭐️ Support LibreCanvas!
+
+If you're interested in the project, please consider [leaving a star ⭐️ on GitHub](https://github.com/GeniusPilot2016/LibreCanvas) to help others discover it and follow its progress toward the first public release!
+
+## 🌟 From a School Project to an Open-Source Editor
+
+LibreCanvas began as a visual-programming course project created for a school end-of-year exhibition. Development continued beyond the original academic project, gradually expanding its scope into an open-source image editor with integrated AI-assisted creative capabilities.
+
+The project is continuing to evolve, with its focus on making traditional image editing and modern AI workflows part of the same creative experience.
