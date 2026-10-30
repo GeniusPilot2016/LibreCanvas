@@ -165,7 +165,7 @@ namespace Carpathia
                 Left + BorderPadding, Top + BorderPadding,
                 Math.Max(1, Width - BorderPadding * 2),
                 Math.Max(1, Height - BorderPadding * 2));
-            if (!e.ClipRectangle.IntersectsWith(destination))
+            if (!e.ClipRectangle.IntersectsWith(Rectangle.Inflate(destination, 3, 3)))
                 return;
 
             GraphicsState state = e.Graphics.Save();
@@ -177,6 +177,21 @@ namespace Carpathia
                 e.Graphics.DrawImage(floating, destination,
                     new Rectangle(0, 0, floating.Width, floating.Height),
                     GraphicsUnit.Pixel);
+
+                // Marching ants, same look as the selection outline.
+                e.Graphics.SmoothingMode = SmoothingMode.None;
+                e.Graphics.PixelOffsetMode = PixelOffsetMode.Half;
+                using (Pen black = new Pen(Color.Black, 3f))
+                using (Pen white = new Pen(Color.White, 2f))
+                {
+                    white.DashStyle = DashStyle.Custom;
+                    white.DashPattern = new float[] { 3f, 3f };
+                    white.DashOffset = antsOffset;
+                    e.Graphics.DrawRectangle(black, destination.X, destination.Y,
+                        destination.Width - 1, destination.Height - 1);
+                    e.Graphics.DrawRectangle(white, destination.X, destination.Y,
+                        destination.Width - 1, destination.Height - 1);
+                }
             }
             finally
             {
@@ -217,12 +232,6 @@ namespace Carpathia
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            Rectangle imageRect = new Rectangle(BorderPadding, BorderPadding,
-                Math.Max(1, ClientSize.Width - BorderPadding * 2),
-                Math.Max(1, ClientSize.Height - BorderPadding * 2));
-            using (Pen frame = new Pen(Color.FromArgb(160, SystemColors.Highlight)))
-                e.Graphics.DrawRectangle(frame, imageRect.X, imageRect.Y,
-                    imageRect.Width - 1, imageRect.Height - 1);
             base.OnPaint(e);
         }
 
@@ -958,6 +967,39 @@ namespace Carpathia
             MouseUp -= MoveSurface_MouseUp;
             MouseCaptureChanged -= MoveSurface_MouseCaptureChanged;
             MouseDoubleClick -= MoveSurface_MouseDoubleClick;
+        }
+        private float antsOffset;
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public float AntsOffset
+        {
+            get { return antsOffset; }
+            set
+            {
+                if (Math.Abs(value - antsOffset) < 0.0001f)
+                    return;
+                antsOffset = value;
+                InvalidateAnts();
+            }
+        }
+
+        // Repaint only the four edge strips of the frame on the canvas.
+        private void InvalidateAnts()
+        {
+            Control canvas = backgroundCanvas;
+            if (canvas == null || canvas.IsDisposed || !canvas.IsHandleCreated)
+                return;
+
+            Rectangle r = Rectangle.Inflate(new Rectangle(
+                Left + BorderPadding, Top + BorderPadding,
+                Math.Max(1, Width - BorderPadding * 2),
+                Math.Max(1, Height - BorderPadding * 2)), 3, 3);
+
+            canvas.Invalidate(new Rectangle(r.Left, r.Top, r.Width, 6));
+            canvas.Invalidate(new Rectangle(r.Left, r.Bottom - 6, r.Width, 6));
+            canvas.Invalidate(new Rectangle(r.Left, r.Top, 6, r.Height));
+            canvas.Invalidate(new Rectangle(r.Right - 6, r.Top, 6, r.Height));
         }
     }
 }

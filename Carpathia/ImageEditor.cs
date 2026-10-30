@@ -690,17 +690,24 @@ namespace Carpathia
 
         private void MarchingAntsTimer_Tick(object sender, EventArgs e)
         {
-            // Do no repaint work while there is no visible selection.
-            if (!isSelected || (magicSelectionMask == null && SelectionRectangle.IsEmpty))
+            bool hasSelection = isSelected &&
+                (magicSelectionMask != null || !SelectionRectangle.IsEmpty);
+            MovingImageControl[] floating = pictureBoxCanvas.Controls
+                .OfType<MovingImageControl>().ToArray();
+
+            // Do no repaint work when nothing is showing ants.
+            if (!hasSelection && floating.Length == 0)
                 return;
 
-            // The white pen uses a {3,3} pattern. Advance the phase and wrap it
-            // so the value stays small even if the editor remains open for hours.
             marchingAntsOffset += 0.75f;
             if (marchingAntsOffset >= 6f)
                 marchingAntsOffset -= 6f;
 
-            pictureBoxCanvas.Invalidate();
+            if (hasSelection)
+                pictureBoxCanvas.Invalidate();
+
+            foreach (MovingImageControl f in floating)
+                f.AntsOffset = marchingAntsOffset;
         }
 
         private void ImageEditor_MouseWheel(object sender, MouseEventArgs e)
@@ -1854,18 +1861,35 @@ namespace Carpathia
                     : InterpolationMode.HighQualityBicubic;
                 g.DrawImage(floating.DisplayImage, floatingImageRect);
                 Rectangle floatingFrame = Rectangle.Inflate(floatingImageRect, 4, 4);
-                using (Pen framePen = new Pen(SystemColors.Highlight, 1f))
-                    g.DrawRectangle(framePen, floatingFrame);
-                using (Brush gripBrush = new SolidBrush(SystemColors.Highlight))
+
+                SmoothingMode oldSmoothing = g.SmoothingMode;
+                g.SmoothingMode = SmoothingMode.None;
+                using (Pen black = new Pen(Color.Black, 1f))
+                using (Pen white = new Pen(Color.White, 1f))
+                {
+                    white.DashStyle = DashStyle.Custom;
+                    white.DashPattern = new float[] { 3f, 3f };
+                    white.DashOffset = marchingAntsOffset;
+                    g.DrawRectangle(black, floatingFrame);
+                    g.DrawRectangle(white, floatingFrame);
+                }
+                g.SmoothingMode = oldSmoothing;
+
+                using (Brush gripFill = new SolidBrush(Color.White))
+                using (Pen gripBorder = new Pen(Color.Black))
                 {
                     int[] xx = { floatingFrame.Left, floatingFrame.Left + floatingFrame.Width / 2,
-                                 floatingFrame.Right };
+                 floatingFrame.Right };
                     int[] yy = { floatingFrame.Top, floatingFrame.Top + floatingFrame.Height / 2,
-                                 floatingFrame.Bottom };
+                 floatingFrame.Bottom };
                     for (int xi = 0; xi < 3; xi++)
                         for (int yi = 0; yi < 3; yi++)
                             if (xi != 1 || yi != 1)
-                                g.FillRectangle(gripBrush, xx[xi] - 4, yy[yi] - 4, 8, 8);
+                            {
+                                Rectangle grip = new Rectangle(xx[xi] - 4, yy[yi] - 4, 8, 8);
+                                g.FillRectangle(gripFill, grip);
+                                g.DrawRectangle(gripBorder, grip);
+                            }
                 }
             }
 
