@@ -8814,8 +8814,10 @@ namespace Carpathia
                     return;
                 }
                 MessageForm.Show(
-                    $"Remaining AI usage: {queryNumber}",
-                    "AI Usage",
+                    $"Remaining AI usage: {queryNumber}\r\n" +
+                    $"\r\nThe AI usage is reset at: \r\n" +
+                    $"{DateTime.UtcNow.Date.AddDays(1).ToLocalTime().ToString("yyyy-MM-dd hh:mm tt", System.Globalization.CultureInfo.InvariantCulture)}.",
+                        "AI Usage",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
             }
