@@ -5,6 +5,7 @@
 LibreCanvas is an open-source C# image editor that combines traditional painting and image-manipulation tools with modern AI-powered image generation and editing. Inspired by classic paint applications and Photoshop-like workflows, LibreCanvas aims to offer a familiar, flexible creative environment where users can draw, edit, transform, and refine images without constantly switching between separate applications. 🎨🖌️🤖
 
 [![GitHub stars](https://img.shields.io/github/stars/GeniusPilot2016/LibreCanvas?style=social)](https://github.com/GeniusPilot2016/LibreCanvas/stargazers)
+[![Downloads](https://img.shields.io/github/downloads/GeniusPilot2016/LibreCanvas/total?style=flat-square)](https://github.com/GeniusPilot2016/LibreCanvas/releases)
 [![License](https://img.shields.io/github/license/GeniusPilot2016/LibreCanvas?style=flat-square)](https://github.com/GeniusPilot2016/LibreCanvas/blob/main/LICENSE)
 [![Top language](https://img.shields.io/github/languages/top/GeniusPilot2016/LibreCanvas?style=flat-square)](https://github.com/GeniusPilot2016/LibreCanvas)
 [![AI Powered](https://img.shields.io/badge/AI-Powered-7C4DFF?style=flat&logo=artificialintelligence&logoColor=white)](https://github.com/GeniusPilot2016/LibreCanvas)
