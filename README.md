@@ -18,9 +18,9 @@ LibreCanvas is an open-source C# image editor that combines traditional painting
 
 ## 🚧 Status
 
-LibreCanvas is **still in active development** and has **not yet reached its first public release**. The current development version is available for experimentation, but it should not be considered production-ready. Features, interfaces, and AI integrations may change as development progresses.
+LibreCanvas is **still in active development** and has **not yet reached its stable release**. The current alpha version is available for experimentation, but it should not be considered production-ready. Features, interfaces, and AI integrations may change as development progresses.
 
-The first public release is planned for when the core editing workflow is sufficiently complete and stable. Feedback, bug reports, and suggestions are welcome in the meantime.
+The first stable release is planned for when the core editing workflow is sufficiently complete and stable. Feedback, bug reports, and suggestions are welcome in the meantime.
 
 ## ✨ Features
 
@@ -82,41 +82,41 @@ This approach is intended to make LibreCanvas more adaptable when providers chan
 
 ## 🖥️📃 System Requirements
 
-The final minimum and recommended system requirements have **not yet been established**. LibreCanvas is a C#/.NET project; to build the development version, use the .NET SDK and any other dependencies specified in the repository's project files.
+**Windows Version:** Windows 10 (1809 and above) 64-bit/ARM64 (minimum)/Windows 11 (recommended)
 
-AI features may also require access to a compatible backend service, local model, or API credentials, depending on the configured integration.
+**CPU:** Intel® Core i3 or equivalent (64-bit), or ARM64 equivalent (e.g., Qualcomm Snapdragon) (minimum)
 
-## ▶️ Running LibreCanvas (Development Version)
+**RAM:** 2 GB (minimum), 4 GB (recommended)
 
-LibreCanvas does **not yet have a finalized public release**. For now, you can explore its current development version by cloning the source code and building the project.
+**Storage:** 250 MB (minimum)
 
-### ⚙️ Build and Run Instructions
+**Required Hardware:** System speaker or any kind of sound device (minimum)
 
-1. **Get the Source Code**
-   - Clone the repository using the instructions in the [Cloning](#-cloning) section below.
+## ▶️ Running the Released Executable
 
-2. **Check the Project Requirements**
-   - Open the repository's project or solution files and check the required .NET version, dependencies, and startup project.
+You can run LibreCanvas easily without compiling by using the pre-built executable available in the [Releases](https://github.com/GeniusPilot2016/LibreCanvas/releases) section.
 
-3. **Restore and Build**
-   - From the appropriate project directory, restore dependencies and build the project using your development environment or the .NET CLI:
+### ⚙️ Execution Instructions
 
-   ```bash
-   dotnet restore
-   dotnet build
-   ```
+1. **Go to the Releases Page**
+   - Visit the [Releases](https://github.com/GeniusPilot2016/LibreCanvas/releases) page on GitHub.
 
-4. **Run the Application**
-   - Select the appropriate startup project in your development environment, or use the .NET CLI when supported by the project's configuration:
+2. **Download the Zip File**
+   - Find the latest release, then download the zip file (for example: `librecanvas-0.23.0-alpha-x64.zip` or similar, depending on your system).
 
-   ```bash
-   dotnet run
-   ```
+3. **Extract the Zip File**
+   - Right-click the downloaded zip file and choose "Extract All..." (on Windows), or use your preferred zip extractor.
 
-5. **Configure AI Features (If Required)**
-   - Configure the backend service or credentials according to the project's current configuration before attempting AI operations. **Never commit private API keys to the repository.**
+4. **Run the Executable**
+   - Open the extracted folder.
+   - Go to the `LibreCanvas` folder
+   - Find and double-click `LibreCanvas.exe` to launch the program.
 
-Build and execution instructions may change during development. There is no guaranteed one-command setup for every configuration yet.
+5. **(Optional) Allow Security Prompts**
+   - If Windows identifies the program as coming from the Internet, you may need to accept a security prompt or click "More info" and then "Run anyway".
+
+**No installation is required.**  
+If you encounter issues running LibreCanvas, make sure your system meets the requirements listed above.
 
 ## 🌱 Cloning
 
