@@ -615,6 +615,11 @@ namespace Carpathia
         private void InitializeComponentAndFont()
         {
             InitializeComponent();
+            // PictureBox paints its Image automatically. Its native image pass must
+            // fill the same zoomed bounds used for selection and pointer overlays.
+            // The custom Paint handler below must ONLY draw overlays; otherwise the
+            // original-size PictureBox image remains underneath transparent pixels.
+            pictureBoxCanvas.SizeMode = PictureBoxSizeMode.StretchImage;
             // The timer changes only the on-screen preview. The expensive WinForms
             // AutoScroll/control layout is committed once, after the transition.
             zoomAnimationTimer.Interval = 16;
@@ -4296,18 +4301,11 @@ namespace Carpathia
         {
             if (pictureBoxCanvas.Image != null)
             {
-                // Draw the current image instead of the zoom snapshot. The snapshot is
-                // rebuilt only when zoom changes, so drawing it here hides edits made by
-                // tools until the next zoom operation.
-                e.Graphics.InterpolationMode = zoom >= 1f
-                    ? InterpolationMode.NearestNeighbor
-                    : InterpolationMode.HighQualityBicubic;
-                e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                e.Graphics.DrawImage(
-                    pictureBoxCanvas.Image,
-                    new Rectangle(0, 0, pictureBoxCanvas.ClientSize.Width, pictureBoxCanvas.ClientSize.Height),
-                    new Rectangle(0, 0, pictureBoxCanvas.Image.Width, pictureBoxCanvas.Image.Height),
-                    GraphicsUnit.Pixel);
+                // The PictureBox has already drawn its image in StretchImage mode.
+                // Do NOT draw it here again. A second SourceOver DrawImage leaves
+                // the PictureBox's original-size image visible through transparent
+                // pixels, producing the apparent fixed-size picture behind the canvas.
+                // This handler only draws selections, contours and tool cursors.
                 // Draw the SelectedBitmap if it exists
                 if (SelectedBitmap != null && !SelectionRectangle.IsEmpty && magicSelectionMask == null)
                 {
