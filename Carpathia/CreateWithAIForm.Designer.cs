@@ -39,7 +39,6 @@
             labelWidth = new Label();
             numericUpDownHeight = new NumericUpDown();
             labelHeight = new Label();
-            progressBarImageCreating = new ProgressBar();
             labelImageCreating = new Label();
             buttonUploadImage = new Button();
             labelUploadedImage = new Label();
@@ -163,29 +162,17 @@
             labelHeight.TabIndex = 4;
             labelHeight.Text = "Height";
             // 
-            // progressBarImageCreating
-            // 
-            progressBarImageCreating.Anchor = AnchorStyles.Bottom;
-            progressBarImageCreating.Location = new Point(126, 172);
-            progressBarImageCreating.Margin = new Padding(4);
-            progressBarImageCreating.MarqueeAnimationSpeed = 10;
-            progressBarImageCreating.Name = "progressBarImageCreating";
-            progressBarImageCreating.Size = new Size(385, 16);
-            progressBarImageCreating.Style = ProgressBarStyle.Marquee;
-            progressBarImageCreating.TabIndex = 5;
-            progressBarImageCreating.Visible = false;
-            // 
             // labelImageCreating
             // 
             labelImageCreating.Anchor = AnchorStyles.Bottom;
-            labelImageCreating.AutoSize = true;
             labelImageCreating.Font = new Font("HarmonyOS Sans", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            labelImageCreating.Location = new Point(16, 172);
+            labelImageCreating.Location = new Point(114, 172);
             labelImageCreating.Margin = new Padding(4, 0, 4, 0);
             labelImageCreating.Name = "labelImageCreating";
-            labelImageCreating.Size = new Size(100, 16);
+            labelImageCreating.Size = new Size(293, 16);
             labelImageCreating.TabIndex = 6;
-            labelImageCreating.Text = "Image is creating";
+            labelImageCreating.Text = "Image is being created by AI. Please wait...";
+            labelImageCreating.TextAlign = ContentAlignment.MiddleCenter;
             labelImageCreating.Visible = false;
             // 
             // buttonUploadImage
@@ -238,7 +225,6 @@
             Controls.Add(labelUploadedImage);
             Controls.Add(buttonUploadImage);
             Controls.Add(labelImageCreating);
-            Controls.Add(progressBarImageCreating);
             Controls.Add(labelHeight);
             Controls.Add(numericUpDownHeight);
             Controls.Add(labelWidth);
@@ -274,7 +260,6 @@
         private Label labelWidth;
         private NumericUpDown numericUpDownHeight;
         private Label labelHeight;
-        private ProgressBar progressBarImageCreating;
         private Label labelImageCreating;
         private Button buttonUploadImage;
         private Label labelUploadedImage;

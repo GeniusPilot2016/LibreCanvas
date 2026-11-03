@@ -352,7 +352,6 @@ namespace Carpathia
         private void setVisibilityOfProgressBarAndSomeControls(bool isVisible)
         {
             labelImageCreating.Visible = isVisible;
-            progressBarImageCreating.Visible = isVisible;
             labelPrompt.Enabled = !isVisible;
             textBoxPrompt.Enabled = !isVisible;
             buttonCreate.Enabled = !isVisible;
@@ -362,6 +361,40 @@ namespace Carpathia
             labelUploadedImage.Enabled = !isVisible;
             numericUpDownWidth.Enabled = !isVisible;
             numericUpDownHeight.Enabled = !isVisible;
+            CreateCreatingAnimation();
+        }
+
+        private async void CreateCreatingAnimation()
+        {
+            string text = labelImageCreating.Text;
+            string frame = "⠏";
+            while (true)
+            {
+                for (int i = 0; i < 19; i++)
+                {
+                    if (i == 0) frame = "⠏";
+                    else if (i == 1) frame = "⠛";
+                    else if (i == 2) frame = "⠹";
+                    else if (i == 3) frame = "⠸";
+                    else if (i == 4) frame = "⠼";
+                    else if (i == 5) frame = "⠴";
+                    else if (i == 6) frame = "⠦";
+                    else if (i == 7) frame = "⠧";
+                    else if (i == 8) frame = "⠇";
+                    else if (i == 9) frame = "⠏";
+                    else if (i == 10) frame = "⠋";
+                    else if (i == 11) frame = "⠙";
+                    else if (i == 12) frame = "⠹";
+                    else if (i == 13) frame = "⠸";
+                    else if (i == 14) frame = "⠼";
+                    else if (i == 15) frame = "⠴";
+                    else if (i == 16) frame = "⠦";
+                    else if (i == 17) frame = "⠧";
+                    else if (i == 18) frame = "⠇";
+                    labelImageCreating.Text = $"{frame} {text}";
+                    await Task.Delay(75);
+                }
+            }
         }
         private Image ResizeImage(Image image, int width, int height)
         {
