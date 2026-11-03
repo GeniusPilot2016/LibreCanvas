@@ -217,7 +217,6 @@
             // 
             // labelOnlyFewUsagesLeft
             // 
-            labelOnlyFewUsagesLeft.AutoSize = true;
             labelOnlyFewUsagesLeft.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Bold, GraphicsUnit.Point, 0);
             labelOnlyFewUsagesLeft.ForeColor = Color.FromArgb(192, 0, 0);
             labelOnlyFewUsagesLeft.Location = new Point(158, 125);
@@ -225,6 +224,7 @@
             labelOnlyFewUsagesLeft.Size = new Size(209, 16);
             labelOnlyFewUsagesLeft.TabIndex = 9;
             labelOnlyFewUsagesLeft.Text = "Only {number} daily usages are left";
+            labelOnlyFewUsagesLeft.TextAlign = ContentAlignment.MiddleCenter;
             labelOnlyFewUsagesLeft.Visible = false;
             // 
             // CreateWithAIForm

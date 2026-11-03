@@ -56,6 +56,20 @@ namespace Carpathia
                 throw new ArgumentOutOfRangeException(
                     "Width and height must be positive.");
 
+            // Keep the requested dimensions for the final output, but never
+            // ask the API to generate more than 2048 pixels on its longer side.
+            // Scale both dimensions together to preserve the aspect ratio.
+            const int maxOutputSide = 2048;
+            int wantedLongSide = Math.Max(width, height);
+            double generationScale = wantedLongSide > maxOutputSide
+                ? (double)maxOutputSide / wantedLongSide
+                : 1.0;
+
+            int generationWidth = Math.Max(
+                1, (int)Math.Round(width * generationScale));
+            int generationHeight = Math.Max(
+                1, (int)Math.Round(height * generationScale));
+
             string endpoint = image == null
                 ? "/api/text-to-image"
                 : "/api/image-to-image";
@@ -63,8 +77,8 @@ namespace Carpathia
             var payload = new JsonObject
             {
                 ["text"] = prompt,
-                ["width"] = width,
-                ["height"] = height
+                ["width"] = generationWidth,
+                ["height"] = generationHeight
             };
 
             if (image != null)
@@ -194,7 +208,32 @@ namespace Carpathia
                 using var imageStream = new MemoryStream(imageBytes);
                 using Image decoded = Image.FromStream(imageStream);
 
-                return new Bitmap(decoded);
+                // Always return the exact dimensions the caller requested,
+                // even when the API generated a 2048px-limited image.
+                if (decoded.Width == width && decoded.Height == height)
+                    return new Bitmap(decoded);
+
+                var resized = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+                try
+                {
+                    using (var graphics = Graphics.FromImage(resized))
+                    {
+                        graphics.CompositingQuality =
+                            System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                        graphics.InterpolationMode =
+                            System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                        graphics.PixelOffsetMode =
+                            System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+                        graphics.DrawImage(decoded, 0, 0, width, height);
+                    }
+
+                    return resized;
+                }
+                catch
+                {
+                    resized.Dispose();
+                    throw;
+                }
             }
             catch (OperationCanceledException)
             {
@@ -210,18 +249,6 @@ namespace Carpathia
                     ex.Message,
                     innerException: ex);
             }
-        }
-
-        private static int NormalizeGenerationDimension(int value)
-        {
-            const int min = 256;
-            const int max = 1920;
-            const int step = 16;
-
-            int clamped = Math.Max(min, Math.Min(max, value));
-            int normalized = (int)Math.Round(clamped / (double)step) * step;
-
-            return Math.Max(min, Math.Min(max, normalized));
         }
 
         private static string CreateHeader()
