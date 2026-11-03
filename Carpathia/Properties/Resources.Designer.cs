@@ -908,6 +908,16 @@ namespace Carpathia.Properties {
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
+        internal static System.Drawing.Bitmap icons8_old_fashioned_family_photo_48__1_ {
+            get {
+                object obj = ResourceManager.GetObject("icons8-old-fashioned-family-photo-48 (1)", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
         internal static System.Drawing.Bitmap icons8_open_file_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-open-file-48", resourceCulture);
@@ -1048,6 +1058,16 @@ namespace Carpathia.Properties {
         /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
+        internal static System.Drawing.Bitmap icons8_repair_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-repair-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
         internal static System.Drawing.Bitmap icons8_rotate_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-rotate-48", resourceCulture);
@@ -1161,6 +1181,16 @@ namespace Carpathia.Properties {
         internal static System.Drawing.Bitmap icons8_strikethrough_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-strikethrough-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap icons8_toggle_full_screen_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-toggle-full-screen-48", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -76,9 +76,8 @@ namespace Carpathia
         private double resizePreviewLastMs;
         private const double ResizePreviewResponseMs = 42.0;
         private const int MaxCanvasDimension = 16000;
-        // true  = expanded area of the bottom layer gets the secondary colour (like Paint)
-        // false = expanded area is fully transparent
-        private bool fillExpandedAreaWithBackgroundColor = true;
+        // Expanding the canvas always adds transparent pixels on every layer.
+        // Transparency checkerboard is a UI preview and is never baked into bitmaps.
 
         private bool ResizeAffectsLeft =>
             resizeDirection is ResizeDirection.Left or ResizeDirection.TopLeft or ResizeDirection.BottomLeft;
@@ -525,7 +524,7 @@ namespace Carpathia
                 pages.ForeColor = TabPage.DefaultForeColor;
             }
             listView1.ApplyListViewTheme(ListView.DefaultBackColor, ListView.DefaultForeColor);
-            toolStrip1.BackgroundImage = Resources.toolstrip_light;
+            toolStripLayer.BackgroundImage = Resources.toolstrip_light;
             UIHelper.ApplyCustomTitleBar(this, false);
         }
         private void DarkTheme()
@@ -589,7 +588,7 @@ namespace Carpathia
                 pages.ForeColor = Color.White;
             }
             listView1.ApplyListViewTheme(Color.Black, Color.White);
-            toolStrip1.BackgroundImage = Resources.toolstrip_dark;
+            toolStripLayer.BackgroundImage = Resources.toolstrip_dark;
             UIHelper.ApplyCustomTitleBar(this, true);
         }
         private void InitializeSelectionPen()
@@ -1833,9 +1832,18 @@ namespace Carpathia
             using (Brush gutter = new SolidBrush(canvasPanel.BackColor))
                 g.FillRectangle(gutter, new Rectangle(x - 10, y - 10,
                     imageWidth + 20, imageHeight + 20));
-            // Preserve the PictureBox background behind transparent pixels.
-            using (Brush imageBackground = new SolidBrush(pictureBoxCanvas.BackColor))
-                g.FillRectangle(imageBackground, imageRect);
+            // Match the canvas transparency preview while zooming.
+            if (toolStripButton9.Checked)
+            {
+                using (TextureBrush checkerboard = new TextureBrush(
+                    Resources.transparent_pattern, WrapMode.Tile))
+                    g.FillRectangle(checkerboard, imageRect);
+            }
+            else
+            {
+                using (Brush imageBackground = new SolidBrush(pictureBoxCanvas.BackColor))
+                    g.FillRectangle(imageBackground, imageRect);
+            }
 
             g.InterpolationMode = animatedZoom >= 1f
                 ? InterpolationMode.NearestNeighbor
@@ -2910,13 +2918,19 @@ namespace Carpathia
             using (Brush gutter = new SolidBrush(canvasPanel.BackColor))
                 g.FillRectangle(gutter, gutterRect);
 
-            // New pixels match ApplyCanvasResize: the visible bottom layer is
-            // extended with secondary color, or with transparency otherwise.
-            bool showExpansionColor = fillExpandedAreaWithBackgroundColor &&
-                (editorLayers.Count == 0 || editorLayers[editorLayers.Count - 1].Visible);
-            using (Brush expansion = new SolidBrush(showExpansionColor
-                ? color2 : pictureBoxCanvas.BackColor))
-                g.FillRectangle(expansion, imageRect);
+            // Newly expanded pixels have alpha 0 regardless of the display preference.
+            // Do not change or override the user's transparency pattern toggle.
+            if (toolStripButton9.Checked)
+            {
+                using (TextureBrush expansionPattern = new TextureBrush(
+                    Resources.transparent_pattern, WrapMode.Tile))
+                    g.FillRectangle(expansionPattern, imageRect);
+            }
+            else
+            {
+                using (Brush imageBackground = new SolidBrush(pictureBoxCanvas.BackColor))
+                    g.FillRectangle(imageBackground, imageRect);
+            }
 
             double xOffset = ResizeAffectsLeft
                 ? resizePreviewWidth - resizeOriginalSize.Width : 0.0;
@@ -2932,11 +2946,8 @@ namespace Carpathia
             try
             {
                 g.SetClip(imageRect, CombineMode.Intersect);
-                // Restore the PictureBox's real transparency background inside
-                // the original image. Its transparent pixels must not be replaced
-                // by the fill used only for the newly expanded area.
-                using (Brush imageBackground = new SolidBrush(pictureBoxCanvas.BackColor))
-                    g.FillRectangle(imageBackground, originalRect);
+                // Existing pixels are displayed over the current canvas background;
+                // their alpha values are preserved in the stored bitmap.
                 g.InterpolationMode = zoom >= 1f
                     ? InterpolationMode.NearestNeighbor : InterpolationMode.HighQualityBicubic;
                 g.PixelOffsetMode = PixelOffsetMode.HighQuality;
@@ -3105,14 +3116,12 @@ namespace Carpathia
 
                 using (Graphics g = Graphics.FromImage(bmp))
                 {
-                    // Index count-1 is the bottom layer (row 0 is the top layer).
-                    bool isBottomLayer = i == count - 1;
-                    g.Clear(fillExpandedAreaWithBackgroundColor && isBottomLayer
-                        ? color2
-                        : Color.Transparent);
+                    // Every newly exposed pixel must remain truly transparent.
+                    // This applies to the bottom layer too, regardless of color2.
+                    g.Clear(Color.Transparent);
 
-                    // SourceCopy: original pixels (including transparent ones) replace
-                    // the fill, so only the newly exposed area keeps the fill colour.
+                    // SourceCopy preserves existing pixels, including their alpha,
+                    // without blending them with a background colour.
                     g.CompositingMode = CompositingMode.SourceCopy;
                     g.InterpolationMode = InterpolationMode.NearestNeighbor;
                     g.PixelOffsetMode = PixelOffsetMode.Half;
@@ -5680,6 +5689,7 @@ namespace Carpathia
                 case true:
                     {
                         pictureBoxCanvas.BackgroundImage = Resources.transparent_pattern;
+                        pictureBoxCanvas.BackgroundImageLayout = ImageLayout.Tile;
                         break;
                     }
             }
@@ -6830,7 +6840,8 @@ namespace Carpathia
                 // 3. Arayüzü ve tuvali güvenli bir şekilde yenile (UI Thread garantisiyle)
                 if (InvokeRequired)
                 {
-                    Invoke(new Action(() => {
+                    Invoke(new Action(() =>
+                    {
                         RenderCompositeToCanvas(force: true);
                         pictureBoxCanvas.Invalidate();
                         pictureBoxCanvas.Update();
@@ -8875,6 +8886,342 @@ namespace Carpathia
             floating.CenterAtDisplayPoint(displayCenter);
             floating.BringToFront();
             return floating;
+        }
+
+        private async void expandToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            toolStripAICreateImage.Visible = false;
+            if (!(isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0))
+            {
+                if (CheckIfInternetConnectionAvailable.IsInternetAvailable())
+                {
+
+                    string systemInstruction =
+                        "You are performing image outpainting, not adding a frame. " +
+                        "The image has been placed on a larger canvas. All blank " +
+                        "or transparent areas outside the original image represent " +
+                        "missing scenery that must be generated. Extend the actual " +
+                        "photograph naturally into every missing area. Continue " +
+                        "existing structures, landscapes, textures, lighting, and " +
+                        "perspective beyond the original image boundaries. " +
+                        "Do not create white borders, picture frames, margins, " +
+                        "matting, or blank spaces. The final image must be " +
+                        "completely filled with continuous photographic content.";
+
+                    try
+                    {
+                        SaveStateForUndo();
+                        isImageCurrentlyCreating = true;
+                        canvasPanel.Enabled = false;
+                        menuStrip1.Enabled = false;
+                        toolStripTools.Enabled = false;
+                        toolStripSeparator29.Visible = true;
+                        labelCreatingImage.Visible = true;
+                        progressBarAIImageCreation.Visible = true;
+                        buttonCreate.Enabled = false;
+                        textBoxPrompt.Enabled = false;
+                        labelPrompt.Enabled = false;
+                        buttonClose.Enabled = false;
+                        var imageTask = ImageGenerationCore.GenerateImage(systemInstruction, MainBitmap,
+                                MainBitmap.Width, MainBitmap.Height, cts.Token);
+                        var image = await imageTask; // Await the task to get the result
+                        if (image != null)
+                        {
+                            // Rebuild the layer composite; Invalidate() alone
+                            // repaints the old cached preview.
+                            ApplyGeneratedImageToCanvas(image);
+                        }
+                        else
+                        {
+                            Undo();
+                            ClearRedoStack();
+                            Logger.Log("The generated image is null.", Logger.LogTypes.Error);
+                            MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                    catch (NullReferenceException)
+                    {
+                        Undo();
+                        ClearRedoStack();
+                        Logger.Log("The generated image is null.", Logger.LogTypes.Error);
+                        MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    catch (Exception ex)
+                    {
+                        Undo();
+                        ClearRedoStack();
+                        Logger.Log("Error during AI image creation: " + ex.Message, Logger.LogTypes.Error);
+                        MessageForm.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    finally
+                    {
+                        isImageCurrentlyCreating = false;
+                        pictureBoxCanvas.Invalidate();
+                        canvasPanel.Enabled = true;
+                        menuStrip1.Enabled = true;
+                        toolStripTools.Enabled = true;
+                        toolStripSeparator29.Visible = false;
+                        labelCreatingImage.Visible = false;
+                        if (!string.IsNullOrEmpty(textBoxPrompt.Text))
+                        {
+                            buttonCreate.Enabled = true;
+                        }
+                        textBoxPrompt.Enabled = true;
+                        labelPrompt.Enabled = true;
+                        buttonClose.Enabled = true;
+                        progressBarAIImageCreation.Visible = false;
+                        toolStripAICreateImage.Visible = false;
+                        textBoxPrompt.Clear();
+                    }
+                }
+                else
+                {
+                    Logger.Log("No internet connection available.", Logger.LogTypes.Error);
+                    MessageForm.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            else
+            {
+                SystemSounds.Beep.Play(); // Notify the user that the expand feature is not available for selections.
+            }
+        }
+
+        private async void colorizeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (CheckIfInternetConnectionAvailable.IsInternetAvailable())
+            {
+                string systemInstruction = "Colorize the image, keeping the original details and textures intact. Ensure that the colors are natural and realistic, enhancing the overall visual appeal of the image.";
+                try
+                {
+                    SaveStateForUndo();
+                    isImageCurrentlyCreating = true;
+                    canvasPanel.Enabled = false;
+                    menuStrip1.Enabled = false;
+                    toolStripTools.Enabled = false;
+                    toolStripSeparator29.Visible = true;
+                    labelCreatingImage.Visible = true;
+                    progressBarAIImageCreation.Visible = true;
+                    buttonCreate.Enabled = false;
+                    textBoxPrompt.Enabled = false;
+                    labelPrompt.Enabled = false;
+                    buttonClose.Enabled = false;
+                    if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
+                    {
+                        if (SelectedBitmap == null)
+                        {
+                            SelectedBitmap = new Bitmap(
+                                (int)(SelectionRectangle.Width / zoom),
+                                (int)(SelectionRectangle.Height / zoom));
+                            using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                            {
+                                g.Clear(Color.Transparent);
+                                Rectangle sourceRect = new Rectangle(
+                                    (int)(originalSelectionRectangleLocation.X),
+                                    (int)(originalSelectionRectangleLocation.Y),
+                                    (int)(originalSelectionRectangleSize.Width),
+                                    (int)(originalSelectionRectangleSize.Height));
+                                g.DrawImage(MainBitmap,
+                                    new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                                    sourceRect,
+                                    GraphicsUnit.Pixel);
+                            }
+                        }
+                        var imageTask = ImageGenerationCore.GenerateImage(systemInstruction, SelectedBitmap,
+                            SelectedBitmap.Width, SelectedBitmap.Height, cts.Token);
+                        var image = await imageTask; // Await the task to get the result
+                        if (image != null)
+                        {
+                            SelectedBitmap = new Bitmap(image); // Convert Image to Bitmap  
+                            MergeMainBitmapWithSelected();
+                            isModified = true; MarkLayerThumbnailDirty();
+                        }
+                        else
+                        {
+                            Undo();
+                            ClearRedoStack();
+                            Logger.Log("The generated image is null.", Logger.LogTypes.Error);
+                            MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                    else
+                    {
+                        var imageTask = ImageGenerationCore.GenerateImage(systemInstruction, MainBitmap,
+                            MainBitmap.Width, MainBitmap.Height, cts.Token);
+                        var image = await imageTask; // Await the task to get the result
+                        if (image != null)
+                        {
+                            // Rebuild the layer composite; Invalidate() alone
+                            // repaints the old cached preview.
+                            ApplyGeneratedImageToCanvas(image);
+                        }
+                        else
+                        {
+                            Undo();
+                            ClearRedoStack();
+                            Logger.Log("The generated image is null.", Logger.LogTypes.Error);
+                            MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+                catch (NullReferenceException)
+                {
+                    Undo();
+                    ClearRedoStack();
+                    Logger.Log("The generated image is null.", Logger.LogTypes.Error);
+                    MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (Exception ex)
+                {
+                    Undo();
+                    ClearRedoStack();
+                    Logger.Log("Error during AI image creation: " + ex.Message, Logger.LogTypes.Error);
+                    MessageForm.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    isImageCurrentlyCreating = false;
+                    pictureBoxCanvas.Invalidate();
+                    canvasPanel.Enabled = true;
+                    menuStrip1.Enabled = true;
+                    toolStripTools.Enabled = true;
+                    toolStripSeparator29.Visible = false;
+                    labelCreatingImage.Visible = false;
+                    if (!string.IsNullOrEmpty(textBoxPrompt.Text))
+                    {
+                        buttonCreate.Enabled = true;
+                    }
+                    textBoxPrompt.Enabled = true;
+                    labelPrompt.Enabled = true;
+                    buttonClose.Enabled = true;
+                    progressBarAIImageCreation.Visible = false;
+                    toolStripAICreateImage.Visible = false;
+                    textBoxPrompt.Clear();
+                }
+            }
+            else
+            {
+                Logger.Log("No internet connection available.", Logger.LogTypes.Error);
+                MessageForm.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private async void restoreToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (CheckIfInternetConnectionAvailable.IsInternetAvailable())
+            {
+                string systemInstruction = "Repair the image, restoring any missing or damaged areas while preserving the original details and textures. Ensure that the restored areas blend seamlessly with the surrounding content, maintaining a natural and realistic appearance.";
+                try
+                {
+                    SaveStateForUndo();
+                    isImageCurrentlyCreating = true;
+                    canvasPanel.Enabled = false;
+                    menuStrip1.Enabled = false;
+                    toolStripTools.Enabled = false;
+                    toolStripSeparator29.Visible = true;
+                    labelCreatingImage.Visible = true;
+                    progressBarAIImageCreation.Visible = true;
+                    buttonCreate.Enabled = false;
+                    textBoxPrompt.Enabled = false;
+                    labelPrompt.Enabled = false;
+                    buttonClose.Enabled = false;
+                    if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
+                    {
+                        if (SelectedBitmap == null)
+                        {
+                            SelectedBitmap = new Bitmap(
+                                (int)(SelectionRectangle.Width / zoom),
+                                (int)(SelectionRectangle.Height / zoom));
+                            using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                            {
+                                g.Clear(Color.Transparent);
+                                Rectangle sourceRect = new Rectangle(
+                                    (int)(originalSelectionRectangleLocation.X),
+                                    (int)(originalSelectionRectangleLocation.Y),
+                                    (int)(originalSelectionRectangleSize.Width),
+                                    (int)(originalSelectionRectangleSize.Height));
+                                g.DrawImage(MainBitmap,
+                                    new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                                    sourceRect,
+                                    GraphicsUnit.Pixel);
+                            }
+                        }
+                        var imageTask = ImageGenerationCore.GenerateImage(systemInstruction, SelectedBitmap,
+                            SelectedBitmap.Width, SelectedBitmap.Height, cts.Token);
+                        var image = await imageTask; // Await the task to get the result
+                        if (image != null)
+                        {
+                            SelectedBitmap = new Bitmap(image); // Convert Image to Bitmap  
+                            MergeMainBitmapWithSelected();
+                            isModified = true; MarkLayerThumbnailDirty();
+                        }
+                        else
+                        {
+                            Undo();
+                            ClearRedoStack();
+                            Logger.Log("The generated image is null.", Logger.LogTypes.Error);
+                            MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                    else
+                    {
+                        var imageTask = ImageGenerationCore.GenerateImage(systemInstruction, MainBitmap,
+                            MainBitmap.Width, MainBitmap.Height, cts.Token);
+                        var image = await imageTask; // Await the task to get the result
+                        if (image != null)
+                        {
+                            // Rebuild the layer composite; Invalidate() alone
+                            // repaints the old cached preview.
+                            ApplyGeneratedImageToCanvas(image);
+                        }
+                        else
+                        {
+                            Undo();
+                            ClearRedoStack();
+                            Logger.Log("The generated image is null.", Logger.LogTypes.Error);
+                            MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+                catch (NullReferenceException)
+                {
+                    Undo();
+                    ClearRedoStack();
+                    Logger.Log("The generated image is null.", Logger.LogTypes.Error);
+                    MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (Exception ex)
+                {
+                    Undo();
+                    ClearRedoStack();
+                    Logger.Log("Error during AI image creation: " + ex.Message, Logger.LogTypes.Error);
+                    MessageForm.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    isImageCurrentlyCreating = false;
+                    pictureBoxCanvas.Invalidate();
+                    canvasPanel.Enabled = true;
+                    menuStrip1.Enabled = true;
+                    toolStripTools.Enabled = true;
+                    toolStripSeparator29.Visible = false;
+                    labelCreatingImage.Visible = false;
+                    if (!string.IsNullOrEmpty(textBoxPrompt.Text))
+                    {
+                        buttonCreate.Enabled = true;
+                    }
+                    textBoxPrompt.Enabled = true;
+                    labelPrompt.Enabled = true;
+                    buttonClose.Enabled = true;
+                    progressBarAIImageCreation.Visible = false;
+                    toolStripAICreateImage.Visible = false;
+                    textBoxPrompt.Clear();
+                }
+            }
+            else
+            {
+                Logger.Log("No internet connection available.", Logger.LogTypes.Error);
+                MessageForm.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 
