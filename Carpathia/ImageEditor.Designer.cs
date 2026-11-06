@@ -68,15 +68,27 @@
             panelResizer = new Panel();
             tabControl1 = new TabControl();
             tabPage1 = new TabPage();
+            tableLayoutPanel1 = new TableLayoutPanel();
+            panel2 = new Panel();
+            comboBoxBlendMode = new ComboBox();
+            label2 = new Label();
             listView1 = new LayerDataGridView();
             dataGridViewImageColumn1 = new DataGridViewImageColumn();
             dataGridViewImageColumn2 = new DataGridViewImageColumn();
             dataGridViewTextBoxColumn1 = new DataGridViewTextBoxColumn();
+            panel1 = new Panel();
+            labelOpacity = new Label();
+            trackBarOpacity = new TrackBar();
+            label1 = new Label();
             toolStripLayer = new ToolStrip();
             toolStripButtonAddLayer = new ToolStripButton();
             toolStripButtonMoveToUp = new ToolStripButton();
             toolStripButtonMoveToDown = new ToolStripButton();
             toolStripButtonDeleteLayer = new ToolStripButton();
+            tabPage2 = new TabPage();
+            listViewHistory = new ListView();
+            columnHeader2 = new ColumnHeader();
+            imageListHistoryIcons = new ImageList(components);
             toolStripTools = new ToolStrip();
             mouseTool = new ToolStripButton();
             toolStripSeparator11 = new ToolStripSeparator();
@@ -298,6 +310,9 @@
             printImageDialog = new PrintDialog();
             printImage = new System.Drawing.Printing.PrintDocument();
             printPreviewDialog1 = new PrintPreviewDialog();
+            dataGridViewImageColumn3 = new DataGridViewImageColumn();
+            dataGridViewImageColumn4 = new DataGridViewImageColumn();
+            dataGridViewTextBoxColumn2 = new DataGridViewTextBoxColumn();
             toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             toolStripContainer1.ContentPanel.SuspendLayout();
             toolStripContainer1.LeftToolStripPanel.SuspendLayout();
@@ -310,8 +325,13 @@
             ((System.ComponentModel.ISupportInitialize)pictureBoxCanvas).BeginInit();
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
+            tableLayoutPanel1.SuspendLayout();
+            panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)listView1).BeginInit();
+            panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)trackBarOpacity).BeginInit();
             toolStripLayer.SuspendLayout();
+            tabPage2.SuspendLayout();
             toolStripTools.SuspendLayout();
             toolStripAirBrush.SuspendLayout();
             toolStripBrush.SuspendLayout();
@@ -506,13 +526,14 @@
             UIPanel.AutoScroll = true;
             UIPanel.AutoScrollMargin = new Size(25, 25);
             UIPanel.AutoScrollMinSize = new Size(820, 620);
+            UIPanel.AutoSize = true;
             UIPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             UIPanel.ContextMenuStrip = contextMenuStrip1;
             UIPanel.Controls.Add(canvasPanel);
             UIPanel.Dock = DockStyle.Fill;
             UIPanel.Location = new Point(0, 0);
             UIPanel.Name = "UIPanel";
-            UIPanel.Size = new Size(1003, 759);
+            UIPanel.Size = new Size(989, 759);
             UIPanel.TabIndex = 3;
             UIPanel.Click += panel1_Click;
             UIPanel.DragDrop += ImageEditor_DragDrop;
@@ -568,7 +589,7 @@
             canvasPanel.Controls.Add(resize_top);
             canvasPanel.Controls.Add(pictureBoxCanvas);
             canvasPanel.Controls.Add(panelResizer);
-            canvasPanel.Location = new Point(86, 88);
+            canvasPanel.Location = new Point(79, 88);
             canvasPanel.Name = "canvasPanel";
             canvasPanel.Size = new Size(820, 620);
             canvasPanel.TabIndex = 2;
@@ -726,26 +747,82 @@
             // 
             // tabControl1
             // 
+            tabControl1.Alignment = TabAlignment.Right;
             tabControl1.Controls.Add(tabPage1);
+            tabControl1.Controls.Add(tabPage2);
             tabControl1.Dock = DockStyle.Right;
             tabControl1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            tabControl1.Location = new Point(1003, 0);
+            tabControl1.Location = new Point(989, 0);
+            tabControl1.Multiline = true;
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(247, 759);
+            tabControl1.Size = new Size(261, 759);
             tabControl1.TabIndex = 3;
             // 
             // tabPage1
             // 
-            tabPage1.Controls.Add(listView1);
+            tabPage1.Controls.Add(tableLayoutPanel1);
             tabPage1.Controls.Add(toolStripLayer);
-            tabPage1.Location = new Point(4, 25);
+            tabPage1.Location = new Point(4, 4);
             tabPage1.Name = "tabPage1";
             tabPage1.Padding = new Padding(3);
-            tabPage1.Size = new Size(239, 730);
+            tabPage1.Size = new Size(231, 751);
             tabPage1.TabIndex = 0;
             tabPage1.Text = "Layers";
             tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // tableLayoutPanel1
+            // 
+            tableLayoutPanel1.AutoSize = true;
+            tableLayoutPanel1.BackColor = SystemColors.Control;
+            tableLayoutPanel1.ColumnCount = 1;
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tableLayoutPanel1.Controls.Add(panel2, 0, 0);
+            tableLayoutPanel1.Controls.Add(listView1, 0, 2);
+            tableLayoutPanel1.Controls.Add(panel1, 0, 1);
+            tableLayoutPanel1.Dock = DockStyle.Fill;
+            tableLayoutPanel1.Location = new Point(3, 3);
+            tableLayoutPanel1.Margin = new Padding(0);
+            tableLayoutPanel1.Name = "tableLayoutPanel1";
+            tableLayoutPanel1.RowCount = 3;
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tableLayoutPanel1.Size = new Size(225, 720);
+            tableLayoutPanel1.TabIndex = 2;
+            // 
+            // panel2
+            // 
+            panel2.AutoSize = true;
+            panel2.BackColor = Color.Transparent;
+            panel2.Controls.Add(comboBoxBlendMode);
+            panel2.Controls.Add(label2);
+            panel2.Dock = DockStyle.Fill;
+            panel2.Location = new Point(3, 3);
+            panel2.Name = "panel2";
+            panel2.Size = new Size(219, 34);
+            panel2.TabIndex = 4;
+            // 
+            // comboBoxBlendMode
+            // 
+            comboBoxBlendMode.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            comboBoxBlendMode.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBoxBlendMode.FormattingEnabled = true;
+            comboBoxBlendMode.Items.AddRange(new object[] { "Normal", "Dissolve", "Darken", "Multiply", "Color Burn", "Linear Burn", "Darker Color", "Lighten", "Screen", "Color Dodge", "Linear Dodge (Add)", "Lighter Color", "Overlay", "Soft Light", "Hard Light", "Vivid Light", "Linear Light", "Pin Light", "Hard Mix", "Difference", "Exclusion", "Subtract", "Divide", "Hue", "Saturation", "Color", "Luminosity" });
+            comboBoxBlendMode.Location = new Point(82, 5);
+            comboBoxBlendMode.Name = "comboBoxBlendMode";
+            comboBoxBlendMode.Size = new Size(133, 24);
+            comboBoxBlendMode.TabIndex = 1;
+            // 
+            // label2
+            // 
+            label2.Anchor = AnchorStyles.Left;
+            label2.AutoSize = true;
+            label2.Location = new Point(3, 9);
+            label2.Name = "label2";
+            label2.Size = new Size(73, 16);
+            label2.TabIndex = 0;
+            label2.Text = "Blend Mode";
             // 
             // listView1
             // 
@@ -757,15 +834,14 @@
             listView1.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
             listView1.ColumnHeadersVisible = false;
             listView1.Dock = DockStyle.Fill;
-            listView1.Location = new Point(3, 3);
+            listView1.Location = new Point(3, 83);
             listView1.MultiSelect = false;
             listView1.Name = "listView1";
             listView1.ReadOnly = true;
             listView1.RowHeadersVisible = false;
             listView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            listView1.Size = new Size(233, 699);
-            listView1.TabIndex = 0;
-            listView1.LayerVisibilityToggled += listView1_LayerVisibilityToggled;
+            listView1.Size = new Size(219, 634);
+            listView1.TabIndex = 1;
             // 
             // dataGridViewImageColumn1
             // 
@@ -796,15 +872,63 @@
             dataGridViewTextBoxColumn1.ReadOnly = true;
             dataGridViewTextBoxColumn1.SortMode = DataGridViewColumnSortMode.NotSortable;
             // 
+            // panel1
+            // 
+            panel1.AutoSize = true;
+            panel1.BackColor = Color.Transparent;
+            panel1.Controls.Add(labelOpacity);
+            panel1.Controls.Add(trackBarOpacity);
+            panel1.Controls.Add(label1);
+            panel1.Dock = DockStyle.Fill;
+            panel1.Location = new Point(3, 43);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(219, 34);
+            panel1.TabIndex = 3;
+            // 
+            // labelOpacity
+            // 
+            labelOpacity.Anchor = AnchorStyles.Right;
+            labelOpacity.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            labelOpacity.Location = new Point(157, 8);
+            labelOpacity.Name = "labelOpacity";
+            labelOpacity.Size = new Size(52, 16);
+            labelOpacity.TabIndex = 2;
+            labelOpacity.Text = "100%";
+            labelOpacity.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // trackBarOpacity
+            // 
+            trackBarOpacity.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            trackBarOpacity.AutoSize = false;
+            trackBarOpacity.BackColor = SystemColors.Control;
+            trackBarOpacity.Location = new Point(58, 8);
+            trackBarOpacity.Maximum = 100;
+            trackBarOpacity.Name = "trackBarOpacity";
+            trackBarOpacity.Size = new Size(104, 23);
+            trackBarOpacity.TabIndex = 1;
+            trackBarOpacity.TickFrequency = 10;
+            trackBarOpacity.Value = 100;
+            trackBarOpacity.ValueChanged += trackBarOpacity_ValueChanged;
+            // 
+            // label1
+            // 
+            label1.Anchor = AnchorStyles.Left;
+            label1.AutoSize = true;
+            label1.Location = new Point(3, 9);
+            label1.Name = "label1";
+            label1.Size = new Size(49, 16);
+            label1.TabIndex = 0;
+            label1.Text = "Opacity";
+            // 
             // toolStripLayer
             // 
             toolStripLayer.BackgroundImageLayout = ImageLayout.Stretch;
             toolStripLayer.Dock = DockStyle.Bottom;
             toolStripLayer.GripStyle = ToolStripGripStyle.Hidden;
             toolStripLayer.Items.AddRange(new ToolStripItem[] { toolStripButtonAddLayer, toolStripButtonMoveToUp, toolStripButtonMoveToDown, toolStripButtonDeleteLayer });
-            toolStripLayer.Location = new Point(3, 702);
+            toolStripLayer.Location = new Point(3, 723);
             toolStripLayer.Name = "toolStripLayer";
-            toolStripLayer.Size = new Size(233, 25);
+            toolStripLayer.Size = new Size(225, 25);
             toolStripLayer.Stretch = true;
             toolStripLayer.TabIndex = 1;
             toolStripLayer.Text = "toolStrip1";
@@ -848,6 +972,51 @@
             toolStripButtonDeleteLayer.Size = new Size(23, 22);
             toolStripButtonDeleteLayer.Text = "Delete Layer";
             toolStripButtonDeleteLayer.Click += toolStripButtonDeleteLayer_Click;
+            // 
+            // tabPage2
+            // 
+            tabPage2.Controls.Add(listViewHistory);
+            tabPage2.Location = new Point(4, 4);
+            tabPage2.Name = "tabPage2";
+            tabPage2.Padding = new Padding(3);
+            tabPage2.Size = new Size(231, 751);
+            tabPage2.TabIndex = 1;
+            tabPage2.Text = "History";
+            tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // listViewHistory
+            // 
+            listViewHistory.Columns.AddRange(new ColumnHeader[] { columnHeader2 });
+            listViewHistory.Dock = DockStyle.Fill;
+            listViewHistory.LargeImageList = imageListHistoryIcons;
+            listViewHistory.Location = new Point(3, 3);
+            listViewHistory.Name = "listViewHistory";
+            listViewHistory.Size = new Size(225, 745);
+            listViewHistory.TabIndex = 0;
+            listViewHistory.UseCompatibleStateImageBehavior = false;
+            listViewHistory.View = View.Details;
+            // 
+            // columnHeader2
+            // 
+            columnHeader2.Text = "Tool";
+            columnHeader2.Width = 220;
+            // 
+            // imageListHistoryIcons
+            // 
+            imageListHistoryIcons.ColorDepth = ColorDepth.Depth32Bit;
+            imageListHistoryIcons.ImageStream = (ImageListStreamer)resources.GetObject("imageListHistoryIcons.ImageStream");
+            imageListHistoryIcons.TransparentColor = Color.Violet;
+            imageListHistoryIcons.Images.SetKeyName(0, "icons8-brush-48 (1).png");
+            imageListHistoryIcons.Images.SetKeyName(1, "icons8-pencil-48.png");
+            imageListHistoryIcons.Images.SetKeyName(2, "icons8-eraser-tool-48.png");
+            imageListHistoryIcons.Images.SetKeyName(3, "icons8-paint-bucket-48.png");
+            imageListHistoryIcons.Images.SetKeyName(4, "icons8-paint-sprayer-48.png");
+            imageListHistoryIcons.Images.SetKeyName(5, "icons8-add-text-48.png");
+            imageListHistoryIcons.Images.SetKeyName(6, "icons8-diversity-48.png");
+            imageListHistoryIcons.Images.SetKeyName(7, "icons8-artificial-intelligence-48.png");
+            imageListHistoryIcons.Images.SetKeyName(8, "icons8-file-48.png");
+            imageListHistoryIcons.Images.SetKeyName(9, "icons8-filter-48 (1).png");
+            imageListHistoryIcons.Images.SetKeyName(10, "icons8-cut-48.png");
             // 
             // toolStripTools
             // 
@@ -1097,7 +1266,7 @@
             // 
             createImageToolStripMenuItem1.Image = Properties.Resources.icons8_image_48;
             createImageToolStripMenuItem1.Name = "createImageToolStripMenuItem1";
-            createImageToolStripMenuItem1.Size = new Size(192, 26);
+            createImageToolStripMenuItem1.Size = new Size(188, 22);
             createImageToolStripMenuItem1.Text = "Create Image";
             createImageToolStripMenuItem1.Click += createImageToolStripMenuItem1_Click;
             // 
@@ -1105,7 +1274,7 @@
             // 
             generativeEraserToolStripMenuItem.Image = Properties.Resources.icons8_erase_48;
             generativeEraserToolStripMenuItem.Name = "generativeEraserToolStripMenuItem";
-            generativeEraserToolStripMenuItem.Size = new Size(192, 26);
+            generativeEraserToolStripMenuItem.Size = new Size(188, 22);
             generativeEraserToolStripMenuItem.Text = "Generative Eraser";
             generativeEraserToolStripMenuItem.Click += generativeEraserToolStripMenuItem_Click;
             // 
@@ -1113,7 +1282,7 @@
             // 
             removeBackgroundToolStripMenuItem2.Image = Properties.Resources.icons8_background_remover_48;
             removeBackgroundToolStripMenuItem2.Name = "removeBackgroundToolStripMenuItem2";
-            removeBackgroundToolStripMenuItem2.Size = new Size(192, 26);
+            removeBackgroundToolStripMenuItem2.Size = new Size(188, 22);
             removeBackgroundToolStripMenuItem2.Text = "Remove Background";
             removeBackgroundToolStripMenuItem2.Click += removeBackgroundToolStripMenuItem2_Click;
             // 
@@ -1121,7 +1290,7 @@
             // 
             expandToolStripMenuItem.Image = Properties.Resources.icons8_toggle_full_screen_48;
             expandToolStripMenuItem.Name = "expandToolStripMenuItem";
-            expandToolStripMenuItem.Size = new Size(192, 26);
+            expandToolStripMenuItem.Size = new Size(188, 22);
             expandToolStripMenuItem.Text = "Expand";
             expandToolStripMenuItem.Click += expandToolStripMenuItem_Click;
             // 
@@ -1129,7 +1298,7 @@
             // 
             colorizeToolStripMenuItem.Image = Properties.Resources.icons8_old_fashioned_family_photo_48;
             colorizeToolStripMenuItem.Name = "colorizeToolStripMenuItem";
-            colorizeToolStripMenuItem.Size = new Size(192, 26);
+            colorizeToolStripMenuItem.Size = new Size(188, 22);
             colorizeToolStripMenuItem.Text = "Colorize";
             colorizeToolStripMenuItem.Click += colorizeToolStripMenuItem_Click;
             // 
@@ -1137,7 +1306,7 @@
             // 
             restoreToolStripMenuItem.Image = Properties.Resources.icons8_repair_48;
             restoreToolStripMenuItem.Name = "restoreToolStripMenuItem";
-            restoreToolStripMenuItem.Size = new Size(192, 26);
+            restoreToolStripMenuItem.Size = new Size(188, 22);
             restoreToolStripMenuItem.Text = "Restore";
             restoreToolStripMenuItem.Click += restoreToolStripMenuItem_Click;
             // 
@@ -1305,7 +1474,7 @@
             fitTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
             fitTool.Image = Properties.Resources.icons8_fit_to_page_48;
             fitTool.Name = "fitTool";
-            fitTool.Size = new Size(24, 24);
+            fitTool.Size = new Size(37, 24);
             fitTool.Text = "Fit";
             fitTool.ToolTipText = "Fit canvas in workspace";
             fitTool.Click += fitTool_Click;
@@ -1321,7 +1490,7 @@
             toolStripAirBrush.Items.AddRange(new ToolStripItem[] { toolStripLabel20, toolStripSeparator38, toolStripLabel9, toolStripComboBoxAirBrushSize, toolStripSeparator21 });
             toolStripAirBrush.Location = new Point(0, 0);
             toolStripAirBrush.Name = "toolStripAirBrush";
-            toolStripAirBrush.Size = new Size(1289, 25);
+            toolStripAirBrush.Size = new Size(182, 25);
             toolStripAirBrush.Stretch = true;
             toolStripAirBrush.TabIndex = 3;
             toolStripAirBrush.Visible = false;
@@ -2724,10 +2893,41 @@
             printPreviewDialog1.Text = "Baskı önizleme";
             printPreviewDialog1.Visible = false;
             // 
+            // dataGridViewImageColumn3
+            // 
+            dataGridViewImageColumn3.HeaderText = "";
+            dataGridViewImageColumn3.ImageLayout = DataGridViewImageCellLayout.Zoom;
+            dataGridViewImageColumn3.MinimumWidth = 32;
+            dataGridViewImageColumn3.Name = "dataGridViewImageColumn3";
+            dataGridViewImageColumn3.ReadOnly = true;
+            dataGridViewImageColumn3.Resizable = DataGridViewTriState.False;
+            dataGridViewImageColumn3.Width = 32;
+            // 
+            // dataGridViewImageColumn4
+            // 
+            dataGridViewImageColumn4.HeaderText = "";
+            dataGridViewImageColumn4.ImageLayout = DataGridViewImageCellLayout.Zoom;
+            dataGridViewImageColumn4.MinimumWidth = 70;
+            dataGridViewImageColumn4.Name = "dataGridViewImageColumn4";
+            dataGridViewImageColumn4.ReadOnly = true;
+            dataGridViewImageColumn4.Resizable = DataGridViewTriState.False;
+            dataGridViewImageColumn4.Width = 70;
+            // 
+            // dataGridViewTextBoxColumn2
+            // 
+            dataGridViewTextBoxColumn2.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            dataGridViewTextBoxColumn2.HeaderText = "Layer";
+            dataGridViewTextBoxColumn2.MinimumWidth = 40;
+            dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            dataGridViewTextBoxColumn2.ReadOnly = true;
+            dataGridViewTextBoxColumn2.SortMode = DataGridViewColumnSortMode.NotSortable;
+            // 
             // ImageEditor
             // 
             AllowDrop = true;
-            AutoScaleMode = AutoScaleMode.None;
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            AutoSize = true;
             ClientSize = new Size(1289, 812);
             Controls.Add(toolStripContainer1);
             Controls.Add(menuStrip1);
@@ -2744,6 +2944,7 @@
             toolStripContainer1.BottomToolStripPanel.ResumeLayout(false);
             toolStripContainer1.BottomToolStripPanel.PerformLayout();
             toolStripContainer1.ContentPanel.ResumeLayout(false);
+            toolStripContainer1.ContentPanel.PerformLayout();
             toolStripContainer1.LeftToolStripPanel.ResumeLayout(false);
             toolStripContainer1.LeftToolStripPanel.PerformLayout();
             toolStripContainer1.TopToolStripPanel.ResumeLayout(false);
@@ -2759,9 +2960,17 @@
             tabControl1.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
             tabPage1.PerformLayout();
+            tableLayoutPanel1.ResumeLayout(false);
+            tableLayoutPanel1.PerformLayout();
+            panel2.ResumeLayout(false);
+            panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)listView1).EndInit();
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)trackBarOpacity).EndInit();
             toolStripLayer.ResumeLayout(false);
             toolStripLayer.PerformLayout();
+            tabPage2.ResumeLayout(false);
             toolStripTools.ResumeLayout(false);
             toolStripTools.PerformLayout();
             toolStripAirBrush.ResumeLayout(false);
@@ -2845,7 +3054,6 @@
         private ToolStripSeparator toolStripSeparator14;
         private ToolStripLabel toolStripResize;
         private ToolStripSeparator toolStripSeparator16;
-        private Panel UIPanel;
         private OpenFileDialog openFileDialog1;
         private SaveFileDialog saveFileDialog1;
         private ToolStrip toolStripAirBrush;
@@ -2862,15 +3070,6 @@
         private ToolStripComboBox comboBoxShapeThickness;
         private ToolStripSeparator toolStripSeparator24;
         private ToolStripLabel labelZoom;
-        private Panel canvasPanel;
-        private Panel resize_bottom_left;
-        private Panel resize_bottom_right;
-        private Panel resize_right;
-        private Panel resize_bottom;
-        private Panel resize_left;
-        private Panel resize_top_left;
-        private Panel resize_top_right;
-        private Panel resize_top;
         private ToolStrip toolStripSpray;
         private ToolStripLabel spraySizeLabel;
         private ToolStripSeparator toolStripSeparator25;
@@ -2904,8 +3103,6 @@
         private ToolStripSeparator toolStripSeparator17;
         private ToolStripLabel toolStripLabel6;
         private ToolStripComboBox comboBoxBrushType;
-        private Panel panelResizer;
-        private PictureBox pictureBoxCanvas;
         private ToolStrip toolStripPen;
         private ToolStripLabel toolStripLabel10;
         private ToolStripComboBox comboBoxPenSize;
@@ -3020,7 +3217,6 @@
         private ToolStripTextBox textBoxTolerance2;
         private TabControl tabControl1;
         private TabPage tabPage1;
-        private LayerDataGridView listView1;
         private ToolStrip toolStripLayer;
         private ToolStripButton toolStripButton2;
         private ToolStripButton toolStripButton3;
@@ -3031,9 +3227,6 @@
         private ToolStripButton toolStripButtonMoveToTop;
         private ToolStripButton toolStripButtonMoveToUp;
         private ToolStripButton toolStripButtonMoveToDown;
-        private DataGridViewImageColumn dataGridViewImageColumn1;
-        private DataGridViewImageColumn dataGridViewImageColumn2;
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private ContextMenuStrip contextMenuStrip1;
         private ToolStripMenuItem cutToolStripMenuItem;
         private ToolStripMenuItem copyToolStripMenuItem;
@@ -3068,6 +3261,38 @@
         private ToolStripMenuItem expandToolStripMenuItem;
         private ToolStripMenuItem colorizeToolStripMenuItem;
         private ToolStripMenuItem restoreToolStripMenuItem;
+        private TableLayoutPanel tableLayoutPanel1;
+        private LayerDataGridView listView1;
+        private DataGridViewImageColumn dataGridViewImageColumn1;
+        private DataGridViewImageColumn dataGridViewImageColumn2;
+        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
+        private DataGridViewImageColumn dataGridViewImageColumn3;
+        private DataGridViewImageColumn dataGridViewImageColumn4;
+        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
+        private Panel panel2;
+        private ComboBox comboBox1;
+        private Label label2;
+        private ComboBox comboBoxBlendMode;
+        private Panel panel1;
+        private TrackBar trackBarOpacity;
+        private Label label1;
+        private Label labelOpacity;
+        private Panel UIPanel;
+        private Panel canvasPanel;
+        private Panel resize_bottom_left;
+        private Panel resize_bottom_right;
+        private Panel resize_right;
+        private Panel resize_bottom;
+        private Panel resize_left;
+        private Panel resize_top_left;
+        private Panel resize_top_right;
+        private Panel resize_top;
+        private PictureBox pictureBoxCanvas;
+        private Panel panelResizer;
+        private TabPage tabPage2;
+        private ListView listViewHistory;
+        private ColumnHeader columnHeader2;
+        private ImageList imageListHistoryIcons;
     }
 
 }

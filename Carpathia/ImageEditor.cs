@@ -21,10 +21,10 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.Media;
 using System.Runtime.InteropServices;
+using System.Numerics;
 using System.Runtime.Serialization;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
@@ -136,12 +136,16 @@ namespace Carpathia
             public string Name { get; set; }
             public Bitmap Bitmap { get; set; }
             public bool Visible { get; set; } = true;
-            public string ThumbnailKey { get; } = Guid.NewGuid().ToString("N");
+            public bool Locked { get; set; } = false;
+            public int Opacity { get; set; } = 100;
+            public LayerBlendMode BlendMode { get; set; } = LayerBlendMode.Normal;
+            public string ThumbnailKey { get; }
 
-            public EditorLayer(string name, Bitmap bitmap)
+            public EditorLayer(string name, Bitmap bitmap, string thumbnailKey = null)
             {
                 Name = name;
                 Bitmap = bitmap;
+                ThumbnailKey = thumbnailKey ?? Guid.NewGuid().ToString("N");
             }
 
             public void Dispose()
@@ -152,8 +156,61 @@ namespace Carpathia
         }
 
         private readonly List<EditorLayer> editorLayers = new();
+        // Eye-button changes are intentionally NOT undoable/history actions.
+        // Remember them by the layer's stable key so an unrelated full-layer
+        // Undo/Redo does not restore an older eye state from its bitmap snapshot.
+        private readonly Dictionary<string, bool> untrackedLayerVisibility = new(StringComparer.Ordinal);
+        // Lock toggles are also not undoable. Preserve them across unrelated undo/redo.
+        private readonly Dictionary<string, bool> untrackedLayerLocks = new(StringComparer.Ordinal);
         private int activeLayerIndex = -1;
         private bool suppressLayerSelectionChanged = false;
+        private bool suppressLayerSettingsChanged = false;
+        private bool opacityDragInProgress = false;
+        private bool opacityDragUndoSaved = false;
+
+        // Indexes intentionally match the combo box order below.
+        private enum LayerBlendMode
+        {
+            Normal, Dissolve,
+            Darken, Multiply, ColorBurn, LinearBurn, DarkerColor,
+            Lighten, Screen, ColorDodge, LinearDodge, LighterColor,
+            Overlay, SoftLight, HardLight, VividLight, LinearLight, PinLight, HardMix,
+            Difference, Exclusion, Subtract, Divide,
+            Hue, Saturation, Color, Luminosity
+        }
+
+        private static readonly string[] LayerBlendModeNames =
+        {
+            "Normal", "Dissolve",
+            "Darken", "Multiply", "Color Burn", "Linear Burn", "Darker Color",
+            "Lighten", "Screen", "Color Dodge", "Linear Dodge (Add)", "Lighter Color",
+            "Overlay", "Soft Light", "Hard Light", "Vivid Light", "Linear Light", "Pin Light", "Hard Mix",
+            "Difference", "Exclusion", "Subtract", "Divide",
+            "Hue", "Saturation", "Color", "Luminosity"
+        };
+
+        private sealed class LayerPropertiesSnapshot
+        {
+            public string Name { get; }
+            public string Key { get; }
+            public bool Visible { get; }
+            public bool Locked { get; }
+            public int Opacity { get; }
+            public LayerBlendMode BlendMode { get; }
+
+            public LayerPropertiesSnapshot(EditorLayer layer)
+            {
+                Name = layer.Name;
+                Key = layer.ThumbnailKey;
+                Visible = layer.Visible;
+                Locked = layer.Locked;
+                Opacity = layer.Opacity;
+                BlendMode = layer.BlendMode;
+            }
+        }
+
+        private List<LayerPropertiesSnapshot> CaptureLayerProperties() =>
+            editorLayers.Select(layer => new LayerPropertiesSnapshot(layer)).ToList();
 
         // Only layers that actually changed are queued for thumbnail regeneration.
         // Selection/reordering/compositing never touches unrelated thumbnails.
@@ -175,13 +232,26 @@ namespace Carpathia
             public Bitmap Bitmap { get; }
             public Size Size { get; }
             public List<Bitmap> LayerBitmaps { get; }
+            public List<LayerPropertiesSnapshot> LayerProperties { get; }
+            public int ActiveLayerIndex { get; }
+            // The action that this snapshot can undo/redo. Its label travels with the
+            // snapshot when it moves between the undo and redo stacks.
+            public string HistoryDescription { get; }
 
-            public LayerCanvasState(string layerKey, Bitmap bitmap, Size size, List<Bitmap> layerBitmaps = null)
+            public LayerCanvasState(string layerKey, Bitmap bitmap, Size size,
+                List<Bitmap> layerBitmaps = null,
+                List<LayerPropertiesSnapshot> layerProperties = null,
+                int activeLayerIndex = -1,
+                string historyDescription = null)
             {
                 LayerKey = layerKey;
                 Bitmap = bitmap;
                 Size = size;
                 LayerBitmaps = layerBitmaps;
+                LayerProperties = layerProperties;
+                ActiveLayerIndex = activeLayerIndex;
+                HistoryDescription = string.IsNullOrWhiteSpace(historyDescription)
+                    ? "Edit image" : historyDescription;
             }
 
             public void Dispose()
@@ -358,6 +428,7 @@ namespace Carpathia
 
         private void CropToSelection()
         {
+            if (IsActiveLayerLocked) return;
             if (MainBitmap == null || !isSelected || SelectionRectangle.IsEmpty)
             {
                 MessageForm.Show("Create a rectangular selection first, then choose Crop.", "Crop", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -366,7 +437,7 @@ namespace Carpathia
             Rectangle r = new Rectangle(originalSelectionRectangleLocation, originalSelectionRectangleSize);
             r.Intersect(new Rectangle(Point.Empty, MainBitmap.Size));
             if (r.Width < 1 || r.Height < 1) return;
-            SaveStateForUndo();
+            SaveStateForUndo(description: "Crop to selection");
             var cropped = MainBitmap.Clone(r, PixelFormat.Format32bppArgb);
             MainBitmap.Dispose(); MainBitmap = cropped;
             SetAsUnselected(); RefreshCanvasAfterTransform();
@@ -374,14 +445,16 @@ namespace Carpathia
 
         private void RotateCanvas(RotateFlipType transform)
         {
+            if (IsActiveLayerLocked) return;
             if (MainBitmap == null) return;
-            SaveStateForUndo(); MainBitmap.RotateFlip(transform); RefreshCanvasAfterTransform();
+            SaveStateForUndo(description: "Rotate canvas"); MainBitmap.RotateFlip(transform); RefreshCanvasAfterTransform();
         }
 
         private void ApplyGrayscaleQuick()
         {
+            if (IsActiveLayerLocked) return;
             if (MainBitmap == null) return;
-            SaveStateForUndo();
+            SaveStateForUndo(description: "Grayscale");
             var output = new Bitmap(MainBitmap.Width, MainBitmap.Height, PixelFormat.Format32bppArgb);
             using (var g = Graphics.FromImage(output)) using (var attrs = new ImageAttributes())
             {
@@ -407,6 +480,13 @@ namespace Carpathia
             StartZoomAnimation(fitZoom, centerOnImage: true);
         }
 
+        private float CalculateDPIRate()
+        {
+            int defaultDPI = 96;
+            float DPIrate = 1.0f;
+            DPIrate = this.CreateGraphics().DpiX / defaultDPI;
+            return DPIrate;
+        }
         private void RefreshCanvasAfterTransform(bool markModified = true)
         {
             CancelZoomAnimation();
@@ -525,6 +605,12 @@ namespace Carpathia
             }
             listView1.ApplyListViewTheme(ListView.DefaultBackColor, ListView.DefaultForeColor);
             toolStripLayer.BackgroundImage = Resources.toolstrip_light;
+            tableLayoutPanel1.BackColor = SystemColors.Control;
+            trackBarOpacity.BackColor = SystemColors.Control;
+            comboBoxBlendMode.BackColor = SystemColors.Window;
+            comboBoxBlendMode.ForeColor = SystemColors.WindowText;
+            listViewHistory.BackColor = SystemColors.Window;
+            listViewHistory.ForeColor = SystemColors.WindowText;
             UIHelper.ApplyCustomTitleBar(this, false);
         }
         private void DarkTheme()
@@ -589,6 +675,12 @@ namespace Carpathia
             }
             listView1.ApplyListViewTheme(Color.Black, Color.White);
             toolStripLayer.BackgroundImage = Resources.toolstrip_dark;
+            tableLayoutPanel1.BackColor = Color.FromArgb(32, 32, 32);
+            trackBarOpacity.BackColor = Color.FromArgb(32, 32, 32);
+            comboBoxBlendMode.BackColor = Color.Black;
+            comboBoxBlendMode.ForeColor = Color.White;
+            listViewHistory.BackColor = Color.Black;
+            listViewHistory.ForeColor = Color.White;
             UIHelper.ApplyCustomTitleBar(this, true);
         }
         private void InitializeSelectionPen()
@@ -614,6 +706,7 @@ namespace Carpathia
         private void InitializeComponentAndFont()
         {
             InitializeComponent();
+            tabControl1.Width = (int)(CalculateDPIRate() * tabControl1.Size.Width);
             // PictureBox paints its Image automatically. Its native image pass must
             // fill the same zoomed bounds used for selection and pointer overlays.
             // The custom Paint handler below must ONLY draw overlays; otherwise the
@@ -658,6 +751,7 @@ namespace Carpathia
             }
             SetTheme();
             SetFonts();
+            InitializeHistoryPanel();
             InitializeLayerSystem();
             // Set the default selected font to the first one in the list
             if (fontsComboBox.Items.Count > 0)
@@ -820,6 +914,45 @@ namespace Carpathia
             listView1.SelectedIndexChanged -= listView1_SelectedIndexChanged_Layers;
             listView1.SelectedIndexChanged += listView1_SelectedIndexChanged_Layers;
 
+            // Do not rely on ImageEditor.Designer.cs to hook the eye buttons. If the
+            // Designer already subscribed, -= followed by += keeps exactly one handler.
+            listView1.LayerVisibilityToggled -= listView1_LayerVisibilityToggled;
+            listView1.LayerVisibilityToggled += listView1_LayerVisibilityToggled;
+            listView1.LayerLockToggled -= listView1_LayerLockToggled;
+            listView1.LayerLockToggled += listView1_LayerLockToggled;
+
+            // Each control reflects only the active layer and never changes the other layers.
+            suppressLayerSettingsChanged = true;
+            try
+            {
+                comboBoxBlendMode.DropDownStyle = ComboBoxStyle.DropDownList;
+                comboBoxBlendMode.Items.Clear();
+                comboBoxBlendMode.Items.AddRange(LayerBlendModeNames);
+                trackBarOpacity.Minimum = 0;
+                trackBarOpacity.Maximum = 100;
+                trackBarOpacity.TickFrequency = 10;
+            }
+            finally
+            {
+                suppressLayerSettingsChanged = false;
+            }
+
+            comboBoxBlendMode.SelectedIndexChanged -= comboBoxBlendMode_SelectedIndexChanged;
+            comboBoxBlendMode.SelectedIndexChanged += comboBoxBlendMode_SelectedIndexChanged;
+            trackBarOpacity.ValueChanged -= trackBarOpacity_ValueChanged;
+            trackBarOpacity.ValueChanged += trackBarOpacity_ValueChanged;
+            trackBarOpacity.MouseDown += (sender, args) =>
+            {
+                opacityDragInProgress = true;
+                opacityDragUndoSaved = false;
+            };
+            trackBarOpacity.MouseUp += (sender, args) =>
+            {
+                opacityDragInProgress = false;
+                opacityDragUndoSaved = false;
+            };
+            UpdateActiveLayerSettingsControls();
+
             // Refresh thumbnails after edits finish. MouseUp covers brush/pen/eraser/shape
             // workflows; other editing commands call MarkLayerThumbnailDirty and refresh
             // through the shared canvas refresh/undo/redo paths below.
@@ -849,6 +982,64 @@ namespace Carpathia
         }
 
 
+        private void UpdateActiveLayerSettingsControls()
+        {
+            bool hasLayer = activeLayerIndex >= 0 && activeLayerIndex < editorLayers.Count;
+            suppressLayerSettingsChanged = true;
+            try
+            {
+                bool editable = hasLayer && !editorLayers[activeLayerIndex].Locked;
+                comboBoxBlendMode.Enabled = editable;
+                trackBarOpacity.Enabled = editable;
+                if (hasLayer)
+                {
+                    EditorLayer layer = editorLayers[activeLayerIndex];
+                    comboBoxBlendMode.SelectedIndex = (int)layer.BlendMode;
+                    trackBarOpacity.Value = Math.Clamp(layer.Opacity, 0, 100);
+                    labelOpacity.Text = layer.Opacity.ToString() + "%";
+                }
+                else
+                {
+                    comboBoxBlendMode.SelectedIndex = -1;
+                    trackBarOpacity.Value = 100;
+                    labelOpacity.Text = "100%";
+                }
+            }
+            finally
+            {
+                suppressLayerSettingsChanged = false;
+            }
+        }
+
+        private void comboBoxBlendMode_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (suppressLayerSettingsChanged || IsActiveLayerLocked || activeLayerIndex < 0 ||
+                activeLayerIndex >= editorLayers.Count)
+                return;
+
+            int selectedMode = comboBoxBlendMode.SelectedIndex;
+            if (selectedMode < 0 || selectedMode >= LayerBlendModeNames.Length)
+                return;
+
+            EditorLayer layer = editorLayers[activeLayerIndex];
+            if ((int)layer.BlendMode == selectedMode)
+                return;
+
+            SaveStateForUndo(includeAllLayers: true, description: $"Blend mode: {LayerBlendModeNames[selectedMode]}");
+            layer.BlendMode = (LayerBlendMode)selectedMode;
+            UpdateActiveLayerSettingsControls();
+            LayerSettingsModified();
+        }
+
+        private void LayerSettingsModified()
+        {
+            isModified = true;
+            isSaved = false;
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+            pictureBoxCanvas.Invalidate();
+        }
+
         private int FindLayerIndexByKey(string layerKey)
         {
             if (string.IsNullOrEmpty(layerKey))
@@ -876,51 +1067,298 @@ namespace Carpathia
             return editorLayers[index].Bitmap;
         }
 
-        private Bitmap CreateCompositeBitmap()
+        // activeLayerPreview is an optional *temporary* bitmap for shape/filter previews.
+        // It replaces only the active layer in the composite; other layers retain
+        // their own visibility, opacity, and blend mode throughout the preview.
+        private Bitmap CreateCompositeBitmap(Bitmap activeLayerPreview = null)
         {
-            Size canvasSize;
-
-            if (MainBitmap != null)
-                canvasSize = MainBitmap.Size;
-            else if (editorLayers.Count > 0 && editorLayers[0].Bitmap != null)
-                canvasSize = editorLayers[0].Bitmap.Size;
-            else
-                canvasSize = Settings1.Default.DefaultCanvasSize;
-
-            var composite = new Bitmap(
-                Math.Max(1, canvasSize.Width),
-                Math.Max(1, canvasSize.Height),
+            Size size = MainBitmap?.Size ??
+                (editorLayers.Count > 0 ? editorLayers[0].Bitmap.Size : Settings1.Default.DefaultCanvasSize);
+            var composite = new Bitmap(Math.Max(1, size.Width), Math.Max(1, size.Height),
                 PixelFormat.Format32bppArgb);
+            ComposeRegion(composite, new Rectangle(Point.Empty, composite.Size), activeLayerPreview);
+            return composite;
+        }
 
-            using (Graphics g = Graphics.FromImage(composite))
+        // Shared by full-frame rendering, export and live brush/shape previews.
+        // Blend settings belong to EditorLayer, never to MainBitmap or the flattened preview.
+        private void ComposeRegion(Bitmap target, Rectangle rectangle, Bitmap activeLayerPreview = null)
+        {
+            rectangle.Intersect(new Rectangle(Point.Empty, target.Size));
+            if (rectangle.IsEmpty)
+                return;
+
+            using (Graphics g = Graphics.FromImage(target))
             {
-                g.Clear(Color.Transparent);
-                g.CompositingMode = CompositingMode.SourceOver;
-                // Layers are normally canvas-sized and drawn unscaled. Expensive
-                // interpolation/smoothing settings do not improve DrawImageUnscaled.
-                g.CompositingQuality = CompositingQuality.HighSpeed;
-                g.InterpolationMode = InterpolationMode.NearestNeighbor;
-                g.PixelOffsetMode = PixelOffsetMode.HighSpeed;
-                g.SmoothingMode = SmoothingMode.HighSpeed;
-
-                // Photoshop-style layer order: row 0 is the topmost layer.
-                // Draw from the bottom of the list toward the top.
-                for (int i = editorLayers.Count - 1; i >= 0; i--)
-                {
-                    // Photoshop-style visibility: hiding a layer only removes it from
-                    // the composite. The layer bitmap remains intact and editable.
-                    if (!editorLayers[i].Visible)
-                        continue;
-
-                    Bitmap layerBitmap = GetLayerBitmapForRender(i);
-                    if (layerBitmap == null)
-                        continue;
-
-                    g.DrawImageUnscaled(layerBitmap, 0, 0);
-                }
+                g.CompositingMode = CompositingMode.SourceCopy;
+                g.FillRectangle(Brushes.Transparent, rectangle);
             }
 
-            return composite;
+            for (int i = editorLayers.Count - 1; i >= 0; i--)
+            {
+                EditorLayer layer = editorLayers[i];
+                if (!layer.Visible || layer.Opacity <= 0)
+                    continue;
+                Bitmap source = (i == activeLayerIndex && activeLayerPreview != null)
+                    ? activeLayerPreview : GetLayerBitmapForRender(i);
+                if (source == null)
+                    continue;
+
+                Rectangle layerRegion = Rectangle.Intersect(rectangle,
+                    new Rectangle(Point.Empty, source.Size));
+                if (layerRegion.IsEmpty)
+                    continue;
+
+                if (layer.BlendMode == LayerBlendMode.Normal)
+                    CompositeNormalLayer(target, source, layerRegion, layer.Opacity);
+                else
+                    CompositeBlendLayer(target, source, layerRegion, layer, i);
+            }
+        }
+
+        // GDI+ does high-performance standard alpha compositing, including image alpha.
+        private static void CompositeNormalLayer(Bitmap destination, Bitmap source,
+            Rectangle area, int opacity)
+        {
+            using (Graphics g = Graphics.FromImage(destination))
+            {
+                g.CompositingMode = CompositingMode.SourceOver;
+                g.CompositingQuality = CompositingQuality.HighSpeed;
+                g.InterpolationMode = InterpolationMode.NearestNeighbor;
+                if (opacity >= 100)
+                {
+                    g.DrawImage(source, area, area.X, area.Y, area.Width, area.Height,
+                        GraphicsUnit.Pixel);
+                }
+                else
+                {
+                    using (var attributes = new ImageAttributes())
+                    {
+                        var matrix = new ColorMatrix { Matrix33 = opacity / 100f };
+                        attributes.SetColorMatrix(matrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+                        g.DrawImage(source, area, area.X, area.Y, area.Width, area.Height,
+                            GraphicsUnit.Pixel, attributes);
+                    }
+                }
+            }
+        }
+
+        // Accurate source-over blending on straight-alpha 32-bit pixels. Only the
+        // requested rectangle is touched, so pen/brush/eraser previews stay responsive.
+        private static void CompositeBlendLayer(Bitmap destination, Bitmap source,
+            Rectangle area, EditorLayer layer, int layerIndex)
+        {
+            Bitmap converted = null;
+            if (source.PixelFormat != PixelFormat.Format32bppArgb)
+            {
+                converted = new Bitmap(source.Width, source.Height, PixelFormat.Format32bppArgb);
+                using (Graphics g = Graphics.FromImage(converted))
+                    g.DrawImageUnscaled(source, 0, 0);
+                source = converted;
+            }
+
+            BitmapData baseData = null;
+            BitmapData sourceData = null;
+            try
+            {
+                baseData = destination.LockBits(area, ImageLockMode.ReadWrite,
+                    PixelFormat.Format32bppArgb);
+                sourceData = source.LockBits(area, ImageLockMode.ReadOnly,
+                    PixelFormat.Format32bppArgb);
+
+                int bytesPerRow = checked(area.Width * 4);
+                var baseRow = new byte[bytesPerRow];
+                var sourceRow = new byte[bytesPerRow];
+                float layerOpacity = layer.Opacity / 100f;
+
+                for (int y = 0; y < area.Height; y++)
+                {
+                    IntPtr baseAddress = IntPtr.Add(baseData.Scan0, y * baseData.Stride);
+                    IntPtr sourceAddress = IntPtr.Add(sourceData.Scan0, y * sourceData.Stride);
+                    Marshal.Copy(baseAddress, baseRow, 0, bytesPerRow);
+                    Marshal.Copy(sourceAddress, sourceRow, 0, bytesPerRow);
+
+                    for (int x = 0; x < area.Width; x++)
+                    {
+                        int j = x * 4;
+                        float sourceAlpha = (sourceRow[j + 3] / 255f) * layerOpacity;
+                        if (sourceAlpha <= 0f)
+                            continue;
+
+                        if (layer.BlendMode == LayerBlendMode.Dissolve)
+                        {
+                            if (DissolveRandom(x + area.X, y + area.Y, layerIndex) >= sourceAlpha)
+                                continue;
+                            sourceAlpha = 1f;
+                        }
+
+                        float baseAlpha = baseRow[j + 3] / 255f;
+                        float outputAlpha = sourceAlpha + baseAlpha * (1f - sourceAlpha);
+                        if (outputAlpha <= 0f)
+                            continue;
+
+                        Vector3 backdrop = new Vector3(baseRow[j + 2], baseRow[j + 1], baseRow[j]) / 255f;
+                        Vector3 foreground = new Vector3(sourceRow[j + 2], sourceRow[j + 1], sourceRow[j]) / 255f;
+                        Vector3 blended = BlendColors(layer.BlendMode, backdrop, foreground);
+
+                        // W3C compositing formula: blend only the overlapping coverage,
+                        // preserving source color when the backdrop is transparent.
+                        Vector3 premultiplied =
+                            sourceAlpha * ((1f - baseAlpha) * foreground + baseAlpha * blended) +
+                            (1f - sourceAlpha) * baseAlpha * backdrop;
+                        Vector3 result = premultiplied / outputAlpha;
+
+                        baseRow[j] = ColorByte(result.Z);
+                        baseRow[j + 1] = ColorByte(result.Y);
+                        baseRow[j + 2] = ColorByte(result.X);
+                        baseRow[j + 3] = ColorByte(outputAlpha);
+                    }
+
+                    Marshal.Copy(baseRow, 0, baseAddress, bytesPerRow);
+                }
+            }
+            finally
+            {
+                if (sourceData != null) source.UnlockBits(sourceData);
+                if (baseData != null) destination.UnlockBits(baseData);
+                converted?.Dispose();
+            }
+        }
+
+        private static byte ColorByte(float value) =>
+            (byte)Math.Clamp((int)(Math.Clamp(value, 0f, 1f) * 255f + 0.5f), 0, 255);
+
+        // Stable hash ensures that a dissolve preview matches the exported image
+        // and that partial brush repainting doesn't cause random flicker.
+        private static float DissolveRandom(int x, int y, int layerIndex)
+        {
+            uint n = unchecked((uint)(x * 73856093 ^ y * 19349663 ^ layerIndex * 83492791));
+            n ^= n >> 13;
+            n = unchecked(n * 1274126177u);
+            n ^= n >> 16;
+            return (n & 0x00ffffff) / 16777216f;
+        }
+
+        private static float ClampUnit(float value) => Math.Clamp(value, 0f, 1f);
+        private static float Burn(float b, float s) =>
+            s <= 0f ? 0f : ClampUnit(1f - (1f - b) / s);
+        private static float Dodge(float b, float s) =>
+            s >= 1f ? 1f : ClampUnit(b / (1f - s));
+        private static float Vivid(float b, float s) =>
+            s <= 0.5f ? Burn(b, 2f * s) : Dodge(b, 2f * (s - 0.5f));
+
+        private static float BlendChannel(LayerBlendMode mode, float b, float s)
+        {
+            switch (mode)
+            {
+                case LayerBlendMode.Darken: return Math.Min(b, s);
+                case LayerBlendMode.Multiply: return b * s;
+                case LayerBlendMode.ColorBurn: return Burn(b, s);
+                case LayerBlendMode.LinearBurn: return ClampUnit(b + s - 1f);
+                case LayerBlendMode.Lighten: return Math.Max(b, s);
+                case LayerBlendMode.Screen: return b + s - b * s;
+                case LayerBlendMode.ColorDodge: return Dodge(b, s);
+                case LayerBlendMode.LinearDodge: return ClampUnit(b + s);
+                case LayerBlendMode.Overlay: return b <= 0.5f ? 2f * b * s : 1f - 2f * (1f - b) * (1f - s);
+                case LayerBlendMode.SoftLight:
+                    return s <= 0.5f
+                        ? b - (1f - 2f * s) * b * (1f - b)
+                        : b + (2f * s - 1f) *
+                            ((b <= 0.25f ? ((16f * b - 12f) * b + 4f) * b : (float)Math.Sqrt(b)) - b);
+                case LayerBlendMode.HardLight: return s <= 0.5f ? 2f * b * s : 1f - 2f * (1f - b) * (1f - s);
+                case LayerBlendMode.VividLight: return Vivid(b, s);
+                case LayerBlendMode.LinearLight: return ClampUnit(b + 2f * s - 1f);
+                case LayerBlendMode.PinLight: return s <= 0.5f ? Math.Min(b, 2f * s) : Math.Max(b, 2f * s - 1f);
+                case LayerBlendMode.HardMix: return Vivid(b, s) < 0.5f ? 0f : 1f;
+                case LayerBlendMode.Difference: return Math.Abs(b - s);
+                case LayerBlendMode.Exclusion: return b + s - 2f * b * s;
+                case LayerBlendMode.Subtract: return ClampUnit(b - s);
+                case LayerBlendMode.Divide: return s <= 0f ? 1f : ClampUnit(b / s);
+                default: return s;
+            }
+        }
+
+        private static Vector3 BlendColors(LayerBlendMode mode, Vector3 backdrop, Vector3 source)
+        {
+            switch (mode)
+            {
+                case LayerBlendMode.Normal:
+                case LayerBlendMode.Dissolve:
+                    return source;
+                case LayerBlendMode.DarkerColor:
+                    return (backdrop.X + backdrop.Y + backdrop.Z) <=
+                        (source.X + source.Y + source.Z) ? backdrop : source;
+                case LayerBlendMode.LighterColor:
+                    return (backdrop.X + backdrop.Y + backdrop.Z) >=
+                        (source.X + source.Y + source.Z) ? backdrop : source;
+                case LayerBlendMode.Hue:
+                    return SetLum(SetSat(source, Sat(backdrop)), Lum(backdrop));
+                case LayerBlendMode.Saturation:
+                    return SetLum(SetSat(backdrop, Sat(source)), Lum(backdrop));
+                case LayerBlendMode.Color:
+                    return SetLum(source, Lum(backdrop));
+                case LayerBlendMode.Luminosity:
+                    return SetLum(backdrop, Lum(source));
+                default:
+                    return new Vector3(
+                        BlendChannel(mode, backdrop.X, source.X),
+                        BlendChannel(mode, backdrop.Y, source.Y),
+                        BlendChannel(mode, backdrop.Z, source.Z));
+            }
+        }
+
+        private static float Lum(Vector3 rgb) => 0.3f * rgb.X + 0.59f * rgb.Y + 0.11f * rgb.Z;
+        private static float Sat(Vector3 rgb) =>
+            Math.Max(rgb.X, Math.Max(rgb.Y, rgb.Z)) - Math.Min(rgb.X, Math.Min(rgb.Y, rgb.Z));
+
+        private static Vector3 SetSat(Vector3 rgb, float saturation)
+        {
+            float lowest = Math.Min(rgb.X, Math.Min(rgb.Y, rgb.Z));
+            float range = Sat(rgb);
+            return range <= 0f ? Vector3.Zero :
+                (rgb - new Vector3(lowest)) * (saturation / range);
+        }
+
+        private static Vector3 SetLum(Vector3 rgb, float luminosity)
+        {
+            rgb += new Vector3(luminosity - Lum(rgb));
+            float min = Math.Min(rgb.X, Math.Min(rgb.Y, rgb.Z));
+            float max = Math.Max(rgb.X, Math.Max(rgb.Y, rgb.Z));
+            if (min < 0f)
+                rgb = new Vector3(luminosity) +
+                    (rgb - new Vector3(luminosity)) * (luminosity / (luminosity - min));
+            if (max > 1f)
+                rgb = new Vector3(luminosity) +
+                    (rgb - new Vector3(luminosity)) * ((1f - luminosity) / (max - luminosity));
+            return Vector3.Clamp(rgb, Vector3.Zero, Vector3.One);
+        }
+
+        // Preview a temporary edit as the active layer, not as a flattened canvas.
+        // Important for shape and filter previews: mode/opacity/eye settings must
+        // remain effective while the user is dragging or adjusting the preview.
+        private void ShowActiveLayerPreview(Bitmap layerPreview)
+        {
+            if (layerPreview == null)
+            {
+                MarkCompositeDirty();
+                RenderCompositeToCanvas(force: true);
+                return;
+            }
+
+            Bitmap displayed = editorLayers.Count > 0
+                ? CreateCompositeBitmap(layerPreview)
+                : new Bitmap(layerPreview);
+            Image previous = pictureBoxCanvas.Image;
+            pictureBoxCanvas.Image = displayed;
+
+            // Ownership of the persistent composited bitmap belongs to
+            // RenderCompositeToCanvas, and filter previews belong to previewBitmap.
+            if (previous != null && previous != MainBitmap &&
+                previous != compositeCanvasBitmap && previous != previewBitmap &&
+                previous != layerPreview && !ReferenceEquals(previous, displayed))
+                previous.Dispose();
+
+            pictureBoxCanvas.Invalidate();
         }
 
         private void RenderCompositeToCanvas(bool force = false)
@@ -941,6 +1379,7 @@ namespace Carpathia
 
             Bitmap nextComposite = CreateCompositeBitmap();
             Bitmap oldComposite = compositeCanvasBitmap;
+            Image oldDisplayed = pictureBoxCanvas.Image;
 
             compositeCanvasBitmap = nextComposite;
             pictureBoxCanvas.Image = compositeCanvasBitmap;
@@ -949,9 +1388,15 @@ namespace Carpathia
             if (oldComposite != null &&
                 !ReferenceEquals(oldComposite, MainBitmap) &&
                 !ReferenceEquals(oldComposite, compositeCanvasBitmap))
-            {
                 oldComposite.Dispose();
-            }
+
+            // A shape preview can be a separate bitmap. Do not retain it or
+            // dispose the layer's actual pixels, the filter preview, or an already
+            // disposed previous composite.
+            if (oldDisplayed != null && oldDisplayed != oldComposite &&
+                oldDisplayed != MainBitmap && oldDisplayed != previewBitmap &&
+                oldDisplayed != compositeCanvasBitmap)
+                oldDisplayed.Dispose();
 
             pictureBoxCanvas.Invalidate();
         }
@@ -1043,6 +1488,8 @@ namespace Carpathia
                     layer.Dispose();
 
                 editorLayers.Clear();
+                untrackedLayerVisibility.Clear(); // Starting a new/opened document.
+                untrackedLayerLocks.Clear();
                 activeLayerIndex = -1;
                 listView1.Items.Clear();
                 imageListLayerThumbnails.Images.Clear();
@@ -1055,6 +1502,7 @@ namespace Carpathia
                     return;
 
                 AddLayerInternal(initialLayerName, MainBitmap, selectLayer: true);
+                UpdateActiveLayerSettingsControls();
                 MarkCompositeDirty();
                 RenderCompositeToCanvas(force: true);
                 pictureBoxCanvas.Invalidate();
@@ -1100,7 +1548,7 @@ namespace Carpathia
                 return;
 
             SyncActiveLayerFromCanvas();
-            SaveStateForUndo(includeAllLayers: true); // Link layer creation to history
+            SaveStateForUndo(includeAllLayers: true, description: "Add layer"); // Link layer creation to history
 
             int nextNumber = editorLayers.Count + 1;
             var blank = new Bitmap(MainBitmap.Width, MainBitmap.Height, PixelFormat.Format32bppArgb);
@@ -1141,6 +1589,7 @@ namespace Carpathia
             }
 
             blank.Dispose();
+            UpdateActiveLayerSettingsControls();
             SetAsUnselected();
             MarkCompositeDirty();
             RenderCompositeToCanvas(force: true);
@@ -1190,6 +1639,7 @@ namespace Carpathia
 
             SetAsUnselected();
             CenterCanvasPanel();
+            UpdateActiveLayerSettingsControls();
             MarkCompositeDirty();
             RenderCompositeToCanvas(force: true);
             pictureBoxCanvas.Invalidate();
@@ -1216,9 +1666,17 @@ namespace Carpathia
 
             EditorLayer layer = editorLayers[e.RowIndex];
             if (layer.Visible == e.Visible)
+            {
+                // The grid is only a view of EditorLayer.Visible. Repair an icon that
+                // could have become stale after a reorder, restore, or designer event.
+                listView1.SetLayerVisibility(e.RowIndex, layer.Visible);
                 return;
+            }
 
+            // Visibility is a view property, not a history action. In particular,
+            // do NOT create an undo snapshot or discard the user's redo stack.
             layer.Visible = e.Visible;
+            untrackedLayerVisibility[layer.ThumbnailKey] = e.Visible;
             listView1.SetLayerVisibility(e.RowIndex, layer.Visible);
 
             MarkCompositeDirty();
@@ -1227,6 +1685,45 @@ namespace Carpathia
             pictureBoxCanvas.Update();
             listView1.InvalidateRow(e.RowIndex);
 
+            isModified = true;
+            isSaved = false;
+        }
+
+        private bool IsActiveLayerLocked =>
+            activeLayerIndex >= 0 && activeLayerIndex < editorLayers.Count &&
+            editorLayers[activeLayerIndex].Locked;
+
+        private bool AnyLayerLocked => editorLayers.Any(layer => layer.Locked);
+
+        private void listView1_LayerLockToggled(object sender, LayerLockToggledEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= editorLayers.Count)
+                return;
+
+            EditorLayer layer = editorLayers[e.RowIndex];
+            if (layer.Locked == e.Locked)
+            {
+                listView1.SetLayerLocked(e.RowIndex, layer.Locked);
+                return;
+            }
+
+            // Finish any editable text or selection while pixels are still writable.
+            if (e.RowIndex == activeLayerIndex && e.Locked)
+            {
+                CommitActiveTextEditor();
+                if (isSelected)
+                    SetAsUnselected();
+                isdrawing = false;
+                if (suppressCompositeDuringToolStroke)
+                    EndToolStrokePreview();
+            }
+
+            // Locking is a view/editing permission. It must not create a history row.
+            layer.Locked = e.Locked;
+            untrackedLayerLocks[layer.ThumbnailKey] = layer.Locked;
+            listView1.SetLayerLocked(e.RowIndex, layer.Locked);
+            UpdateActiveLayerSettingsControls();
+            listView1.InvalidateRow(e.RowIndex);
             isModified = true;
             isSaved = false;
         }
@@ -1321,46 +1818,9 @@ namespace Carpathia
                     RenderCompositeToCanvas(force: true);
                 }
 
-                using (Graphics g = Graphics.FromImage(compositeCanvasBitmap))
-                {
-                    GraphicsState state = g.Save();
-                    try
-                    {
-                        // First clear only the dirty part to transparent. This is required
-                        // for erasing because lower layers must become visible immediately.
-                        g.CompositingMode = CompositingMode.SourceCopy;
-                        using (Brush clearBrush = new SolidBrush(Color.Transparent))
-                            g.FillRectangle(clearBrush, imageRect);
-
-                        g.CompositingMode = CompositingMode.SourceOver;
-                        g.CompositingQuality = CompositingQuality.HighSpeed;
-                        g.InterpolationMode = InterpolationMode.NearestNeighbor;
-                        g.PixelOffsetMode = PixelOffsetMode.HighSpeed;
-                        g.SmoothingMode = SmoothingMode.HighSpeed;
-
-                        // Same stacking order as CreateCompositeBitmap, but only for the
-                        // changed rectangle instead of allocating/redrawing the full canvas.
-                        for (int i = editorLayers.Count - 1; i >= 0; i--)
-                        {
-                            if (!editorLayers[i].Visible)
-                                continue;
-
-                            Bitmap layerBitmap = GetLayerBitmapForRender(i);
-                            if (layerBitmap == null)
-                                continue;
-
-                            g.DrawImage(
-                                layerBitmap,
-                                imageRect,
-                                imageRect.X, imageRect.Y, imageRect.Width, imageRect.Height,
-                                GraphicsUnit.Pixel);
-                        }
-                    }
-                    finally
-                    {
-                        g.Restore(state);
-                    }
-                }
+                // Same per-layer blend and opacity logic as full rendering/export.
+                // Recompute the entire dirty rectangle after erasing, so lower layers show.
+                ComposeRegion(compositeCanvasBitmap, imageRect);
 
                 pictureBoxCanvas.Image = compositeCanvasBitmap;
             }
@@ -1504,10 +1964,7 @@ namespace Carpathia
             canvasPanel.Refresh();
             labelSize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height}px";
             labelFileName.Text = "Unnamed File";
-            undoStack.Clear();
-            redoStack.Clear();
-            geriAlToolStripMenuItem.Enabled = false;
-            yineleToolStripMenuItem.Enabled = false;
+            ResetHistory("New document");
             isSaved = false;
             openedFilePath = string.Empty;
             farklıKaydetToolStripMenuItem.Enabled = false;
@@ -1540,10 +1997,7 @@ namespace Carpathia
             canvasPanel.Refresh();
             labelSize.Text = $"{pictureBoxCanvas.Width} X {pictureBoxCanvas.Height}px";
             labelFileName.Text = fileName;
-            undoStack.Clear();
-            redoStack.Clear();
-            geriAlToolStripMenuItem.Enabled = false;
-            yineleToolStripMenuItem.Enabled = false;
+            ResetHistory("Opened image");
             isSaved = true;
             openedFilePath = fileName;
             farklıKaydetToolStripMenuItem.Enabled = true;
@@ -1583,10 +2037,7 @@ namespace Carpathia
                     labelFileName.Text = "Unnamed File";
                     break;
             }
-            undoStack.Clear();
-            redoStack.Clear();
-            geriAlToolStripMenuItem.Enabled = false;
-            yineleToolStripMenuItem.Enabled = false;
+            ResetHistory(isAIGenerated ? "AI generated image" : "Webcam image");
             isSaved = false;
             openedFilePath = string.Empty;
             farklıKaydetToolStripMenuItem.Enabled = false;
@@ -2222,7 +2673,7 @@ namespace Carpathia
                 {
                     if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
                     {
-                        SaveStateForUndo();
+
                         isImageCurrentlyCreating = true;
                         toolStripAICreateImage.Visible = false;
                         if (SelectedBitmap == null)
@@ -2243,28 +2694,26 @@ namespace Carpathia
                                     sourceRect,
                                     GraphicsUnit.Pixel);
                             }
-                            canvasPanel.Enabled = false;
-                            menuStrip1.Enabled = false;
-                            toolStripTools.Enabled = false;
-                            toolStripSeparator29.Visible = true;
-                            labelAIImageErasing.Visible = true;
-                            progressBarAIImageCreation.Visible = true;
-                            var image = await ImageGenerationCore.GenerateImage("Remove the object or person in context of the image.",
-                                SelectedBitmap, SelectedBitmap.Width, SelectedBitmap.Height, cts.Token);
+                        }
+                        canvasPanel.Enabled = false;
+                        menuStrip1.Enabled = false;
+                        toolStripTools.Enabled = false;
+                        toolStripSeparator29.Visible = true;
+                        labelAIImageErasing.Visible = true;
+                        progressBarAIImageCreation.Visible = true;
+                        var image = await ImageGenerationCore.GenerateImage("Remove the object or person in context of the image.",
+                            SelectedBitmap, SelectedBitmap.Width, SelectedBitmap.Height, cts.Token);
 
-                            if (image != null)
-                            {
-                                SelectedBitmap = (Bitmap)image;
-                                MergeMainBitmapWithSelected();
-                                isModified = true; MarkLayerThumbnailDirty(); // Mark the image as modified
-                            }
-                            else
-                            {
-                                Undo();
-                                ClearRedoStack();
-                                Logger.Log("The generated image is null.", Logger.LogTypes.Error);
-                                MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            }
+                        if (image != null)
+                        {
+
+                            ApplyGeneratedSelectionToCanvas(image, "AI generative erase");
+                            isModified = true; MarkLayerThumbnailDirty(); // Mark the image as modified
+                        }
+                        else
+                        {
+                            Logger.Log("The generated image is null.", Logger.LogTypes.Error);
+                            MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
                     else
@@ -2274,15 +2723,11 @@ namespace Carpathia
                 }
                 catch (NullReferenceException)
                 {
-                    Undo();
-                    ClearRedoStack();
                     Logger.Log("The generated image is null.", Logger.LogTypes.Error);
                     MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 catch (Exception ex)
                 {
-                    Undo();
-                    ClearRedoStack();
                     Logger.Log("An error occurred: " + ex.Message, Logger.LogTypes.Error);
                     MessageForm.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
@@ -2320,7 +2765,7 @@ namespace Carpathia
                     toolStripSeparator29.Visible = true;
                     labelBackgroundRemoving.Visible = true;
                     progressBarAIImageCreation.Visible = true;
-                    SaveStateForUndo();
+
                     if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
                     {
                         if (SelectedBitmap == null)
@@ -2347,13 +2792,11 @@ namespace Carpathia
                         var image = await imageTask; // Await the task to get the result
                         if (image != null)
                         {
-                            SelectedBitmap = new Bitmap(image); // Convert Image to Bitmap  
-                            MergeMainBitmapWithSelected();
+
+                            ApplyGeneratedSelectionToCanvas(image, "AI remove background");
                         }
                         else
                         {
-                            Undo();
-                            ClearRedoStack();
                             Logger.Log("The generated image is null.", Logger.LogTypes.Error);
                             MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
@@ -2366,12 +2809,10 @@ namespace Carpathia
                         if (image != null)
                         {
                             image = RemoveGeneratedCheckerboard(image);
-                            ApplyGeneratedImageToCanvas(image);
+                            ApplyGeneratedImageToCanvas(image, "AI remove background");
                         }
                         else
                         {
-                            Undo();
-                            ClearRedoStack();
                             Logger.Log("The generated image is null.", Logger.LogTypes.Error);
                             MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
@@ -2380,15 +2821,11 @@ namespace Carpathia
                 }
                 catch (NullReferenceException)
                 {
-                    Undo();
-                    ClearRedoStack();
                     Logger.Log("The generated image is null.", Logger.LogTypes.Error);
                     MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 catch (Exception ex)
                 {
-                    Undo();
-                    ClearRedoStack();
                     Logger.Log("An error occurred: " + ex.Message, Logger.LogTypes.Error);
                     MessageForm.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
@@ -2995,6 +3432,7 @@ namespace Carpathia
 
         private void resize_MouseDown(object sender, MouseEventArgs e)
         {
+            if (AnyLayerLocked) return;
             if (MainBitmap == null || e.Button != MouseButtons.Left || isResizing)
                 return;
 
@@ -3067,12 +3505,12 @@ namespace Carpathia
             StopResizePreview();
             try
             {
-                if (MainBitmap != null && resizeOriginalLayers != null &&
+                if (MainBitmap != null && resizeOriginalLayers != null && !AnyLayerLocked &&
                     finalSize != resizeOriginalSize)
                 {
                     // Snapshot history only for actual edits. The animated
                     // preview itself never modifies the document or undo stack.
-                    SaveStateForUndo(includeAllLayers: true);
+                    SaveStateForUndo(includeAllLayers: true, description: "Resize canvas");
                     int offsetX = ResizeAffectsLeft
                         ? finalSize.Width - resizeOriginalSize.Width : 0;
                     int offsetY = ResizeAffectsTop
@@ -3106,6 +3544,7 @@ namespace Carpathia
 
         private void ApplyCanvasResize(int newWidth, int newHeight, int offsetX, int offsetY)
         {
+            if (AnyLayerLocked) return;
             int count = resizeOriginalLayers.Count;
             var rebuilt = new List<Bitmap>(count);
 
@@ -3379,6 +3818,12 @@ namespace Carpathia
 
         private void pictureBoxCanvas_MouseUp(object sender, MouseEventArgs e)
         {
+            if (IsActiveLayerLocked && isdrawing && !IsNonPaintingTool())
+            {
+                isdrawing = false;
+                if (suppressCompositeDuringToolStroke) EndToolStrokePreview();
+                return;
+            }
             if (e.Button == MouseButtons.Left)
                 foreach (MovingImageControl floating in pictureBoxCanvas.Controls.OfType<MovingImageControl>())
                     if (floating.EndCanvasDrag())
@@ -3528,6 +3973,11 @@ namespace Carpathia
 
         private void pictureBoxCanvas_MouseMove(object sender, MouseEventArgs e)
         {
+            if (IsActiveLayerLocked && isdrawing && !IsNonPaintingTool())
+            {
+                isdrawing = false;
+                return;
+            }
             // Canvas captures the pointer while moving a floating PNG.
             // Do not run drawing/selection tools during that gesture.
             foreach (MovingImageControl floating in pictureBoxCanvas.Controls.OfType<MovingImageControl>())
@@ -3787,17 +4237,10 @@ namespace Carpathia
                                     }
                                 }
 
-                                // Swap out the image instead of modifying existing
-                                var oldImage = pictureBoxCanvas.Image;
-                                pictureBoxCanvas.Image = newPreview;
-
-                                // Dispose of old image if not the main bitmap
-                                if (oldImage != null && oldImage != MainBitmap)
-                                {
-                                    oldImage.Dispose();
-                                }
-
-                                pictureBoxCanvas.Invalidate();
+                                // The shape preview is composited in place of the active
+                                // layer, using that layer's blend mode and opacity.
+                                try { ShowActiveLayerPreview(newPreview); }
+                                finally { newPreview.Dispose(); }
                             }
                             break;
 
@@ -3932,6 +4375,7 @@ namespace Carpathia
 
         private void drawIntoCanvas(MouseEventArgs e)
         {
+            if (IsActiveLayerLocked && !IsNonPaintingTool()) return;
             // Preserve the previous image-space point before DrawBrush/FillGap updates x/y.
             // It is needed to refresh the complete segment touched by this mouse event.
             int previousStrokeX = x;
@@ -4450,6 +4894,203 @@ namespace Carpathia
         private Stack<LayerCanvasState> undoStack = new Stack<LayerCanvasState>();
         private Stack<LayerCanvasState> redoStack = new Stack<LayerCanvasState>();
 
+        // listViewHistory is a VIEW of the existing stacks, not a separate history.
+        // Undo stack oldest-to-newest = applied actions; redo stack top-to-bottom =
+        // actions available ahead of the current state. A row's Tag is its step index.
+        private string historyBaseDescription = "New document";
+        private bool suppressHistorySelectionChanged;
+        private bool historyNavigationInProgress;
+
+        private void InitializeHistoryPanel()
+        {
+            // Use the eleven icons already configured in the WinForms Designer.
+            // Rows use their ImageIndex, not generated icons or number prefixes.
+            listViewHistory.SmallImageList = imageListHistoryIcons;
+            listViewHistory.LargeImageList = null;
+            listViewHistory.View = View.Details;
+            listViewHistory.HeaderStyle = ColumnHeaderStyle.None;
+            listViewHistory.FullRowSelect = true;
+            listViewHistory.MultiSelect = false;
+            listViewHistory.HideSelection = false;
+            listViewHistory.Columns.Clear();
+            listViewHistory.Columns.Add("History");
+            UpdateHistoryColumnWidth();
+
+            listViewHistory.Resize -= listViewHistory_Resize;
+            listViewHistory.Resize += listViewHistory_Resize;
+            listViewHistory.SelectedIndexChanged -= listViewHistory_SelectedIndexChanged;
+            listViewHistory.SelectedIndexChanged += listViewHistory_SelectedIndexChanged;
+            UpdateHistoryList();
+        }
+
+        // Existing imageListHistoryIcons order (as shown in the WinForms Designer):
+        //  0 brush, 1 pencil, 2 eraser, 3 bucket, 4 sprayer, 5 add text,
+        //  6 diversity (SHAPES), 7 artificial intelligence, 8 file,
+        //  9 filter, 10 cut. Do not create/append any icons at runtime.
+        private const int HistoryBrushIcon = 0;
+        private const int HistoryPencilIcon = 1;
+        private const int HistoryEraserIcon = 2;
+        private const int HistoryBucketIcon = 3;
+        private const int HistorySprayIcon = 4;
+        private const int HistoryTextIcon = 5;
+        private const int HistoryShapesIcon = 6;
+        private const int HistoryAiIcon = 7;
+        private const int HistoryFileIcon = 8;
+        private const int HistoryFilterIcon = 9;
+        private const int HistoryCutIcon = 10;
+
+        private int GetHistoryImageIndex(string description)
+        {
+            string action = (description ?? string.Empty).Trim().ToLowerInvariant();
+            int index;
+
+            // This order matters: e.g. 'Clear layer' is an erase action,
+            // 'Cut selection' is a cut action, and 'AI or webcam image' is AI.
+            if (action.Contains("ai ") || action.StartsWith("ai") ||
+                action.Contains("generat") || action.Contains("background") ||
+                action.Contains("restore"))
+                index = HistoryAiIcon;
+            else if (action.Contains("cut") || action.Contains("crop") ||
+                     action.Contains("selection") || action.Contains("select"))
+                index = HistoryCutIcon;
+            else if (action.Contains("brush"))
+                index = HistoryBrushIcon;
+            else if (action == "pen" || action.StartsWith("pen ") ||
+                     action.Contains("pencil"))
+                index = HistoryPencilIcon;
+            else if (action.Contains("eras") || action.Contains("clear") ||
+                     action.StartsWith("delete selection"))
+                index = HistoryEraserIcon;
+            else if (action.Contains("bucket") || action == "fill" ||
+                     action.StartsWith("fill "))
+                index = HistoryBucketIcon;
+            else if (action.Contains("spray"))
+                index = HistorySprayIcon;
+            else if (action.Contains("text"))
+                index = HistoryTextIcon;
+            else if (action == "line" || action.Contains("ellipse") ||
+                     action.Contains("rectangle") || action.Contains("round") ||
+                     action.Contains("triangle") || action.Contains("hexagon") ||
+                     action.Contains("shape"))
+                index = HistoryShapesIcon;   // icons8-diversity-48.png
+            else if (action.Contains("filter") || action.Contains("blur") ||
+                     action.Contains("pixelat") || action.Contains("grayscale") ||
+                     action.Contains("black and white") || action.Contains("blend mode") ||
+                     action.Contains("opacity") || action.Contains("mirror") ||
+                     action.Contains("rotate") || action.Contains("flash") ||
+                     action.Contains("transform"))
+                index = HistoryFilterIcon;
+            else
+                index = HistoryFileIcon;     // new/open document, layers, general edits
+
+            // Handle an incomplete Designer ImageList safely. Normally all 11 exist.
+            int count = imageListHistoryIcons?.Images.Count ?? 0;
+            if (count == 0) return -1;
+            if (index < count) return index;
+            return HistoryFileIcon < count ? HistoryFileIcon : 0;
+        }
+
+        private void listViewHistory_Resize(object sender, EventArgs e) =>
+            UpdateHistoryColumnWidth();
+
+        private void UpdateHistoryColumnWidth()
+        {
+            if (listViewHistory.Columns.Count > 0)
+                listViewHistory.Columns[0].Width = Math.Max(40, listViewHistory.ClientSize.Width - 4);
+        }
+
+        private void UpdateHistoryList()
+        {
+            if (listViewHistory == null || listViewHistory.IsDisposed)
+                return;
+
+            int currentStep = undoStack.Count;
+            // One list row for *every action* that SaveStateForUndo recorded,
+            // including redoable actions. Do not create separate UI-only history
+            // entries: clicking any row must remain consistent with Undo/Redo.
+            // Stack<T> enumerates top-first; undo therefore needs reversing,
+            // whereas redo is already ordered from the next action forward.
+            var descriptions = new List<string>(1 + undoStack.Count + redoStack.Count)
+            {
+                historyBaseDescription
+            };
+            foreach (LayerCanvasState step in undoStack.Reverse())
+                descriptions.Add(step.HistoryDescription);
+            foreach (LayerCanvasState step in redoStack)
+                descriptions.Add(step.HistoryDescription);
+
+            suppressHistorySelectionChanged = true;
+            listViewHistory.BeginUpdate();
+            try
+            {
+                listViewHistory.Items.Clear();
+                for (int i = 0; i < descriptions.Count; i++)
+                {
+                    // No numeric prefix: the image list supplies the leading glyph.
+                    var item = new ListViewItem(descriptions[i])
+                    {
+                        Tag = i,
+                        ImageIndex = GetHistoryImageIndex(descriptions[i])
+                    };
+                    // Rows above the current state are redoable, not discarded.
+                    if (i > currentStep)
+                        item.ForeColor = SystemColors.GrayText;
+                    listViewHistory.Items.Add(item);
+                }
+
+                if (currentStep < listViewHistory.Items.Count)
+                {
+                    var selected = listViewHistory.Items[currentStep];
+                    selected.Selected = true;
+                    selected.Focused = true;
+                    selected.EnsureVisible();
+                }
+            }
+            finally
+            {
+                listViewHistory.EndUpdate();
+                suppressHistorySelectionChanged = false;
+            }
+        }
+
+        private void listViewHistory_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (suppressHistorySelectionChanged || historyNavigationInProgress ||
+                listViewHistory.SelectedItems.Count == 0)
+                return;
+
+            if (listViewHistory.SelectedItems[0].Tag is not int targetStep)
+                return;
+
+            // Use the same Undo/Redo path as keyboard shortcuts. It restores all
+            // affected layer bitmaps and properties, and keeps the stacks coherent.
+            historyNavigationInProgress = true;
+            try
+            {
+                while (undoStack.Count > targetStep && undoStack.Count > 0)
+                    Undo();
+                while (undoStack.Count < targetStep && redoStack.Count > 0)
+                    Redo();
+            }
+            finally
+            {
+                historyNavigationInProgress = false;
+                UpdateHistoryList();
+            }
+        }
+
+        private void ResetHistory(string initialDescription)
+        {
+            foreach (LayerCanvasState state in undoStack)
+                state.Dispose();
+            foreach (LayerCanvasState state in redoStack)
+                state.Dispose();
+            undoStack.Clear();
+            redoStack.Clear();
+            historyBaseDescription = initialDescription;
+            UpdateUndoRedoButtons();
+        }
+
         private bool EnsureVisibleLayerForTool()
         {
             if (editorLayers.Count == 0)
@@ -4457,7 +5098,7 @@ namespace Carpathia
 
             if (activeLayerIndex >= 0 && activeLayerIndex < editorLayers.Count &&
                 editorLayers[activeLayerIndex].Visible)
-                return true;
+                return !IsActiveLayerLocked || IsNonPaintingTool();
 
             // A hidden layer must never become the target of a canvas tool. Pick the
             // topmost visible layer, keep the hidden layer hidden, and make the actual
@@ -4494,8 +5135,12 @@ namespace Carpathia
                 suppressLayerSelectionChanged = false;
             }
 
-            return true;
+            return !IsActiveLayerLocked || IsNonPaintingTool();
         }
+
+        private bool IsNonPaintingTool() => selectedTool == Tools.Cursor ||
+            selectedTool == Tools.Selection || selectedTool == Tools.MagicSelection ||
+            selectedTool == Tools.ColorDrop;
 
         private void pictureBoxCanvas_MouseDown(object sender, MouseEventArgs e)
         {
@@ -4547,6 +5192,17 @@ namespace Carpathia
                 {
                     isdrawing = false;
                     RenderCompositeToCanvas(force: true);
+                    return;
+                }
+
+                // Bucket fills exactly once on MouseDown. The Click event must not
+                // save a second undo state or leave the cached composite unchanged.
+                if (selectedTool == Tools.Bucket)
+                {
+                    isdrawing = false;
+                    CancelFilters();
+                    PerformBucketFill(new Point((int)(e.X / zoom), (int)(e.Y / zoom)),
+                        ActivePaintColor);
                     return;
                 }
 
@@ -4637,7 +5293,7 @@ namespace Carpathia
 
                     default:
                         if (selectedTool == Tools.Brush || selectedTool == Tools.Pen || selectedTool == Tools.Eraser ||
-                            selectedTool == Tools.Spray || selectedTool == Tools.Bucket || selectedTool == Tools.Text)
+                            selectedTool == Tools.Spray || selectedTool == Tools.Text)
                         {
                             SaveStateForUndo();
                         }
@@ -4698,41 +5354,19 @@ namespace Carpathia
 
         private void pictureBoxCanvas_Click(object sender, EventArgs e)
         {
-            if (!isImageCurrentlyCreating)
-            {
-                toolStripArtisticFilters.Visible = false;
-                toolStripPixelate.Visible = false;
-                toolStripGaussianBlur.Visible = false;
-                switch (selectedTool)
-                {
-                    case Tools.Bucket:
-                        {
-                            SaveStateForUndo();
-                            MouseEventArgs me = (MouseEventArgs)e; // EventArgs yerine MouseEventArgs kullanımı  
-                                                                   // Fix for CS0246: 'Location' türü veya ad alanı adı bulunamadı  
-                                                                   // The issue occurs because 'Location' is not a valid type.  
-                                                                   // The correct type to use here is 'Point', which represents a location in a two-dimensional plane.  
-
-                            // Replace the problematic line:  
-                            // Location unzoomedLocation = me.Location;  
-
-                            // With the following corrected line:  
-                            Point unzoomedLocation = me.Location;
-                            // Adjust the location based on the zoom level
-                            int adjustedX = (int)(unzoomedLocation.X / zoom);
-                            int adjustedY = (int)(unzoomedLocation.Y / zoom);
-                            Point adjustedLocation = new Point(adjustedX, adjustedY);
-                            FloodFill(MainBitmap, adjustedLocation, ActivePaintColor, tolerance);
-                            isModified = true; MarkLayerThumbnailDirty();
-                        }
-                        break;
-                }
-            }
-            else
+            // The bucket is handled by MouseDown (where the mouse button, colour,
+            // layer and image coordinates are reliable). Running it here again
+            // creates an extra undo snapshot and may fail to refresh the composite.
+            if (isImageCurrentlyCreating)
             {
                 SystemSounds.Beep.Play();
+                return;
             }
+            toolStripArtisticFilters.Visible = false;
+            toolStripPixelate.Visible = false;
+            toolStripGaussianBlur.Visible = false;
         }
+
         private void DrawMagicSelectionOutline(Graphics graphics)
         {
             if (magicSelectionMask == null || magicSelectionOutlineSegments.Count == 0 || magicSelectionBounds.IsEmpty)
@@ -4955,94 +5589,173 @@ namespace Carpathia
             pictureBoxCanvas.Invalidate();
         }
 
-        private void FloodFill(Bitmap bmp, Point pt, Color replacementColor, int tolerance)
+        private void PerformBucketFill(Point imagePoint, Color replacementColor)
         {
-            // Validate input
-            if (bmp == null || pt.X < 0 || pt.X >= bmp.Width || pt.Y < 0 || pt.Y >= bmp.Height)
-            {
+            if (IsActiveLayerLocked) return;
+            if (MainBitmap == null || imagePoint.X < 0 || imagePoint.Y < 0 ||
+                imagePoint.X >= MainBitmap.Width || imagePoint.Y >= MainBitmap.Height)
                 return;
-            }
 
-            // Get the target color from the starting point
-            Color targetColor = bmp.GetPixel(pt.X, pt.Y);
-
-            // If the target color is the same as the replacement color, or the colors are too similar, do nothing
-            if (IsColorWithinTolerance(targetColor, replacementColor, tolerance))
+            // Work on a private ARGB copy. Only create a history entry when the
+            // fill actually changes pixels, and preserve the original layer data.
+            using (Bitmap candidate = new Bitmap(MainBitmap.Width, MainBitmap.Height,
+                       PixelFormat.Format32bppArgb))
             {
-                return;
-            }
-
-            // Use a Queue instead of a Stack to process pixels in a breadth-first manner
-            Queue<Point> pixels = new Queue<Point>();
-            pixels.Enqueue(pt);
-
-            // Determine the bounds for the flood fill operation
-            Rectangle bounds;
-            if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
-            {
-                bounds = new Rectangle(
-                    (int)(originalSelectionRectangleLocation.X),
-                    (int)(originalSelectionRectangleLocation.Y),
-                    (int)(originalSelectionRectangleSize.Width),
-                    (int)(originalSelectionRectangleSize.Height));
-            }
-            else
-            {
-                bounds = new Rectangle(0, 0, bmp.Width, bmp.Height);
-            }
-
-            // Use a HashSet to keep track of visited pixels
-            HashSet<Point> visited = new HashSet<Point>();
-
-            while (pixels.Count > 0)
-            {
-                Point a = pixels.Dequeue();
-
-                // Check if the pixel is within the bounds and has not been visited
-                if (a.X >= bounds.Left && a.X < bounds.Right &&
-                    a.Y >= bounds.Top && a.Y < bounds.Bottom &&
-                    !visited.Contains(a))
+                using (Graphics g = Graphics.FromImage(candidate))
                 {
-                    Color pixelColor = bmp.GetPixel(a.X, a.Y);
+                    g.CompositingMode = CompositingMode.SourceCopy;
+                    g.DrawImageUnscaled(MainBitmap, 0, 0);
+                }
 
-                    // Apply tolerance check
-                    if (IsColorWithinTolerance(pixelColor, targetColor, tolerance))
+                // A rectangular selection may have a temporary painted bitmap.
+                // Carry that content into the working copy before filling, or a
+                // later deselection could paste old pixels over the bucket result.
+                if (isSelected && SelectedBitmap != null && !SelectionRectangle.IsEmpty &&
+                    originalSelectionRectangleSize.Width > 0 &&
+                    originalSelectionRectangleSize.Height > 0)
+                {
+                    using (Graphics g = Graphics.FromImage(candidate))
                     {
-                        bmp.SetPixel(a.X, a.Y, replacementColor);
-                        visited.Add(a); // Mark the pixel as visited
-
-                        // Enqueue adjacent pixels
-                        pixels.Enqueue(new Point(a.X - 1, a.Y));
-                        pixels.Enqueue(new Point(a.X + 1, a.Y));
-                        pixels.Enqueue(new Point(a.X, a.Y - 1));
-                        pixels.Enqueue(new Point(a.X, a.Y + 1));
+                        g.CompositingMode = CompositingMode.SourceCopy;
+                        g.DrawImage(SelectedBitmap,
+                            new Rectangle(originalSelectionRectangleLocation,
+                                originalSelectionRectangleSize),
+                            new Rectangle(Point.Empty, SelectedBitmap.Size),
+                            GraphicsUnit.Pixel);
                     }
                 }
-            }
 
-            pictureBoxCanvas.Invalidate(); // Refresh the main picture box
-            return;
+                if (!FloodFill(candidate, imagePoint, replacementColor, tolerance))
+                    return;
+
+                SaveStateForUndo(description: "Fill");
+                Bitmap old = MainBitmap;
+                MainBitmap = new Bitmap(candidate);
+                old?.Dispose();
+                if (isSelected && SelectedBitmap != null)
+                {
+                    SelectedBitmap.Dispose();
+                    SelectedBitmap = null;
+                }
+                SyncActiveLayerFromCanvas();
+                isModified = true;
+                isSaved = false;
+                MarkLayerThumbnailDirty();
+                MarkCompositeDirty();
+                RenderCompositeToCanvas(force: true);
+                pictureBoxCanvas.Invalidate();
+                RefreshActiveLayerThumbnail();
+            }
         }
 
-        private bool IsColorWithinTolerance(Color color1, Color color2, int tolerance)
+        // Scanline flood-fill with 32-bit ARGB pixel access. Unlike SetPixel and
+        // a queue entry for every pixel, it remains practical for large images.
+        // The mask and rectangular selection, when present, constrain the fill.
+        private bool FloodFill(Bitmap bmp, Point start, Color replacement, int toleranceValue)
         {
-            // Calculate the color difference
-            int aDiff = Math.Abs(color1.A - color2.A);
-            int rDiff = Math.Abs(color1.R - color2.R);
-            int gDiff = Math.Abs(color1.G - color2.G);
-            int bDiff = Math.Abs(color1.B - color2.B);
+            Rectangle bounds = new Rectangle(Point.Empty, bmp.Size);
+            if (isSelected && !SelectionRectangle.IsEmpty &&
+                originalSelectionRectangleSize.Width > 0 &&
+                originalSelectionRectangleSize.Height > 0)
+            {
+                bounds.Intersect(new Rectangle(originalSelectionRectangleLocation,
+                    originalSelectionRectangleSize));
+            }
+            if (bounds.IsEmpty || !bounds.Contains(start))
+                return false;
 
-            // Calculate the overall difference
-            double difference = Math.Sqrt(aDiff * aDiff + rDiff * rDiff + gDiff * gDiff + bDiff * bDiff);
+            bool hasMagicMask = isSelected && magicSelectionMask != null &&
+                magicSelectionMaskWidth == bmp.Width &&
+                magicSelectionMaskHeight == bmp.Height;
+            int width = bmp.Width;
+            int height = bmp.Height;
+            if (hasMagicMask && !magicSelectionMask[start.Y * width + start.X])
+                return false;
 
-            // The maximum difference between two colors
-            double maxDifference = Math.Sqrt(50000);
+            BitmapData data = bmp.LockBits(new Rectangle(0, 0, width, height),
+                ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            try
+            {
+                int rowBytes = checked(width * 4);
+                byte[] rgba = new byte[checked(rowBytes * height)];
+                for (int y = 0; y < height; y++)
+                    Marshal.Copy(IntPtr.Add(data.Scan0, y * data.Stride),
+                        rgba, y * rowBytes, rowBytes);
 
-            // Normalize the difference to a range between 0 and 1
-            double normalizedDifference = difference / maxDifference;
+                int seedOffset = start.Y * rowBytes + start.X * 4;
+                byte oldB = rgba[seedOffset];
+                byte oldG = rgba[seedOffset + 1];
+                byte oldR = rgba[seedOffset + 2];
+                byte oldA = rgba[seedOffset + 3];
+                if (oldB == replacement.B && oldG == replacement.G &&
+                    oldR == replacement.R && oldA == replacement.A)
+                    return false;
 
-            // Check if the normalized difference is within the tolerance
-            return normalizedDifference <= (tolerance / 100.0);
+                int t = Math.Clamp(toleranceValue, 0, 100);
+                double threshold = t * (510.0 / 100.0);
+                double thresholdSquared = threshold * threshold;
+                var visited = new BitArray(checked(width * height));
+                var seeds = new Stack<Point>();
+                seeds.Push(start);
+                bool changed = false;
+
+                bool Matches(int px, int py)
+                {
+                    if (px < bounds.Left || px >= bounds.Right ||
+                        py < bounds.Top || py >= bounds.Bottom)
+                        return false;
+                    int idx = py * width + px;
+                    if (visited[idx] || (hasMagicMask && !magicSelectionMask[idx]))
+                        return false;
+                    int offset = py * rowBytes + px * 4;
+                    int da = rgba[offset + 3] - oldA;
+                    // Transparent pixels have no meaningful RGB values.
+                    if (oldA == 0 && rgba[offset + 3] == 0)
+                        return true;
+                    int db = rgba[offset] - oldB;
+                    int dg = rgba[offset + 1] - oldG;
+                    int dr = rgba[offset + 2] - oldR;
+                    return (double)(da * da + dr * dr + dg * dg + db * db)
+                        <= thresholdSquared;
+                }
+
+                while (seeds.Count > 0)
+                {
+                    Point seed = seeds.Pop();
+                    if (!Matches(seed.X, seed.Y)) continue;
+                    int left = seed.X, right = seed.X;
+                    while (left > bounds.Left && Matches(left - 1, seed.Y)) left--;
+                    while (right + 1 < bounds.Right && Matches(right + 1, seed.Y)) right++;
+                    bool above = false, below = false;
+                    for (int px = left; px <= right; px++)
+                    {
+                        int offset = seed.Y * rowBytes + px * 4;
+                        visited[seed.Y * width + px] = true;
+                        rgba[offset] = replacement.B;
+                        rgba[offset + 1] = replacement.G;
+                        rgba[offset + 2] = replacement.R;
+                        rgba[offset + 3] = replacement.A;
+                        changed = true;
+
+                        bool a = Matches(px, seed.Y - 1);
+                        if (a && !above) seeds.Push(new Point(px, seed.Y - 1));
+                        above = a;
+                        bool b = Matches(px, seed.Y + 1);
+                        if (b && !below) seeds.Push(new Point(px, seed.Y + 1));
+                        below = b;
+                    }
+                }
+
+                if (changed)
+                    for (int y = 0; y < height; y++)
+                        Marshal.Copy(rgba, y * rowBytes,
+                            IntPtr.Add(data.Scan0, y * data.Stride), rowBytes);
+                return changed;
+            }
+            finally
+            {
+                bmp.UnlockBits(data);
+            }
         }
 
         private void çıkışToolStripMenuItem_Click(object sender, EventArgs e)
@@ -5459,7 +6172,24 @@ namespace Carpathia
 
         private Tools selectedTool; // Rename the variable from `currentTool` to `selectedTool`
 
-        private void SaveStateForUndo(bool includeAllLayers = false)
+        private string DefaultHistoryDescription() => selectedTool switch
+        {
+            Tools.Brush => "Brush stroke",
+            Tools.Pen => "Pen stroke",
+            Tools.Eraser => "Erase",
+            Tools.Spray => "Spray",
+            Tools.Bucket => "Fill",
+            Tools.Line => "Line",
+            Tools.Round => "Ellipse",
+            Tools.Rectangle => "Rectangle",
+            Tools.RoundedRectangle => "Rounded rectangle",
+            Tools.Triangle => "Triangle",
+            Tools.Hexagon => "Hexagon",
+            Tools.Text => "Text",
+            _ => "Edit image"
+        };
+
+        private void SaveStateForUndo(bool includeAllLayers = false, string description = null)
         {
             if (MainBitmap != null &&
                 (includeAllLayers ||
@@ -5470,6 +6200,9 @@ namespace Carpathia
                     var tempList = undoStack.Reverse().ToList();
                     if (tempList.Count > 0)
                     {
+                        // Once the oldest undoable action is discarded, its resulting
+                        // state becomes the new start of the visible timeline.
+                        historyBaseDescription = tempList[0].HistoryDescription;
                         tempList[0].Dispose();
                         tempList.RemoveAt(0);
                     }
@@ -5483,7 +6216,8 @@ namespace Carpathia
                 if (includeAllLayers)
                 {
                     layerBitmaps = editorLayers.Count > 0
-                        ? editorLayers.Select(layer => new Bitmap(layer.Bitmap)).ToList()
+                        ? Enumerable.Range(0, editorLayers.Count)
+                            .Select(i => new Bitmap(GetLayerBitmapForRender(i))).ToList()
                         : new List<Bitmap> { new Bitmap(MainBitmap) };
                 }
 
@@ -5491,12 +6225,34 @@ namespace Carpathia
                     layerKey,
                     new Bitmap(MainBitmap),
                     MainBitmap.Size,
-                    layerBitmaps));
+                    layerBitmaps,
+                    includeAllLayers ? CaptureLayerProperties() : null,
+                    activeLayerIndex,
+                    description ?? DefaultHistoryDescription()));
 
                 ClearRedoStack();
             }
 
             UpdateUndoRedoButtons();
+        }
+
+        // When reconstructing a complete layer stack, honor eye-button changes
+        // that were made outside the Undo/Redo timeline. Snapshot visibility is
+        // used only for layers the user has not explicitly toggled.
+        private bool GetLockForRestoredLayer(LayerPropertiesSnapshot properties)
+        {
+            if (properties != null &&
+                untrackedLayerLocks.TryGetValue(properties.Key, out bool currentLock))
+                return currentLock;
+            return properties?.Locked ?? false;
+        }
+
+        private bool GetVisibilityForRestoredLayer(LayerPropertiesSnapshot properties)
+        {
+            if (properties != null &&
+                untrackedLayerVisibility.TryGetValue(properties.Key, out bool currentVisibility))
+                return currentVisibility;
+            return properties?.Visible ?? true;
         }
 
         private void RestoreHistoryState(LayerCanvasState state, Stack<LayerCanvasState> oppositeStack)
@@ -5507,21 +6263,20 @@ namespace Carpathia
             if (state.LayerBitmaps != null)
             {
                 int currentIndex = activeLayerIndex >= 0 && activeLayerIndex < editorLayers.Count
-                    ? activeLayerIndex
-                    : 0;
-                if (currentIndex >= state.LayerBitmaps.Count)
-                    currentIndex = state.LayerBitmaps.Count - 1;
-
-                Bitmap fullCurrentTarget = new Bitmap(MainBitmap ?? (editorLayers.Count > 0 ? editorLayers[Math.Max(0, Math.Min(activeLayerIndex, editorLayers.Count - 1))].Bitmap : new Bitmap(1, 1)));
-                List<Bitmap> fullCurrentLayerBitmaps = editorLayers
-                    .Select(layer => new Bitmap(layer.Bitmap))
-                    .ToList();
+                    ? activeLayerIndex : 0;
+                Bitmap fullCurrentTarget = new Bitmap(MainBitmap ??
+                    (editorLayers.Count > 0 ? editorLayers[Math.Clamp(currentIndex, 0, editorLayers.Count - 1)].Bitmap : state.Bitmap));
+                List<Bitmap> fullCurrentLayerBitmaps = Enumerable.Range(0, editorLayers.Count)
+                    .Select(i => new Bitmap(GetLayerBitmapForRender(i))).ToList();
 
                 oppositeStack.Push(new LayerCanvasState(
-                    editorLayers.Count > 0 && currentIndex < editorLayers.Count ? editorLayers[currentIndex].ThumbnailKey : string.Empty,
+                    editorLayers.Count > 0 ? editorLayers[currentIndex].ThumbnailKey : string.Empty,
                     fullCurrentTarget,
                     fullCurrentTarget.Size,
-                    fullCurrentLayerBitmaps));
+                    fullCurrentLayerBitmaps,
+                    CaptureLayerProperties(),
+                    activeLayerIndex,
+                    state.HistoryDescription));
 
                 suppressLayerSelectionChanged = true;
                 try
@@ -5535,8 +6290,16 @@ namespace Carpathia
 
                     for (int i = 0; i < state.LayerBitmaps.Count; i++)
                     {
-                        string layerName = $"Layer {i + 1}";
-                        var layer = new EditorLayer(layerName, new Bitmap(state.LayerBitmaps[i]));
+                        LayerPropertiesSnapshot props = state.LayerProperties != null &&
+                            i < state.LayerProperties.Count ? state.LayerProperties[i] : null;
+                        string layerName = props?.Name ?? $"Layer {i + 1}";
+                        var layer = new EditorLayer(layerName, new Bitmap(state.LayerBitmaps[i]), props?.Key)
+                        {
+                            Visible = GetVisibilityForRestoredLayer(props),
+                            Locked = GetLockForRestoredLayer(props),
+                            Opacity = props?.Opacity ?? 100,
+                            BlendMode = props?.BlendMode ?? LayerBlendMode.Normal
+                        };
                         editorLayers.Add(layer);
 
                         using (Bitmap thumbnail = CreateLayerThumbnail(layer.Bitmap))
@@ -5548,9 +6311,13 @@ namespace Carpathia
                             Tag = layer
                         };
                         listView1.Items.Add(item);
+                        listView1.SetLayerVisibility(i, layer.Visible);
+                        listView1.SetLayerLocked(i, layer.Locked);
                     }
 
-                    activeLayerIndex = Math.Max(0, Math.Min(currentIndex, editorLayers.Count - 1));
+                    activeLayerIndex = Math.Max(0, Math.Min(
+                        state.ActiveLayerIndex >= 0 ? state.ActiveLayerIndex : currentIndex,
+                        editorLayers.Count - 1));
                     if (editorLayers.Count > 0)
                     {
                         MainBitmap?.Dispose();
@@ -5577,6 +6344,7 @@ namespace Carpathia
                 RefreshDirtyLayerThumbnails();
                 SetAsUnselected();
                 CenterCanvasPanel();
+                UpdateActiveLayerSettingsControls();
                 MarkCompositeDirty();
                 RenderCompositeToCanvas(force: true);
                 pictureBoxCanvas.Invalidate();
@@ -5603,7 +6371,8 @@ namespace Carpathia
             oppositeStack.Push(new LayerCanvasState(
                 targetLayer.ThumbnailKey,
                 currentTarget,
-                currentTarget.Size));
+                currentTarget.Size,
+                historyDescription: state.HistoryDescription));
 
             targetLayer.Bitmap?.Dispose();
             targetLayer.Bitmap = new Bitmap(state.Bitmap);
@@ -5670,11 +6439,9 @@ namespace Carpathia
         }
         private void UpdateUndoRedoButtons()
         {
-            // Undo tuşunu yığın doluysa etkinleştir, boşsa devre dışı bırak
             geriAlToolStripMenuItem.Enabled = undoStack.Count > 0;
-
-            // Redo tuşunu yığın doluysa etkinleştir, boşsa devre dışı bırak
             yineleToolStripMenuItem.Enabled = redoStack.Count > 0;
+            UpdateHistoryList();
         }
 
         private void toolStripButton9_Click(object sender, EventArgs e)
@@ -5717,6 +6484,7 @@ namespace Carpathia
         /// </summary>
         private bool CommitFloatingImagesToActiveLayer()
         {
+            if (IsActiveLayerLocked) return false;
             if (committingFloatingImages || MainBitmap == null ||
                 activeLayerIndex < 0 || activeLayerIndex >= editorLayers.Count ||
                 isImageCurrentlyCreating)
@@ -5740,7 +6508,7 @@ namespace Carpathia
                 // Finalize any transformable selection before taking the undo
                 // snapshot. Otherwise a selection can be painted over the new image.
                 SetAsUnselected();
-                SaveStateForUndo();
+                SaveStateForUndo(description: "Commit floating image");
 
                 using (Graphics g = Graphics.FromImage(MainBitmap))
                 {
@@ -5815,6 +6583,7 @@ namespace Carpathia
         /// </summary>
         private void BeginTextEdit(Point displayPoint)
         {
+            if (IsActiveLayerLocked) return;
             CommitActiveTextEditor();
             if (MainBitmap == null || isImageCurrentlyCreating)
                 return;
@@ -5940,9 +6709,9 @@ namespace Carpathia
                 editor.KeyDown -= ActiveTextEditor_KeyDown;
 
                 string content = editor.Text;
-                if (!string.IsNullOrWhiteSpace(content) && MainBitmap != null)
+                if (!string.IsNullOrWhiteSpace(content) && MainBitmap != null && !IsActiveLayerLocked)
                 {
-                    SaveStateForUndo(); // Exactly one undo step per committed text.
+                    SaveStateForUndo(description: "Text edit"); // Exactly one undo step per committed text.
                     float contentWidth = Math.Max(1f, editor.ClientSize.Width / zoom);
                     float contentHeight = Math.Max(1f, editor.ClientSize.Height / zoom);
                     RectangleF layout = new RectangleF(
@@ -6044,7 +6813,7 @@ namespace Carpathia
             if (!isImageCurrentlyCreating)
             {
                 // Seçim kaldırılırken mevcut içeriği koruyarak işlemi gerçekleştirin
-                if (isSelected && SelectedBitmap != null && !SelectionRectangle.IsEmpty)
+                if (isSelected && SelectedBitmap != null && !SelectionRectangle.IsEmpty && !IsActiveLayerLocked)
                 {
                     if (artisticFilters != ArtisticFilters.None)
                     {
@@ -6081,6 +6850,12 @@ namespace Carpathia
                     SelectedBitmap = null;
                 }
 
+                if (IsActiveLayerLocked && SelectedBitmap != null)
+                {
+                    SelectedBitmap.Dispose();
+                    SelectedBitmap = null;
+                }
+
                 // Seçim durumunu sıfırlayın
                 SelectionRectangle = Rectangle.Empty;
                 isSelected = false;
@@ -6095,7 +6870,7 @@ namespace Carpathia
                 }
                 else
                 {
-                    pictureBoxCanvas.Image = previewBitmap;
+                    ShowActiveLayerPreview(previewBitmap);
                 }
                 pictureBoxCanvas.Invalidate();
             }
@@ -6187,8 +6962,9 @@ namespace Carpathia
 
         private void mirrorToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (IsActiveLayerLocked) return;
             SetAsUnselected();
-            SaveStateForUndo();
+            SaveStateForUndo(description: "Mirror");
             if (artisticFilters != ArtisticFilters.None)
             {
                 artisticFilters = ArtisticFilters.None;
@@ -6221,7 +6997,8 @@ namespace Carpathia
         }
         private void flashToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SaveStateForUndo();
+            if (IsActiveLayerLocked) return;
+            SaveStateForUndo(description: "Flash filter");
             if (artisticFilters != ArtisticFilters.None)
             {
                 artisticFilters = ArtisticFilters.None;
@@ -6273,7 +7050,10 @@ namespace Carpathia
 
         private void frozenToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SaveStateForUndo();
+
+
+            if (IsActiveLayerLocked) return;
+            SaveStateForUndo(description: "Frozen filter");
             if (artisticFilters != ArtisticFilters.None)
             {
                 artisticFilters = ArtisticFilters.None;
@@ -6323,7 +7103,8 @@ namespace Carpathia
 
         private void winterToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SaveStateForUndo();
+            if (IsActiveLayerLocked) return;
+            SaveStateForUndo(description: "Winter filter");
             if (artisticFilters != ArtisticFilters.None)
             {
                 artisticFilters = ArtisticFilters.None;
@@ -6373,7 +7154,8 @@ namespace Carpathia
 
         private void blackAndWhiteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SaveStateForUndo();
+            if (IsActiveLayerLocked) return;
+            SaveStateForUndo(description: "Black and white");
             if (artisticFilters != ArtisticFilters.None)
             {
                 artisticFilters = ArtisticFilters.None;
@@ -6423,7 +7205,8 @@ namespace Carpathia
 
         private void oldPictureToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SaveStateForUndo();
+            if (IsActiveLayerLocked) return;
+            SaveStateForUndo(description: "Old photo filter");
             if (artisticFilters != ArtisticFilters.None)
             {
                 artisticFilters = ArtisticFilters.None;
@@ -6473,7 +7256,8 @@ namespace Carpathia
 
         private void cherryToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SaveStateForUndo();
+            if (IsActiveLayerLocked) return;
+            SaveStateForUndo(description: "Cherry filter");
             if (artisticFilters != ArtisticFilters.None)
             {
                 artisticFilters = ArtisticFilters.None;
@@ -6523,7 +7307,8 @@ namespace Carpathia
 
         private void lightAddToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SaveStateForUndo();
+            if (IsActiveLayerLocked) return;
+            SaveStateForUndo(description: "Light Add filter");
             if (artisticFilters != ArtisticFilters.None)
             {
                 artisticFilters = ArtisticFilters.None;
@@ -6573,7 +7358,8 @@ namespace Carpathia
 
         private void purpleToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SaveStateForUndo();
+            if (IsActiveLayerLocked) return;
+            SaveStateForUndo(description: "Purple filter");
             if (artisticFilters != ArtisticFilters.None)
             {
                 artisticFilters = ArtisticFilters.None;
@@ -6623,7 +7409,8 @@ namespace Carpathia
 
         private void fogToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SaveStateForUndo();
+            if (IsActiveLayerLocked) return;
+            SaveStateForUndo(description: "Fog filter");
             if (artisticFilters != ArtisticFilters.None)
             {
                 artisticFilters = ArtisticFilters.None;
@@ -6727,7 +7514,7 @@ namespace Carpathia
                 SelectedBitmap = filteredBitmap;
 
                 // Keep MainBitmap as the image but update the display to show selection
-                pictureBoxCanvas.Image = previewBitmap;
+                ShowActiveLayerPreview(previewBitmap);
             }
             else
             {
@@ -6767,7 +7554,7 @@ namespace Carpathia
                 }
 
                 previewBitmap = filteredBitmap;
-                pictureBoxCanvas.Image = previewBitmap;
+                ShowActiveLayerPreview(previewBitmap);
                 MarkCompositeDirty();
                 pictureBoxCanvas.Invalidate();
                 pictureBoxCanvas.Update();
@@ -6778,7 +7565,8 @@ namespace Carpathia
         }
         private void buttonArtisticFiltersOK_Click(object sender, EventArgs e)
         {
-            SaveStateForUndo();
+            if (IsActiveLayerLocked) return;
+            SaveStateForUndo(description: "Artistic filter");
             MainBitmap = previewBitmap;
             artisticFilters = ArtisticFilters.None;
             RenderCompositeToCanvas();
@@ -7168,9 +7956,10 @@ namespace Carpathia
 
         private void Cut()
         {
+            if (IsActiveLayerLocked) return;
             try
             {
-                SaveStateForUndo();
+                SaveStateForUndo(description: "Cut selection");
                 CutOrCopy();
                 if (magicSelectionMask != null && !magicSelectionBounds.IsEmpty)
                 {
@@ -7215,6 +8004,7 @@ namespace Carpathia
 
         private void Paste()
         {
+            if (IsActiveLayerLocked) return;
             if (MainBitmap == null)
                 return;
 
@@ -7334,7 +8124,8 @@ namespace Carpathia
 
         private void chloeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SaveStateForUndo();
+            if (IsActiveLayerLocked) return;
+            SaveStateForUndo(description: "Chloe filter");
             if (artisticFilters != ArtisticFilters.None)
             {
                 artisticFilters = ArtisticFilters.None;
@@ -7702,21 +8493,84 @@ namespace Carpathia
         private void ClearRedoStack()
         {
             while (redoStack.Count > 0)
-            {
-                var state = redoStack.Pop();
-                state.Bitmap.Dispose();
-                UpdateUndoRedoButtons();
-            }
+                redoStack.Pop().Dispose(); // Also disposes full-stack layer bitmaps.
+            UpdateUndoRedoButtons();
         }
         // Generated pixels must be installed into the editable layer AND the
         // flattened preview. Changing MainBitmap alone leaves the old composite
         // in pictureBoxCanvas.Image, even though undo/history has the new state.
-        private void ApplyGeneratedImageToCanvas(Image generatedImage)
+        // Commit selection-based AI edits to the active layer, not just the
+        // temporary SelectedBitmap. Use SourceCopy so transparent background
+        // removal actually clears old pixels rather than painting over them.
+        private void ApplyGeneratedSelectionToCanvas(Image generatedImage,
+            string historyDescription)
         {
+            if (IsActiveLayerLocked) return;
+            if (generatedImage == null)
+                throw new ArgumentNullException(nameof(generatedImage));
+            if (MainBitmap == null)
+                return;
+
+            Rectangle selection = new Rectangle(originalSelectionRectangleLocation,
+                originalSelectionRectangleSize);
+            Rectangle destination = Rectangle.Intersect(selection,
+                new Rectangle(Point.Empty, MainBitmap.Size));
+            if (selection.Width <= 0 || selection.Height <= 0 || destination.IsEmpty)
+                return;
+
+            Bitmap next = new Bitmap(MainBitmap.Width, MainBitmap.Height,
+                PixelFormat.Format32bppArgb);
+            try
+            {
+                using (Graphics g = Graphics.FromImage(next))
+                {
+                    g.CompositingMode = CompositingMode.SourceCopy;
+                    g.DrawImageUnscaled(MainBitmap, 0, 0);
+                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    float scaleX = (float)generatedImage.Width / selection.Width;
+                    float scaleY = (float)generatedImage.Height / selection.Height;
+                    RectangleF source = new RectangleF(
+                        (destination.X - selection.X) * scaleX,
+                        (destination.Y - selection.Y) * scaleY,
+                        destination.Width * scaleX, destination.Height * scaleY);
+                    g.DrawImage(generatedImage,
+                        new RectangleF(destination.X, destination.Y,
+                            destination.Width, destination.Height),
+                        source, GraphicsUnit.Pixel);
+                }
+                SaveStateForUndo(description: historyDescription);
+                Bitmap old = MainBitmap;
+                MainBitmap = next;
+                next = null;
+                old?.Dispose();
+                SelectedBitmap?.Dispose();
+                SelectedBitmap = null;
+                SyncActiveLayerFromCanvas();
+                MarkCompositeDirty();
+                RenderCompositeToCanvas(force: true);
+                MarkLayerThumbnailDirty();
+                RefreshActiveLayerThumbnail();
+                isModified = true;
+                isSaved = false;
+                pictureBoxCanvas.Invalidate();
+            }
+            finally
+            {
+                next?.Dispose();
+            }
+        }
+
+        private void ApplyGeneratedImageToCanvas(Image generatedImage,
+            string historyDescription = "AI image edit")
+        {
+            if (IsActiveLayerLocked) return;
             if (generatedImage == null)
                 throw new ArgumentNullException(nameof(generatedImage));
 
             Bitmap replacement = new Bitmap(generatedImage);
+            // Delayed until the AI provider has returned a usable result. Errors,
+            // cancellation or null responses must not add phantom history steps.
+            SaveStateForUndo(description: historyDescription);
             Bitmap previous = MainBitmap;
             bool canvasSizeChanged = previous == null || previous.Size != replacement.Size;
             MainBitmap = replacement;
@@ -7762,7 +8616,7 @@ namespace Carpathia
                 string systemInstruction = "Fix the selection-editing pipeline by identifying whether the seam comes from coordinate mapping or generated content.\r\n\r\nFirst, bypass generation and reinsert the unchanged input crop through the exact same processing pipeline. Verify that it aligns with the original without displacement, stretching, or visible seams. Correct any failed mapping before continuing.\r\n\r\nTreat surrounding context as protected reference content. Keep the editable mask separate from the context crop. Composite only through the selection mask, preserving all pixels outside it.\r\n\r\nDo not assume that image-to-image generation preserves geometry or honors a mask. Verify that the backend actually forwards a mask and that the selected model supports masked editing. If either is missing, implement a supported inpainting workflow before claiming seamless selection editing.\r\n\r\nRequest edits only within the mask. Preserve the position and shape of structures crossing its boundary. Reject results that shift those structures; feathering cannot repair displaced sunglasses, whiskers, or contours.\r\n\r\nInspect the actual returned image dimensions and reverse recorded crop, resize, and padding transforms before compositing. Never substitute requested dimensions for measured dimensions.";
                 try
                 {
-                    SaveStateForUndo();
+
                     isImageCurrentlyCreating = true;
                     canvasPanel.Enabled = false;
                     menuStrip1.Enabled = false;
@@ -7800,14 +8654,12 @@ namespace Carpathia
                         var image = await imageTask; // Await the task to get the result
                         if (image != null)
                         {
-                            SelectedBitmap = new Bitmap(image); // Convert Image to Bitmap  
-                            MergeMainBitmapWithSelected();
+
+                            ApplyGeneratedSelectionToCanvas(image, "AI generate image");
                             isModified = true; MarkLayerThumbnailDirty();
                         }
                         else
                         {
-                            Undo();
-                            ClearRedoStack();
                             Logger.Log("The generated image is null.", Logger.LogTypes.Error);
                             MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
@@ -7821,12 +8673,10 @@ namespace Carpathia
                         {
                             // Rebuild the layer composite; Invalidate() alone
                             // repaints the old cached preview.
-                            ApplyGeneratedImageToCanvas(image);
+                            ApplyGeneratedImageToCanvas(image, "AI generate image");
                         }
                         else
                         {
-                            Undo();
-                            ClearRedoStack();
                             Logger.Log("The generated image is null.", Logger.LogTypes.Error);
                             MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
@@ -7834,15 +8684,11 @@ namespace Carpathia
                 }
                 catch (NullReferenceException)
                 {
-                    Undo();
-                    ClearRedoStack();
                     Logger.Log("The generated image is null.", Logger.LogTypes.Error);
                     MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 catch (Exception ex)
                 {
-                    Undo();
-                    ClearRedoStack();
                     Logger.Log("Error during AI image creation: " + ex.Message, Logger.LogTypes.Error);
                     MessageForm.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
@@ -7888,7 +8734,8 @@ namespace Carpathia
 
         private void buttonApplyPixelation_Click(object sender, EventArgs e)
         {
-            SaveStateForUndo();
+            if (IsActiveLayerLocked) return;
+            SaveStateForUndo(description: "Pixelate");
             blurEffect = BlurEffect.None;
             MainBitmap = previewBitmap;
             RenderCompositeToCanvas();
@@ -8055,7 +8902,8 @@ namespace Carpathia
         }
         private void buttonApplyGaussianBlur_Click(object sender, EventArgs e)
         {
-            SaveStateForUndo();
+            if (IsActiveLayerLocked) return;
+            SaveStateForUndo(description: "Gaussian blur");
             blurEffect = BlurEffect.None;
             MainBitmap = previewBitmap;
             RenderCompositeToCanvas();
@@ -8308,6 +9156,7 @@ namespace Carpathia
         }
         private void ClearActiveLayer()
         {
+            if (IsActiveLayerLocked) return;
             if (MainBitmap == null ||
                 activeLayerIndex < 0 ||
                 activeLayerIndex >= editorLayers.Count)
@@ -8316,7 +9165,7 @@ namespace Carpathia
             }
 
             // Keep this operation independently undoable for the active layer.
-            SaveStateForUndo();
+            SaveStateForUndo(description: "Clear layer");
 
             // Clear every pixel of the selected/active layer to transparent.
             // SourceCopy is important here: normal SourceOver drawing with a
@@ -8349,10 +9198,11 @@ namespace Carpathia
 
         private void DeleteCurrentSelection()
         {
+            if (IsActiveLayerLocked) return;
             if (!isSelected || MainBitmap == null)
                 return;
 
-            SaveStateForUndo();
+            SaveStateForUndo(description: "Delete selection");
 
             // Magic selection
             if (magicSelectionMask != null &&
@@ -8472,13 +9322,16 @@ namespace Carpathia
 
         private void MoveLayer(int oldIndex, int newIndex)
         {
+            if (oldIndex >= 0 && newIndex >= 0 && oldIndex < editorLayers.Count &&
+                newIndex < editorLayers.Count &&
+                (editorLayers[oldIndex].Locked || editorLayers[newIndex].Locked)) return;
             if (oldIndex < 0 || oldIndex >= editorLayers.Count ||
                 newIndex < 0 || newIndex >= editorLayers.Count ||
                 oldIndex == newIndex)
                 return;
 
             SyncActiveLayerFromCanvas();
-            SaveStateForUndo(includeAllLayers: true); // Link layer reordering to history
+            SaveStateForUndo(includeAllLayers: true, description: "Reorder layer"); // Link layer reordering to history
 
             EditorLayer layer = editorLayers[oldIndex];
             editorLayers.RemoveAt(oldIndex);
@@ -8502,8 +9355,17 @@ namespace Carpathia
                 suppressLayerSelectionChanged = false;
             }
 
+            // ListView compatibility rows may have been removed and reinserted.
+            // Reapply the authoritative model's visibility to every eye icon.
+            for (int i = 0; i < editorLayers.Count; i++)
+            {
+                listView1.SetLayerVisibility(i, editorLayers[i].Visible);
+                listView1.SetLayerLocked(i, editorLayers[i].Locked);
+            }
+
             isModified = true;
             isSaved = false;
+            UpdateActiveLayerSettingsControls();
             MarkCompositeDirty();
             RenderCompositeToCanvas(force: true);
             pictureBoxCanvas.Invalidate();
@@ -8523,11 +9385,12 @@ namespace Carpathia
             }
 
             int deleteIndex = listView1.SelectedIndices[0];
-            if (deleteIndex < 0 || deleteIndex >= editorLayers.Count)
+            if (deleteIndex < 0 || deleteIndex >= editorLayers.Count ||
+                editorLayers[deleteIndex].Locked)
                 return;
 
             SyncActiveLayerFromCanvas();
-            SaveStateForUndo(includeAllLayers: true); // Link layer deletion to history
+            SaveStateForUndo(includeAllLayers: true, description: "Delete layer"); // Link layer deletion to history
 
             EditorLayer deletedLayer = editorLayers[deleteIndex];
             string thumbnailKey = deletedLayer.ThumbnailKey;
@@ -8910,7 +9773,7 @@ namespace Carpathia
 
                     try
                     {
-                        SaveStateForUndo();
+
                         isImageCurrentlyCreating = true;
                         canvasPanel.Enabled = false;
                         menuStrip1.Enabled = false;
@@ -8929,27 +9792,21 @@ namespace Carpathia
                         {
                             // Rebuild the layer composite; Invalidate() alone
                             // repaints the old cached preview.
-                            ApplyGeneratedImageToCanvas(image);
+                            ApplyGeneratedImageToCanvas(image, "AI expand image");
                         }
                         else
                         {
-                            Undo();
-                            ClearRedoStack();
                             Logger.Log("The generated image is null.", Logger.LogTypes.Error);
                             MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
                     catch (NullReferenceException)
                     {
-                        Undo();
-                        ClearRedoStack();
                         Logger.Log("The generated image is null.", Logger.LogTypes.Error);
                         MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     catch (Exception ex)
                     {
-                        Undo();
-                        ClearRedoStack();
                         Logger.Log("Error during AI image creation: " + ex.Message, Logger.LogTypes.Error);
                         MessageForm.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
@@ -8993,7 +9850,7 @@ namespace Carpathia
                 string systemInstruction = "Colorize the image, keeping the original details and textures intact. Ensure that the colors are natural and realistic, enhancing the overall visual appeal of the image.";
                 try
                 {
-                    SaveStateForUndo();
+
                     isImageCurrentlyCreating = true;
                     canvasPanel.Enabled = false;
                     menuStrip1.Enabled = false;
@@ -9031,14 +9888,12 @@ namespace Carpathia
                         var image = await imageTask; // Await the task to get the result
                         if (image != null)
                         {
-                            SelectedBitmap = new Bitmap(image); // Convert Image to Bitmap  
-                            MergeMainBitmapWithSelected();
+
+                            ApplyGeneratedSelectionToCanvas(image, "AI colorize");
                             isModified = true; MarkLayerThumbnailDirty();
                         }
                         else
                         {
-                            Undo();
-                            ClearRedoStack();
                             Logger.Log("The generated image is null.", Logger.LogTypes.Error);
                             MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
@@ -9052,12 +9907,10 @@ namespace Carpathia
                         {
                             // Rebuild the layer composite; Invalidate() alone
                             // repaints the old cached preview.
-                            ApplyGeneratedImageToCanvas(image);
+                            ApplyGeneratedImageToCanvas(image, "AI colorize");
                         }
                         else
                         {
-                            Undo();
-                            ClearRedoStack();
                             Logger.Log("The generated image is null.", Logger.LogTypes.Error);
                             MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
@@ -9065,15 +9918,141 @@ namespace Carpathia
                 }
                 catch (NullReferenceException)
                 {
-                    Undo();
-                    ClearRedoStack();
                     Logger.Log("The generated image is null.", Logger.LogTypes.Error);
                     MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 catch (Exception ex)
                 {
-                    Undo();
-                    ClearRedoStack();
+                    Logger.Log("Error during AI image creation: " + ex.Message, Logger.LogTypes.Error);
+                    MessageForm.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    isImageCurrentlyCreating = false;
+                    pictureBoxCanvas.Invalidate();
+                    canvasPanel.Enabled = true;
+                    menuStrip1.Enabled = true;
+                    toolStripTools.Enabled = true;
+                    toolStripSeparator29.Visible = false;
+                    labelCreatingImage.Visible = false;
+                    if (!string.IsNullOrEmpty(textBoxPrompt.Text))
+                    {
+                        buttonCreate.Enabled = true;
+                    }
+                    textBoxPrompt.Enabled = true;
+                    labelPrompt.Enabled = true;
+                    buttonClose.Enabled = true;
+                    progressBarAIImageCreation.Visible = false;
+                    toolStripAICreateImage.Visible = false;
+                    textBoxPrompt.Clear();
+                }
+            }
+            else
+            {
+                Logger.Log("No internet connection available.", Logger.LogTypes.Error);
+                MessageForm.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        private bool IsColorWithinTolerance(Color color1, Color color2, int tolerance)
+        {
+            // Calculate the color difference
+            int aDiff = Math.Abs(color1.A - color2.A);
+            int rDiff = Math.Abs(color1.R - color2.R);
+            int gDiff = Math.Abs(color1.G - color2.G);
+            int bDiff = Math.Abs(color1.B - color2.B);
+
+            // Calculate the overall difference
+            double difference = Math.Sqrt(aDiff * aDiff + rDiff * rDiff + gDiff * gDiff + bDiff * bDiff);
+
+            // The maximum difference between two colors
+            double maxDifference = Math.Sqrt(50000);
+
+            // Normalize the difference to a range between 0 and 1
+            double normalizedDifference = difference / maxDifference;
+
+            // Check if the normalized difference is within the tolerance
+            return normalizedDifference <= (tolerance / 100.0);
+        }
+        private async void restoreToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (CheckIfInternetConnectionAvailable.IsInternetAvailable())
+            {
+                string systemInstruction = "Repair the image, restoring any missing or damaged areas while preserving the original details and textures. Ensure that the restored areas blend seamlessly with the surrounding content, maintaining a natural and realistic appearance.";
+                try
+                {
+
+                    isImageCurrentlyCreating = true;
+                    canvasPanel.Enabled = false;
+                    menuStrip1.Enabled = false;
+                    toolStripTools.Enabled = false;
+                    toolStripSeparator29.Visible = true;
+                    labelCreatingImage.Visible = true;
+                    progressBarAIImageCreation.Visible = true;
+                    buttonCreate.Enabled = false;
+                    textBoxPrompt.Enabled = false;
+                    labelPrompt.Enabled = false;
+                    buttonClose.Enabled = false;
+                    if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
+                    {
+                        if (SelectedBitmap == null)
+                        {
+                            SelectedBitmap = new Bitmap(
+                                (int)(SelectionRectangle.Width / zoom),
+                                (int)(SelectionRectangle.Height / zoom));
+                            using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                            {
+                                g.Clear(Color.Transparent);
+                                Rectangle sourceRect = new Rectangle(
+                                    (int)(originalSelectionRectangleLocation.X),
+                                    (int)(originalSelectionRectangleLocation.Y),
+                                    (int)(originalSelectionRectangleSize.Width),
+                                    (int)(originalSelectionRectangleSize.Height));
+                                g.DrawImage(MainBitmap,
+                                    new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
+                                    sourceRect,
+                                    GraphicsUnit.Pixel);
+                            }
+                        }
+                        var imageTask = ImageGenerationCore.GenerateImage(systemInstruction, SelectedBitmap,
+                            SelectedBitmap.Width, SelectedBitmap.Height, cts.Token);
+                        var image = await imageTask; // Await the task to get the result
+                        if (image != null)
+                        {
+
+                            ApplyGeneratedSelectionToCanvas(image, "AI restore");
+                            isModified = true; MarkLayerThumbnailDirty();
+                        }
+                        else
+                        {
+                            Logger.Log("The generated image is null.", Logger.LogTypes.Error);
+                            MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                    else
+                    {
+                        var imageTask = ImageGenerationCore.GenerateImage(systemInstruction, MainBitmap,
+                            MainBitmap.Width, MainBitmap.Height, cts.Token);
+                        var image = await imageTask; // Await the task to get the result
+                        if (image != null)
+                        {
+                            // Rebuild the layer composite; Invalidate() alone
+                            // repaints the old cached preview.
+                            ApplyGeneratedImageToCanvas(image, "AI restore");
+                        }
+                        else
+                        {
+                            Logger.Log("The generated image is null.", Logger.LogTypes.Error);
+                            MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+                catch (NullReferenceException)
+                {
+                    Logger.Log("The generated image is null.", Logger.LogTypes.Error);
+                    MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (Exception ex)
+                {
                     Logger.Log("Error during AI image creation: " + ex.Message, Logger.LogTypes.Error);
                     MessageForm.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
@@ -9105,123 +10084,28 @@ namespace Carpathia
             }
         }
 
-        private async void restoreToolStripMenuItem_Click(object sender, EventArgs e)
+        private void trackBarOpacity_ValueChanged(object sender, EventArgs e)
         {
-            if (CheckIfInternetConnectionAvailable.IsInternetAvailable())
+            if (suppressLayerSettingsChanged || IsActiveLayerLocked || activeLayerIndex < 0 ||
+                activeLayerIndex >= editorLayers.Count)
+                return;
+
+            EditorLayer layer = editorLayers[activeLayerIndex];
+            int nextOpacity = trackBarOpacity.Value;
+            if (layer.Opacity == nextOpacity)
+                return;
+
+            // A mouse drag is one history entry, not dozens of gigantic bitmap copies.
+            if (!opacityDragInProgress || !opacityDragUndoSaved)
             {
-                string systemInstruction = "Repair the image, restoring any missing or damaged areas while preserving the original details and textures. Ensure that the restored areas blend seamlessly with the surrounding content, maintaining a natural and realistic appearance.";
-                try
-                {
-                    SaveStateForUndo();
-                    isImageCurrentlyCreating = true;
-                    canvasPanel.Enabled = false;
-                    menuStrip1.Enabled = false;
-                    toolStripTools.Enabled = false;
-                    toolStripSeparator29.Visible = true;
-                    labelCreatingImage.Visible = true;
-                    progressBarAIImageCreation.Visible = true;
-                    buttonCreate.Enabled = false;
-                    textBoxPrompt.Enabled = false;
-                    labelPrompt.Enabled = false;
-                    buttonClose.Enabled = false;
-                    if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
-                    {
-                        if (SelectedBitmap == null)
-                        {
-                            SelectedBitmap = new Bitmap(
-                                (int)(SelectionRectangle.Width / zoom),
-                                (int)(SelectionRectangle.Height / zoom));
-                            using (Graphics g = Graphics.FromImage(SelectedBitmap))
-                            {
-                                g.Clear(Color.Transparent);
-                                Rectangle sourceRect = new Rectangle(
-                                    (int)(originalSelectionRectangleLocation.X),
-                                    (int)(originalSelectionRectangleLocation.Y),
-                                    (int)(originalSelectionRectangleSize.Width),
-                                    (int)(originalSelectionRectangleSize.Height));
-                                g.DrawImage(MainBitmap,
-                                    new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                                    sourceRect,
-                                    GraphicsUnit.Pixel);
-                            }
-                        }
-                        var imageTask = ImageGenerationCore.GenerateImage(systemInstruction, SelectedBitmap,
-                            SelectedBitmap.Width, SelectedBitmap.Height, cts.Token);
-                        var image = await imageTask; // Await the task to get the result
-                        if (image != null)
-                        {
-                            SelectedBitmap = new Bitmap(image); // Convert Image to Bitmap  
-                            MergeMainBitmapWithSelected();
-                            isModified = true; MarkLayerThumbnailDirty();
-                        }
-                        else
-                        {
-                            Undo();
-                            ClearRedoStack();
-                            Logger.Log("The generated image is null.", Logger.LogTypes.Error);
-                            MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                    }
-                    else
-                    {
-                        var imageTask = ImageGenerationCore.GenerateImage(systemInstruction, MainBitmap,
-                            MainBitmap.Width, MainBitmap.Height, cts.Token);
-                        var image = await imageTask; // Await the task to get the result
-                        if (image != null)
-                        {
-                            // Rebuild the layer composite; Invalidate() alone
-                            // repaints the old cached preview.
-                            ApplyGeneratedImageToCanvas(image);
-                        }
-                        else
-                        {
-                            Undo();
-                            ClearRedoStack();
-                            Logger.Log("The generated image is null.", Logger.LogTypes.Error);
-                            MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                    }
-                }
-                catch (NullReferenceException)
-                {
-                    Undo();
-                    ClearRedoStack();
-                    Logger.Log("The generated image is null.", Logger.LogTypes.Error);
-                    MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                catch (Exception ex)
-                {
-                    Undo();
-                    ClearRedoStack();
-                    Logger.Log("Error during AI image creation: " + ex.Message, Logger.LogTypes.Error);
-                    MessageForm.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                finally
-                {
-                    isImageCurrentlyCreating = false;
-                    pictureBoxCanvas.Invalidate();
-                    canvasPanel.Enabled = true;
-                    menuStrip1.Enabled = true;
-                    toolStripTools.Enabled = true;
-                    toolStripSeparator29.Visible = false;
-                    labelCreatingImage.Visible = false;
-                    if (!string.IsNullOrEmpty(textBoxPrompt.Text))
-                    {
-                        buttonCreate.Enabled = true;
-                    }
-                    textBoxPrompt.Enabled = true;
-                    labelPrompt.Enabled = true;
-                    buttonClose.Enabled = true;
-                    progressBarAIImageCreation.Visible = false;
-                    toolStripAICreateImage.Visible = false;
-                    textBoxPrompt.Clear();
-                }
+                SaveStateForUndo(includeAllLayers: true, description: $"Layer opacity: {nextOpacity}%");
+                if (opacityDragInProgress)
+                    opacityDragUndoSaved = true;
             }
-            else
-            {
-                Logger.Log("No internet connection available.", Logger.LogTypes.Error);
-                MessageForm.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+
+            layer.Opacity = nextOpacity;
+            labelOpacity.Text = nextOpacity.ToString() + "%";
+            LayerSettingsModified();
         }
     }
 
@@ -9234,6 +10118,17 @@ namespace Carpathia
         {
             RowIndex = rowIndex;
             Visible = visible;
+        }
+    }
+
+    internal sealed class LayerLockToggledEventArgs : EventArgs
+    {
+        public int RowIndex { get; }
+        public bool Locked { get; }
+        public LayerLockToggledEventArgs(int rowIndex, bool locked)
+        {
+            RowIndex = rowIndex;
+            Locked = locked;
         }
     }
 
@@ -9258,8 +10153,11 @@ namespace Carpathia
         private readonly LayerSelectedItemCollection selectedItemCollection;
         private readonly LayerColumnCollection layerColumns;
         private readonly HashSet<ListViewItem> hiddenItems = new();
+        private readonly HashSet<ListViewItem> lockedItems = new();
         private readonly Image showIcon;
         private readonly Image hideIcon;
+        private readonly Image lockIcon;
+        private readonly Image unlockIcon;
         private bool syncingSelection;
         private ImageList? smallImageList;
         private ImageList? largeImageList;
@@ -9271,12 +10169,17 @@ namespace Carpathia
 
         public event EventHandler? SelectedIndexChanged;
         public event EventHandler<LayerVisibilityToggledEventArgs>? LayerVisibilityToggled;
+        public event EventHandler<LayerLockToggledEventArgs>? LayerLockToggled;
         public event EventHandler<LayerItemRemovedEventArgs>? LayerItemRemoved;
 
         public LayerDataGridView()
         {
             showIcon = Resources.icons8_show_48;
             hideIcon = Resources.icons8_hide_48;
+            // Exact lock/unlock artwork supplied with this change. Embedded in source
+            // so users need only replace ImageEditor.cs (no Designer/resource edits).
+            lockIcon = Resources.icons8_lock_48;
+            unlockIcon = Resources.icons8_unlock_48;
 
             AllowUserToAddRows = false;
             AllowUserToDeleteRows = false;
@@ -9295,6 +10198,17 @@ namespace Carpathia
             var visibilityColumn = new DataGridViewImageColumn
             {
                 Name = "Visibility",
+                HeaderText = string.Empty,
+                Width = 32,
+                MinimumWidth = 32,
+                ImageLayout = DataGridViewImageCellLayout.Zoom,
+                SortMode = DataGridViewColumnSortMode.NotSortable,
+                Resizable = DataGridViewTriState.False
+            };
+
+            var lockColumn = new DataGridViewImageColumn
+            {
+                Name = "Lock",
                 HeaderText = string.Empty,
                 Width = 32,
                 MinimumWidth = 32,
@@ -9325,6 +10239,7 @@ namespace Carpathia
             };
 
             base.Columns.Add(visibilityColumn);
+            base.Columns.Add(lockColumn);
             base.Columns.Add(thumbnailColumn);
             base.Columns.Add(textColumn);
 
@@ -9456,6 +10371,18 @@ namespace Carpathia
             InvalidateRow(rowIndex);
         }
 
+        public void SetLayerLocked(int rowIndex, bool locked)
+        {
+            if (rowIndex < 0 || rowIndex >= compatibilityList.Items.Count)
+                return;
+            ListViewItem item = compatibilityList.Items[rowIndex];
+            if (locked) lockedItems.Add(item);
+            else lockedItems.Remove(item);
+            if (rowIndex < Rows.Count)
+                Rows[rowIndex].Cells[1].ToolTipText = locked ? "Unlock layer" : "Lock layer";
+            InvalidateRow(rowIndex);
+        }
+
         internal void AddCompatibilityItem(ListViewItem item, int? insertIndex = null)
         {
             if (insertIndex.HasValue)
@@ -9477,6 +10404,7 @@ namespace Carpathia
             ListViewItem item = compatibilityList.Items[index];
             LayerItemRemoved?.Invoke(this, new LayerItemRemovedEventArgs(item));
             hiddenItems.Remove(item);
+            lockedItems.Remove(item);
             compatibilityList.Items.RemoveAt(index);
 
             if (index < base.Rows.Count)
@@ -9489,6 +10417,7 @@ namespace Carpathia
                 LayerItemRemoved?.Invoke(this, new LayerItemRemovedEventArgs(item));
 
             hiddenItems.Clear();
+            lockedItems.Clear();
             compatibilityList.Items.Clear();
             base.Rows.Clear();
         }
@@ -9557,13 +10486,22 @@ namespace Carpathia
             // Photoshop behavior: clicking the eye toggles visibility without making
             // that row the active editing layer. Selection is handled only by the
             // thumbnail/name cells.
-            if (e.RowIndex >= 0 && e.ColumnIndex == 0 &&
+            if (e.RowIndex >= 0 &&
+                (e.ColumnIndex == 0 || e.ColumnIndex == 1) &&
                 e.RowIndex < compatibilityList.Items.Count && e.Button == MouseButtons.Left)
             {
                 ListViewItem item = compatibilityList.Items[e.RowIndex];
-                bool nextVisible = hiddenItems.Contains(item);
-                LayerVisibilityToggled?.Invoke(this, new LayerVisibilityToggledEventArgs(e.RowIndex, nextVisible));
-                return;
+                if (e.ColumnIndex == 0)
+                {
+                    bool nextVisible = hiddenItems.Contains(item);
+                    LayerVisibilityToggled?.Invoke(this, new LayerVisibilityToggledEventArgs(e.RowIndex, nextVisible));
+                }
+                else
+                {
+                    bool nextLocked = !lockedItems.Contains(item);
+                    LayerLockToggled?.Invoke(this, new LayerLockToggledEventArgs(e.RowIndex, nextLocked));
+                }
+                return; // Neither icon changes which layer is selected.
             }
 
             base.OnCellMouseDown(e);
@@ -9584,6 +10522,11 @@ namespace Carpathia
             }
             else if (e.ColumnIndex == 1)
             {
+                e.Value = lockedItems.Contains(item) ? lockIcon : unlockIcon;
+                e.FormattingApplied = true;
+            }
+            else if (e.ColumnIndex == 2)
+            {
                 if (smallImageList != null && !string.IsNullOrEmpty(item.ImageKey) &&
                     smallImageList.Images.ContainsKey(item.ImageKey))
                     e.Value = smallImageList.Images[item.ImageKey];
@@ -9592,7 +10535,7 @@ namespace Carpathia
 
                 e.FormattingApplied = true;
             }
-            else if (e.ColumnIndex == 2)
+            else if (e.ColumnIndex == 3)
             {
                 e.Value = item.Text;
                 e.FormattingApplied = true;
@@ -9603,8 +10546,9 @@ namespace Carpathia
         {
             if (disposing)
             {
-                showIcon.Dispose();
-                hideIcon.Dispose();
+                // showIcon and hideIcon are shared Resources bitmaps: do not dispose them.
+                lockIcon.Dispose();
+                unlockIcon.Dispose();
                 compatibilityList.Dispose();
             }
             base.Dispose(disposing);
