@@ -91,8 +91,6 @@ This approach is intended to make LibreCanvas more adaptable when providers chan
 
 **Storage:** 250 MB (minimum)
 
-**Required Hardware:** System speaker or any kind of sound device (minimum)
-
 ## ▶️ Running the Released Executable
 
 You can run LibreCanvas easily without compiling by using the pre-built executable available in the [Releases](https://github.com/GeniusPilot2016/LibreCanvas/releases) section.
