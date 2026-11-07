@@ -75,6 +75,7 @@
             listView1 = new LayerDataGridView();
             dataGridViewImageColumn1 = new DataGridViewImageColumn();
             dataGridViewImageColumn2 = new DataGridViewImageColumn();
+            dataGridViewImageColumn3 = new DataGridViewImageColumn();
             dataGridViewTextBoxColumn1 = new DataGridViewTextBoxColumn();
             panel1 = new Panel();
             labelOpacity = new Label();
@@ -94,6 +95,7 @@
             toolStripSeparator11 = new ToolStripSeparator();
             selectTool = new ToolStripButton();
             magicSelectTool = new ToolStripButton();
+            lassoTool = new ToolStripButton();
             toolStripSeparator10 = new ToolStripSeparator();
             brushTool = new ToolStripButton();
             penTool = new ToolStripButton();
@@ -310,7 +312,6 @@
             printImageDialog = new PrintDialog();
             printImage = new System.Drawing.Printing.PrintDocument();
             printPreviewDialog1 = new PrintPreviewDialog();
-            dataGridViewImageColumn3 = new DataGridViewImageColumn();
             dataGridViewImageColumn4 = new DataGridViewImageColumn();
             dataGridViewTextBoxColumn2 = new DataGridViewTextBoxColumn();
             toolStripContainer1.BottomToolStripPanel.SuspendLayout();
@@ -857,11 +858,21 @@
             // 
             dataGridViewImageColumn2.HeaderText = "";
             dataGridViewImageColumn2.ImageLayout = DataGridViewImageCellLayout.Zoom;
-            dataGridViewImageColumn2.MinimumWidth = 70;
+            dataGridViewImageColumn2.MinimumWidth = 32;
             dataGridViewImageColumn2.Name = "dataGridViewImageColumn2";
             dataGridViewImageColumn2.ReadOnly = true;
             dataGridViewImageColumn2.Resizable = DataGridViewTriState.False;
-            dataGridViewImageColumn2.Width = 70;
+            dataGridViewImageColumn2.Width = 32;
+            // 
+            // dataGridViewImageColumn3
+            // 
+            dataGridViewImageColumn3.HeaderText = "";
+            dataGridViewImageColumn3.ImageLayout = DataGridViewImageCellLayout.Zoom;
+            dataGridViewImageColumn3.MinimumWidth = 70;
+            dataGridViewImageColumn3.Name = "dataGridViewImageColumn3";
+            dataGridViewImageColumn3.ReadOnly = true;
+            dataGridViewImageColumn3.Resizable = DataGridViewTriState.False;
+            dataGridViewImageColumn3.Width = 70;
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -1025,7 +1036,7 @@
             toolStripTools.Dock = DockStyle.None;
             toolStripTools.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             toolStripTools.ImageScalingSize = new Size(20, 20);
-            toolStripTools.Items.AddRange(new ToolStripItem[] { mouseTool, toolStripSeparator11, selectTool, magicSelectTool, toolStripSeparator10, brushTool, penTool, eraserTool, bucketTool, sprayTool, addTextTool, drawShapeTool, toolStripSeparator6, colorDropTool, createWithAITool, zoomTool, toolStripSeparator9, foregroundColorButton, backgroundColorButton, toolStripSeparator7, pasteTool, copyTool, cutTool, toolStripButton9, toolStripSeparatorProfessional, cropTool, rotateTool, flipHTool, flipVTool, grayscaleTool, fitTool });
+            toolStripTools.Items.AddRange(new ToolStripItem[] { mouseTool, toolStripSeparator11, selectTool, magicSelectTool, lassoTool, toolStripSeparator10, brushTool, penTool, eraserTool, bucketTool, sprayTool, addTextTool, drawShapeTool, toolStripSeparator6, colorDropTool, createWithAITool, zoomTool, toolStripSeparator9, foregroundColorButton, backgroundColorButton, toolStripSeparator7, pasteTool, copyTool, cutTool, toolStripButton9, toolStripSeparatorProfessional, cropTool, rotateTool, flipHTool, flipVTool, grayscaleTool, fitTool });
             toolStripTools.Location = new Point(0, 0);
             toolStripTools.Name = "toolStripTools";
             toolStripTools.Size = new Size(39, 759);
@@ -1078,6 +1089,19 @@
             magicSelectTool.Text = "Magic Selection";
             magicSelectTool.CheckedChanged += magicSelectTool_CheckedChanged;
             magicSelectTool.Click += magicSelectTool_Click;
+            // 
+            // lassoTool
+            // 
+            lassoTool.CheckOnClick = true;
+            lassoTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            lassoTool.Image = Properties.Resources.icons8_scout_knot_48;
+            lassoTool.ImageTransparentColor = Color.Magenta;
+            lassoTool.Name = "lassoTool";
+            lassoTool.Size = new Size(37, 24);
+            lassoTool.Tag = "";
+            lassoTool.Text = "Lasso Tool";
+            lassoTool.CheckedChanged += lassoTool_CheckedChanged;
+            lassoTool.Click += lassoTool_Click;
             // 
             // toolStripSeparator10
             // 
@@ -1464,7 +1488,7 @@
             grayscaleTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
             grayscaleTool.Image = Properties.Resources.icons8_black_and_white_48__1_;
             grayscaleTool.Name = "grayscaleTool";
-            grayscaleTool.Size = new Size(37, 24);
+            grayscaleTool.Size = new Size(24, 24);
             grayscaleTool.Text = "B&W";
             grayscaleTool.ToolTipText = "B&W";
             grayscaleTool.Click += grayscaleTool_Click;
@@ -1474,7 +1498,7 @@
             fitTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
             fitTool.Image = Properties.Resources.icons8_fit_to_page_48;
             fitTool.Name = "fitTool";
-            fitTool.Size = new Size(37, 24);
+            fitTool.Size = new Size(24, 24);
             fitTool.Text = "Fit";
             fitTool.ToolTipText = "Fit canvas in workspace";
             fitTool.Click += fitTool_Click;
@@ -2893,16 +2917,6 @@
             printPreviewDialog1.Text = "Baskı önizleme";
             printPreviewDialog1.Visible = false;
             // 
-            // dataGridViewImageColumn3
-            // 
-            dataGridViewImageColumn3.HeaderText = "";
-            dataGridViewImageColumn3.ImageLayout = DataGridViewImageCellLayout.Zoom;
-            dataGridViewImageColumn3.MinimumWidth = 32;
-            dataGridViewImageColumn3.Name = "dataGridViewImageColumn3";
-            dataGridViewImageColumn3.ReadOnly = true;
-            dataGridViewImageColumn3.Resizable = DataGridViewTriState.False;
-            dataGridViewImageColumn3.Width = 32;
-            // 
             // dataGridViewImageColumn4
             // 
             dataGridViewImageColumn4.HeaderText = "";
@@ -3293,6 +3307,7 @@
         private ListView listViewHistory;
         private ColumnHeader columnHeader2;
         private ImageList imageListHistoryIcons;
+        private ToolStripButton lassoTool;
     }
 
 }

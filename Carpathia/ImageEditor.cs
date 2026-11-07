@@ -371,6 +371,7 @@ namespace Carpathia
             Cursor,
             Selection,
             MagicSelection,
+            Lasso,
             Brush,
             Pen,
             Eraser,
@@ -448,22 +449,6 @@ namespace Carpathia
             if (IsActiveLayerLocked) return;
             if (MainBitmap == null) return;
             SaveStateForUndo(description: "Rotate canvas"); MainBitmap.RotateFlip(transform); RefreshCanvasAfterTransform();
-        }
-
-        private void ApplyGrayscaleQuick()
-        {
-            if (IsActiveLayerLocked) return;
-            if (MainBitmap == null) return;
-            SaveStateForUndo(description: "Grayscale");
-            var output = new Bitmap(MainBitmap.Width, MainBitmap.Height, PixelFormat.Format32bppArgb);
-            using (var g = Graphics.FromImage(output)) using (var attrs = new ImageAttributes())
-            {
-                attrs.SetColorMatrix(new ColorMatrix(new float[][] {
-                    new float[] {.299f,.299f,.299f,0,0}, new float[] {.587f,.587f,.587f,0,0},
-                    new float[] {.114f,.114f,.114f,0,0}, new float[] {0,0,0,1,0}, new float[] {0,0,0,0,1}}));
-                g.DrawImage(MainBitmap, new Rectangle(0, 0, output.Width, output.Height), 0, 0, MainBitmap.Width, MainBitmap.Height, GraphicsUnit.Pixel, attrs);
-            }
-            MainBitmap.Dispose(); MainBitmap = output; RefreshCanvasAfterTransform();
         }
 
         private void FitCanvasToWorkspace()
@@ -2667,86 +2652,53 @@ namespace Carpathia
 
         private async void generativeEraserToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (CheckIfInternetConnectionAvailable.IsInternetAvailable())
-            {
-                try
-                {
-                    if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
-                    {
-
-                        isImageCurrentlyCreating = true;
-                        toolStripAICreateImage.Visible = false;
-                        if (SelectedBitmap == null)
-                        {
-                            SelectedBitmap = new Bitmap(
-                                (int)(SelectionRectangle.Width / zoom),
-                                (int)(SelectionRectangle.Height / zoom));
-                            using (Graphics g = Graphics.FromImage(SelectedBitmap))
-                            {
-                                g.Clear(Color.Transparent);
-                                Rectangle sourceRect = new Rectangle(
-                                    (int)(originalSelectionRectangleLocation.X),
-                                    (int)(originalSelectionRectangleLocation.Y),
-                                    (int)(originalSelectionRectangleSize.Width),
-                                    (int)(originalSelectionRectangleSize.Height));
-                                g.DrawImage(MainBitmap,
-                                    new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                                    sourceRect,
-                                    GraphicsUnit.Pixel);
-                            }
-                        }
-                        canvasPanel.Enabled = false;
-                        menuStrip1.Enabled = false;
-                        toolStripTools.Enabled = false;
-                        toolStripSeparator29.Visible = true;
-                        labelAIImageErasing.Visible = true;
-                        progressBarAIImageCreation.Visible = true;
-                        var image = await ImageGenerationCore.GenerateImage("Remove the object or person in context of the image.",
-                            SelectedBitmap, SelectedBitmap.Width, SelectedBitmap.Height, cts.Token);
-
-                        if (image != null)
-                        {
-
-                            ApplyGeneratedSelectionToCanvas(image, "AI generative erase");
-                            isModified = true; MarkLayerThumbnailDirty(); // Mark the image as modified
-                        }
-                        else
-                        {
-                            Logger.Log("The generated image is null.", Logger.LogTypes.Error);
-                            MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                    }
-                    else
-                    {
-                        SystemSounds.Beep.Play(); // Play a beep sound when the image is not selected
-                    }
-                }
-                catch (NullReferenceException)
-                {
-                    Logger.Log("The generated image is null.", Logger.LogTypes.Error);
-                    MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                catch (Exception ex)
-                {
-                    Logger.Log("An error occurred: " + ex.Message, Logger.LogTypes.Error);
-                    MessageForm.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                finally
-                {
-                    isImageCurrentlyCreating = false;
-                    pictureBoxCanvas.Invalidate();
-                    canvasPanel.Enabled = true;
-                    menuStrip1.Enabled = true;
-                    toolStripTools.Enabled = true;
-                    toolStripSeparator29.Visible = false;
-                    labelAIImageErasing.Visible = false;
-                    progressBarAIImageCreation.Visible = false;
-                }
-            }
-            else
+            if (!CheckIfInternetConnectionAvailable.IsInternetAvailable())
             {
                 Logger.Log("No internet connection available.", Logger.LogTypes.Error);
                 MessageForm.Show("Please check your internet connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (!HasAnySelection)
+            {
+                SystemSounds.Beep.Play(); // The eraser needs something selected.
+                return;
+            }
+
+            try
+            {
+                isImageCurrentlyCreating = true;
+                toolStripAICreateImage.Visible = false;
+                canvasPanel.Enabled = false;
+                menuStrip1.Enabled = false;
+                toolStripTools.Enabled = false;
+                toolStripSeparator29.Visible = true;
+                labelAIImageErasing.Visible = true;
+                progressBarAIImageCreation.Visible = true;
+
+                await TryRunAiOnSelectionAsync(
+                    "Remove the object or person in context of the image.", "AI generative erase");
+            }
+            catch (NullReferenceException)
+            {
+                Logger.Log("The generated image is null.", Logger.LogTypes.Error);
+                MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("An error occurred: " + ex.Message, Logger.LogTypes.Error);
+                MessageForm.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                isImageCurrentlyCreating = false;
+                pictureBoxCanvas.Invalidate();
+                canvasPanel.Enabled = true;
+                menuStrip1.Enabled = true;
+                toolStripTools.Enabled = true;
+                toolStripSeparator29.Visible = false;
+                labelAIImageErasing.Visible = false;
+                progressBarAIImageCreation.Visible = false;
             }
         }
 
@@ -2766,46 +2718,13 @@ namespace Carpathia
                     labelBackgroundRemoving.Visible = true;
                     progressBarAIImageCreation.Visible = true;
 
-                    if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
-                    {
-                        if (SelectedBitmap == null)
-                        {
-                            SelectedBitmap = new Bitmap(
-                                (int)(SelectionRectangle.Width / zoom),
-                                (int)(SelectionRectangle.Height / zoom));
-                            using (Graphics g = Graphics.FromImage(SelectedBitmap))
-                            {
-                                g.Clear(Color.Transparent);
-                                Rectangle sourceRect = new Rectangle(
-                                    (int)(originalSelectionRectangleLocation.X),
-                                    (int)(originalSelectionRectangleLocation.Y),
-                                    (int)(originalSelectionRectangleSize.Width),
-                                    (int)(originalSelectionRectangleSize.Height));
-                                g.DrawImage(MainBitmap,
-                                    new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                                    sourceRect,
-                                    GraphicsUnit.Pixel);
-                            }
-                        }
-                        var imageTask = ImageGenerationCore.GenerateImage("Isolate the main object or person precisely and remove the entire background. Return the result as a PNG with a true transparent alpha channel (RGBA). All background pixels must have alpha 0. Do not replace the background with white, black, gray, any solid color, blur, studio backdrop, gradient, or checkerboard pattern. Preserve the subject’s original colors, edges, fine details, hair, and semi-transparent areas.",
-                            SelectedBitmap, SelectedBitmap.Width, SelectedBitmap.Height, cts.Token);
-                        var image = await imageTask; // Await the task to get the result
-                        if (image != null)
-                        {
+                    const string selectionPrompt = "Isolate the main object or person precisely and remove the entire background. Return the result as a PNG with a true transparent alpha channel (RGBA). All background pixels must have alpha 0. Do not replace the background with white, black, gray, any solid color, blur, studio backdrop, gradient, or checkerboard pattern. Preserve the subject’s original colors, edges, fine details, hair, and semi-transparent areas.";
 
-                            ApplyGeneratedSelectionToCanvas(image, "AI remove background");
-                        }
-                        else
-                        {
-                            Logger.Log("The generated image is null.", Logger.LogTypes.Error);
-                            MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                    }
-                    else
+                    if (!await TryRunAiOnSelectionAsync(selectionPrompt, "AI remove background"))
                     {
-                        var imageTask = ImageGenerationCore.GenerateImage("Isolate the object or person and make the background transparent.",
+                        var image = await ImageGenerationCore.GenerateImage(
+                            "Isolate the object or person and make the background transparent.",
                             MainBitmap, MainBitmap.Width, MainBitmap.Height, cts.Token);
-                        var image = await imageTask; // Await the task to get the result
                         if (image != null)
                         {
                             image = RemoveGeneratedCheckerboard(image);
@@ -2817,7 +2736,6 @@ namespace Carpathia
                             MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
-
                 }
                 catch (NullReferenceException)
                 {
@@ -3042,31 +2960,47 @@ namespace Carpathia
 
         }
 
+        private bool closeConfirmed;
 
         private async void kaydetToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            save();
+            await SaveAsync();
         }
-        private void save()
+
+        private async void farklıKaydetToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (!isSaved)
-            {
-                saveFileAs();
-            }
-            else
-            {
-                saveFile(openedFilePath);
-            }
+            await SaveAsAsync();
         }
-        private async void saveFile(string targetFilePath)
+
+        // Save writes to the current file when there is one; otherwise it behaves like Save As.
+        private Task<bool> SaveAsync() =>
+            string.IsNullOrEmpty(openedFilePath) ? SaveAsAsync() : SaveFileAsync(openedFilePath);
+
+        private async Task<bool> SaveAsAsync()
+        {
+            saveFileDialog1.Filter = "PNG Files|*.png|JPEG Files|*.jpg|Bitmap Files|*.bmp";
+            if (saveFileDialog1.ShowDialog() != DialogResult.OK)
+                return false;
+
+            bool saved = await SaveFileAsync(saveFileDialog1.FileName);
+            if (saved)
+                farklıKaydetToolStripMenuItem.Enabled = true;
+            return saved;
+        }
+
+        private async Task<bool> SaveFileAsync(string targetFilePath)
         {
             CommitActiveTextEditor();
+            CommitFloatingImagesToActiveLayer();   // a floating image would otherwise be missing from the file
             SyncActiveLayerFromCanvas();
             RefreshActiveLayerThumbnail(force: true);
             fileSaved = false;
-            string tempFilePath = Path.Combine(Path.GetDirectoryName(targetFilePath), Path.GetRandomFileName());
-            string backupFilePath = Path.Combine(Path.GetDirectoryName(targetFilePath), Path.GetRandomFileName());
 
+            string extension = Path.GetExtension(targetFilePath);
+            string tempFilePath = Path.Combine(Path.GetDirectoryName(targetFilePath),
+                "~" + Guid.NewGuid().ToString("N") + extension);
+
+            bool previousModified = isModified, previousSaved = isSaved;
             labelSaving.Visible = true;
             progressBarSaving.Visible = true;
             toolStripSeparator13.Visible = true;
@@ -3075,58 +3009,136 @@ namespace Carpathia
             try
             {
                 ImageFormat format = ImageFormat.Png;
-                string ext = Path.GetExtension(targetFilePath).ToLower();
-                if (ext == ".jpg" || ext == ".jpeg")
-                    format = ImageFormat.Jpeg;
-                else if (ext == ".bmp")
-                    format = ImageFormat.Bmp;
+                string ext = extension.ToLowerInvariant();
+                if (ext == ".jpg" || ext == ".jpeg") format = ImageFormat.Jpeg;
+                else if (ext == ".bmp") format = ImageFormat.Bmp;
 
-                await Task.Run(() =>
+                // Flatten on the UI thread so edits can't race with the background write.
+                using (Bitmap flattened = CreateCompositeBitmap())
                 {
-                    try
-                    {
-                        using (Bitmap flattened = CreateCompositeBitmap())
-                        {
-                            flattened.Save(targetFilePath, format);
-                        }
-                        SaveMetaDataToImage(targetFilePath);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Log($"Save operation error: {ex.Message}", Logger.LogTypes.Error);
-                        throw;
-                    }
-                });
-
-                if (File.Exists(tempFilePath))
-                {
-                    File.Replace(tempFilePath, targetFilePath, backupFilePath, true);
+                    // Edits made while the file is being written set these flags again.
+                    isModified = false;
                     isSaved = true;
-                    fileSaved = true;
-                    Logger.Log($"File saved successfully: {targetFilePath}", Logger.LogTypes.Info);
+
+                    await Task.Run(() =>
+                    {
+                        flattened.Save(tempFilePath, format);
+                        SaveMetaDataToImage(tempFilePath);
+                    });
                 }
+
+                if (File.Exists(targetFilePath))
+                {
+                    try { File.Replace(tempFilePath, targetFilePath, null, true); }
+                    catch (IOException) { File.Copy(tempFilePath, targetFilePath, true); }
+                }
+                else
+                {
+                    File.Move(tempFilePath, targetFilePath);
+                }
+
+                openedFilePath = targetFilePath;
+                labelFileName.Text = targetFilePath;
+                fileSaved = true;
+                Logger.Log($"File saved successfully: {targetFilePath}", Logger.LogTypes.Info);
+                return true;
             }
             catch (Exception ex)
             {
+                isModified = previousModified || isModified;
+                isSaved = previousSaved && !isModified;
                 fileSaved = false;
                 Logger.Log($"An error occurred while saving the file: {ex.Message}", Logger.LogTypes.Error);
                 MessageForm.Show($"An error occurred while saving the file: {ex.Message}",
-                                "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
             }
             finally
             {
                 labelSaving.Visible = false;
                 progressBarSaving.Visible = false;
                 toolStripSeparator13.Visible = false;
+                try { if (File.Exists(tempFilePath)) File.Delete(tempFilePath); } catch { }
+            }
+        }
 
-                try
-                {
-                    if (File.Exists(tempFilePath))
-                        File.Delete(tempFilePath);
-                    if (File.Exists(backupFilePath))
-                        File.Delete(backupFilePath);
-                }
-                catch { }
+        // Runs `action` once the user has chosen to save (and the save succeeded) or to discard.
+        private async void AskForSavingOrCancel(Action action)
+        {
+            if (!isModified)
+            {
+                action();
+                return;
+            }
+
+            DialogResult result = MessageForm.Show("Do you want to save changes to your image?",
+                "Unsaved Changes", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+            switch (result)
+            {
+                case DialogResult.Yes:
+                    if (await SaveAsync())
+                        action();
+                    break;
+                case DialogResult.No:
+                    action();
+                    break;
+            }
+        }
+
+        private async void AskForSavingWithRetry(Action action)
+        {
+            if (!isModified)
+            {
+                action();
+                return;
+            }
+
+            DialogResult result = MessageForm.Show("Do you want to save changes to your image?",
+                "Unsaved Changes", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (result == DialogResult.No)
+            {
+                action();
+                return;
+            }
+
+            if (await SaveAsync())
+            {
+                action();
+                return;
+            }
+
+            // The save failed or was cancelled: let the user choose again (this time with Cancel).
+            AskForSavingOrCancel(action);
+        }
+
+        private void ImageEditor_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            CommitActiveTextEditor();
+            if (!isModified || closeConfirmed)
+                return;
+
+            DialogResult result = MessageForm.Show("Do you want to save changes to your image?",
+                "Unsaved Changes", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+            switch (result)
+            {
+                case DialogResult.Yes:
+                    e.Cancel = true;              // the save is asynchronous; close again once it succeeds
+                    _ = SaveAndCloseAsync();
+                    break;
+                case DialogResult.No:
+                    break;
+                default:
+                    e.Cancel = true;
+                    break;
+            }
+        }
+
+        private async Task SaveAndCloseAsync()
+        {
+            if (await SaveAsync())
+            {
+                closeConfirmed = true;
+                Close();
             }
         }
 
@@ -3147,24 +3159,7 @@ namespace Carpathia
             }
         }
 
-        private void saveFileAs()
-        {
-            try
-            {
-                saveFileDialog1.Filter = "PNG Files|*.png|JPEG Files|*.jpg|Bitmap Files|*.bmp";
-                DialogResult dialogResult = saveFileDialog1.ShowDialog();
-                if (dialogResult == DialogResult.OK)
-                {
-                    saveFile(saveFileDialog1.FileName);
-                    farklıKaydetToolStripMenuItem.Enabled = true;
-                }
-            }
-            catch
-            {
-                fileSaved = false; // Ensure the flag is false if an exception occurs
-            }
-        }
-
+        
         private void addTextTool_CheckedChanged(object sender, EventArgs e)
         {
             if (addTextTool.Checked)
@@ -3828,7 +3823,12 @@ namespace Carpathia
                 foreach (MovingImageControl floating in pictureBoxCanvas.Controls.OfType<MovingImageControl>())
                     if (floating.EndCanvasDrag())
                         return;
-
+            if (lassoActive)
+            {
+                FinishLasso();
+                isdrawing = false;
+                return;
+            }
             if (!isImageCurrentlyCreating)
             {
                 if (isdrawing)
@@ -4300,7 +4300,9 @@ namespace Carpathia
                                 pictureBoxCanvas.Invalidate();
                                 break;
                             }
-
+                        case Tools.Lasso:
+                            ExtendLasso(e);
+                            break;
                         default:
                             drawIntoCanvas(e);
                             break;
@@ -4389,23 +4391,7 @@ namespace Carpathia
             {
                 if (SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
                 {
-                    SelectedBitmap = new Bitmap(
-                        (int)(SelectionRectangle.Width / zoom),
-                        (int)(SelectionRectangle.Height / zoom));
-
-                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
-                    {
-                        g.Clear(Color.Transparent);
-                        Rectangle sourceRect = new Rectangle(
-                            originalSelectionRectangleLocation.X,
-                            originalSelectionRectangleLocation.Y,
-                            originalSelectionRectangleSize.Width,
-                            originalSelectionRectangleSize.Height);
-                        g.DrawImage(MainBitmap,
-                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                            sourceRect,
-                            GraphicsUnit.Pixel);
-                    }
+                    SelectedBitmap = CreateSelectionWorkingBitmap();
                 }
             }
             if (isSelected && SelectedBitmap != null)
@@ -4772,7 +4758,7 @@ namespace Carpathia
                         new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
                         GraphicsUnit.Pixel);
                 }
-
+                DrawLassoInProgress(e.Graphics);
                 // Draw the actual Magic Wand contour instead of its rectangular bounds.
                 if (magicSelectionMask != null)
                 {
@@ -5140,7 +5126,7 @@ namespace Carpathia
 
         private bool IsNonPaintingTool() => selectedTool == Tools.Cursor ||
             selectedTool == Tools.Selection || selectedTool == Tools.MagicSelection ||
-            selectedTool == Tools.ColorDrop;
+            selectedTool == Tools.ColorDrop || selectedTool == Tools.Lasso;
 
         private void pictureBoxCanvas_MouseDown(object sender, MouseEventArgs e)
         {
@@ -5290,7 +5276,9 @@ namespace Carpathia
                         CreateMagicSelection(magicPoint, tolerance2);
                         isdrawing = false; // Prevent MouseUp from treating the selection as a paint stroke.
                         break;
-
+                    case Tools.Lasso:
+                        BeginLasso(e);
+                        break;
                     default:
                         if (selectedTool == Tools.Brush || selectedTool == Tools.Pen || selectedTool == Tools.Eraser ||
                             selectedTool == Tools.Spray || selectedTool == Tools.Text)
@@ -5362,9 +5350,7 @@ namespace Carpathia
                 SystemSounds.Beep.Play();
                 return;
             }
-            toolStripArtisticFilters.Visible = false;
-            toolStripPixelate.Visible = false;
-            toolStripGaussianBlur.Visible = false;
+            CancelFilters();
         }
 
         private void DrawMagicSelectionOutline(Graphics graphics)
@@ -5815,73 +5801,7 @@ namespace Carpathia
         {
             AskForSavingOrCancel(new Action(() => createNewFile()));
         }
-        private void AskForSavingOrCancel(Action action)
-        {
-            if (isModified)
-            {
-                DialogResult result = MessageForm.Show("Do you want to save changes to your image?", "Unsaved Changes", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
-                switch (result)
-                {
-                    case DialogResult.Yes:
-                        save();
-                        if (isSaved)
-                        {
-                            action();
-                        }
-                        break;
-                    case DialogResult.No:
-                        action();
-                        break;
-                    default:
-                        return;
-                }
-            }
-            else
-            {
-                action();
-            }
-        }
-        int retryCount = 0;
-        private void AskForSavingWithRetry(Action action)
-        {
-            if (isModified)
-            {
-                DialogResult result = MessageForm.Show("Do you want to save changes to your image?", "Unsaved Changes", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                switch (result)
-                {
-                    case DialogResult.Yes:
-                        save();
-                        if (isSaved)
-                        {
-                            retryCount = 0; // Reset the retry count
-                            action();
-                        }
-                        else
-                        {
-                            if (retryCount == 3)
-                            {
-                                Logger.Log("The action will be executed without saving after 3 attempts to save.", Logger.LogTypes.Warning);
-                                retryCount = 0; // Reset the retry count
-                                action();
-                            }
-                            else
-                            {
-                                retryCount++;
-                                AskForSavingOrCancel(action);
-                            }
-                        }
-                        break;
-                    case DialogResult.No:
-                        action();
-                        break;
-                }
-            }
-            else
-            {
-                action();
-            }
-        }
-
+       
         private void createWithAIToolStripMenuItem_Click(object sender, EventArgs e)
         {
             CreateWithAIForm createWithAIForm = new CreateWithAIForm();
@@ -6864,14 +6784,8 @@ namespace Carpathia
                 magicSelectionMaskHeight = 0;
                 magicSelectionBounds = Rectangle.Empty;
                 magicSelectionOutlineSegments.Clear();
-                if (artisticFilters == ArtisticFilters.None || blurEffect == BlurEffect.None)
-                {
-                    RenderCompositeToCanvas();
-                }
-                else
-                {
-                    ShowActiveLayerPreview(previewBitmap);
-                }
+                CancelFilters();   // a filter preview belongs to the selection that was just removed
+                RenderCompositeToCanvas();
                 pictureBoxCanvas.Invalidate();
             }
         }
@@ -6963,616 +6877,281 @@ namespace Carpathia
         private void mirrorToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (IsActiveLayerLocked) return;
-            SetAsUnselected();
-            SaveStateForUndo(description: "Mirror");
-            if (artisticFilters != ArtisticFilters.None)
-            {
-                artisticFilters = ArtisticFilters.None;
-            }
-            if (blurEffect != BlurEffect.None)
-            {
-                blurEffect = BlurEffect.None;
-            }
-            basicFilters = BasicFilters.Mirror;
-            MainBitmap = Filters.BasicFilters.MirrorEffect(MainBitmap);
-
-            // Update zoomed canvas bounds and scrollbars properly
-            SetZoomedCanvasBounds();
-
-            SyncActiveLayerFromCanvas();
-            MarkCompositeDirty();
-            RenderCompositeToCanvas(force: true);
-
-            pictureBoxCanvas.Invalidate();
-            pictureBoxCanvas.Update();
-
-            isModified = true;
-            MarkLayerThumbnailDirty();
-            RefreshActiveLayerThumbnail(force: true);
-            labelSize.Text = $"{MainBitmap.Width} x {MainBitmap.Height} px";
-
-            // Center the canvas and scrollbars
-            CenterCanvasPanel();
-            CenterScrollbars();
-        }
-        private void flashToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (IsActiveLayerLocked) return;
-            SaveStateForUndo(description: "Flash filter");
-            if (artisticFilters != ArtisticFilters.None)
-            {
-                artisticFilters = ArtisticFilters.None;
-            }
-            if (blurEffect != BlurEffect.None)
-            {
-                blurEffect = BlurEffect.None;
-            }
-            if (isSelected)
-            {
-                if (SelectedBitmap == null)
-                {
-                    SelectedBitmap = new Bitmap(
-                        (int)(SelectionRectangle.Width / zoom),
-                        (int)(SelectionRectangle.Height / zoom));
-                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
-                    {
-                        g.Clear(Color.Transparent);
-                        Rectangle sourceRect = new Rectangle(
-                            (int)(originalSelectionRectangleLocation.X),
-                            (int)(originalSelectionRectangleLocation.Y),
-                            (int)(originalSelectionRectangleSize.Width),
-                            (int)(originalSelectionRectangleSize.Height));
-                        g.DrawImage(MainBitmap,
-                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                            sourceRect,
-                            GraphicsUnit.Pixel);
-                    }
-                }
-                SelectedBitmap = Filters.BasicFilters.Flash(SelectedBitmap);
-            }
-            else
-            {
-                MainBitmap = Filters.BasicFilters.Flash(MainBitmap);
-            }
-
-            SyncActiveLayerFromCanvas();
-            MarkCompositeDirty();
-            RenderCompositeToCanvas(force: true);
-
-            pictureBoxCanvas.Invalidate();
-            pictureBoxCanvas.Update();
-
-            isModified = true;
-            MarkLayerThumbnailDirty();
-            RefreshActiveLayerThumbnail(force: true);
+            SetAsUnselected();   // a mirror always flips the whole layer
+            ApplyFilterToSelectionOrLayer(b => Filters.BasicFilters.MirrorEffect(b), "Mirror");
         }
 
+        private void flashToolStripMenuItem_Click(object sender, EventArgs e) =>
+            ApplyFilterToSelectionOrLayer(b => Filters.BasicFilters.Flash(b), "Flash filter");
 
-        private void frozenToolStripMenuItem_Click(object sender, EventArgs e)
+        private void frozenToolStripMenuItem_Click(object sender, EventArgs e) =>
+            ApplyFilterToSelectionOrLayer(b => Filters.BasicFilters.Frozen(b), "Frozen filter");
+
+        private void winterToolStripMenuItem_Click(object sender, EventArgs e) =>
+            ApplyFilterToSelectionOrLayer(b => Filters.BasicFilters.Winter(b), "Winter filter");
+
+        private void blackAndWhiteToolStripMenuItem_Click(object sender, EventArgs e) =>
+            ApplyFilterToSelectionOrLayer(b => Filters.BasicFilters.BlackAndWhite(b), "Black and white");
+
+        private void oldPictureToolStripMenuItem_Click(object sender, EventArgs e) =>
+            ApplyFilterToSelectionOrLayer(b => Filters.BasicFilters.OldImage(b), "Old photo filter");
+
+        private void cherryToolStripMenuItem_Click(object sender, EventArgs e) =>
+            ApplyFilterToSelectionOrLayer(b => Filters.BasicFilters.CherryFilter(b), "Cherry filter");
+
+        private void lightAddToolStripMenuItem_Click(object sender, EventArgs e) =>
+            ApplyFilterToSelectionOrLayer(b => Filters.BasicFilters.LightAdd(b), "Light Add filter");
+
+        private void purpleToolStripMenuItem_Click(object sender, EventArgs e) =>
+            ApplyFilterToSelectionOrLayer(b => Filters.BasicFilters.PurpleEffect(b), "Purple filter");
+
+        private void fogToolStripMenuItem_Click(object sender, EventArgs e) =>
+            ApplyFilterToSelectionOrLayer(b => Filters.BasicFilters.FogEffect(b), "Fog filter");
+
+        private void chloeToolStripMenuItem_Click(object sender, EventArgs e) =>
+            ApplyFilterToSelectionOrLayer(b => Filters.AmbientFilters.Chloe(b), "Chloe filter");
+
+        private void ApplyGrayscaleQuick()
         {
-
-
-            if (IsActiveLayerLocked) return;
-            SaveStateForUndo(description: "Frozen filter");
-            if (artisticFilters != ArtisticFilters.None)
+            ApplyFilterToSelectionOrLayer(source =>
             {
-                artisticFilters = ArtisticFilters.None;
-            }
-            if (blurEffect != BlurEffect.None)
-            {
-                blurEffect = BlurEffect.None;
-            }
-            if (isSelected)
-            {
-                if (SelectedBitmap == null)
+                var output = new Bitmap(source.Width, source.Height, PixelFormat.Format32bppArgb);
+                using (var g = Graphics.FromImage(output))
+                using (var attrs = new ImageAttributes())
                 {
-                    SelectedBitmap = new Bitmap(
-                        (int)(SelectionRectangle.Width / zoom),
-                        (int)(SelectionRectangle.Height / zoom));
-                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
-                    {
-                        g.Clear(Color.Transparent);
-                        Rectangle sourceRect = new Rectangle(
-                            (int)(originalSelectionRectangleLocation.X),
-                            (int)(originalSelectionRectangleLocation.Y),
-                            (int)(originalSelectionRectangleSize.Width),
-                            (int)(originalSelectionRectangleSize.Height));
-                        g.DrawImage(MainBitmap,
-                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                            sourceRect,
-                            GraphicsUnit.Pixel);
-                    }
+                    attrs.SetColorMatrix(new ColorMatrix(new float[][] {
+                new float[] {.299f,.299f,.299f,0,0}, new float[] {.587f,.587f,.587f,0,0},
+                new float[] {.114f,.114f,.114f,0,0}, new float[] {0,0,0,1,0}, new float[] {0,0,0,0,1}}));
+                    g.DrawImage(source, new Rectangle(0, 0, output.Width, output.Height),
+                        0, 0, source.Width, source.Height, GraphicsUnit.Pixel, attrs);
                 }
-                SelectedBitmap = Filters.BasicFilters.Frozen(SelectedBitmap);
-            }
-            else
-            {
-                MainBitmap = Filters.BasicFilters.Frozen(MainBitmap);
-            }
-            SyncActiveLayerFromCanvas();
-            MarkCompositeDirty();
-            RenderCompositeToCanvas(force: true);
-
-            pictureBoxCanvas.Invalidate();
-            pictureBoxCanvas.Update();
-
-            isModified = true;
-            MarkLayerThumbnailDirty();
-            RefreshActiveLayerThumbnail(force: true);
+                return output;
+            }, "Grayscale");
         }
-
-        private void winterToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ApplyFilterToSelectionOrLayer(Func<Bitmap, Bitmap> filter, string description)
         {
-            if (IsActiveLayerLocked) return;
-            SaveStateForUndo(description: "Winter filter");
-            if (artisticFilters != ArtisticFilters.None)
+            if (MainBitmap == null || IsActiveLayerLocked) return;
+
+            CancelFilters();                   // drop any open blur/pixelate/artistic preview
+            FlushPendingSelectionBitmap();
+
+            try
             {
-                artisticFilters = ArtisticFilters.None;
-            }
-            if (blurEffect != BlurEffect.None)
-            {
-                blurEffect = BlurEffect.None;
-            }
-            if (isSelected)
-            {
-                if (SelectedBitmap == null)
+                if (HasAnySelection)
                 {
-                    SelectedBitmap = new Bitmap(
-                        (int)(SelectionRectangle.Width / zoom),
-                        (int)(SelectionRectangle.Height / zoom));
-                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                    Rectangle bounds = GetSelectionImageBounds();
+                    if (bounds.Width < 1 || bounds.Height < 1) { SystemSounds.Beep.Play(); return; }
+
+                    Bitmap input = MainBitmap.Clone(bounds, PixelFormat.Format32bppArgb);
+                    Bitmap result = null;
+                    try
                     {
-                        g.Clear(Color.Transparent);
-                        Rectangle sourceRect = new Rectangle(
-                            (int)(originalSelectionRectangleLocation.X),
-                            (int)(originalSelectionRectangleLocation.Y),
-                            (int)(originalSelectionRectangleSize.Width),
-                            (int)(originalSelectionRectangleSize.Height));
-                        g.DrawImage(MainBitmap,
-                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                            sourceRect,
-                            GraphicsUnit.Pixel);
+                        result = filter(input);
+                        ApplyGeneratedSelectionToCanvas(result, description);   // writes through the mask/rectangle
                     }
-                }
-                SelectedBitmap = Filters.BasicFilters.Winter(SelectedBitmap);
-            }
-            else
-            {
-                MainBitmap = Filters.BasicFilters.Winter(MainBitmap);
-            }
-            SyncActiveLayerFromCanvas();
-            MarkCompositeDirty();
-            RenderCompositeToCanvas(force: true);
-
-            pictureBoxCanvas.Invalidate();
-            pictureBoxCanvas.Update();
-
-            isModified = true;
-            MarkLayerThumbnailDirty();
-            RefreshActiveLayerThumbnail(force: true);
-        }
-
-        private void blackAndWhiteToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (IsActiveLayerLocked) return;
-            SaveStateForUndo(description: "Black and white");
-            if (artisticFilters != ArtisticFilters.None)
-            {
-                artisticFilters = ArtisticFilters.None;
-            }
-            if (blurEffect != BlurEffect.None)
-            {
-                blurEffect = BlurEffect.None;
-            }
-            if (isSelected)
-            {
-                if (SelectedBitmap == null)
-                {
-                    SelectedBitmap = new Bitmap(
-                        (int)(SelectionRectangle.Width / zoom),
-                        (int)(SelectionRectangle.Height / zoom));
-                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
+                    finally
                     {
-                        g.Clear(Color.Transparent);
-                        Rectangle sourceRect = new Rectangle(
-                            (int)(originalSelectionRectangleLocation.X),
-                            (int)(originalSelectionRectangleLocation.Y),
-                            (int)(originalSelectionRectangleSize.Width),
-                            (int)(originalSelectionRectangleSize.Height));
-                        g.DrawImage(MainBitmap,
-                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                            sourceRect,
-                            GraphicsUnit.Pixel);
+                        if (result != null && !ReferenceEquals(result, input)) result.Dispose();
+                        input.Dispose();
                     }
-                }
-                SelectedBitmap = Filters.BasicFilters.BlackAndWhite(SelectedBitmap);
-            }
-            else
-            {
-                MainBitmap = Filters.BasicFilters.BlackAndWhite(MainBitmap);
-            }
-            SyncActiveLayerFromCanvas();
-            MarkCompositeDirty();
-            RenderCompositeToCanvas(force: true);
-
-            pictureBoxCanvas.Invalidate();
-            pictureBoxCanvas.Update();
-
-            isModified = true;
-            MarkLayerThumbnailDirty();
-            RefreshActiveLayerThumbnail(force: true);
-        }
-
-        private void oldPictureToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (IsActiveLayerLocked) return;
-            SaveStateForUndo(description: "Old photo filter");
-            if (artisticFilters != ArtisticFilters.None)
-            {
-                artisticFilters = ArtisticFilters.None;
-            }
-            if (blurEffect != BlurEffect.None)
-            {
-                blurEffect = BlurEffect.None;
-            }
-            if (isSelected)
-            {
-                if (SelectedBitmap == null)
-                {
-                    SelectedBitmap = new Bitmap(
-                        (int)(SelectionRectangle.Width / zoom),
-                        (int)(SelectionRectangle.Height / zoom));
-                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
-                    {
-                        g.Clear(Color.Transparent);
-                        Rectangle sourceRect = new Rectangle(
-                            (int)(originalSelectionRectangleLocation.X),
-                            (int)(originalSelectionRectangleLocation.Y),
-                            (int)(originalSelectionRectangleSize.Width),
-                            (int)(originalSelectionRectangleSize.Height));
-                        g.DrawImage(MainBitmap,
-                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                            sourceRect,
-                            GraphicsUnit.Pixel);
-                    }
-                }
-                SelectedBitmap = Filters.BasicFilters.OldImage(SelectedBitmap);
-            }
-            else
-            {
-                MainBitmap = Filters.BasicFilters.OldImage(MainBitmap);
-            }
-            SyncActiveLayerFromCanvas();
-            MarkCompositeDirty();
-            RenderCompositeToCanvas(force: true);
-
-            pictureBoxCanvas.Invalidate();
-            pictureBoxCanvas.Update();
-
-            isModified = true;
-            MarkLayerThumbnailDirty();
-            RefreshActiveLayerThumbnail(force: true);
-        }
-
-        private void cherryToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (IsActiveLayerLocked) return;
-            SaveStateForUndo(description: "Cherry filter");
-            if (artisticFilters != ArtisticFilters.None)
-            {
-                artisticFilters = ArtisticFilters.None;
-            }
-            if (blurEffect != BlurEffect.None)
-            {
-                blurEffect = BlurEffect.None;
-            }
-            if (isSelected)
-            {
-                if (SelectedBitmap == null)
-                {
-                    SelectedBitmap = new Bitmap(
-                        (int)(SelectionRectangle.Width / zoom),
-                        (int)(SelectionRectangle.Height / zoom));
-                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
-                    {
-                        g.Clear(Color.Transparent);
-                        Rectangle sourceRect = new Rectangle(
-                            (int)(originalSelectionRectangleLocation.X),
-                            (int)(originalSelectionRectangleLocation.Y),
-                            (int)(originalSelectionRectangleSize.Width),
-                            (int)(originalSelectionRectangleSize.Height));
-                        g.DrawImage(MainBitmap,
-                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                            sourceRect,
-                            GraphicsUnit.Pixel);
-                    }
-                }
-                SelectedBitmap = Filters.BasicFilters.CherryFilter(SelectedBitmap);
-            }
-            else
-            {
-                MainBitmap = Filters.BasicFilters.CherryFilter(MainBitmap);
-            }
-            SyncActiveLayerFromCanvas();
-            MarkCompositeDirty();
-            RenderCompositeToCanvas(force: true);
-
-            pictureBoxCanvas.Invalidate();
-            pictureBoxCanvas.Update();
-
-            isModified = true;
-            MarkLayerThumbnailDirty();
-            RefreshActiveLayerThumbnail(force: true);
-        }
-
-        private void lightAddToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (IsActiveLayerLocked) return;
-            SaveStateForUndo(description: "Light Add filter");
-            if (artisticFilters != ArtisticFilters.None)
-            {
-                artisticFilters = ArtisticFilters.None;
-            }
-            if (blurEffect != BlurEffect.None)
-            {
-                blurEffect = BlurEffect.None;
-            }
-            if (isSelected)
-            {
-                if (SelectedBitmap == null)
-                {
-                    SelectedBitmap = new Bitmap(
-                        (int)(SelectionRectangle.Width / zoom),
-                        (int)(SelectionRectangle.Height / zoom));
-                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
-                    {
-                        g.Clear(Color.Transparent);
-                        Rectangle sourceRect = new Rectangle(
-                            (int)(originalSelectionRectangleLocation.X),
-                            (int)(originalSelectionRectangleLocation.Y),
-                            (int)(originalSelectionRectangleSize.Width),
-                            (int)(originalSelectionRectangleSize.Height));
-                        g.DrawImage(MainBitmap,
-                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                            sourceRect,
-                            GraphicsUnit.Pixel);
-                    }
-                }
-                SelectedBitmap = Filters.BasicFilters.LightAdd(SelectedBitmap);
-            }
-            else
-            {
-                MainBitmap = Filters.BasicFilters.LightAdd(MainBitmap);
-            }
-            SyncActiveLayerFromCanvas();
-            MarkCompositeDirty();
-            RenderCompositeToCanvas(force: true);
-
-            pictureBoxCanvas.Invalidate();
-            pictureBoxCanvas.Update();
-
-            isModified = true;
-            MarkLayerThumbnailDirty();
-            RefreshActiveLayerThumbnail(force: true);
-        }
-
-        private void purpleToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (IsActiveLayerLocked) return;
-            SaveStateForUndo(description: "Purple filter");
-            if (artisticFilters != ArtisticFilters.None)
-            {
-                artisticFilters = ArtisticFilters.None;
-            }
-            if (blurEffect != BlurEffect.None)
-            {
-                blurEffect = BlurEffect.None;
-            }
-            if (isSelected)
-            {
-                if (SelectedBitmap == null)
-                {
-                    SelectedBitmap = new Bitmap(
-                        (int)(SelectionRectangle.Width / zoom),
-                        (int)(SelectionRectangle.Height / zoom));
-                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
-                    {
-                        g.Clear(Color.Transparent);
-                        Rectangle sourceRect = new Rectangle(
-                            (int)(originalSelectionRectangleLocation.X),
-                            (int)(originalSelectionRectangleLocation.Y),
-                            (int)(originalSelectionRectangleSize.Width),
-                            (int)(originalSelectionRectangleSize.Height));
-                        g.DrawImage(MainBitmap,
-                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                            sourceRect,
-                            GraphicsUnit.Pixel);
-                    }
-                }
-                SelectedBitmap = Filters.BasicFilters.PurpleEffect(SelectedBitmap);
-            }
-            else
-            {
-                MainBitmap = Filters.BasicFilters.PurpleEffect(MainBitmap);
-            }
-            SyncActiveLayerFromCanvas();
-            MarkCompositeDirty();
-            RenderCompositeToCanvas(force: true);
-
-            pictureBoxCanvas.Invalidate();
-            pictureBoxCanvas.Update();
-
-            isModified = true;
-            MarkLayerThumbnailDirty();
-            RefreshActiveLayerThumbnail(force: true);
-        }
-
-        private void fogToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (IsActiveLayerLocked) return;
-            SaveStateForUndo(description: "Fog filter");
-            if (artisticFilters != ArtisticFilters.None)
-            {
-                artisticFilters = ArtisticFilters.None;
-            }
-            if (blurEffect != BlurEffect.None)
-            {
-                blurEffect = BlurEffect.None;
-            }
-            if (isSelected)
-            {
-                if (SelectedBitmap == null)
-                {
-                    SelectedBitmap = new Bitmap(
-                        (int)(SelectionRectangle.Width / zoom),
-                        (int)(SelectionRectangle.Height / zoom));
-                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
-                    {
-                        g.Clear(Color.Transparent);
-                        Rectangle sourceRect = new Rectangle(
-                            (int)(originalSelectionRectangleLocation.X),
-                            (int)(originalSelectionRectangleLocation.Y),
-                            (int)(originalSelectionRectangleSize.Width),
-                            (int)(originalSelectionRectangleSize.Height));
-                        g.DrawImage(MainBitmap,
-                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                            sourceRect,
-                            GraphicsUnit.Pixel);
-                    }
-                }
-                SelectedBitmap = Filters.BasicFilters.FogEffect(SelectedBitmap);
-            }
-            else
-            {
-                MainBitmap = Filters.BasicFilters.FogEffect(MainBitmap);
-            }
-            RenderCompositeToCanvas();
-            pictureBoxCanvas.Invalidate();
-            isModified = true; MarkLayerThumbnailDirty();
-        }
-        private void RefreshFiltersPreview()
-        {
-            previewBitmap = new Bitmap(MainBitmap);
-            if (isSelected)
-            {
-                // Create SelectedBitmap if it doesn't exist
-                if (SelectedBitmap == null)
-                {
-                    SelectedBitmap = new Bitmap(
-                        (int)(SelectionRectangle.Width / zoom),
-                        (int)(SelectionRectangle.Height / zoom));
-                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
-                    {
-                        g.Clear(Color.Transparent);
-                        Rectangle sourceRect = new Rectangle(
-                            (int)(originalSelectionRectangleLocation.X),
-                            (int)(originalSelectionRectangleLocation.Y),
-                            (int)(originalSelectionRectangleSize.Width),
-                            (int)(originalSelectionRectangleSize.Height));
-                        g.DrawImage(previewBitmap,
-                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                            sourceRect,
-                            GraphicsUnit.Pixel);
-                    }
+                    return;
                 }
 
-                // Create a temporary copy of SelectedBitmap to apply filter
-                Bitmap filteredBitmap;
+                // No selection: filter a copy so MainBitmap is untouched until the filter succeeds.
+                Bitmap source = new Bitmap(MainBitmap);
+                Bitmap filtered;
+                try { filtered = filter(source); }
+                catch { source.Dispose(); throw; }
+                if (!ReferenceEquals(filtered, source)) source.Dispose();
 
-                switch (artisticFilters)
-                {
-                    case ArtisticFilters.OilPainting:
-                        filteredBitmap = Filters.ArtisticFilters.OilPaintFilter(SelectedBitmap,
-                            FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity,
-                            FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize,
-                            (byte)FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold);
-                        break;
-                    case ArtisticFilters.Cartoon:
-                        filteredBitmap = Filters.ArtisticFilters.CartoonFilter(SelectedBitmap,
-                            FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity,
-                            FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize,
-                            (byte)FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold);
-                        break;
-                    default:
-                        filteredBitmap = new Bitmap(SelectedBitmap);
-                        switch (blurEffect)
-                        {
-                            case BlurEffect.Pixelate:
-                                filteredBitmap = Filters.BlurringFilters.Pixelate(filteredBitmap,
-                                    pixelationSize, pixelationOffsetX, pixelationOffsetY);
-                                break;
-                            case BlurEffect.Gaussian:
-                                filteredBitmap = Filters.BlurringFilters.GaussianBlur(filteredBitmap,
-                                    gaussianBlurSize);
-                                break;
-                        }
-                        break;
-                }
+                SaveStateForUndo(description: description);
+                Bitmap previous = MainBitmap;
+                MainBitmap = filtered;
+                previous.Dispose();
 
-                // Update SelectedBitmap with filtered result
-                SelectedBitmap.Dispose();
-                SelectedBitmap = filteredBitmap;
-
-                // Keep MainBitmap as the image but update the display to show selection
-                ShowActiveLayerPreview(previewBitmap);
-            }
-            else
-            {
-                // For the entire image
-                Bitmap filteredBitmap = null;
-
-                switch (artisticFilters)
-                {
-                    case ArtisticFilters.OilPainting:
-                        filteredBitmap = Filters.ArtisticFilters.OilPaintFilter(MainBitmap,
-                            FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity,
-                            FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize,
-                            (byte)FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold);
-                        break;
-                    case ArtisticFilters.Cartoon:
-                        filteredBitmap = Filters.ArtisticFilters.CartoonFilter(MainBitmap,
-                            FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity,
-                            FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize,
-                            (byte)FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold);
-                        break;
-                    default:
-                        switch (blurEffect)
-                        {
-                            case BlurEffect.Pixelate:
-                                filteredBitmap = Filters.BlurringFilters.Pixelate(MainBitmap,
-                                    pixelationSize, pixelationOffsetX, pixelationOffsetY);
-                                break;
-                            case BlurEffect.Gaussian:
-                                filteredBitmap = Filters.BlurringFilters.GaussianBlur(MainBitmap,
-                                    gaussianBlurSize);
-                                break;
-                            default:
-                                filteredBitmap = new Bitmap(MainBitmap);
-                                break;
-                        }
-                        break;
-                }
-
-                previewBitmap = filteredBitmap;
-                ShowActiveLayerPreview(previewBitmap);
+                SyncActiveLayerFromCanvas();
                 MarkCompositeDirty();
+                RenderCompositeToCanvas(force: true);
                 pictureBoxCanvas.Invalidate();
                 pictureBoxCanvas.Update();
+                isModified = true;
+                isSaved = false;
+                MarkLayerThumbnailDirty();
+                RefreshActiveLayerThumbnail(force: true);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("Filter error: " + ex.Message, Logger.LogTypes.Error);
+                MessageForm.Show("Unable to apply the filter: " + ex.Message, "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // A full-size copy of the layer with `filter` applied through the current selection
+        // (or to the whole layer when nothing is selected).
+        private Bitmap BuildFilteredLayer(Func<Bitmap, Bitmap> filter)
+        {
+            Bitmap layer = new Bitmap(MainBitmap);
+            try
+            {
+                if (!HasAnySelection)
+                {
+                    Bitmap filtered = filter(layer);
+                    if (!ReferenceEquals(filtered, layer)) layer.Dispose();
+                    return filtered;
+                }
+
+                Rectangle bounds = GetSelectionImageBounds();
+                if (bounds.Width < 1 || bounds.Height < 1) return layer;
+
+                Bitmap input = MainBitmap.Clone(bounds, PixelFormat.Format32bppArgb);
+                Bitmap result = null;
+                try
+                {
+                    result = filter(input);
+                    WriteImageThroughSelection(layer, result);
+                }
+                finally
+                {
+                    if (result != null && !ReferenceEquals(result, input)) result.Dispose();
+                    input.Dispose();
+                }
+                return layer;
+            }
+            catch
+            {
+                layer.Dispose();
+                throw;
+            }
+        }
+
+        private Func<Bitmap, Bitmap> GetActivePreviewFilter()
+        {
+            switch (artisticFilters)
+            {
+                case ArtisticFilters.OilPainting:
+                    return b => Filters.ArtisticFilters.OilPaintFilter(b,
+                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity,
+                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize,
+                        (byte)FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold);
+                case ArtisticFilters.Cartoon:
+                    return b => Filters.ArtisticFilters.CartoonFilter(b,
+                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity,
+                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize,
+                        (byte)FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold);
             }
 
+            switch (blurEffect)
+            {
+                case BlurEffect.Pixelate:
+                    return b => Filters.BlurringFilters.Pixelate(b,
+                        pixelationSize, pixelationOffsetX, pixelationOffsetY);
+                case BlurEffect.Gaussian:
+                    return b => Filters.BlurringFilters.GaussianBlur(b, gaussianBlurSize);
+            }
+            return null;
+        }
+
+        private void DisposePreviewBitmap()
+        {
+            Bitmap old = previewBitmap;
+            previewBitmap = null;
+            if (old != null && !ReferenceEquals(old, MainBitmap))
+                old.Dispose();
+        }
+
+        // Replaces the old RefreshFiltersPreview.
+        private void RefreshFiltersPreview()
+        {
+            if (MainBitmap == null) return;
+
+            Func<Bitmap, Bitmap> filter = GetActivePreviewFilter();
+            if (filter == null)
+            {
+                if (previewBitmap != null) CancelFilters();
+                return;
+            }
+
+            try
+            {
+                FlushPendingSelectionBitmap();
+                Bitmap next = BuildFilteredLayer(filter);
+                DisposePreviewBitmap();
+                previewBitmap = next;
+                ShowActiveLayerPreview(previewBitmap);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("Filter preview error: " + ex.Message, Logger.LogTypes.Error);
+                CancelFilters();
+                MessageForm.Show("Unable to preview the filter: " + ex.Message, "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // Replaces the old CancelFilters. Also resets the filter mode and hides the toolbars.
+        private void CancelFilters()
+        {
+            bool hadPreview = previewBitmap != null ||
+                artisticFilters != ArtisticFilters.None || blurEffect != BlurEffect.None;
+
+            artisticFilters = ArtisticFilters.None;
+            blurEffect = BlurEffect.None;
+            toolStripArtisticFilters.Visible = false;
+            toolStripPixelate.Visible = false;
+            toolStripGaussianBlur.Visible = false;
+            DisposePreviewBitmap();
+
+            if (!hadPreview || MainBitmap == null) return;
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
             pictureBoxCanvas.Invalidate();
             pictureBoxCanvas.Update();
         }
-        private void buttonArtisticFiltersOK_Click(object sender, EventArgs e)
+
+        private void BeginFilterPreview(ArtisticFilters artistic, BlurEffect blur)
         {
-            if (IsActiveLayerLocked) return;
-            SaveStateForUndo(description: "Artistic filter");
+            if (MainBitmap == null) return;
+            if (IsActiveLayerLocked) { SystemSounds.Beep.Play(); return; }
+
+            artisticFilters = artistic;
+            blurEffect = blur;
+            toolStripArtisticFilters.Visible = artistic != ArtisticFilters.None;
+            toolStripPixelate.Visible = blur == BlurEffect.Pixelate;
+            toolStripGaussianBlur.Visible = blur == BlurEffect.Gaussian;
+            RefreshFiltersPreview();
+        }
+
+        // Shared by the three OK/Apply buttons. Swaps the previewed layer in; the selection is kept.
+        private void ApplyFilterPreview(string description)
+        {
+            if (previewBitmap == null || MainBitmap == null || IsActiveLayerLocked)
+            {
+                CancelFilters();
+                return;
+            }
+
+            SaveStateForUndo(description: description);
+            Bitmap previous = MainBitmap;
             MainBitmap = previewBitmap;
+            previewBitmap = null;
+            previous.Dispose();
+
             artisticFilters = ArtisticFilters.None;
-            RenderCompositeToCanvas();
-            pictureBoxCanvas.Invalidate();
+            blurEffect = BlurEffect.None;
             toolStripArtisticFilters.Visible = false;
-            isModified = true; MarkLayerThumbnailDirty();
+            toolStripPixelate.Visible = false;
+            toolStripGaussianBlur.Visible = false;
+
+            SyncActiveLayerFromCanvas();
+            MarkCompositeDirty();
+            RenderCompositeToCanvas(force: true);
+            pictureBoxCanvas.Invalidate();
+            pictureBoxCanvas.Update();
+            isModified = true;
+            isSaved = false;
+            MarkLayerThumbnailDirty();
+            RefreshActiveLayerThumbnail(force: true);
         }
 
         private void buttonArtisticFiltersCancel_Click(object sender, EventArgs e)
@@ -7581,73 +7160,6 @@ namespace Carpathia
             artisticFilters = ArtisticFilters.None;
             CancelFilters();
         }
-        private void CancelFilters()
-        {
-            try
-            {
-                // 1. Önizleme bitkisel belleğini güvenli bir şekilde temizle
-                if (previewBitmap != null)
-                {
-                    if (!ReferenceEquals(previewBitmap, MainBitmap))
-                    {
-                        try { previewBitmap.Dispose(); } catch { }
-                    }
-                    previewBitmap = null;
-                }
-
-                // 2. Seçili alan bitmap'ini güvenli bir şekilde sıfırla
-                if (isSelected && SelectedBitmap != null)
-                {
-                    try { SelectedBitmap.Dispose(); } catch { }
-                    SelectedBitmap = null;
-
-                    if (!SelectionRectangle.IsEmpty && MainBitmap != null)
-                    {
-                        int w = Math.Max(1, (int)(SelectionRectangle.Width / zoom));
-                        int h = Math.Max(1, (int)(SelectionRectangle.Height / zoom));
-
-                        SelectedBitmap = new Bitmap(w, h);
-
-                        using (Graphics g = Graphics.FromImage(SelectedBitmap))
-                        {
-                            g.Clear(Color.Transparent);
-                            Rectangle sourceRect = new Rectangle(
-                                (int)(originalSelectionRectangleLocation.X),
-                                (int)(originalSelectionRectangleLocation.Y),
-                                (int)(originalSelectionRectangleSize.Width),
-                                (int)(originalSelectionRectangleSize.Height));
-
-                            g.DrawImage(MainBitmap,
-                                new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                                sourceRect,
-                                GraphicsUnit.Pixel);
-                        }
-                    }
-                }
-
-                // 3. Arayüzü ve tuvali güvenli bir şekilde yenile (UI Thread garantisiyle)
-                if (InvokeRequired)
-                {
-                    Invoke(new Action(() =>
-                    {
-                        RenderCompositeToCanvas(force: true);
-                        pictureBoxCanvas.Invalidate();
-                        pictureBoxCanvas.Update();
-                    }));
-                }
-                else
-                {
-                    RenderCompositeToCanvas(force: true);
-                    pictureBoxCanvas.Invalidate();
-                    pictureBoxCanvas.Update();
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log("CancelFilters Safe Error: " + ex.Message, Logger.LogTypes.Error);
-            }
-        }
-
         private void cartoonToolStripMenuItem_Click(object sender, EventArgs e)
         {
             InitializeArtisticFilters(ArtisticFilters.Cartoon);
@@ -7659,233 +7171,120 @@ namespace Carpathia
         }
         private void InitializeArtisticFilters(Enum filterType)
         {
-            if (blurEffect != BlurEffect.None)
-            {
-                blurEffect = BlurEffect.None;
-            }
-            toolStripArtisticFilters.Visible = true;
-            artisticFilters = (ArtisticFilters)filterType;
-            switch (artisticFilters)
+            ArtisticFilters selected = (ArtisticFilters)filterType;
+            switch (selected)
             {
                 case ArtisticFilters.OilPainting:
                     textBoxArtisticFilterSize.Text = FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize.ToString();
                     textBoxArtisticFilterIntensity.Text = FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity.ToString();
                     textBoxArtisticFilterThreshold.Text = FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold.ToString();
-                    RefreshFiltersPreview();
                     break;
                 case ArtisticFilters.Cartoon:
                     textBoxArtisticFilterSize.Text = FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize.ToString();
                     textBoxArtisticFilterIntensity.Text = FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity.ToString();
                     textBoxArtisticFilterThreshold.Text = FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold.ToString();
-                    RefreshFiltersPreview();
                     break;
                 default:
-                    break;
+                    return;
             }
+            BeginFilterPreview(selected, BlurEffect.None);
         }
+
+        private void pixellateToolStripMenuItem_Click(object sender, EventArgs e) =>
+            BeginFilterPreview(ArtisticFilters.None, BlurEffect.Pixelate);
+
+        private void blurToolStripMenuItem1_Click(object sender, EventArgs e) =>
+            BeginFilterPreview(ArtisticFilters.None, BlurEffect.Gaussian);
+
+        private void buttonArtisticFiltersOK_Click(object sender, EventArgs e) =>
+            ApplyFilterPreview(artisticFilters == ArtisticFilters.Cartoon ? "Cartoon filter" : "Oil painting filter");
+
+        private void buttonApplyPixelation_Click(object sender, EventArgs e) =>
+            ApplyFilterPreview("Pixelate");
+
+        private void buttonApplyGaussianBlur_Click(object sender, EventArgs e) =>
+            ApplyFilterPreview("Gaussian blur");
+        private bool TryReadFilterNumber(string text, int min, int max, string label, out int value)
+        {
+            if (!int.TryParse(text, out value))
+            {
+                Logger.Log($"Invalid {label} value entered for artistic filter: " + text, Logger.LogTypes.Error);
+                MessageForm.Show($"Invalid {label} value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            if (value < min || value > max)
+            {
+                Logger.Log($"The {label} value is out of range for artistic filter: " + text, Logger.LogTypes.Error);
+                MessageForm.Show($"The {label} value is too big or too small", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            return true;
+        }
+
         private void setArtisticFilterSize()
         {
-            try
+            if (artisticFilters != ArtisticFilters.None)
             {
-                if (!string.IsNullOrEmpty(textBoxArtisticFilterSize.Text))
+                bool cartoon = artisticFilters == ArtisticFilters.Cartoon;
+                if (TryReadFilterNumber(textBoxArtisticFilterSize.Text, 2, 32, "size", out int value))
                 {
-                    switch (artisticFilters)
-                    {
-                        case ArtisticFilters.OilPainting:
-                            if (Convert.ToInt32(textBoxArtisticFilterSize.Text) > 1 && Convert.ToInt32(textBoxArtisticFilterSize.Text) < 33)
-                            {
-                                FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize = Convert.ToInt32(textBoxArtisticFilterSize.Text);
-                            }
-                            else
-                            {
-                                throw new OverflowException();
-                            }
-                            break;
-                        case ArtisticFilters.Cartoon:
-                            if (Convert.ToInt32(textBoxArtisticFilterSize.Text) > 1 && Convert.ToInt32(textBoxArtisticFilterSize.Text) < 33)
-                            {
-                                FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize = Convert.ToInt32(textBoxArtisticFilterSize.Text);
-                            }
-                            else
-                            {
-                                throw new OverflowException();
-                            }
-                            break;
-                    }
+                    if (cartoon) FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize = value;
+                    else FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize = value;
                 }
+                else if (cartoon)
+                    FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize = Settings1.Default.DefaultCartoonFilterSize;
+                else
+                    FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize = Settings1.Default.DefaultOilPaintFilterSize;
+
+                textBoxArtisticFilterSize.Text = (cartoon
+                    ? FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize
+                    : FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize).ToString();
             }
-            catch (FormatException)
-            {
-                Logger.Log("Invalid size value entered for artistic filter size: " + textBoxArtisticFilterSize.Text, Logger.LogTypes.Error);
-                MessageForm.Show("Invalid size value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                switch (artisticFilters)
-                {
-                    case ArtisticFilters.OilPainting:
-                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize = Settings1.Default.DefaultOilPaintFilterSize;
-                        textBoxArtisticFilterSize.Text = FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize.ToString();
-                        break;
-                    case ArtisticFilters.Cartoon:
-                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize = Settings1.Default.DefaultCartoonFilterSize;
-                        textBoxArtisticFilterSize.Text = FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize.ToString();
-                        break;
-                }
-            }
-            catch (OverflowException)
-            {
-                Logger.Log("Size value too big or too small for artistic filter size: " + textBoxArtisticFilterSize.Text, Logger.LogTypes.Error);
-                MessageForm.Show("Size value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                switch (artisticFilters)
-                {
-                    case ArtisticFilters.OilPainting:
-                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize = Settings1.Default.DefaultOilPaintFilterSize;
-                        textBoxArtisticFilterSize.Text = FilterValues.ArtisticFiltersValues.OilPaintFilterValues.FilterSize.ToString();
-                        break;
-                    case ArtisticFilters.Cartoon:
-                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize = Settings1.Default.DefaultCartoonFilterSize;
-                        textBoxArtisticFilterSize.Text = FilterValues.ArtisticFiltersValues.CartoonFilterValues.FilterSize.ToString();
-                        break;
-                }
-            }
-            finally
-            {
-                RefreshFiltersPreview();
-            }
+            RefreshFiltersPreview();
         }
+
         private void setArtisticFilterIntensity()
         {
-            try
+            if (artisticFilters != ArtisticFilters.None)
             {
-                if (!string.IsNullOrEmpty(textBoxArtisticFilterIntensity.Text))
+                bool cartoon = artisticFilters == ArtisticFilters.Cartoon;
+                if (TryReadFilterNumber(textBoxArtisticFilterIntensity.Text, 1, 255, "intensity", out int value))
                 {
-                    switch (artisticFilters)
-                    {
-                        case ArtisticFilters.OilPainting:
-                            if (Convert.ToInt32(textBoxArtisticFilterIntensity.Text) > 0 && Convert.ToInt32(textBoxArtisticFilterIntensity.Text) < 256)
-                            {
-                                FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity = Convert.ToInt32(textBoxArtisticFilterIntensity.Text);
-                            }
-                            else
-                            {
-                                throw new OverflowException();
-                            }
-                            break;
-                        case ArtisticFilters.Cartoon:
-                            if (Convert.ToInt32(textBoxArtisticFilterIntensity.Text) > 0 && Convert.ToInt32(textBoxArtisticFilterSize.Text) < 256)
-                            {
-                                FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity = Convert.ToInt32(textBoxArtisticFilterIntensity.Text);
-                            }
-                            else
-                            {
-                                throw new OverflowException();
-                            }
-                            break;
-                    }
+                    if (cartoon) FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity = value;
+                    else FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity = value;
                 }
+                else if (cartoon)
+                    FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity = Settings1.Default.DefaultCartoonFilterIntensity;
+                else
+                    FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity = Settings1.Default.DefaultOilPaintFilterIntensity;
+
+                textBoxArtisticFilterIntensity.Text = (cartoon
+                    ? FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity
+                    : FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity).ToString();
             }
-            catch (FormatException)
-            {
-                Logger.Log("Invalid intensity value entered for artistic filter intensity: " + textBoxArtisticFilterIntensity.Text, Logger.LogTypes.Error);
-                MessageForm.Show("Invalid intensity value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                switch (artisticFilters)
-                {
-                    case ArtisticFilters.OilPainting:
-                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity = Settings1.Default.DefaultOilPaintFilterIntensity;
-                        textBoxArtisticFilterIntensity.Text = FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity.ToString();
-                        break;
-                    case ArtisticFilters.Cartoon:
-                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity = Settings1.Default.DefaultCartoonFilterIntensity;
-                        textBoxArtisticFilterIntensity.Text = FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity.ToString();
-                        break;
-                }
-            }
-            catch (OverflowException)
-            {
-                Logger.Log("Intensity value too big or too small for artistic filter intensity: " + textBoxArtisticFilterIntensity.Text, Logger.LogTypes.Error);
-                MessageForm.Show("Intensity value is too big or too small", String.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                switch (artisticFilters)
-                {
-                    case ArtisticFilters.OilPainting:
-                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity = Settings1.Default.DefaultOilPaintFilterIntensity;
-                        textBoxArtisticFilterIntensity.Text = FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Intensity.ToString();
-                        break;
-                    case ArtisticFilters.Cartoon:
-                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity = Settings1.Default.DefaultCartoonFilterIntensity;
-                        textBoxArtisticFilterIntensity.Text = FilterValues.ArtisticFiltersValues.CartoonFilterValues.Intensity.ToString();
-                        break;
-                }
-            }
-            finally
-            {
-                RefreshFiltersPreview();
-            }
+            RefreshFiltersPreview();
         }
+
         private void setArtisticFilterThreshold()
         {
-            try
+            if (artisticFilters != ArtisticFilters.None)
             {
-                if (!string.IsNullOrEmpty(textBoxArtisticFilterThreshold.Text))
+                bool cartoon = artisticFilters == ArtisticFilters.Cartoon;
+                if (TryReadFilterNumber(textBoxArtisticFilterThreshold.Text, 0, 255, "threshold", out int value))
                 {
-                    switch (artisticFilters)
-                    {
-                        case ArtisticFilters.OilPainting:
-                            if (Convert.ToInt32(textBoxArtisticFilterThreshold.Text) >= 0 && Convert.ToInt32(textBoxArtisticFilterThreshold.Text) < 256)
-                            {
-                                FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold = Convert.ToInt32(textBoxArtisticFilterThreshold.Text);
-                            }
-                            else
-                            {
-                                throw new OverflowException();
-                            }
-                            break;
-                        case ArtisticFilters.Cartoon:
-                            if (Convert.ToInt32(textBoxArtisticFilterThreshold.Text) >= 0 && Convert.ToInt32(textBoxArtisticFilterThreshold.Text) < 256)
-                            {
-                                FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold = Convert.ToInt32(textBoxArtisticFilterThreshold.Text);
-                            }
-                            else
-                            {
-                                throw new OverflowException();
-                            }
-                            break;
-                    }
+                    if (cartoon) FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold = value;
+                    else FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold = value;
                 }
+                else if (cartoon)
+                    FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold = Settings1.Default.DefaultCartoonFilterThreshold;
+                else
+                    FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold = Settings1.Default.DefaultOilPaintFilterThreshold;
+
+                textBoxArtisticFilterThreshold.Text = (cartoon
+                    ? FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold
+                    : FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold).ToString();
             }
-            catch (FormatException)
-            {
-                Logger.Log("Invalid threshold value entered for artistic filter threshold: " + textBoxArtisticFilterThreshold.Text, Logger.LogTypes.Error);
-                MessageForm.Show("Invalid threshold value is entered", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                switch (artisticFilters)
-                {
-                    case ArtisticFilters.OilPainting:
-                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold = Settings1.Default.DefaultOilPaintFilterThreshold;
-                        textBoxArtisticFilterThreshold.Text = FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold.ToString();
-                        break;
-                    case ArtisticFilters.Cartoon:
-                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold = Settings1.Default.DefaultCartoonFilterThreshold;
-                        textBoxArtisticFilterThreshold.Text = FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold.ToString();
-                        break;
-                }
-            }
-            catch (OverflowException)
-            {
-                Logger.Log("Threshold value too big or too small for artistic filter threshold: " + textBoxArtisticFilterThreshold.Text, Logger.LogTypes.Error);
-                MessageForm.Show("Threshold value is too big or too small", string.Empty, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                switch (artisticFilters)
-                {
-                    case ArtisticFilters.OilPainting:
-                        FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold = Settings1.Default.DefaultOilPaintFilterThreshold;
-                        textBoxArtisticFilterThreshold.Text = FilterValues.ArtisticFiltersValues.OilPaintFilterValues.Threshold.ToString();
-                        break;
-                    case ArtisticFilters.Cartoon:
-                        FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold = Settings1.Default.DefaultCartoonFilterThreshold;
-                        textBoxArtisticFilterThreshold.Text = FilterValues.ArtisticFiltersValues.CartoonFilterValues.Threshold.ToString();
-                        break;
-                }
-            }
-            finally
-            {
-                RefreshFiltersPreview();
-            }
+            RefreshFiltersPreview();
         }
         private void textBoxArtisticFilterSize_Leave(object sender, EventArgs e)
         {
@@ -7956,30 +7355,21 @@ namespace Carpathia
 
         private void Cut()
         {
-            if (IsActiveLayerLocked) return;
+            if (IsActiveLayerLocked || MainBitmap == null) return;
             try
             {
+                if (!CutOrCopy()) return;
+
                 SaveStateForUndo(description: "Cut selection");
-                CutOrCopy();
-                if (magicSelectionMask != null && !magicSelectionBounds.IsEmpty)
-                {
-                    for (int y = magicSelectionBounds.Top; y < magicSelectionBounds.Bottom; y++)
-                    {
-                        for (int x = magicSelectionBounds.Left; x < magicSelectionBounds.Right; x++)
-                        {
-                            if (magicSelectionMask[y * magicSelectionMaskWidth + x])
-                                MainBitmap.SetPixel(x, y, Color.Transparent);
-                        }
-                    }
-                    SetAsUnselected();
-                }
-                else
-                {
-                    MainBitmap = new Bitmap(MainBitmap.Width, MainBitmap.Height);
-                }
-                RenderCompositeToCanvas();
+                ClearSelectionPixels(MainBitmap);
+                SyncActiveLayerFromCanvas();
+                MarkCompositeDirty();
+                RenderCompositeToCanvas(force: true);
                 pictureBoxCanvas.Invalidate();
-                isModified = true; MarkLayerThumbnailDirty();
+                isModified = true;
+                isSaved = false;
+                MarkLayerThumbnailDirty();
+                RefreshActiveLayerThumbnail(force: true);
             }
             catch (Exception ex)
             {
@@ -7992,8 +7382,7 @@ namespace Carpathia
         {
             try
             {
-                CutOrCopy();
-                isModified = true; MarkLayerThumbnailDirty();
+                CutOrCopy();   // copying never changes the document
             }
             catch (Exception ex)
             {
@@ -8071,50 +7460,30 @@ namespace Carpathia
             return null;
         }
 
-        private void CutOrCopy()
+        private bool CutOrCopy()
         {
-            Bitmap copyBitmap;
+            Bitmap copyBitmap = CreateSelectionBitmap();
+            if (copyBitmap == null) return false;
 
-            if (magicSelectionMask != null && !magicSelectionBounds.IsEmpty)
+            try
             {
-                copyBitmap = new Bitmap(magicSelectionBounds.Width, magicSelectionBounds.Height, PixelFormat.Format32bppArgb);
-                for (int y = magicSelectionBounds.Top; y < magicSelectionBounds.Bottom; y++)
+                byte[] pngBytes;
+                using (MemoryStream pngStream = new MemoryStream())
                 {
-                    for (int x = magicSelectionBounds.Left; x < magicSelectionBounds.Right; x++)
-                    {
-                        int mx = x - magicSelectionBounds.Left;
-                        int my = y - magicSelectionBounds.Top;
-
-                        // magicSelectionMask is indexed in absolute MainBitmap coordinates.
-                        // mx/my are only the destination coordinates inside copyBitmap.
-                        if (x >= 0 && y >= 0 && x < magicSelectionMaskWidth && y < magicSelectionMaskHeight &&
-                            magicSelectionMask[y * magicSelectionMaskWidth + x])
-                        {
-                            copyBitmap.SetPixel(mx, my, MainBitmap.GetPixel(x, y));
-                        }
-                    }
+                    copyBitmap.Save(pngStream, ImageFormat.Png);
+                    pngBytes = pngStream.ToArray();
                 }
-            }
-            else
-            {
-                copyBitmap = new Bitmap(MainBitmap.Width, MainBitmap.Height, PixelFormat.Format32bppArgb);
-                using Graphics g = Graphics.FromImage(copyBitmap);
-                g.Clear(Color.Transparent);
-                g.DrawImageUnscaled(MainBitmap, 0, 0);
-            }
 
-            DataObject dataObject = new DataObject();
-            byte[] pngBytes;
-            using (MemoryStream pngStream = new MemoryStream())
-            {
-                copyBitmap.Save(pngStream, ImageFormat.Png);
-                pngBytes = pngStream.ToArray();
+                DataObject dataObject = new DataObject();
+                dataObject.SetData("PNG", false, new MemoryStream(pngBytes));
+                dataObject.SetData(DataFormats.Bitmap, true, copyBitmap);
+                System.Windows.Forms.Clipboard.SetDataObject(dataObject, true);
+                return true;
             }
-            // The stream stays alive and is owned by the clipboard data.
-            dataObject.SetData("PNG", false, new MemoryStream(pngBytes));
-            dataObject.SetData(DataFormats.Bitmap, true, copyBitmap);
-            System.Windows.Forms.Clipboard.SetDataObject(dataObject, true);
-            copyBitmap.Dispose();
+            finally
+            {
+                copyBitmap.Dispose();
+            }
         }
 
         private void Cut_Click(object sender, EventArgs e)
@@ -8122,71 +7491,17 @@ namespace Carpathia
             Cut();
         }
 
-        private void chloeToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (IsActiveLayerLocked) return;
-            SaveStateForUndo(description: "Chloe filter");
-            if (artisticFilters != ArtisticFilters.None)
-            {
-                artisticFilters = ArtisticFilters.None;
-            }
-            if (blurEffect != BlurEffect.None)
-            {
-                blurEffect = BlurEffect.None;
-            }
-            if (isSelected)
-            {
-                if (SelectedBitmap == null)
-                {
-                    SelectedBitmap = new Bitmap(
-                        (int)(SelectionRectangle.Width / zoom),
-                        (int)(SelectionRectangle.Height / zoom));
-                    using (Graphics g = Graphics.FromImage(SelectedBitmap))
-                    {
-                        g.Clear(Color.Transparent);
-                        Rectangle sourceRect = new Rectangle(
-                            (int)(originalSelectionRectangleLocation.X),
-                            (int)(originalSelectionRectangleLocation.Y),
-                            (int)(originalSelectionRectangleSize.Width),
-                            (int)(originalSelectionRectangleSize.Height));
-                        g.DrawImage(MainBitmap,
-                            new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                            sourceRect,
-                            GraphicsUnit.Pixel);
-                    }
-                }
-                SelectedBitmap = Filters.AmbientFilters.Chloe(MainBitmap);
-            }
-            else
-            {
-                MainBitmap = Filters.AmbientFilters.Chloe(MainBitmap);
-            }
-            RenderCompositeToCanvas();
-            pictureBoxCanvas.Invalidate();
-            isModified = true; MarkLayerThumbnailDirty();
-        }
-
         private void zoomInToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            float baseZoom = zoomAnimationTimer.Enabled ? zoomAnimationTo : zoom;
-            float target = Math.Max(0.05f, baseZoom + 0.05f);
-            if ((target > 5f))
-            {
-                SystemSounds.Beep.Play();
-                return;
-            }
+            float current = zoomAnimationTimer.Enabled ? zoomAnimationTo : zoom;
+            if (current >= 5f - 0.0001f) { SystemSounds.Beep.Play(); return; }
             RequestSmoothZoom(0.05f);
         }
 
         private void zoomOutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            float baseZoom = zoomAnimationTimer.Enabled ? zoomAnimationTo : zoom;
-            float target = Math.Max(0.05f, baseZoom + 0.05f);
-            if ((target <= 0.1f))
-            {
-                SystemSounds.Beep.Play();
-                return;
-            }
+            float current = zoomAnimationTimer.Enabled ? zoomAnimationTo : zoom;
+            if (current <= 0.05f + 0.0001f) { SystemSounds.Beep.Play(); return; }
             RequestSmoothZoom(-0.05f);
         }
 
@@ -8496,48 +7811,53 @@ namespace Carpathia
                 redoStack.Pop().Dispose(); // Also disposes full-stack layer bitmaps.
             UpdateUndoRedoButtons();
         }
-        // Generated pixels must be installed into the editable layer AND the
-        // flattened preview. Changing MainBitmap alone leaves the old composite
-        // in pictureBoxCanvas.Image, even though undo/history has the new state.
-        // Commit selection-based AI edits to the active layer, not just the
-        // temporary SelectedBitmap. Use SourceCopy so transparent background
-        // removal actually clears old pixels rather than painting over them.
-        private void ApplyGeneratedSelectionToCanvas(Image generatedImage,
-            string historyDescription)
+
+        private bool MaskMatchesCanvas(Bitmap bitmap) =>
+    magicSelectionMask != null &&
+    magicSelectionMaskWidth == bitmap.Width &&
+    magicSelectionMaskHeight == bitmap.Height;
+
+        // Same-size results are copied pixel for pixel; only resized results are resampled.
+        private static void DrawIntoRectangle(Graphics g, Image source, Rectangle destination)
+        {
+            bool sameSize = source.Width == destination.Width && source.Height == destination.Height;
+            g.CompositingMode = CompositingMode.SourceCopy;
+            g.InterpolationMode = sameSize ? InterpolationMode.NearestNeighbor : InterpolationMode.HighQualityBicubic;
+            g.PixelOffsetMode = sameSize ? PixelOffsetMode.Half : PixelOffsetMode.HighQuality;
+            g.DrawImage(source, destination, 0, 0, source.Width, source.Height, GraphicsUnit.Pixel);
+        }
+
+        // Writes `generated` (scaled to the selection's bounding box) into `target`,
+        // only where the selection is: the whole rectangle, or just the mask pixels.
+        private void WriteImageThroughSelection(Bitmap target, Image generated)
+        {
+            Rectangle bounds = GetSelectionImageBounds();
+            if (bounds.Width < 1 || bounds.Height < 1) return;
+
+            if (HasMaskSelection)
+            {
+                if (MaskMatchesCanvas(target))
+                    CopyGeneratedThroughMask(target, generated, bounds);
+                return;
+            }
+
+            using (Graphics g = Graphics.FromImage(target))
+                DrawIntoRectangle(g, generated, bounds);
+        }
+
+        private void ApplyGeneratedSelectionToCanvas(Image generatedImage, string historyDescription)
         {
             if (IsActiveLayerLocked) return;
             if (generatedImage == null)
                 throw new ArgumentNullException(nameof(generatedImage));
-            if (MainBitmap == null)
+            if (MainBitmap == null || !HasAnySelection)
                 return;
 
-            Rectangle selection = new Rectangle(originalSelectionRectangleLocation,
-                originalSelectionRectangleSize);
-            Rectangle destination = Rectangle.Intersect(selection,
-                new Rectangle(Point.Empty, MainBitmap.Size));
-            if (selection.Width <= 0 || selection.Height <= 0 || destination.IsEmpty)
-                return;
-
-            Bitmap next = new Bitmap(MainBitmap.Width, MainBitmap.Height,
-                PixelFormat.Format32bppArgb);
+            Bitmap next = new Bitmap(MainBitmap);
             try
             {
-                using (Graphics g = Graphics.FromImage(next))
-                {
-                    g.CompositingMode = CompositingMode.SourceCopy;
-                    g.DrawImageUnscaled(MainBitmap, 0, 0);
-                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                    float scaleX = (float)generatedImage.Width / selection.Width;
-                    float scaleY = (float)generatedImage.Height / selection.Height;
-                    RectangleF source = new RectangleF(
-                        (destination.X - selection.X) * scaleX,
-                        (destination.Y - selection.Y) * scaleY,
-                        destination.Width * scaleX, destination.Height * scaleY);
-                    g.DrawImage(generatedImage,
-                        new RectangleF(destination.X, destination.Y,
-                            destination.Width, destination.Height),
-                        source, GraphicsUnit.Pixel);
-                }
+                WriteImageThroughSelection(next, generatedImage);
+
                 SaveStateForUndo(description: historyDescription);
                 Bitmap old = MainBitmap;
                 MainBitmap = next;
@@ -8558,6 +7878,155 @@ namespace Carpathia
             {
                 next?.Dispose();
             }
+        }
+
+        private void CopyGeneratedThroughMask(Bitmap target, Image generated, Rectangle bounds)
+        {
+            using Bitmap scaled = new Bitmap(bounds.Width, bounds.Height, PixelFormat.Format32bppArgb);
+            using (Graphics g = Graphics.FromImage(scaled))
+            {
+                g.Clear(Color.Transparent);
+                DrawIntoRectangle(g, generated, new Rectangle(0, 0, bounds.Width, bounds.Height));
+            }
+
+            BitmapData targetData = target.LockBits(bounds, ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            BitmapData scaledData = scaled.LockBits(new Rectangle(Point.Empty, scaled.Size),
+                ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+            try
+            {
+                int rowBytes = bounds.Width * 4;
+                byte[] targetRow = new byte[rowBytes];
+                byte[] scaledRow = new byte[rowBytes];
+
+                for (int y = 0; y < bounds.Height; y++)
+                {
+                    IntPtr targetPtr = IntPtr.Add(targetData.Scan0, y * targetData.Stride);
+                    IntPtr scaledPtr = IntPtr.Add(scaledData.Scan0, y * scaledData.Stride);
+                    Marshal.Copy(targetPtr, targetRow, 0, rowBytes);
+                    Marshal.Copy(scaledPtr, scaledRow, 0, rowBytes);
+
+                    int maskRow = (bounds.Y + y) * magicSelectionMaskWidth + bounds.X;
+                    bool changed = false;
+                    for (int x = 0; x < bounds.Width; x++)
+                    {
+                        if (!magicSelectionMask[maskRow + x]) continue;
+                        System.Buffer.BlockCopy(scaledRow, x * 4, targetRow, x * 4, 4);
+                        changed = true;
+                    }
+
+                    if (changed)
+                        Marshal.Copy(targetRow, 0, targetPtr, rowBytes);
+                }
+            }
+            finally
+            {
+                scaled.UnlockBits(scaledData);
+                target.UnlockBits(targetData);
+            }
+        }
+
+        // Copy of the selected rectangle at its real pixel size. The old code derived the size
+        // from the zoomed rectangle, which truncates and resamples the pixels at zooms other than 100%.
+        private Bitmap CreateSelectionWorkingBitmap()
+        {
+            Rectangle r = GetSelectionImageBounds();
+            return r.Width < 1 || r.Height < 1
+                ? null
+                : MainBitmap.Clone(r, PixelFormat.Format32bppArgb);
+        }
+
+        // Zeroes the pixels of `bmp` (inside or outside the mask). lockRect is the area of bmp
+        // to process; maskOrigin is the image coordinate of lockRect's top-left corner.
+        private void ZeroMaskedPixels(Bitmap bmp, Rectangle lockRect, Point maskOrigin, bool zeroInside)
+        {
+            BitmapData data = bmp.LockBits(lockRect, ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            try
+            {
+                int rowBytes = lockRect.Width * 4;
+                byte[] row = new byte[rowBytes];
+                for (int y = 0; y < lockRect.Height; y++)
+                {
+                    IntPtr ptr = IntPtr.Add(data.Scan0, y * data.Stride);
+                    Marshal.Copy(ptr, row, 0, rowBytes);
+
+                    int maskRow = (maskOrigin.Y + y) * magicSelectionMaskWidth + maskOrigin.X;
+                    bool changed = false;
+                    for (int x = 0; x < lockRect.Width; x++)
+                    {
+                        if (magicSelectionMask[maskRow + x] != zeroInside) continue;
+                        Array.Clear(row, x * 4, 4);
+                        changed = true;
+                    }
+
+                    if (changed)
+                        Marshal.Copy(row, 0, ptr, rowBytes);
+                }
+            }
+            finally
+            {
+                bmp.UnlockBits(data);
+            }
+        }
+
+        // Clears the selected pixels (rectangle or mask). With no selection, clears the whole bitmap.
+        private void ClearSelectionPixels(Bitmap target)
+        {
+            Rectangle bounds = HasAnySelection
+                ? GetSelectionImageBounds()
+                : new Rectangle(Point.Empty, target.Size);
+            if (bounds.Width < 1 || bounds.Height < 1) return;
+
+            if (HasMaskSelection)
+            {
+                if (MaskMatchesCanvas(target))
+                    ZeroMaskedPixels(target, bounds, bounds.Location, zeroInside: true);
+                return;
+            }
+
+            using (Graphics g = Graphics.FromImage(target))
+            {
+                g.CompositingMode = CompositingMode.SourceCopy;
+                g.FillRectangle(Brushes.Transparent, bounds);
+            }
+        }
+
+        // The selected pixels only (transparent outside a lasso/wand mask), cropped to the
+        // selection's bounding box. With no selection, a copy of the whole layer.
+        private Bitmap CreateSelectionBitmap()
+        {
+            if (MainBitmap == null) return null;
+            FlushPendingSelectionBitmap();
+
+            Rectangle bounds = HasAnySelection
+                ? GetSelectionImageBounds()
+                : new Rectangle(Point.Empty, MainBitmap.Size);
+            if (bounds.Width < 1 || bounds.Height < 1) return null;
+
+            Bitmap copy = MainBitmap.Clone(bounds, PixelFormat.Format32bppArgb);
+            if (HasMaskSelection && MaskMatchesCanvas(MainBitmap))
+                ZeroMaskedPixels(copy, new Rectangle(Point.Empty, copy.Size), bounds.Location, zeroInside: false);
+            return copy;
+        }
+
+        // Ctrl+A
+        private void SelectAllCanvas()
+        {
+            if (MainBitmap == null || isImageCurrentlyCreating) return;
+
+            CompleteZoomAnimation();          // make sure `zoom` is the final value
+            CommitActiveTextEditor();
+            CommitFloatingImagesToActiveLayer();
+            CancelFilters();
+            if (lassoActive) CancelLasso();
+            SetAsUnselected();                // merges pending edits and clears any previous selection
+
+            originalSelectionRectangleLocation = Point.Empty;
+            originalSelectionRectangleSize = MainBitmap.Size;
+            SelectionRectangle = new Rectangle(0, 0,
+                (int)Math.Round(MainBitmap.Width * zoom),
+                (int)Math.Round(MainBitmap.Height * zoom));
+            isSelected = true;
+            pictureBoxCanvas.Invalidate();
         }
 
         private void ApplyGeneratedImageToCanvas(Image generatedImage,
@@ -8628,53 +8097,12 @@ namespace Carpathia
                     textBoxPrompt.Enabled = false;
                     labelPrompt.Enabled = false;
                     buttonClose.Enabled = false;
-                    if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
+                    if (!await TryRunAiOnSelectionAsync(systemInstruction + "\n" + textBoxPrompt.Text, "AI generate image"))
                     {
-                        if (SelectedBitmap == null)
-                        {
-                            SelectedBitmap = new Bitmap(
-                                (int)(SelectionRectangle.Width / zoom),
-                                (int)(SelectionRectangle.Height / zoom));
-                            using (Graphics g = Graphics.FromImage(SelectedBitmap))
-                            {
-                                g.Clear(Color.Transparent);
-                                Rectangle sourceRect = new Rectangle(
-                                    (int)(originalSelectionRectangleLocation.X),
-                                    (int)(originalSelectionRectangleLocation.Y),
-                                    (int)(originalSelectionRectangleSize.Width),
-                                    (int)(originalSelectionRectangleSize.Height));
-                                g.DrawImage(MainBitmap,
-                                    new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                                    sourceRect,
-                                    GraphicsUnit.Pixel);
-                            }
-                        }
-                        var imageTask = ImageGenerationCore.GenerateImage(systemInstruction + "\n" + textBoxPrompt.Text, SelectedBitmap,
-                            SelectedBitmap.Width, SelectedBitmap.Height, cts.Token);
-                        var image = await imageTask; // Await the task to get the result
-                        if (image != null)
-                        {
-
-                            ApplyGeneratedSelectionToCanvas(image, "AI generate image");
-                            isModified = true; MarkLayerThumbnailDirty();
-                        }
-                        else
-                        {
-                            Logger.Log("The generated image is null.", Logger.LogTypes.Error);
-                            MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                    }
-                    else
-                    {
-                        var imageTask = ImageGenerationCore.GenerateImage(textBoxPrompt.Text, MainBitmap,
+                        var image = await ImageGenerationCore.GenerateImage(textBoxPrompt.Text, MainBitmap,
                             MainBitmap.Width, MainBitmap.Height, cts.Token);
-                        var image = await imageTask; // Await the task to get the result
                         if (image != null)
-                        {
-                            // Rebuild the layer composite; Invalidate() alone
-                            // repaints the old cached preview.
                             ApplyGeneratedImageToCanvas(image, "AI generate image");
-                        }
                         else
                         {
                             Logger.Log("The generated image is null.", Logger.LogTypes.Error);
@@ -8732,18 +8160,6 @@ namespace Carpathia
             }
         }
 
-        private void buttonApplyPixelation_Click(object sender, EventArgs e)
-        {
-            if (IsActiveLayerLocked) return;
-            SaveStateForUndo(description: "Pixelate");
-            blurEffect = BlurEffect.None;
-            MainBitmap = previewBitmap;
-            RenderCompositeToCanvas();
-            pictureBoxCanvas.Invalidate();
-            toolStripPixelate.Visible = false;
-            isModified = true; MarkLayerThumbnailDirty();
-        }
-
         private void buttonCancelPixelation_Click(object sender, EventArgs e)
         {
             toolStripPixelate.Visible = false;
@@ -8751,25 +8167,11 @@ namespace Carpathia
             CancelFilters();
         }
 
-        private void pixellateToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            toolStripPixelate.Visible = true;
-            blurEffect = BlurEffect.Pixelate;
-            RefreshFiltersPreview();
-        }
-
-        private void blurToolStripMenuItem1_Click(object sender, EventArgs e)
-        {
-            toolStripGaussianBlur.Visible = true;
-            blurEffect = BlurEffect.Gaussian;
-            RefreshFiltersPreview();
-        }
-
         private void setPixelationSize()
         {
             try
             {
-                if (Convert.ToInt32(textBoxPixelationSize.Text) < 1 && Convert.ToInt32(textBoxPixelationSize.Text) > 9299)
+                if (Convert.ToInt32(textBoxPixelationSize.Text) < 1 || Convert.ToInt32(textBoxPixelationSize.Text) > 9299)
                 {
                     throw new OverflowException();
                 }
@@ -8798,7 +8200,7 @@ namespace Carpathia
         {
             try
             {
-                if (Convert.ToInt32(textBoxPixelationOffsetX.Text) < -2944 && Convert.ToInt32(textBoxPixelationOffsetX.Text) > 10602)
+                if (Convert.ToInt32(textBoxPixelationOffsetX.Text) < -2944 || Convert.ToInt32(textBoxPixelationOffsetX.Text) > 10602)
                 {
                     throw new OverflowException();
                 }
@@ -8827,7 +8229,7 @@ namespace Carpathia
         {
             try
             {
-                if (Convert.ToInt32(textBoxPixelationOffsetY.Text) < -2944 && Convert.ToInt32(textBoxPixelationOffsetY.Text) > 10602)
+                if (Convert.ToInt32(textBoxPixelationOffsetY.Text) < -2944 || Convert.ToInt32(textBoxPixelationOffsetY.Text) > 10602)
                 {
                     throw new OverflowException();
                 }
@@ -8899,17 +8301,6 @@ namespace Carpathia
             {
                 RefreshFiltersPreview();
             }
-        }
-        private void buttonApplyGaussianBlur_Click(object sender, EventArgs e)
-        {
-            if (IsActiveLayerLocked) return;
-            SaveStateForUndo(description: "Gaussian blur");
-            blurEffect = BlurEffect.None;
-            MainBitmap = previewBitmap;
-            RenderCompositeToCanvas();
-            pictureBoxCanvas.Invalidate();
-            toolStripGaussianBlur.Visible = false;
-            isModified = true; MarkLayerThumbnailDirty();
         }
 
         private void buttonCancelGaussianBlur_Click(object sender, EventArgs e)
@@ -8999,11 +8390,6 @@ namespace Carpathia
             }
         }
 
-        private void farklıKaydetToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            saveFileAs();
-        }
-
         private void cropTool_Click(object sender, EventArgs e)
         {
             CropToSelection();
@@ -9032,31 +8418,6 @@ namespace Carpathia
         private void fitTool_Click(object sender, EventArgs e)
         {
             FitCanvasToWorkspace();
-        }
-
-        private void ImageEditor_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            CommitActiveTextEditor();
-            if (isModified)
-            {
-                DialogResult result = MessageForm.Show("Do you want to save changes to your image?", "Unsaved Changes", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
-                switch (result)
-                {
-                    case DialogResult.Yes:
-                        save();
-                        if (!fileSaved)
-                        {
-                            e.Cancel = true;
-                        }
-                        break;
-                    case DialogResult.No:
-                        // Proceed with closing without saving
-                        break;
-                    case DialogResult.Cancel:
-                        e.Cancel = true; // Cancel closing
-                        break;
-                }
-            }
         }
 
         private void toolStripTextBox1_KeyDown(object sender, KeyEventArgs e)
@@ -9091,7 +8452,12 @@ namespace Carpathia
                 // and ordinary Enter (for multiline text).
                 return base.ProcessCmdKey(ref msg, keyData);
             }
-
+            if (keyData == (Keys.Control | Keys.A) &&
+    !(ActiveControl is TextBoxBase) && !(ActiveControl is ComboBox))
+            {
+                SelectAllCanvas();
+                return true;
+            }
             // Ctrl+D: commit floating images and deselect the current selection.
             if (keyData == (Keys.Control | Keys.D))
             {
@@ -9126,12 +8492,12 @@ namespace Carpathia
             }
             if (key == Keys.Escape)
             {
+                if (lassoActive) { CancelLasso(); return true; }
                 if (isSelected)
                 {
                     SetAsUnselected();
                     pictureBoxCanvas.Invalidate();
                 }
-
                 return true;
             }
 
@@ -9198,64 +8564,17 @@ namespace Carpathia
 
         private void DeleteCurrentSelection()
         {
-            if (IsActiveLayerLocked) return;
-            if (!isSelected || MainBitmap == null)
+            if (IsActiveLayerLocked || !isSelected || MainBitmap == null) return;
+
+            if (!HasAnySelection)        // a click with the Selection tool that never became a rectangle
+            {
+                SetAsUnselected();
                 return;
+            }
 
+            FlushPendingSelectionBitmap();
             SaveStateForUndo(description: "Delete selection");
-
-            // Magic selection
-            if (magicSelectionMask != null &&
-                magicSelectionMaskWidth > 0 &&
-                magicSelectionMaskHeight > 0 &&
-                !magicSelectionBounds.IsEmpty)
-            {
-                Rectangle bounds = magicSelectionBounds;
-
-                bounds.Intersect(
-                    new Rectangle(0, 0, MainBitmap.Width, MainBitmap.Height));
-
-                for (int y = bounds.Top; y < bounds.Bottom; y++)
-                {
-                    for (int x = bounds.Left; x < bounds.Right; x++)
-                    {
-                        int index = y * magicSelectionMaskWidth + x;
-
-                        if (index >= 0 &&
-                            index < magicSelectionMask.Length &&
-                            magicSelectionMask[index])
-                        {
-                            MainBitmap.SetPixel(x, y, Color.Transparent);
-                        }
-                    }
-                }
-            }
-            // Rectangular selection
-            else if (!SelectionRectangle.IsEmpty)
-            {
-                Rectangle rect = new Rectangle(
-                    originalSelectionRectangleLocation,
-                    originalSelectionRectangleSize);
-
-                rect.Intersect(
-                    new Rectangle(Point.Empty, MainBitmap.Size));
-
-                if (!rect.IsEmpty)
-                {
-                    using (Graphics g = Graphics.FromImage(MainBitmap))
-                    {
-                        g.CompositingMode =
-                            System.Drawing.Drawing2D.CompositingMode.SourceCopy;
-
-                        using (Brush brush =
-                            new SolidBrush(Color.Transparent))
-                        {
-                            g.FillRectangle(brush, rect);
-                        }
-                    }
-                }
-            }
-
+            ClearSelectionPixels(MainBitmap);
             SetAsUnselected();
 
             SyncActiveLayerFromCanvas();
@@ -9265,11 +8584,8 @@ namespace Carpathia
             pictureBoxCanvas.Update();
             isModified = true;
             isSaved = false;
-
             MarkLayerThumbnailDirty();
-            RefreshActiveLayerThumbnail();
-
-            pictureBoxCanvas.Invalidate();
+            RefreshActiveLayerThumbnail(force: true);
             UpdateUndoRedoButtons();
         }
 
@@ -9754,7 +9070,7 @@ namespace Carpathia
         private async void expandToolStripMenuItem_Click(object sender, EventArgs e)
         {
             toolStripAICreateImage.Visible = false;
-            if (!(isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0))
+            if (!HasAnySelection)
             {
                 if (CheckIfInternetConnectionAvailable.IsInternetAvailable())
                 {
@@ -9862,53 +9178,12 @@ namespace Carpathia
                     textBoxPrompt.Enabled = false;
                     labelPrompt.Enabled = false;
                     buttonClose.Enabled = false;
-                    if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
+                    if (!await TryRunAiOnSelectionAsync(systemInstruction, "AI colorize"))
                     {
-                        if (SelectedBitmap == null)
-                        {
-                            SelectedBitmap = new Bitmap(
-                                (int)(SelectionRectangle.Width / zoom),
-                                (int)(SelectionRectangle.Height / zoom));
-                            using (Graphics g = Graphics.FromImage(SelectedBitmap))
-                            {
-                                g.Clear(Color.Transparent);
-                                Rectangle sourceRect = new Rectangle(
-                                    (int)(originalSelectionRectangleLocation.X),
-                                    (int)(originalSelectionRectangleLocation.Y),
-                                    (int)(originalSelectionRectangleSize.Width),
-                                    (int)(originalSelectionRectangleSize.Height));
-                                g.DrawImage(MainBitmap,
-                                    new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                                    sourceRect,
-                                    GraphicsUnit.Pixel);
-                            }
-                        }
-                        var imageTask = ImageGenerationCore.GenerateImage(systemInstruction, SelectedBitmap,
-                            SelectedBitmap.Width, SelectedBitmap.Height, cts.Token);
-                        var image = await imageTask; // Await the task to get the result
-                        if (image != null)
-                        {
-
-                            ApplyGeneratedSelectionToCanvas(image, "AI colorize");
-                            isModified = true; MarkLayerThumbnailDirty();
-                        }
-                        else
-                        {
-                            Logger.Log("The generated image is null.", Logger.LogTypes.Error);
-                            MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                    }
-                    else
-                    {
-                        var imageTask = ImageGenerationCore.GenerateImage(systemInstruction, MainBitmap,
+                        var image = await ImageGenerationCore.GenerateImage(systemInstruction, MainBitmap,
                             MainBitmap.Width, MainBitmap.Height, cts.Token);
-                        var image = await imageTask; // Await the task to get the result
                         if (image != null)
-                        {
-                            // Rebuild the layer composite; Invalidate() alone
-                            // repaints the old cached preview.
                             ApplyGeneratedImageToCanvas(image, "AI colorize");
-                        }
                         else
                         {
                             Logger.Log("The generated image is null.", Logger.LogTypes.Error);
@@ -9992,53 +9267,12 @@ namespace Carpathia
                     textBoxPrompt.Enabled = false;
                     labelPrompt.Enabled = false;
                     buttonClose.Enabled = false;
-                    if (isSelected && SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0)
+                    if (!await TryRunAiOnSelectionAsync(systemInstruction, "AI restore"))
                     {
-                        if (SelectedBitmap == null)
-                        {
-                            SelectedBitmap = new Bitmap(
-                                (int)(SelectionRectangle.Width / zoom),
-                                (int)(SelectionRectangle.Height / zoom));
-                            using (Graphics g = Graphics.FromImage(SelectedBitmap))
-                            {
-                                g.Clear(Color.Transparent);
-                                Rectangle sourceRect = new Rectangle(
-                                    (int)(originalSelectionRectangleLocation.X),
-                                    (int)(originalSelectionRectangleLocation.Y),
-                                    (int)(originalSelectionRectangleSize.Width),
-                                    (int)(originalSelectionRectangleSize.Height));
-                                g.DrawImage(MainBitmap,
-                                    new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
-                                    sourceRect,
-                                    GraphicsUnit.Pixel);
-                            }
-                        }
-                        var imageTask = ImageGenerationCore.GenerateImage(systemInstruction, SelectedBitmap,
-                            SelectedBitmap.Width, SelectedBitmap.Height, cts.Token);
-                        var image = await imageTask; // Await the task to get the result
-                        if (image != null)
-                        {
-
-                            ApplyGeneratedSelectionToCanvas(image, "AI restore");
-                            isModified = true; MarkLayerThumbnailDirty();
-                        }
-                        else
-                        {
-                            Logger.Log("The generated image is null.", Logger.LogTypes.Error);
-                            MessageForm.Show("The generated image is null. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                    }
-                    else
-                    {
-                        var imageTask = ImageGenerationCore.GenerateImage(systemInstruction, MainBitmap,
+                        var image = await ImageGenerationCore.GenerateImage(systemInstruction, MainBitmap,
                             MainBitmap.Width, MainBitmap.Height, cts.Token);
-                        var image = await imageTask; // Await the task to get the result
                         if (image != null)
-                        {
-                            // Rebuild the layer composite; Invalidate() alone
-                            // repaints the old cached preview.
                             ApplyGeneratedImageToCanvas(image, "AI restore");
-                        }
                         else
                         {
                             Logger.Log("The generated image is null.", Logger.LogTypes.Error);
@@ -10107,6 +9341,237 @@ namespace Carpathia
             labelOpacity.Text = nextOpacity.ToString() + "%";
             LayerSettingsModified();
         }
+
+        private void lassoTool_Click(object sender, EventArgs e)
+        {
+            ToolStripButtonsClick(lassoTool);
+        }
+
+        private void lassoTool_CheckedChanged(object sender, EventArgs e)
+        {
+            if (lassoTool.Checked)
+            {
+                selectedTool = Tools.Lasso;
+            }
+        }
+
+        private readonly List<PointF> lassoPoints = new();
+        private bool lassoActive = false;
+
+        private void BeginLasso(MouseEventArgs e)
+        {
+            if (MainBitmap == null) return;
+            if (isSelected) SetAsUnselected();
+
+            lassoPoints.Clear();
+            lassoPoints.Add(ClampToImage(e.X / zoom, e.Y / zoom));
+            lassoActive = true;
+            pictureBoxCanvas.Invalidate();
+        }
+
+        private PointF ClampToImage(float x, float y) =>
+            new PointF(Math.Max(0f, Math.Min(MainBitmap.Width, x)),
+                       Math.Max(0f, Math.Min(MainBitmap.Height, y)));
+
+        private void ExtendLasso(MouseEventArgs e)
+        {
+            if (!lassoActive || MainBitmap == null) return;
+
+            PointF next = ClampToImage(e.X / zoom, e.Y / zoom);
+            PointF last = lassoPoints[lassoPoints.Count - 1];
+            float dx = (next.X - last.X) * zoom, dy = (next.Y - last.Y) * zoom;
+            if (dx * dx + dy * dy < 4f) return;   // ignore sub-2px screen jitter
+
+            lassoPoints.Add(next);
+            pictureBoxCanvas.Invalidate();
+        }
+
+        private void CancelLasso()
+        {
+            lassoActive = false;
+            lassoPoints.Clear();
+            pictureBoxCanvas.Invalidate();
+        }
+
+        private void DrawLassoInProgress(Graphics g)
+        {
+            if (!lassoActive || lassoPoints.Count < 2) return;
+
+            PointF[] pts = lassoPoints.Select(p => new PointF(p.X * zoom, p.Y * zoom)).ToArray();
+            GraphicsState state = g.Save();
+            try
+            {
+                g.SmoothingMode = SmoothingMode.None;
+                var (blackPen, whitePen) = CreateMarchingAntsPens();
+                using (blackPen)
+                using (whitePen)
+                {
+                    g.DrawLines(blackPen, pts);
+                    g.DrawLines(whitePen, pts);
+                    // Show where the shape will close.
+                    g.DrawLine(blackPen, pts[pts.Length - 1], pts[0]);
+                    g.DrawLine(whitePen, pts[pts.Length - 1], pts[0]);
+                }
+            }
+            finally { g.Restore(state); }
+        }
+
+        private void FinishLasso()
+        {
+            lassoActive = false;
+            PointF[] pts = lassoPoints.ToArray();
+            lassoPoints.Clear();
+
+            if (MainBitmap == null || pts.Length < 3)
+            {
+                pictureBoxCanvas.Invalidate();
+                return;
+            }
+
+            int width = MainBitmap.Width, height = MainBitmap.Height;
+
+            using GraphicsPath path = new GraphicsPath(FillMode.Winding);
+            path.AddPolygon(pts);
+
+            RectangleF bf = path.GetBounds();
+            Rectangle bounds = Rectangle.Intersect(
+                Rectangle.FromLTRB((int)Math.Floor(bf.Left), (int)Math.Floor(bf.Top),
+                                   (int)Math.Ceiling(bf.Right), (int)Math.Ceiling(bf.Bottom)),
+                new Rectangle(0, 0, width, height));
+            if (bounds.Width < 1 || bounds.Height < 1)
+            {
+                pictureBoxCanvas.Invalidate();
+                return;
+            }
+
+            // The mask uses absolute MainBitmap coordinates, like the Magic Wand mask.
+            BitArray mask = new BitArray(width * height);
+            int minX = width, minY = height, maxX = -1, maxY = -1, count = 0;
+
+            using (Bitmap raster = new Bitmap(bounds.Width, bounds.Height, PixelFormat.Format32bppArgb))
+            {
+                using (Graphics g = Graphics.FromImage(raster))
+                {
+                    g.Clear(Color.Black);
+                    g.SmoothingMode = SmoothingMode.None;   // hard edges => crisp 1-bit mask
+                    g.TranslateTransform(-bounds.X, -bounds.Y);
+                    g.FillPath(Brushes.White, path);
+                }
+
+                BitmapData data = raster.LockBits(new Rectangle(Point.Empty, raster.Size),
+                    ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                try
+                {
+                    byte[] row = new byte[bounds.Width * 4];
+                    for (int y = 0; y < bounds.Height; y++)
+                    {
+                        Marshal.Copy(IntPtr.Add(data.Scan0, y * data.Stride), row, 0, row.Length);
+                        for (int x = 0; x < bounds.Width; x++)
+                        {
+                            if (row[x * 4 + 2] <= 127) continue;   // red channel: white = inside
+                            int ax = bounds.X + x, ay = bounds.Y + y;
+                            mask[ay * width + ax] = true;
+                            count++;
+                            if (ax < minX) minX = ax;
+                            if (ax > maxX) maxX = ax;
+                            if (ay < minY) minY = ay;
+                            if (ay > maxY) maxY = ay;
+                        }
+                    }
+                }
+                finally { raster.UnlockBits(data); }
+            }
+
+            if (count == 0)
+            {
+                pictureBoxCanvas.Invalidate();
+                return;
+            }
+
+            magicSelectionMask = mask;
+            magicSelectionMaskWidth = width;
+            magicSelectionMaskHeight = height;
+            magicSelectionBounds = Rectangle.FromLTRB(minX, minY, maxX + 1, maxY + 1);
+            BuildMagicSelectionOutlineSegments();
+
+            SelectedBitmap?.Dispose();
+            SelectedBitmap = null;
+            SelectionRectangle = Rectangle.Empty;
+            originalSelectionRectangleLocation = Point.Empty;
+            originalSelectionRectangleSize = Size.Empty;
+            isSelected = true;
+
+            pictureBoxCanvas.Invalidate();
+        }
+
+        // The lasso and the Magic Wand both use magicSelectionMask, so "mask" covers both.
+        private bool HasMaskSelection =>
+            isSelected && magicSelectionMask != null && !magicSelectionBounds.IsEmpty;
+
+        private bool HasRectSelection =>
+            isSelected && magicSelectionMask == null &&
+            SelectionRectangle.Width > 0 && SelectionRectangle.Height > 0;
+
+        private bool HasAnySelection => HasMaskSelection || HasRectSelection;
+
+        // Bounding box of the selection in image (bitmap) pixels.
+        private Rectangle GetSelectionImageBounds()
+        {
+            if (MainBitmap == null) return Rectangle.Empty;
+            Rectangle r = HasMaskSelection
+                ? magicSelectionBounds
+                : new Rectangle(originalSelectionRectangleLocation, originalSelectionRectangleSize);
+            r.Intersect(new Rectangle(Point.Empty, MainBitmap.Size));
+            return r;
+        }
+
+        // A rectangular selection may hold unflushed edits in SelectedBitmap. Merge them into
+        // the layer (keeping the selection) so the AI sees, and replaces, the real pixels.
+        private void FlushPendingSelectionBitmap()
+        {
+            if (SelectedBitmap == null || magicSelectionMask != null || MainBitmap == null ||
+                originalSelectionRectangleSize.Width <= 0 || originalSelectionRectangleSize.Height <= 0)
+                return;
+
+            using (Graphics g = Graphics.FromImage(MainBitmap))
+            {
+                g.CompositingMode = CompositingMode.SourceCopy;
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                g.DrawImage(SelectedBitmap,
+                    new Rectangle(originalSelectionRectangleLocation, originalSelectionRectangleSize),
+                    new Rectangle(Point.Empty, SelectedBitmap.Size), GraphicsUnit.Pixel);
+            }
+            SelectedBitmap.Dispose();
+            SelectedBitmap = null;
+        }
+
+        // Runs an AI edit on the current selection, whatever its type.
+        // Returns false when there is no selection, so the caller can edit the whole image.
+        private async Task<bool> TryRunAiOnSelectionAsync(string prompt, string historyDescription)
+        {
+            if (!HasAnySelection) return false;
+            if (IsActiveLayerLocked) { SystemSounds.Beep.Play(); return true; }
+
+            FlushPendingSelectionBitmap();
+            Rectangle bounds = GetSelectionImageBounds();
+            if (bounds.Width < 1 || bounds.Height < 1) { SystemSounds.Beep.Play(); return true; }
+
+            using Bitmap input = MainBitmap.Clone(bounds, PixelFormat.Format32bppArgb);
+            var image = await ImageGenerationCore.GenerateImage(prompt, input,
+                input.Width, input.Height, cts.Token);
+
+            if (image != null)
+                ApplyGeneratedSelectionToCanvas(image, historyDescription);
+            else
+            {
+                Logger.Log("The generated image is null.", Logger.LogTypes.Error);
+                MessageForm.Show("The generated image is null. Please try again.", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            return true;
+        }
+
+
     }
 
     internal sealed class LayerVisibilityToggledEventArgs : EventArgs
