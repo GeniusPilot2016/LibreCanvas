@@ -371,6 +371,7 @@ namespace Carpathia
             Cursor,
             Selection,
             MagicSelection,
+            Lasso,
             Brush,
             Pen,
             Eraser,
@@ -3828,7 +3829,12 @@ namespace Carpathia
                 foreach (MovingImageControl floating in pictureBoxCanvas.Controls.OfType<MovingImageControl>())
                     if (floating.EndCanvasDrag())
                         return;
-
+            if (lassoActive)
+            {
+                FinishLasso();
+                isdrawing = false;
+                return;
+            }
             if (!isImageCurrentlyCreating)
             {
                 if (isdrawing)
@@ -4300,7 +4306,9 @@ namespace Carpathia
                                 pictureBoxCanvas.Invalidate();
                                 break;
                             }
-
+                        case Tools.Lasso:
+                            ExtendLasso(e);
+                            break;
                         default:
                             drawIntoCanvas(e);
                             break;
@@ -4772,7 +4780,7 @@ namespace Carpathia
                         new Rectangle(0, 0, SelectedBitmap.Width, SelectedBitmap.Height),
                         GraphicsUnit.Pixel);
                 }
-
+                DrawLassoInProgress(e.Graphics);
                 // Draw the actual Magic Wand contour instead of its rectangular bounds.
                 if (magicSelectionMask != null)
                 {
@@ -5140,7 +5148,7 @@ namespace Carpathia
 
         private bool IsNonPaintingTool() => selectedTool == Tools.Cursor ||
             selectedTool == Tools.Selection || selectedTool == Tools.MagicSelection ||
-            selectedTool == Tools.ColorDrop;
+            selectedTool == Tools.ColorDrop || selectedTool == Tools.Lasso;
 
         private void pictureBoxCanvas_MouseDown(object sender, MouseEventArgs e)
         {
@@ -5290,7 +5298,9 @@ namespace Carpathia
                         CreateMagicSelection(magicPoint, tolerance2);
                         isdrawing = false; // Prevent MouseUp from treating the selection as a paint stroke.
                         break;
-
+                    case Tools.Lasso:
+                        BeginLasso(e);
+                        break;
                     default:
                         if (selectedTool == Tools.Brush || selectedTool == Tools.Pen || selectedTool == Tools.Eraser ||
                             selectedTool == Tools.Spray || selectedTool == Tools.Text)
@@ -9126,12 +9136,12 @@ namespace Carpathia
             }
             if (key == Keys.Escape)
             {
+                if (lassoActive) { CancelLasso(); return true; }
                 if (isSelected)
                 {
                     SetAsUnselected();
                     pictureBoxCanvas.Invalidate();
                 }
-
                 return true;
             }
 
@@ -10106,6 +10116,168 @@ namespace Carpathia
             layer.Opacity = nextOpacity;
             labelOpacity.Text = nextOpacity.ToString() + "%";
             LayerSettingsModified();
+        }
+
+        private void lassoTool_Click(object sender, EventArgs e)
+        {
+            ToolStripButtonsClick(lassoTool);
+        }
+
+        private void lassoTool_CheckedChanged(object sender, EventArgs e)
+        {
+            if (lassoTool.Checked)
+            {
+                selectedTool = Tools.Lasso;
+            }
+        }
+
+        private readonly List<PointF> lassoPoints = new();
+        private bool lassoActive = false;
+
+        private void BeginLasso(MouseEventArgs e)
+        {
+            if (MainBitmap == null) return;
+            if (isSelected) SetAsUnselected();
+
+            lassoPoints.Clear();
+            lassoPoints.Add(ClampToImage(e.X / zoom, e.Y / zoom));
+            lassoActive = true;
+            pictureBoxCanvas.Invalidate();
+        }
+
+        private PointF ClampToImage(float x, float y) =>
+            new PointF(Math.Max(0f, Math.Min(MainBitmap.Width, x)),
+                       Math.Max(0f, Math.Min(MainBitmap.Height, y)));
+
+        private void ExtendLasso(MouseEventArgs e)
+        {
+            if (!lassoActive || MainBitmap == null) return;
+
+            PointF next = ClampToImage(e.X / zoom, e.Y / zoom);
+            PointF last = lassoPoints[lassoPoints.Count - 1];
+            float dx = (next.X - last.X) * zoom, dy = (next.Y - last.Y) * zoom;
+            if (dx * dx + dy * dy < 4f) return;   // ignore sub-2px screen jitter
+
+            lassoPoints.Add(next);
+            pictureBoxCanvas.Invalidate();
+        }
+
+        private void CancelLasso()
+        {
+            lassoActive = false;
+            lassoPoints.Clear();
+            pictureBoxCanvas.Invalidate();
+        }
+
+        private void DrawLassoInProgress(Graphics g)
+        {
+            if (!lassoActive || lassoPoints.Count < 2) return;
+
+            PointF[] pts = lassoPoints.Select(p => new PointF(p.X * zoom, p.Y * zoom)).ToArray();
+            GraphicsState state = g.Save();
+            try
+            {
+                g.SmoothingMode = SmoothingMode.None;
+                var (blackPen, whitePen) = CreateMarchingAntsPens();
+                using (blackPen)
+                using (whitePen)
+                {
+                    g.DrawLines(blackPen, pts);
+                    g.DrawLines(whitePen, pts);
+                    // Show where the shape will close.
+                    g.DrawLine(blackPen, pts[pts.Length - 1], pts[0]);
+                    g.DrawLine(whitePen, pts[pts.Length - 1], pts[0]);
+                }
+            }
+            finally { g.Restore(state); }
+        }
+
+        private void FinishLasso()
+        {
+            lassoActive = false;
+            PointF[] pts = lassoPoints.ToArray();
+            lassoPoints.Clear();
+
+            if (MainBitmap == null || pts.Length < 3)
+            {
+                pictureBoxCanvas.Invalidate();
+                return;
+            }
+
+            int width = MainBitmap.Width, height = MainBitmap.Height;
+
+            using GraphicsPath path = new GraphicsPath(FillMode.Winding);
+            path.AddPolygon(pts);
+
+            RectangleF bf = path.GetBounds();
+            Rectangle bounds = Rectangle.Intersect(
+                Rectangle.FromLTRB((int)Math.Floor(bf.Left), (int)Math.Floor(bf.Top),
+                                   (int)Math.Ceiling(bf.Right), (int)Math.Ceiling(bf.Bottom)),
+                new Rectangle(0, 0, width, height));
+            if (bounds.Width < 1 || bounds.Height < 1)
+            {
+                pictureBoxCanvas.Invalidate();
+                return;
+            }
+
+            // The mask uses absolute MainBitmap coordinates, like the Magic Wand mask.
+            BitArray mask = new BitArray(width * height);
+            int minX = width, minY = height, maxX = -1, maxY = -1, count = 0;
+
+            using (Bitmap raster = new Bitmap(bounds.Width, bounds.Height, PixelFormat.Format32bppArgb))
+            {
+                using (Graphics g = Graphics.FromImage(raster))
+                {
+                    g.Clear(Color.Black);
+                    g.SmoothingMode = SmoothingMode.None;   // hard edges => crisp 1-bit mask
+                    g.TranslateTransform(-bounds.X, -bounds.Y);
+                    g.FillPath(Brushes.White, path);
+                }
+
+                BitmapData data = raster.LockBits(new Rectangle(Point.Empty, raster.Size),
+                    ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                try
+                {
+                    byte[] row = new byte[bounds.Width * 4];
+                    for (int y = 0; y < bounds.Height; y++)
+                    {
+                        Marshal.Copy(IntPtr.Add(data.Scan0, y * data.Stride), row, 0, row.Length);
+                        for (int x = 0; x < bounds.Width; x++)
+                        {
+                            if (row[x * 4 + 2] <= 127) continue;   // red channel: white = inside
+                            int ax = bounds.X + x, ay = bounds.Y + y;
+                            mask[ay * width + ax] = true;
+                            count++;
+                            if (ax < minX) minX = ax;
+                            if (ax > maxX) maxX = ax;
+                            if (ay < minY) minY = ay;
+                            if (ay > maxY) maxY = ay;
+                        }
+                    }
+                }
+                finally { raster.UnlockBits(data); }
+            }
+
+            if (count == 0)
+            {
+                pictureBoxCanvas.Invalidate();
+                return;
+            }
+
+            magicSelectionMask = mask;
+            magicSelectionMaskWidth = width;
+            magicSelectionMaskHeight = height;
+            magicSelectionBounds = Rectangle.FromLTRB(minX, minY, maxX + 1, maxY + 1);
+            BuildMagicSelectionOutlineSegments();
+
+            SelectedBitmap?.Dispose();
+            SelectedBitmap = null;
+            SelectionRectangle = Rectangle.Empty;
+            originalSelectionRectangleLocation = Point.Empty;
+            originalSelectionRectangleSize = Size.Empty;
+            isSelected = true;
+
+            pictureBoxCanvas.Invalidate();
         }
     }
 
