@@ -484,6 +484,111 @@
   <data name="example_prompt_15" xml:space="preserve">
     <value>A cinematic underwater scene with whales and sun rays</value>
   </data>
+  <data name="example_prompt_16" xml:space="preserve">
+    <value>A futuristic floating island city above the ocean, glowing skyscrapers and flying vehicles</value>
+  </data>
+  <data name="example_prompt_17" xml:space="preserve">
+    <value>A magical library with endless bookshelves, floating candles and golden light</value>
+  </data>
+  <data name="example_prompt_18" xml:space="preserve">
+    <value>A photorealistic supercar parked in a rainy neon-lit city street at midnight</value>
+  </data>
+  <data name="example_prompt_19" xml:space="preserve">
+    <value>A majestic dragon flying above snow-covered mountains, epic fantasy atmosphere</value>
+  </data>
+  <data name="example_prompt_28" xml:space="preserve">
+    <value>A futuristic space station orbiting Earth, dramatic cinematic lighting</value>
+  </data>
+  <data name="example_prompt_29" xml:space="preserve">
+    <value>A cute golden retriever puppy wearing a tiny astronaut helmet on the Moon</value>
+  </data>
+  <data name="example_prompt_30" xml:space="preserve">
+    <value>A luxurious perfume bottle on reflective marble with dramatic studio lighting</value>
+  </data>
+  <data name="example_prompt_40" xml:space="preserve">
+    <value>A cinematic pirate ship sailing through a storm with enormous ocean waves</value>
+  </data>
+  <data name="example_prompt_50" xml:space="preserve">
+    <value>A cinematic aerial view of Istanbul at night, illuminated Bosphorus bridges and city lights</value>
+  </data>
+  <data name="example_prompt_49" xml:space="preserve">
+    <value>A grand fantasy palace carved into a cliffside beside a massive waterfall</value>
+  </data>
+  <data name="example_prompt_48" xml:space="preserve">
+    <value>A realistic volcanic landscape with flowing lava beneath a dramatic night sky</value>
+  </data>
+  <data name="example_prompt_47" xml:space="preserve">
+    <value>A whimsical miniature bakery inside a hollow tree, warm fairy-tale lighting</value>
+  </data>
+  <data name="example_prompt_46" xml:space="preserve">
+    <value>An elegant black sports motorcycle parked beside a modern glass building</value>
+  </data>
+  <data name="example_prompt_45" xml:space="preserve">
+    <value>A futuristic underwater research facility with glass tunnels and marine life</value>
+  </data>
+  <data name="example_prompt_44" xml:space="preserve">
+    <value>A high-detail macro photograph of a butterfly covered in tiny water droplets</value>
+  </data>
+  <data name="example_prompt_43" xml:space="preserve">
+    <value>A colorful hot air balloon festival over Cappadocia at sunrise</value>
+  </data>
+  <data name="example_prompt_42" xml:space="preserve">
+    <value>A mysterious abandoned subway station overgrown with plants and glowing mushrooms</value>
+  </data>
+  <data name="example_prompt_41" xml:space="preserve">
+    <value>A photorealistic futuristic electric car inside a luxury showroom</value>
+  </data>
+  <data name="example_prompt_39" xml:space="preserve">
+    <value>An enchanted treehouse village surrounded by glowing fireflies at night</value>
+  </data>
+  <data name="example_prompt_38" xml:space="preserve">
+    <value>A professional fashion editorial portrait with dramatic shadows and elegant styling</value>
+  </data>
+  <data name="example_prompt_37" xml:space="preserve">
+    <value>A dreamy field of lavender flowers under a pink and orange sunset sky</value>
+  </data>
+  <data name="example_prompt_36" xml:space="preserve">
+    <value>A giant futuristic robot walking through an abandoned city at sunset</value>
+  </data>
+  <data name="example_prompt_35" xml:space="preserve">
+    <value>A breathtaking northern lights display above a snowy mountain village</value>
+  </data>
+  <data name="example_prompt_34" xml:space="preserve">
+    <value>A minimalist Scandinavian bedroom with soft morning light and neutral tones</value>
+  </data>
+  <data name="example_prompt_33" xml:space="preserve">
+    <value>A fantasy underwater kingdom with glowing coral, ancient ruins and mermaids</value>
+  </data>
+  <data name="example_prompt_32" xml:space="preserve">
+    <value>A cyberpunk motorcycle speeding through a neon tunnel, dynamic motion blur</value>
+  </data>
+  <data name="example_prompt_31" xml:space="preserve">
+    <value>An ancient Egyptian temple illuminated by moonlight under a star-filled sky</value>
+  </data>
+  <data name="example_prompt_27" xml:space="preserve">
+    <value>A photorealistic tropical island with crystal-clear turquoise water and white sand</value>
+  </data>
+  <data name="example_prompt_26" xml:space="preserve">
+    <value>A cozy coffee shop on a rainy evening, warm interior lights and reflections</value>
+  </data>
+  <data name="example_prompt_25" xml:space="preserve">
+    <value>A cinematic medieval knight standing in a misty battlefield at sunrise</value>
+  </data>
+  <data name="example_prompt_24" xml:space="preserve">
+    <value>A surreal desert landscape with giant floating planets and purple skies</value>
+  </data>
+  <data name="example_prompt_23" xml:space="preserve">
+    <value>A realistic robot sitting in a futuristic laboratory, blue holographic screens</value>
+  </data>
+  <data name="example_prompt_22" xml:space="preserve">
+    <value>A beautiful Japanese garden with cherry blossoms, wooden bridge and peaceful pond</value>
+  </data>
+  <data name="example_prompt_21" xml:space="preserve">
+    <value>A steampunk airship flying over Victorian London, cinematic clouds and warm lighting</value>
+  </data>
+  <data name="example_prompt_20" xml:space="preserve">
+    <value>A luxurious modern villa overlooking the Mediterranean Sea at golden hour</value>
+  </data>
   <data name="icons8-rotate-48" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\icons8-rotate-48.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>

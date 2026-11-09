@@ -2978,7 +2978,6 @@ namespace Carpathia
 
         private async Task<bool> SaveAsAsync()
         {
-            saveFileDialog1.Filter = "PNG Files|*.png|JPEG Files|*.jpg|Bitmap Files|*.bmp";
             if (saveFileDialog1.ShowDialog() != DialogResult.OK)
                 return false;
 
@@ -5773,7 +5772,6 @@ namespace Carpathia
         {
             try
             {
-                openFileDialog1.Filter = "PNG Files|*.png|JPEG Files|*.jpg|Bitmap Files|*.bmp";
                 DialogResult dialogResult = openFileDialog1.ShowDialog();
                 if (dialogResult == DialogResult.OK)
                 {

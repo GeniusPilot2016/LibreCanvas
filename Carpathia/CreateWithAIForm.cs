@@ -262,61 +262,22 @@ namespace Carpathia
                 }
             }
         }
+
+        private static readonly Random random = new Random();
+
         private void SelectRandomPrompt()
         {
-            Random random = new Random();
-            int number = random.Next(1, 16); // Random number between 1 and 15
-            string selectedPrompt = string.Empty;
-            switch (number)
-            {
-                case 1:
-                    selectedPrompt = Resources.example_prompt_1;
-                    break;
-                case 2:
-                    selectedPrompt = Resources.example_prompt_2;
-                    break;
-                case 3:
-                    selectedPrompt = Resources.example_prompt_3;
-                    break;
-                case 4:
-                    selectedPrompt = Resources.example_prompt_4;
-                    break;
-                case 5:
-                    selectedPrompt = Resources.example_prompt_5;
-                    break;
-                case 6:
-                    selectedPrompt = Resources.example_prompt_6;
-                    break;
-                case 7:
-                    selectedPrompt = Resources.example_prompt_7;
-                    break;
-                case 8:
-                    selectedPrompt = Resources.example_prompt_8;
-                    break;
-                case 9:
-                    selectedPrompt = Resources.example_prompt_9;
-                    break;
-                case 10:
-                    selectedPrompt = Resources.example_prompt_10;
-                    break;
-                case 11:
-                    selectedPrompt = Resources.example_prompt_11;
-                    break;
-                case 12:
-                    selectedPrompt = Resources.example_prompt_12;
-                    break;
-                case 13:
-                    selectedPrompt = Resources.example_prompt_13;
-                    break;
-                case 14:
-                    selectedPrompt = Resources.example_prompt_14;
-                    break;
-                case 15:
-                    selectedPrompt = Resources.example_prompt_15;
-                    break;
-            }
+            // Random number between 1 and 50 (inclusive)
+            int number = random.Next(1, 51);
+
+            // Dynamically retrieve the prompt from Resources
+            string selectedPrompt = Resources.ResourceManager.GetString(
+                $"example_prompt_{number}"
+            ) ?? string.Empty;
+
             textBoxPrompt.PlaceholderText = selectedPrompt;
         }
+
         private static Bitmap LoadInputImage(string path)
         {
             using var original = new Bitmap(path);

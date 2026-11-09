@@ -740,7 +740,6 @@
             // panelResizer
             // 
             panelResizer.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            panelResizer.BorderStyle = BorderStyle.FixedSingle;
             panelResizer.Location = new Point(10, 10);
             panelResizer.Name = "panelResizer";
             panelResizer.Size = new Size(800, 600);
@@ -1488,7 +1487,7 @@
             grayscaleTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
             grayscaleTool.Image = Properties.Resources.icons8_black_and_white_48__1_;
             grayscaleTool.Name = "grayscaleTool";
-            grayscaleTool.Size = new Size(24, 24);
+            grayscaleTool.Size = new Size(37, 24);
             grayscaleTool.Text = "B&W";
             grayscaleTool.ToolTipText = "B&W";
             grayscaleTool.Click += grayscaleTool_Click;
@@ -1498,7 +1497,7 @@
             fitTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
             fitTool.Image = Properties.Resources.icons8_fit_to_page_48;
             fitTool.Name = "fitTool";
-            fitTool.Size = new Size(24, 24);
+            fitTool.Size = new Size(37, 24);
             fitTool.Text = "Fit";
             fitTool.ToolTipText = "Fit canvas in workspace";
             fitTool.Click += fitTool_Click;
@@ -2897,6 +2896,14 @@
             // 
             colorDialog1.AnyColor = true;
             colorDialog1.FullOpen = true;
+            // 
+            // openFileDialog1
+            // 
+            openFileDialog1.Filter = "PNG Files|*.png|JPEG Files|*.jpg|Bitmap Files|*.bmp|WEBP Files|*.webp|GIF Files|*.gif|All Files|*.*";
+            // 
+            // saveFileDialog1
+            // 
+            saveFileDialog1.Filter = "PNG Files|*.png|JPEG Files|*.jpg|Bitmap Files|*.bmp|WEBP Files|*.webp";
             // 
             // printImageDialog
             // 
