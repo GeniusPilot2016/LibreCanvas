@@ -50,6 +50,7 @@
             labelCreatingImage = new ToolStripLabel();
             labelAIImageErasing = new ToolStripLabel();
             progressBarAIImageCreation = new ToolStripProgressBar();
+            sunnyTheCat1 = new SunnyTheCat();
             UIPanel = new Panel();
             contextMenuStrip1 = new ContextMenuStrip(components);
             cutToolStripMenuItem = new ToolStripMenuItem();
@@ -359,6 +360,7 @@
             // 
             // toolStripContainer1.ContentPanel
             // 
+            toolStripContainer1.ContentPanel.Controls.Add(sunnyTheCat1);
             toolStripContainer1.ContentPanel.Controls.Add(UIPanel);
             toolStripContainer1.ContentPanel.Controls.Add(tabControl1);
             toolStripContainer1.ContentPanel.Size = new Size(1250, 759);
@@ -521,6 +523,15 @@
             progressBarAIImageCreation.Size = new Size(400, 22);
             progressBarAIImageCreation.Style = ProgressBarStyle.Marquee;
             progressBarAIImageCreation.Visible = false;
+            // 
+            // sunnyTheCat1
+            // 
+            sunnyTheCat1.Anchor = AnchorStyles.Bottom;
+            sunnyTheCat1.BackColor = Color.Transparent;
+            sunnyTheCat1.Location = new Point(100, 669);
+            sunnyTheCat1.Name = "sunnyTheCat1";
+            sunnyTheCat1.Size = new Size(101, 90);
+            sunnyTheCat1.TabIndex = 5;
             // 
             // UIPanel
             // 
@@ -3315,6 +3326,7 @@
         private ColumnHeader columnHeader2;
         private ImageList imageListHistoryIcons;
         private ToolStripButton lassoTool;
+        private SunnyTheCat sunnyTheCat1;
     }
 
 }

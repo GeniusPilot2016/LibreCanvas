@@ -691,6 +691,8 @@ namespace Carpathia
         private void InitializeComponentAndFont()
         {
             InitializeComponent();
+            // Keep the mascot within the *visible* UIPanel viewport while dragging.
+            MakeDraggable(sunnyTheCat1, UIPanel);
             tabControl1.Width = (int)(CalculateDPIRate() * tabControl1.Size.Width);
             // PictureBox paints its Image automatically. Its native image pass must
             // fill the same zoomed bounds used for selection and pointer overlays.
@@ -3158,7 +3160,7 @@ namespace Carpathia
             }
         }
 
-        
+
         private void addTextTool_CheckedChanged(object sender, EventArgs e)
         {
             if (addTextTool.Checked)
@@ -3176,6 +3178,89 @@ namespace Carpathia
         private void panel1_MouseMove(object sender, MouseEventArgs e)
         {
             this.Cursor = Cursors.Default;
+        }
+        public static void MakeDraggable(Control control, Control movementBounds = null)
+        {
+            bool isMouseDown = false;
+            bool hasMoved = false;
+            Point dragCursorPoint = Point.Empty;
+            Point dragControlPoint = Point.Empty;
+            const int DragThreshold = 4; // Distinguish a click from a drag.
+
+            MouseEventHandler onMouseDown = (sender, e) =>
+            {
+                if (e.Button != MouseButtons.Left) return;
+
+                isMouseDown = true;
+                hasMoved = false;
+                dragCursorPoint = Cursor.Position;
+                dragControlPoint = control.Location;
+                control.BringToFront();
+
+                if (control is SunnyTheCat cat)
+                    cat.WasDragged = false;
+            };
+
+            MouseEventHandler onMouseMove = (sender, e) =>
+            {
+                if (!isMouseDown) return;
+
+                Point diff = Point.Subtract(Cursor.Position, new Size(dragCursorPoint));
+
+                if (!hasMoved &&
+                    (Math.Abs(diff.X) > DragThreshold || Math.Abs(diff.Y) > DragThreshold))
+                {
+                    hasMoved = true;
+                    if (control is SunnyTheCat cat)
+                        cat.WasDragged = true;
+                }
+
+                if (!hasMoved) return;
+
+                Point proposed = Point.Add(dragControlPoint, new Size(diff));
+
+                if (movementBounds != null && control.Parent != null)
+                {
+                    // Convert the visible viewport from its own coordinate space
+                    // into the mascot parent's coordinate space. This also works
+                    // when the mascot and UIPanel are not direct parent/child controls.
+                    Rectangle viewportInParent = control.Parent.RectangleToClient(
+                        movementBounds.RectangleToScreen(movementBounds.ClientRectangle));
+
+                    int minX = viewportInParent.Left;
+                    int minY = viewportInParent.Top;
+                    int maxX = Math.Max(minX, viewportInParent.Right - control.Width);
+                    int maxY = Math.Max(minY, viewportInParent.Bottom - control.Height);
+
+                    proposed.X = Math.Clamp(proposed.X, minX, maxX);
+                    proposed.Y = Math.Clamp(proposed.Y, minY, maxY);
+                }
+
+                control.Location = proposed;
+            };
+
+            MouseEventHandler onMouseUp = (sender, e) =>
+            {
+                if (e.Button != MouseButtons.Left) return;
+
+                isMouseDown = false;
+                // Keep WasDragged until the next MouseDown, so a trailing Click
+                // cannot trigger a meow or Happy animation.
+            };
+
+            AttachMouseEvents(control, onMouseDown, onMouseMove, onMouseUp);
+        }
+
+        private static void AttachMouseEvents(Control target, MouseEventHandler down, MouseEventHandler move, MouseEventHandler up)
+        {
+            target.MouseDown += down;
+            target.MouseMove += move;
+            target.MouseUp += up;
+
+            foreach (Control child in target.Controls)
+            {
+                AttachMouseEvents(child, down, move, up);
+            }
         }
 
         private void panel1_Paint(object sender, PaintEventArgs e)
@@ -5799,7 +5884,7 @@ namespace Carpathia
         {
             AskForSavingOrCancel(new Action(() => createNewFile()));
         }
-       
+
         private void createWithAIToolStripMenuItem_Click(object sender, EventArgs e)
         {
             CreateWithAIForm createWithAIForm = new CreateWithAIForm();
