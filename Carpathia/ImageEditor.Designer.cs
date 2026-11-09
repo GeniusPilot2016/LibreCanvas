@@ -72,11 +72,6 @@
             panel2 = new Panel();
             comboBoxBlendMode = new ComboBox();
             label2 = new Label();
-            listView1 = new LayerDataGridView();
-            dataGridViewImageColumn1 = new DataGridViewImageColumn();
-            dataGridViewImageColumn2 = new DataGridViewImageColumn();
-            dataGridViewImageColumn3 = new DataGridViewImageColumn();
-            dataGridViewTextBoxColumn1 = new DataGridViewTextBoxColumn();
             panel1 = new Panel();
             labelOpacity = new Label();
             trackBarOpacity = new TrackBar();
@@ -255,6 +250,10 @@
             toolStripLabel12 = new ToolStripLabel();
             comboBoxEraserSize = new ToolStripComboBox();
             toolStripSeparator23 = new ToolStripSeparator();
+            dataGridViewImageColumn1 = new DataGridViewImageColumn();
+            dataGridViewImageColumn2 = new DataGridViewImageColumn();
+            dataGridViewImageColumn3 = new DataGridViewImageColumn();
+            dataGridViewTextBoxColumn1 = new DataGridViewTextBoxColumn();
             columnHeader1 = new ColumnHeader();
             imageListLayerThumbnails = new ImageList(components);
             menuStrip1 = new MenuStrip();
@@ -328,7 +327,6 @@
             tabPage1.SuspendLayout();
             tableLayoutPanel1.SuspendLayout();
             panel2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)listView1).BeginInit();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)trackBarOpacity).BeginInit();
             toolStripLayer.SuspendLayout();
@@ -779,7 +777,6 @@
             tableLayoutPanel1.ColumnCount = 1;
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tableLayoutPanel1.Controls.Add(panel2, 0, 0);
-            tableLayoutPanel1.Controls.Add(listView1, 0, 2);
             tableLayoutPanel1.Controls.Add(panel1, 0, 1);
             tableLayoutPanel1.Dock = DockStyle.Fill;
             tableLayoutPanel1.Location = new Point(3, 3);
@@ -824,64 +821,6 @@
             label2.Size = new Size(73, 16);
             label2.TabIndex = 0;
             label2.Text = "Blend Mode";
-            // 
-            // listView1
-            // 
-            listView1.AllowUserToAddRows = false;
-            listView1.AllowUserToDeleteRows = false;
-            listView1.AllowUserToResizeRows = false;
-            listView1.BackgroundColor = SystemColors.Window;
-            listView1.BorderStyle = BorderStyle.Fixed3D;
-            listView1.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-            listView1.ColumnHeadersVisible = false;
-            listView1.Dock = DockStyle.Fill;
-            listView1.Location = new Point(3, 83);
-            listView1.MultiSelect = false;
-            listView1.Name = "listView1";
-            listView1.ReadOnly = true;
-            listView1.RowHeadersVisible = false;
-            listView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            listView1.Size = new Size(219, 634);
-            listView1.TabIndex = 1;
-            // 
-            // dataGridViewImageColumn1
-            // 
-            dataGridViewImageColumn1.HeaderText = "";
-            dataGridViewImageColumn1.ImageLayout = DataGridViewImageCellLayout.Zoom;
-            dataGridViewImageColumn1.MinimumWidth = 32;
-            dataGridViewImageColumn1.Name = "dataGridViewImageColumn1";
-            dataGridViewImageColumn1.ReadOnly = true;
-            dataGridViewImageColumn1.Resizable = DataGridViewTriState.False;
-            dataGridViewImageColumn1.Width = 32;
-            // 
-            // dataGridViewImageColumn2
-            // 
-            dataGridViewImageColumn2.HeaderText = "";
-            dataGridViewImageColumn2.ImageLayout = DataGridViewImageCellLayout.Zoom;
-            dataGridViewImageColumn2.MinimumWidth = 32;
-            dataGridViewImageColumn2.Name = "dataGridViewImageColumn2";
-            dataGridViewImageColumn2.ReadOnly = true;
-            dataGridViewImageColumn2.Resizable = DataGridViewTriState.False;
-            dataGridViewImageColumn2.Width = 32;
-            // 
-            // dataGridViewImageColumn3
-            // 
-            dataGridViewImageColumn3.HeaderText = "";
-            dataGridViewImageColumn3.ImageLayout = DataGridViewImageCellLayout.Zoom;
-            dataGridViewImageColumn3.MinimumWidth = 70;
-            dataGridViewImageColumn3.Name = "dataGridViewImageColumn3";
-            dataGridViewImageColumn3.ReadOnly = true;
-            dataGridViewImageColumn3.Resizable = DataGridViewTriState.False;
-            dataGridViewImageColumn3.Width = 70;
-            // 
-            // dataGridViewTextBoxColumn1
-            // 
-            dataGridViewTextBoxColumn1.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            dataGridViewTextBoxColumn1.HeaderText = "Layer";
-            dataGridViewTextBoxColumn1.MinimumWidth = 40;
-            dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
-            dataGridViewTextBoxColumn1.ReadOnly = true;
-            dataGridViewTextBoxColumn1.SortMode = DataGridViewColumnSortMode.NotSortable;
             // 
             // panel1
             // 
@@ -1488,7 +1427,7 @@
             grayscaleTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
             grayscaleTool.Image = Properties.Resources.icons8_black_and_white_48__1_;
             grayscaleTool.Name = "grayscaleTool";
-            grayscaleTool.Size = new Size(24, 24);
+            grayscaleTool.Size = new Size(37, 24);
             grayscaleTool.Text = "B&W";
             grayscaleTool.ToolTipText = "B&W";
             grayscaleTool.Click += grayscaleTool_Click;
@@ -1498,7 +1437,7 @@
             fitTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
             fitTool.Image = Properties.Resources.icons8_fit_to_page_48;
             fitTool.Name = "fitTool";
-            fitTool.Size = new Size(24, 24);
+            fitTool.Size = new Size(37, 24);
             fitTool.Text = "Fit";
             fitTool.ToolTipText = "Fit canvas in workspace";
             fitTool.Click += fitTool_Click;
@@ -2487,6 +2426,45 @@
             toolStripSeparator23.Name = "toolStripSeparator23";
             toolStripSeparator23.Size = new Size(6, 25);
             // 
+            // dataGridViewImageColumn1
+            // 
+            dataGridViewImageColumn1.HeaderText = "";
+            dataGridViewImageColumn1.ImageLayout = DataGridViewImageCellLayout.Zoom;
+            dataGridViewImageColumn1.MinimumWidth = 32;
+            dataGridViewImageColumn1.Name = "dataGridViewImageColumn1";
+            dataGridViewImageColumn1.ReadOnly = true;
+            dataGridViewImageColumn1.Resizable = DataGridViewTriState.False;
+            dataGridViewImageColumn1.Width = 32;
+            // 
+            // dataGridViewImageColumn2
+            // 
+            dataGridViewImageColumn2.HeaderText = "";
+            dataGridViewImageColumn2.ImageLayout = DataGridViewImageCellLayout.Zoom;
+            dataGridViewImageColumn2.MinimumWidth = 32;
+            dataGridViewImageColumn2.Name = "dataGridViewImageColumn2";
+            dataGridViewImageColumn2.ReadOnly = true;
+            dataGridViewImageColumn2.Resizable = DataGridViewTriState.False;
+            dataGridViewImageColumn2.Width = 32;
+            // 
+            // dataGridViewImageColumn3
+            // 
+            dataGridViewImageColumn3.HeaderText = "";
+            dataGridViewImageColumn3.ImageLayout = DataGridViewImageCellLayout.Zoom;
+            dataGridViewImageColumn3.MinimumWidth = 70;
+            dataGridViewImageColumn3.Name = "dataGridViewImageColumn3";
+            dataGridViewImageColumn3.ReadOnly = true;
+            dataGridViewImageColumn3.Resizable = DataGridViewTriState.False;
+            dataGridViewImageColumn3.Width = 70;
+            // 
+            // dataGridViewTextBoxColumn1
+            // 
+            dataGridViewTextBoxColumn1.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            dataGridViewTextBoxColumn1.HeaderText = "Layer";
+            dataGridViewTextBoxColumn1.MinimumWidth = 40;
+            dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            dataGridViewTextBoxColumn1.ReadOnly = true;
+            dataGridViewTextBoxColumn1.SortMode = DataGridViewColumnSortMode.NotSortable;
+            // 
             // columnHeader1
             // 
             columnHeader1.Text = "Layer";
@@ -2898,6 +2876,14 @@
             colorDialog1.AnyColor = true;
             colorDialog1.FullOpen = true;
             // 
+            // openFileDialog1
+            // 
+            openFileDialog1.Filter = "PNG Files|*.png|JPEG Files|*.jpg|Bitmap Files|*.bmp|GIF Files|*.gif|WEBP Files|*.webp|All Files|*.*";
+            // 
+            // saveFileDialog1
+            // 
+            saveFileDialog1.Filter = "PNG Files|*.png|JPEG Files|*.jpg|Bitmap Files|*.bmp|WEBP Files|*.webp";
+            // 
             // printImageDialog
             // 
             printImageDialog.UseEXDialog = true;
@@ -2978,7 +2964,6 @@
             tableLayoutPanel1.PerformLayout();
             panel2.ResumeLayout(false);
             panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)listView1).EndInit();
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)trackBarOpacity).EndInit();
