@@ -124,11 +124,137 @@ namespace Carpathia.Properties {
         }
         
         /// <summary>
+        ///   A futuristic floating island city above the ocean, glowing skyscrapers and flying vehicles benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_16 {
+            get {
+                return ResourceManager.GetString("example_prompt_16", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A magical library with endless bookshelves, floating candles and golden light benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_17 {
+            get {
+                return ResourceManager.GetString("example_prompt_17", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A photorealistic supercar parked in a rainy neon-lit city street at midnight benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_18 {
+            get {
+                return ResourceManager.GetString("example_prompt_18", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A majestic dragon flying above snow-covered mountains, epic fantasy atmosphere benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_19 {
+            get {
+                return ResourceManager.GetString("example_prompt_19", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   A cozy cabin in a snowy forest, warm lights, cinematic atmosphere benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
         internal static string example_prompt_2 {
             get {
                 return ResourceManager.GetString("example_prompt_2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A luxurious modern villa overlooking the Mediterranean Sea at golden hour benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_20 {
+            get {
+                return ResourceManager.GetString("example_prompt_20", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A steampunk airship flying over Victorian London, cinematic clouds and warm lighting benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_21 {
+            get {
+                return ResourceManager.GetString("example_prompt_21", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A beautiful Japanese garden with cherry blossoms, wooden bridge and peaceful pond benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_22 {
+            get {
+                return ResourceManager.GetString("example_prompt_22", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A realistic robot sitting in a futuristic laboratory, blue holographic screens benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_23 {
+            get {
+                return ResourceManager.GetString("example_prompt_23", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A surreal desert landscape with giant floating planets and purple skies benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_24 {
+            get {
+                return ResourceManager.GetString("example_prompt_24", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A cinematic medieval knight standing in a misty battlefield at sunrise benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_25 {
+            get {
+                return ResourceManager.GetString("example_prompt_25", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A cozy coffee shop on a rainy evening, warm interior lights and reflections benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_26 {
+            get {
+                return ResourceManager.GetString("example_prompt_26", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A photorealistic tropical island with crystal-clear turquoise water and white sand benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_27 {
+            get {
+                return ResourceManager.GetString("example_prompt_27", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A futuristic space station orbiting Earth, dramatic cinematic lighting benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_28 {
+            get {
+                return ResourceManager.GetString("example_prompt_28", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A cute golden retriever puppy wearing a tiny astronaut helmet on the Moon benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_29 {
+            get {
+                return ResourceManager.GetString("example_prompt_29", resourceCulture);
             }
         }
         
@@ -142,6 +268,96 @@ namespace Carpathia.Properties {
         }
         
         /// <summary>
+        ///   A luxurious perfume bottle on reflective marble with dramatic studio lighting benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_30 {
+            get {
+                return ResourceManager.GetString("example_prompt_30", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   An ancient Egyptian temple illuminated by moonlight under a star-filled sky benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_31 {
+            get {
+                return ResourceManager.GetString("example_prompt_31", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A cyberpunk motorcycle speeding through a neon tunnel, dynamic motion blur benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_32 {
+            get {
+                return ResourceManager.GetString("example_prompt_32", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A fantasy underwater kingdom with glowing coral, ancient ruins and mermaids benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_33 {
+            get {
+                return ResourceManager.GetString("example_prompt_33", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A minimalist Scandinavian bedroom with soft morning light and neutral tones benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_34 {
+            get {
+                return ResourceManager.GetString("example_prompt_34", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A breathtaking northern lights display above a snowy mountain village benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_35 {
+            get {
+                return ResourceManager.GetString("example_prompt_35", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A giant futuristic robot walking through an abandoned city at sunset benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_36 {
+            get {
+                return ResourceManager.GetString("example_prompt_36", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A dreamy field of lavender flowers under a pink and orange sunset sky benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_37 {
+            get {
+                return ResourceManager.GetString("example_prompt_37", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A professional fashion editorial portrait with dramatic shadows and elegant styling benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_38 {
+            get {
+                return ResourceManager.GetString("example_prompt_38", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   An enchanted treehouse village surrounded by glowing fireflies at night benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_39 {
+            get {
+                return ResourceManager.GetString("example_prompt_39", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   A cyberpunk samurai in Tokyo, neon rain, cinematic lighting benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
         internal static string example_prompt_4 {
@@ -151,11 +367,110 @@ namespace Carpathia.Properties {
         }
         
         /// <summary>
+        ///   A cinematic pirate ship sailing through a storm with enormous ocean waves benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_40 {
+            get {
+                return ResourceManager.GetString("example_prompt_40", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A photorealistic futuristic electric car inside a luxury showroom benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_41 {
+            get {
+                return ResourceManager.GetString("example_prompt_41", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A mysterious abandoned subway station overgrown with plants and glowing mushrooms benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_42 {
+            get {
+                return ResourceManager.GetString("example_prompt_42", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A colorful hot air balloon festival over Cappadocia at sunrise benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_43 {
+            get {
+                return ResourceManager.GetString("example_prompt_43", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A high-detail macro photograph of a butterfly covered in tiny water droplets benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_44 {
+            get {
+                return ResourceManager.GetString("example_prompt_44", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A futuristic underwater research facility with glass tunnels and marine life benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_45 {
+            get {
+                return ResourceManager.GetString("example_prompt_45", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   An elegant black sports motorcycle parked beside a modern glass building benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_46 {
+            get {
+                return ResourceManager.GetString("example_prompt_46", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A whimsical miniature bakery inside a hollow tree, warm fairy-tale lighting benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_47 {
+            get {
+                return ResourceManager.GetString("example_prompt_47", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A realistic volcanic landscape with flowing lava beneath a dramatic night sky benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_48 {
+            get {
+                return ResourceManager.GetString("example_prompt_48", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A grand fantasy palace carved into a cliffside beside a massive waterfall benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_49 {
+            get {
+                return ResourceManager.GetString("example_prompt_49", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   A minimalist product photo of a luxury watch on a black background benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
         internal static string example_prompt_5 {
             get {
                 return ResourceManager.GetString("example_prompt_5", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   A cinematic aerial view of Istanbul at night, illuminated Bosphorus bridges and city lights benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string example_prompt_50 {
+            get {
+                return ResourceManager.GetString("example_prompt_50", resourceCulture);
             }
         }
         
