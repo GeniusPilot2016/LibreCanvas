@@ -32,12 +32,13 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsWindow));
             tabControl1 = new TabControl();
             tabPage1 = new TabPage();
+            groupBox23 = new GroupBox();
+            checkBox1 = new CheckBox();
             groupBox3 = new GroupBox();
             groupBox4 = new GroupBox();
             radioButtonDontShowStartup = new RadioButton();
             radioButtonShowStartup = new RadioButton();
             groupBox2 = new GroupBox();
-            icons = new ImageList(components);
             groupBox18 = new GroupBox();
             numericUpDownDefaultAIGeneratedImageHeight = new NumericUpDown();
             numericUpDownDefaultAIGeneratedImageWidth = new NumericUpDown();
@@ -127,9 +128,11 @@
             panelPrimaryColorPreview = new Panel();
             label16 = new Label();
             label17 = new Label();
+            icons = new ImageList(components);
             colorDialog1 = new ColorDialog();
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
+            groupBox23.SuspendLayout();
             groupBox3.SuspendLayout();
             groupBox4.SuspendLayout();
             groupBox2.SuspendLayout();
@@ -203,6 +206,7 @@
             // 
             // tabPage1
             // 
+            tabPage1.Controls.Add(groupBox23);
             tabPage1.Controls.Add(groupBox3);
             tabPage1.Controls.Add(groupBox2);
             tabPage1.Controls.Add(groupBox1);
@@ -216,9 +220,34 @@
             tabPage1.UseVisualStyleBackColor = true;
             tabPage1.Click += tabPage1_Click;
             // 
+            // groupBox23
+            // 
+            groupBox23.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox23.Controls.Add(checkBox1);
+            groupBox23.Location = new Point(6, 265);
+            groupBox23.Name = "groupBox23";
+            groupBox23.Size = new Size(539, 50);
+            groupBox23.TabIndex = 3;
+            groupBox23.TabStop = false;
+            groupBox23.Text = "Sunny the Cat";
+            // 
+            // checkBox1
+            // 
+            checkBox1.Anchor = AnchorStyles.Left;
+            checkBox1.AutoSize = true;
+            checkBox1.Checked = true;
+            checkBox1.CheckState = CheckState.Checked;
+            checkBox1.Location = new Point(12, 22);
+            checkBox1.Name = "checkBox1";
+            checkBox1.Size = new Size(189, 20);
+            checkBox1.TabIndex = 0;
+            checkBox1.Text = "Show the Sunny the Cat on UI";
+            checkBox1.UseVisualStyleBackColor = true;
+            checkBox1.CheckedChanged += checkBox1_CheckedChanged;
+            // 
             // groupBox3
             // 
-            groupBox3.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox3.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             groupBox3.Controls.Add(groupBox4);
             groupBox3.Location = new Point(6, 163);
             groupBox3.Name = "groupBox3";
@@ -276,28 +305,6 @@
             groupBox2.TabStop = false;
             groupBox2.Text = "AI Settings";
             groupBox2.Enter += groupBox2_Enter;
-            // 
-            // icons
-            // 
-            icons.ColorDepth = ColorDepth.Depth32Bit;
-            icons.ImageStream = (ImageListStreamer)resources.GetObject("icons.ImageStream");
-            icons.TransparentColor = Color.Transparent;
-            icons.Images.SetKeyName(0, "icons8-wrench-48.png");
-            icons.Images.SetKeyName(1, "icons8-canvas-48.png");
-            icons.Images.SetKeyName(2, "icons8-drawing-48.png");
-            icons.Images.SetKeyName(3, "icons8-color-48.png");
-            icons.Images.SetKeyName(4, "icons8-ai-48.png");
-            icons.Images.SetKeyName(5, "icons8-mark-view-as-non-hidden-48.png");
-            icons.Images.SetKeyName(6, "icons8-mark-view-as-hidden-48.png");
-            icons.Images.SetKeyName(7, "icons8-warning-48.png");
-            icons.Images.SetKeyName(8, "icons8-update-48 (1).png");
-            icons.Images.SetKeyName(9, "icons8-reset-48.png");
-            icons.Images.SetKeyName(10, "icons8-bard-48.png");
-            icons.Images.SetKeyName(11, "icons8-hugging-face-48.png");
-            icons.Images.SetKeyName(12, "icons8-photo-editor-48.png");
-            icons.Images.SetKeyName(13, "icons8-ai-chip-48.png");
-            icons.Images.SetKeyName(14, "icons8-opened-folder-48.png");
-            icons.Images.SetKeyName(15, "icons8-clear-48.png");
             // 
             // groupBox18
             // 
@@ -1334,6 +1341,28 @@
             label17.TabIndex = 0;
             label17.Text = "Primary Color";
             // 
+            // icons
+            // 
+            icons.ColorDepth = ColorDepth.Depth32Bit;
+            icons.ImageStream = (ImageListStreamer)resources.GetObject("icons.ImageStream");
+            icons.TransparentColor = Color.Transparent;
+            icons.Images.SetKeyName(0, "icons8-wrench-48.png");
+            icons.Images.SetKeyName(1, "icons8-canvas-48.png");
+            icons.Images.SetKeyName(2, "icons8-drawing-48.png");
+            icons.Images.SetKeyName(3, "icons8-color-48.png");
+            icons.Images.SetKeyName(4, "icons8-ai-48.png");
+            icons.Images.SetKeyName(5, "icons8-mark-view-as-non-hidden-48.png");
+            icons.Images.SetKeyName(6, "icons8-mark-view-as-hidden-48.png");
+            icons.Images.SetKeyName(7, "icons8-warning-48.png");
+            icons.Images.SetKeyName(8, "icons8-update-48 (1).png");
+            icons.Images.SetKeyName(9, "icons8-reset-48.png");
+            icons.Images.SetKeyName(10, "icons8-bard-48.png");
+            icons.Images.SetKeyName(11, "icons8-hugging-face-48.png");
+            icons.Images.SetKeyName(12, "icons8-photo-editor-48.png");
+            icons.Images.SetKeyName(13, "icons8-ai-chip-48.png");
+            icons.Images.SetKeyName(14, "icons8-opened-folder-48.png");
+            icons.Images.SetKeyName(15, "icons8-clear-48.png");
+            // 
             // SettingsWindow
             // 
             AutoScaleDimensions = new SizeF(96F, 96F);
@@ -1351,6 +1380,8 @@
             Text = "Settings";
             tabControl1.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
+            groupBox23.ResumeLayout(false);
+            groupBox23.PerformLayout();
             groupBox3.ResumeLayout(false);
             groupBox4.ResumeLayout(false);
             groupBox4.PerformLayout();
@@ -1523,5 +1554,7 @@
         private GroupBox groupBox29;
         private Label label38;
         private NumericUpDown numericUpDownDefaultGaussianBlurRadius;
+        private GroupBox groupBox23;
+        private CheckBox checkBox1;
     }
 }

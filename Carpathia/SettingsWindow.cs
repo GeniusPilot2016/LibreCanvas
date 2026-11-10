@@ -105,6 +105,7 @@ namespace Carpathia
             panelSecondaryColorPreview.BackColor = Settings1.Default.SecondaryColor;
             EncryptionHelper encryptionHelper = new EncryptionHelper();
             APIKey = encryptionHelper.DecryptStringFromBase64(Settings1.Default.HuggingFaceAPIKeyBase64);
+            checkBox1.Checked = Settings1.Default.ShowSunnyTheCat;
         }
         private void SetTheme()
         {
@@ -476,6 +477,11 @@ namespace Carpathia
         {
             Settings1.Default.DefaultGaussianBlurRadius = (float)numericUpDownDefaultGaussianBlurRadius.Value;
             Settings1.Default.Save();
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            Settings1.Default.ShowSunnyTheCat = checkBox1.Checked;
         }
     }
 }

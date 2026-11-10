@@ -41,6 +41,17 @@ namespace Carpathia
         private CatAnimation currentAnimation = CatAnimation.Idle;
         private bool returnToIdleAfterOnce = false;
 
+        // Bubble_Gum_Pop has 14 frames at 12 fps. Index 8 is the ninth frame;
+        // adjust this if the visible burst occurs at a different frame in your PNGs.
+        private const int BubblePopSoundFrame = 8;
+        private bool bubblePopSoundPlayed;
+        private System.Media.SoundPlayer poppingSoundPlayer;
+
+        // Stretch_Yawn has eight frames. Start the yawn sound as the mouth opens.
+        private const int YawnSoundFrame = 3;
+        private bool yawnSoundPlayed;
+        private System.Media.SoundPlayer yawningSoundPlayer;
+
         // Random idle behaviors are separate from click reactions.
         private readonly Random rng = new Random();
         private readonly System.Windows.Forms.Timer randomBehaviorTimer = new System.Windows.Forms.Timer();
@@ -128,6 +139,22 @@ namespace Carpathia
             InitializeComponent();
             originalFrameInterval = timer1.Interval;
 
+            // Keep the SoundPlayer alive until this control is disposed. SoundPlayer.Play()
+            // is asynchronous, so disposing it immediately could interrupt the sound.
+            this.Disposed += (s, e) =>
+            {
+                if (poppingSoundPlayer != null)
+                {
+                    poppingSoundPlayer.Dispose();
+                    poppingSoundPlayer = null;
+                }
+                if (yawningSoundPlayer != null)
+                {
+                    yawningSoundPlayer.Dispose();
+                    yawningSoundPlayer = null;
+                }
+            };
+
             pictureBox1.Dock = DockStyle.Fill;
             pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
             pictureBox1.BackColor = Color.Transparent;
@@ -183,6 +210,43 @@ namespace Carpathia
                 {
                     randomBehaviorTimer.Stop();
                 }
+            }
+        }
+
+        private void PlayPoppingSound()
+        {
+            try
+            {
+                // Retain the resource stream/player for the entire playback.
+                if (poppingSoundPlayer == null)
+                {
+                    poppingSoundPlayer = new System.Media.SoundPlayer(Properties.Resources.bubble_pop);
+                    poppingSoundPlayer.Load();
+                }
+
+                poppingSoundPlayer.Play();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Bubble pop sound failed: " + ex);
+            }
+        }
+
+        private void PlayYawningSound()
+        {
+            try
+            {
+                // Keep the player alive for asynchronous playback.
+                if (yawningSoundPlayer == null)
+                {
+                    yawningSoundPlayer = new System.Media.SoundPlayer(Properties.Resources.yawn);
+                    yawningSoundPlayer.Load();
+                }
+                yawningSoundPlayer.Play();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
             }
         }
 
@@ -395,6 +459,8 @@ namespace Carpathia
                 animation == CatAnimation.ButterflyLandsOnEar;
             frames = selectedFrames;
             frame = 0;
+            bubblePopSoundPlayed = false;
+            yawnSoundPlayed = false;
             frameRegions = null;
             timer1.Interval = GetFrameInterval(animation);
 
@@ -455,6 +521,23 @@ namespace Carpathia
 
             frame = nextFrame % frames.Length;
             ApplyFrame(frame);
+
+            // Trigger only on the actual pop frame, never on resize or before
+            // the bubble bursts. Each animation run plays this sound once.
+            if (currentAnimation == CatAnimation.BubbleGumPop &&
+                frame == BubblePopSoundFrame && !bubblePopSoundPlayed)
+            {
+                bubblePopSoundPlayed = true;
+                PlayPoppingSound();
+            }
+
+            // Play once per StretchYawn animation, synchronized with frame 4.
+            if (currentAnimation == CatAnimation.StretchYawn &&
+                frame == YawnSoundFrame && !yawnSoundPlayed)
+            {
+                yawnSoundPlayed = true;
+                PlayYawningSound();
+            }
         }
 
         private void ApplyFrame(int index)
