@@ -526,7 +526,7 @@
             // 
             // sunnyTheCat1
             // 
-            sunnyTheCat1.Anchor = AnchorStyles.Bottom;
+            sunnyTheCat1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             sunnyTheCat1.BackColor = Color.Transparent;
             sunnyTheCat1.Location = new Point(100, 669);
             sunnyTheCat1.Name = "sunnyTheCat1";
