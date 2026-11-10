@@ -760,4 +760,343 @@
   <data name="meow_sound_effect" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\meow_sound_effect.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="purr_sound_effect" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\purr_sound_effect.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Happy_Hearts_15" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Happy_Hearts_15.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Happy_Hearts_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Happy_Hearts_16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Happy_Hearts_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Happy_Hearts_01.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Happy_Hearts_02" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Happy_Hearts_02.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Happy_Hearts_03" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Happy_Hearts_03.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Happy_Hearts_04" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Happy_Hearts_04.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Happy_Hearts_05" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Happy_Hearts_05.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Happy_Hearts_06" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Happy_Hearts_06.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Happy_Hearts_07" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Happy_Hearts_07.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Happy_Hearts_08" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Happy_Hearts_08.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Happy_Hearts_09" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Happy_Hearts_09.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Happy_Hearts_10" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Happy_Hearts_10.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Happy_Hearts_11" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Happy_Hearts_11.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Happy_Hearts_12" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Happy_Hearts_12.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Happy_Hearts_13" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Happy_Hearts_13.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Happy_Hearts_14" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Happy_Hearts_14.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Sunglasses_Sparkle_05" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Sunglasses_Sparkle_05.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Sunglasses_Sparkle_06" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Sunglasses_Sparkle_06.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Sunglasses_Sparkle_07" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Sunglasses_Sparkle_07.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Sunglasses_Sparkle_08" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Sunglasses_Sparkle_08.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Sunglasses_Sparkle_09" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Sunglasses_Sparkle_09.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Sunglasses_Sparkle_10" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Sunglasses_Sparkle_10.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Sunglasses_Sparkle_11" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Sunglasses_Sparkle_11.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Sunglasses_Sparkle_12" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Sunglasses_Sparkle_12.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Sunglasses_Sparkle_13" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Sunglasses_Sparkle_13.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Sunglasses_Sparkle_14" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Sunglasses_Sparkle_14.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Sunglasses_Sparkle_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Sunglasses_Sparkle_01.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Sunglasses_Sparkle_02" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Sunglasses_Sparkle_02.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Sunglasses_Sparkle_03" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Sunglasses_Sparkle_03.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Sunglasses_Sparkle_04" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Sunglasses_Sparkle_04.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Watching_Butterfly_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Watching_Butterfly_01.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Watching_Butterfly_02" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Watching_Butterfly_02.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Watching_Butterfly_03" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Watching_Butterfly_03.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Watching_Butterfly_04" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Watching_Butterfly_04.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Watching_Butterfly_05" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Watching_Butterfly_05.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Watching_Butterfly_06" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Watching_Butterfly_06.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Watching_Butterfly_07" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Watching_Butterfly_07.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Watching_Butterfly_08" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Watching_Butterfly_08.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Watching_Butterfly_09" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Watching_Butterfly_09.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Watching_Butterfly_10" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Watching_Butterfly_10.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Watching_Butterfly_11" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Watching_Butterfly_11.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Watching_Butterfly_12" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Watching_Butterfly_12.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Watching_Butterfly_13" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Watching_Butterfly_13.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Watching_Butterfly_14" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Watching_Butterfly_14.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Watching_Butterfly_15" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Watching_Butterfly_15.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Watching_Butterfly_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Watching_Butterfly_16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Watching_Butterfly_17" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Watching_Butterfly_17.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Watching_Butterfly_18" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Watching_Butterfly_18.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Blow_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Blow_01.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Blow_02" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Blow_02.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Blow_03" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Blow_03.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Blow_04" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Blow_04.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Blow_05" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Blow_05.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Blow_06" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Blow_06.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Blow_07" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Blow_07.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Blow_08" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Blow_08.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Blow_09" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Blow_09.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Blow_10" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Blow_10.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Blow_11" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Blow_11.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Blow_12" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Blow_12.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Blow_13" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Blow_13.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Blow_14" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Blow_14.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Blow_15" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Blow_15.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Blow_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Blow_16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Pop_02" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Pop_02.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Pop_03" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Pop_03.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Pop_04" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Pop_04.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Pop_05" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Pop_05.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Pop_06" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Pop_06.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Pop_07" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Pop_07.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Pop_08" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Pop_08.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Pop_09" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Pop_09.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Pop_10" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Pop_10.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Pop_11" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Pop_11.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Pop_12" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Pop_12.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Pop_13" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Pop_13.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Pop_14" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Pop_14.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bubble_Gum_Pop_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bubble_Gum_Pop_01.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Chase_05" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Chase_05.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Chase_06" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Chase_06.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Chase_07" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Chase_07.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Chase_08" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Chase_08.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Chase_09" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Chase_09.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Chase_10" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Chase_10.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Chase_11" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Chase_11.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Chase_12" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Chase_12.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Chase_13" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Chase_13.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Chase_14" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Chase_14.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Chase_15" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Chase_15.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Chase_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Chase_16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Chase_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Chase_01.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Chase_02" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Chase_02.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Chase_03" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Chase_03.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Chase_04" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Chase_04.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Lands_On_Ear_01" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Lands_On_Ear_01.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Lands_On_Ear_02" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Lands_On_Ear_02.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Lands_On_Ear_03" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Lands_On_Ear_03.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Lands_On_Ear_04" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Lands_On_Ear_04.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Lands_On_Ear_05" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Lands_On_Ear_05.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Lands_On_Ear_06" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Lands_On_Ear_06.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Lands_On_Ear_07" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Lands_On_Ear_07.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Lands_On_Ear_08" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Lands_On_Ear_08.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Lands_On_Ear_09" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Lands_On_Ear_09.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Lands_On_Ear_10" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Lands_On_Ear_10.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Lands_On_Ear_11" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Lands_On_Ear_11.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Lands_On_Ear_12" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Lands_On_Ear_12.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Lands_On_Ear_13" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Lands_On_Ear_13.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Lands_On_Ear_14" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Lands_On_Ear_14.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Lands_On_Ear_15" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Lands_On_Ear_15.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Lands_On_Ear_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Lands_On_Ear_16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Lands_On_Ear_17" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Lands_On_Ear_17.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Butterfly_Lands_On_Ear_18" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Butterfly_Lands_On_Ear_18.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

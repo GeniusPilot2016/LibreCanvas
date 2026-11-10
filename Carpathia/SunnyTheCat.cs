@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -15,7 +17,14 @@ namespace Carpathia
         LookLeftToRight,
         StretchYawn,
         WalkCycle,
-        Wink
+        Wink,
+        BubbleGumBlow,
+        BubbleGumPop,
+        WatchingButterfly,
+        ButterflyLandsOnEar,
+        ButterflyChase,
+        SunglassesSparkle,
+        HappyHearts
     }
 
     public partial class SunnyTheCat : UserControl
@@ -32,14 +41,22 @@ namespace Carpathia
         private CatAnimation currentAnimation = CatAnimation.Idle;
         private bool returnToIdleAfterOnce = false;
 
-        // Rastgele animasyon yönetimi için değişkenler
+        // Random idle behaviors are separate from click reactions.
         private readonly Random rng = new Random();
         private readonly System.Windows.Forms.Timer randomBehaviorTimer = new System.Windows.Forms.Timer();
+        private int originalFrameInterval = 100; // Value from timer1 in the designer.
+        // New animations play automatically while idle; wink remains click-only.
         private readonly CatAnimation[] idleRandomPool = new CatAnimation[]
         {
-            CatAnimation.Wink,
             CatAnimation.LookLeftToRight,
-            CatAnimation.StretchYawn
+            CatAnimation.StretchYawn,
+            CatAnimation.BubbleGumBlow,
+            CatAnimation.BubbleGumPop,
+            CatAnimation.WatchingButterfly,
+            CatAnimation.ButterflyLandsOnEar,
+            CatAnimation.ButterflyChase,
+            CatAnimation.SunglassesSparkle,
+            CatAnimation.HappyHearts
         };
 
         Bitmap[] idleFrames = new Bitmap[]
@@ -109,6 +126,7 @@ namespace Carpathia
         public SunnyTheCat()
         {
             InitializeComponent();
+            originalFrameInterval = timer1.Interval;
 
             pictureBox1.Dock = DockStyle.Fill;
             pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
@@ -133,6 +151,7 @@ namespace Carpathia
                 { CatAnimation.StretchYawn, stretchYawnFrames },
                 { CatAnimation.WalkCycle, walkCycleFrames },
                 { CatAnimation.Wink, winkFrames }
+                // New animations are loaded on demand when first played.
             };
 
             // Rastgele boşta davranış zamanlayıcısını kur
@@ -182,6 +201,21 @@ namespace Carpathia
             }
         }
 
+        private void PlayPurrSound()
+        {
+            try
+            {
+                using (var player = new System.Media.SoundPlayer(Properties.Resources.purr_sound_effect))
+                {
+                    player.Play();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+        }
+
         private void ScheduleNextRandomBehavior()
         {
             // 4 ile 10 saniye arasında rastgele bir süre belirle
@@ -201,28 +235,168 @@ namespace Carpathia
         }
 
         /// <summary>
-        /// Tıklama gibi olaylarda rastgele neşeli bir tepki (Happy veya Wink) oynatır.
+        /// Click reactions ONLY: meow + Happy, purr + LookLeftToRight, or Wink.
+        /// New animations belong to the random idle behavior pool, not here.
         /// </summary>
-        public void PlayRandomReaction()
+
+        private bool reactionInProgress = false;
+
+        public async void PlayRandomReaction()
         {
-            CatAnimation[] reactions = { CatAnimation.Happy, CatAnimation.Wink };
-            CatAnimation chosen = reactions[rng.Next(reactions.Length)];
-            SetAnimation(chosen, playOnce: true);
+            if (reactionInProgress || IsDisposed || WasDragged)
+                return;
+
+            reactionInProgress = true;
+
+            try
+            {
+                int reaction = rng.Next(3);
+                string message;
+
+                switch (reaction)
+                {
+                    case 0:
+                        message = "Meow! I'm Sunny the Cat!";
+                        break;
+                    case 1:
+                        message = "Purr... I like that!";
+                        break;
+                    default:
+                        message = "Wink! I'm feeling playful!";
+                        break;
+                }
+
+                toolTip1.Hide(pictureBox1);
+
+                // Position tooltip farther above Sunny.
+                toolTip1.Show(
+                    message,
+                    pictureBox1,
+                    pictureBox1.Width / 2,
+                    -40,
+                    1200
+                );
+
+                await Task.Delay(500);
+
+                if (IsDisposed || Disposing)
+                    return;
+
+                switch (reaction)
+                {
+                    case 0:
+                        PlayMeowSound();
+                        SetAnimation(CatAnimation.Happy, playOnce: true);
+                        break;
+
+                    case 1:
+                        PlayPurrSound();
+                        SetAnimation(CatAnimation.LookLeftToRight, playOnce: true);
+                        break;
+
+                    default:
+                        SetAnimation(CatAnimation.Wink, playOnce: true);
+                        break;
+                }
+
+                // Let the selected animation finish.
+                int animationDuration =
+                    frames.Length * timer1.Interval + 100;
+
+                await Task.Delay(animationDuration);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
+            finally
+            {
+                if (!IsDisposed && !Disposing)
+                    toolTip1.Hide(pictureBox1);
+
+                reactionInProgress = false;
+            }
+        }
+
+
+        /// <summary>
+        /// Loads the PNG frames embedded in Properties/Resources.resx.
+        /// The installer registers all 112 images under their exact filenames.
+        /// </summary>
+        private static Bitmap[] LoadEmbeddedFrames(string prefix, int count)
+        {
+            Bitmap[] loaded = new Bitmap[count];
+            for (int i = 0; i < count; i++)
+            {
+                string resourceName = prefix + "_" + (i + 1).ToString("D2");
+                Bitmap image = Properties.Resources.ResourceManager.GetObject(resourceName) as Bitmap;
+                if (image == null)
+                    throw new InvalidOperationException(
+                        "Sunny animation resource not found: " + resourceName +
+                        ". Run Install-SunnyAnimations.ps1 to add the new PNG resources.");
+                loaded[i] = image;
+            }
+            return loaded;
+        }
+
+        private static Bitmap[] LoadNewAnimation(CatAnimation animation)
+        {
+            switch (animation)
+            {
+                case CatAnimation.BubbleGumBlow: return LoadEmbeddedFrames("Bubble_Gum_Blow", 16);
+                case CatAnimation.BubbleGumPop: return LoadEmbeddedFrames("Bubble_Gum_Pop", 14);
+                case CatAnimation.WatchingButterfly: return LoadEmbeddedFrames("Watching_Butterfly", 18);
+                case CatAnimation.ButterflyLandsOnEar: return LoadEmbeddedFrames("Butterfly_Lands_On_Ear", 18);
+                case CatAnimation.ButterflyChase: return LoadEmbeddedFrames("Butterfly_Chase", 16);
+                case CatAnimation.SunglassesSparkle: return LoadEmbeddedFrames("Sunglasses_Sparkle", 14);
+                case CatAnimation.HappyHearts: return LoadEmbeddedFrames("Happy_Hearts", 16);
+                default: return null;
+            }
+        }
+
+        private int GetFrameInterval(CatAnimation animation)
+        {
+            // New animations use the FPS specified in animation_manifest.json.
+            switch (animation)
+            {
+                case CatAnimation.BubbleGumBlow: return 111; // 9 fps
+                case CatAnimation.BubbleGumPop: return 83; // 12 fps
+                case CatAnimation.WatchingButterfly: return 100; // 10 fps
+                case CatAnimation.ButterflyLandsOnEar: return 100; // 10 fps
+                case CatAnimation.ButterflyChase: return 83; // 12 fps
+                case CatAnimation.SunglassesSparkle: return 100; // 10 fps
+                case CatAnimation.HappyHearts: return 100; // 10 fps
+                default: return originalFrameInterval;
+            }
         }
 
         /// <summary>
         /// Kedinin animasyonunu değiştirir.
         /// </summary>
         /// <param name="animation">Oynatılacak animasyon</param>
-        /// <param name="playOnce">True ise animasyon 1 kez oynar ve otomatik Idle'a döner</param>
+        /// <param name="playOnce">True ise animasyon 1 kez oynar ve otomatik Idle'a döner.</param>
         public void SetAnimation(CatAnimation animation, bool playOnce = false)
         {
-            if (!animationMap.ContainsKey(animation)) return;
+            if (animationMap == null) return;
+
+            Bitmap[] selectedFrames;
+            if (!animationMap.TryGetValue(animation, out selectedFrames))
+            {
+                selectedFrames = LoadNewAnimation(animation);
+                if (selectedFrames == null) return;
+                animationMap[animation] = selectedFrames;
+            }
+            if (selectedFrames.Length == 0) return;
 
             currentAnimation = animation;
-            returnToIdleAfterOnce = playOnce;
-            frames = animationMap[animation];
+            // Pop and ear-landing animations are one-shot according to the supplied manifest.
+            returnToIdleAfterOnce = playOnce ||
+                animation == CatAnimation.BubbleGumPop ||
+                animation == CatAnimation.ButterflyLandsOnEar;
+            frames = selectedFrames;
             frame = 0;
+            frameRegions = null;
+            timer1.Interval = GetFrameInterval(animation);
 
             BuildRegions();
             ApplyFrame(0);
@@ -297,73 +471,69 @@ namespace Carpathia
 
         private Region CreateRegionFromBitmap(Bitmap bitmap, int targetWidth, int targetHeight)
         {
-            GraphicsPath path = new GraphicsPath();
+            float scale = Math.Min((float)targetWidth / bitmap.Width,
+                                   (float)targetHeight / bitmap.Height);
+            float offsetX = (targetWidth - bitmap.Width * scale) / 2f;
+            float offsetY = (targetHeight - bitmap.Height * scale) / 2f;
 
-            float ratioX = (float)targetWidth / bitmap.Width;
-            float ratioY = (float)targetHeight / bitmap.Height;
-            float scale = Math.Min(ratioX, ratioY);
-
-            float drawWidth = bitmap.Width * scale;
-            float drawHeight = bitmap.Height * scale;
-            float offsetX = (targetWidth - drawWidth) / 2f;
-            float offsetY = (targetHeight - drawHeight) / 2f;
-
-            for (int y = 0; y < bitmap.Height; y++)
+            using (GraphicsPath path = new GraphicsPath())
+            using (Bitmap argb = new Bitmap(bitmap.Width, bitmap.Height, PixelFormat.Format32bppArgb))
             {
-                int startX = -1;
-                for (int x = 0; x < bitmap.Width; x++)
+                using (Graphics graphics = Graphics.FromImage(argb))
                 {
-                    bool isOpaque = bitmap.GetPixel(x, y).A > 200;
-
-                    if (isOpaque && startX == -1)
-                    {
-                        startX = x;
-                    }
-                    else if (!isOpaque && startX != -1)
-                    {
-                        path.AddRectangle(new RectangleF(
-                            offsetX + (startX * scale),
-                            offsetY + (y * scale),
-                            (x - startX) * scale,
-                            scale));
-                        startX = -1;
-                    }
+                    graphics.CompositingMode = CompositingMode.SourceCopy;
+                    graphics.DrawImageUnscaled(bitmap, 0, 0);
                 }
 
-                if (startX != -1)
+                Rectangle imageRect = new Rectangle(0, 0, argb.Width, argb.Height);
+                BitmapData data = argb.LockBits(imageRect, ImageLockMode.ReadOnly,
+                                                PixelFormat.Format32bppArgb);
+                try
                 {
-                    path.AddRectangle(new RectangleF(
-                        offsetX + (startX * scale),
-                        offsetY + (y * scale),
-                        (bitmap.Width - startX) * scale,
-                        scale));
+                    byte[] row = new byte[Math.Abs(data.Stride)];
+                    for (int y = 0; y < argb.Height; y++)
+                    {
+                        Marshal.Copy(IntPtr.Add(data.Scan0, y * data.Stride), row, 0, row.Length);
+                        int startX = -1;
+                        for (int x = 0; x < argb.Width; x++)
+                        {
+                            bool isOpaque = row[x * 4 + 3] > 200;
+                            if (isOpaque && startX < 0)
+                                startX = x;
+                            else if (!isOpaque && startX >= 0)
+                            {
+                                path.AddRectangle(new RectangleF(offsetX + startX * scale,
+                                    offsetY + y * scale, (x - startX) * scale, scale));
+                                startX = -1;
+                            }
+                        }
+                        if (startX >= 0)
+                            path.AddRectangle(new RectangleF(offsetX + startX * scale,
+                                offsetY + y * scale, (argb.Width - startX) * scale, scale));
+                    }
                 }
-            }
+                finally
+                {
+                    argb.UnlockBits(data);
+                }
 
-            if (path.PointCount == 0)
-            {
-                path.AddRectangle(new Rectangle(0, 0, 1, 1));
+                if (path.PointCount == 0)
+                    path.AddRectangle(new Rectangle(0, 0, 1, 1));
+                return new Region(path);
             }
-
-            Region region = new Region(path);
-            path.Dispose();
-            return region;
         }
 
         private void SunnyTheCat_Load(object sender, EventArgs e)
         {
         }
-
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-            // A drag can still be followed by a Click event. Ignore it entirely.
-            // WasDragged is cleared on the *next* left MouseDown by MakeDraggable.
+            // Dragging is not a click and must not trigger a reaction.
             if (WasDragged)
                 return;
 
-            toolTip1.Show("Meow! I'm Sunny the Cat!", pictureBox1, pictureBox1.Width / 2, 0, 2000);
-            PlayMeowSound();
-            this.SetAnimation(CatAnimation.Happy, playOnce: true);
+            // Exactly three click outcomes: meow, purr, or wink.
+            PlayRandomReaction();
         }
     }
 }

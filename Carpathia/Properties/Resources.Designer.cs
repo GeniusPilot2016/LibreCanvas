@@ -61,6 +61,646 @@ namespace Carpathia.Properties {
         }
         
         /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Blow_01 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Blow_01", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Blow_02 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Blow_02", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Blow_03 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Blow_03", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Blow_04 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Blow_04", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Blow_05 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Blow_05", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Blow_06 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Blow_06", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Blow_07 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Blow_07", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Blow_08 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Blow_08", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Blow_09 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Blow_09", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Blow_10 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Blow_10", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Blow_11 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Blow_11", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Blow_12 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Blow_12", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Blow_13 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Blow_13", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Blow_14 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Blow_14", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Blow_15 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Blow_15", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Blow_16 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Blow_16", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Pop_01 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Pop_01", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Pop_02 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Pop_02", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Pop_03 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Pop_03", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Pop_04 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Pop_04", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Pop_05 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Pop_05", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Pop_06 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Pop_06", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Pop_07 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Pop_07", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Pop_08 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Pop_08", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Pop_09 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Pop_09", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Pop_10 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Pop_10", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Pop_11 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Pop_11", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Pop_12 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Pop_12", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Pop_13 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Pop_13", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Bubble_Gum_Pop_14 {
+            get {
+                object obj = ResourceManager.GetObject("Bubble_Gum_Pop_14", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Chase_01 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Chase_01", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Chase_02 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Chase_02", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Chase_03 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Chase_03", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Chase_04 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Chase_04", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Chase_05 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Chase_05", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Chase_06 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Chase_06", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Chase_07 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Chase_07", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Chase_08 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Chase_08", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Chase_09 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Chase_09", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Chase_10 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Chase_10", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Chase_11 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Chase_11", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Chase_12 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Chase_12", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Chase_13 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Chase_13", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Chase_14 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Chase_14", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Chase_15 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Chase_15", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Chase_16 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Chase_16", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Lands_On_Ear_01 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Lands_On_Ear_01", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Lands_On_Ear_02 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Lands_On_Ear_02", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Lands_On_Ear_03 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Lands_On_Ear_03", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Lands_On_Ear_04 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Lands_On_Ear_04", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Lands_On_Ear_05 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Lands_On_Ear_05", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Lands_On_Ear_06 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Lands_On_Ear_06", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Lands_On_Ear_07 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Lands_On_Ear_07", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Lands_On_Ear_08 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Lands_On_Ear_08", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Lands_On_Ear_09 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Lands_On_Ear_09", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Lands_On_Ear_10 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Lands_On_Ear_10", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Lands_On_Ear_11 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Lands_On_Ear_11", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Lands_On_Ear_12 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Lands_On_Ear_12", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Lands_On_Ear_13 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Lands_On_Ear_13", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Lands_On_Ear_14 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Lands_On_Ear_14", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Lands_On_Ear_15 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Lands_On_Ear_15", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Lands_On_Ear_16 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Lands_On_Ear_16", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Lands_On_Ear_17 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Lands_On_Ear_17", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Butterfly_Lands_On_Ear_18 {
+            get {
+                object obj = ResourceManager.GetObject("Butterfly_Lands_On_Ear_18", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   A futuristic city at night with neon lights and flying cars benzeri yerelleştirilmiş bir dize arar.
         /// </summary>
         internal static string example_prompt_1 {
@@ -536,6 +1176,166 @@ namespace Carpathia.Properties {
         internal static System.Drawing.Bitmap Happy_03 {
             get {
                 object obj = ResourceManager.GetObject("Happy_03", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Happy_Hearts_01 {
+            get {
+                object obj = ResourceManager.GetObject("Happy_Hearts_01", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Happy_Hearts_02 {
+            get {
+                object obj = ResourceManager.GetObject("Happy_Hearts_02", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Happy_Hearts_03 {
+            get {
+                object obj = ResourceManager.GetObject("Happy_Hearts_03", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Happy_Hearts_04 {
+            get {
+                object obj = ResourceManager.GetObject("Happy_Hearts_04", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Happy_Hearts_05 {
+            get {
+                object obj = ResourceManager.GetObject("Happy_Hearts_05", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Happy_Hearts_06 {
+            get {
+                object obj = ResourceManager.GetObject("Happy_Hearts_06", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Happy_Hearts_07 {
+            get {
+                object obj = ResourceManager.GetObject("Happy_Hearts_07", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Happy_Hearts_08 {
+            get {
+                object obj = ResourceManager.GetObject("Happy_Hearts_08", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Happy_Hearts_09 {
+            get {
+                object obj = ResourceManager.GetObject("Happy_Hearts_09", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Happy_Hearts_10 {
+            get {
+                object obj = ResourceManager.GetObject("Happy_Hearts_10", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Happy_Hearts_11 {
+            get {
+                object obj = ResourceManager.GetObject("Happy_Hearts_11", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Happy_Hearts_12 {
+            get {
+                object obj = ResourceManager.GetObject("Happy_Hearts_12", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Happy_Hearts_13 {
+            get {
+                object obj = ResourceManager.GetObject("Happy_Hearts_13", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Happy_Hearts_14 {
+            get {
+                object obj = ResourceManager.GetObject("Happy_Hearts_14", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Happy_Hearts_15 {
+            get {
+                object obj = ResourceManager.GetObject("Happy_Hearts_15", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Happy_Hearts_16 {
+            get {
+                object obj = ResourceManager.GetObject("Happy_Hearts_16", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1880,6 +2680,15 @@ namespace Carpathia.Properties {
         }
         
         /// <summary>
+        ///   System.IO.MemoryStream öğesine benzeyen System.IO.UnmanagedMemoryStream türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream purr_sound_effect {
+            get {
+                return ResourceManager.GetStream("purr_sound_effect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
         internal static System.Drawing.Bitmap splash {
@@ -1965,6 +2774,146 @@ namespace Carpathia.Properties {
         internal static System.Drawing.Bitmap Stretch_Yawn_08 {
             get {
                 object obj = ResourceManager.GetObject("Stretch_Yawn_08", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Sunglasses_Sparkle_01 {
+            get {
+                object obj = ResourceManager.GetObject("Sunglasses_Sparkle_01", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Sunglasses_Sparkle_02 {
+            get {
+                object obj = ResourceManager.GetObject("Sunglasses_Sparkle_02", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Sunglasses_Sparkle_03 {
+            get {
+                object obj = ResourceManager.GetObject("Sunglasses_Sparkle_03", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Sunglasses_Sparkle_04 {
+            get {
+                object obj = ResourceManager.GetObject("Sunglasses_Sparkle_04", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Sunglasses_Sparkle_05 {
+            get {
+                object obj = ResourceManager.GetObject("Sunglasses_Sparkle_05", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Sunglasses_Sparkle_06 {
+            get {
+                object obj = ResourceManager.GetObject("Sunglasses_Sparkle_06", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Sunglasses_Sparkle_07 {
+            get {
+                object obj = ResourceManager.GetObject("Sunglasses_Sparkle_07", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Sunglasses_Sparkle_08 {
+            get {
+                object obj = ResourceManager.GetObject("Sunglasses_Sparkle_08", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Sunglasses_Sparkle_09 {
+            get {
+                object obj = ResourceManager.GetObject("Sunglasses_Sparkle_09", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Sunglasses_Sparkle_10 {
+            get {
+                object obj = ResourceManager.GetObject("Sunglasses_Sparkle_10", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Sunglasses_Sparkle_11 {
+            get {
+                object obj = ResourceManager.GetObject("Sunglasses_Sparkle_11", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Sunglasses_Sparkle_12 {
+            get {
+                object obj = ResourceManager.GetObject("Sunglasses_Sparkle_12", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Sunglasses_Sparkle_13 {
+            get {
+                object obj = ResourceManager.GetObject("Sunglasses_Sparkle_13", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Sunglasses_Sparkle_14 {
+            get {
+                object obj = ResourceManager.GetObject("Sunglasses_Sparkle_14", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -2075,6 +3024,186 @@ namespace Carpathia.Properties {
         internal static System.Drawing.Bitmap Walk_Cycle_08 {
             get {
                 object obj = ResourceManager.GetObject("Walk_Cycle_08", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Watching_Butterfly_01 {
+            get {
+                object obj = ResourceManager.GetObject("Watching_Butterfly_01", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Watching_Butterfly_02 {
+            get {
+                object obj = ResourceManager.GetObject("Watching_Butterfly_02", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Watching_Butterfly_03 {
+            get {
+                object obj = ResourceManager.GetObject("Watching_Butterfly_03", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Watching_Butterfly_04 {
+            get {
+                object obj = ResourceManager.GetObject("Watching_Butterfly_04", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Watching_Butterfly_05 {
+            get {
+                object obj = ResourceManager.GetObject("Watching_Butterfly_05", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Watching_Butterfly_06 {
+            get {
+                object obj = ResourceManager.GetObject("Watching_Butterfly_06", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Watching_Butterfly_07 {
+            get {
+                object obj = ResourceManager.GetObject("Watching_Butterfly_07", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Watching_Butterfly_08 {
+            get {
+                object obj = ResourceManager.GetObject("Watching_Butterfly_08", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Watching_Butterfly_09 {
+            get {
+                object obj = ResourceManager.GetObject("Watching_Butterfly_09", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Watching_Butterfly_10 {
+            get {
+                object obj = ResourceManager.GetObject("Watching_Butterfly_10", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Watching_Butterfly_11 {
+            get {
+                object obj = ResourceManager.GetObject("Watching_Butterfly_11", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Watching_Butterfly_12 {
+            get {
+                object obj = ResourceManager.GetObject("Watching_Butterfly_12", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Watching_Butterfly_13 {
+            get {
+                object obj = ResourceManager.GetObject("Watching_Butterfly_13", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Watching_Butterfly_14 {
+            get {
+                object obj = ResourceManager.GetObject("Watching_Butterfly_14", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Watching_Butterfly_15 {
+            get {
+                object obj = ResourceManager.GetObject("Watching_Butterfly_15", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Watching_Butterfly_16 {
+            get {
+                object obj = ResourceManager.GetObject("Watching_Butterfly_16", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Watching_Butterfly_17 {
+            get {
+                object obj = ResourceManager.GetObject("Watching_Butterfly_17", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.Drawing.Bitmap Watching_Butterfly_18 {
+            get {
+                object obj = ResourceManager.GetObject("Watching_Butterfly_18", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
