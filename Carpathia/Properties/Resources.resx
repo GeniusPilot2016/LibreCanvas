@@ -1099,4 +1099,10 @@
   <data name="Butterfly_Lands_On_Ear_18" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Butterfly_Lands_On_Ear_18.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="bubble_pop" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\bubble_pop.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="yawn" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\yawn.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>

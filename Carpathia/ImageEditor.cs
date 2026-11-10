@@ -693,6 +693,10 @@ namespace Carpathia
             InitializeComponent();
             // Keep the mascot within the *visible* UIPanel viewport while dragging.
             MakeDraggable(sunnyTheCat1, UIPanel);
+            if(!Settings1.Default.ShowSunnyTheCat)
+            {
+                sunnyTheCat1.Visible = false;
+            }
             tabControl1.Width = (int)(CalculateDPIRate() * tabControl1.Size.Width);
             // PictureBox paints its Image automatically. Its native image pass must
             // fill the same zoomed bounds used for selection and pointer overlays.
@@ -7608,6 +7612,7 @@ namespace Carpathia
         {
             SettingsWindow settingsWindow = new SettingsWindow();
             settingsWindow.ShowDialog();
+            sunnyTheCat1.Visible = Settings1.Default.ShowSunnyTheCat;
         }
         // Keep the three nested surfaces in a single coordinate system.
         // The canvas has a 10 px resize-handle gutter on each edge; the resizer

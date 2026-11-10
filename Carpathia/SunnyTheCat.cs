@@ -1,4 +1,20 @@
-﻿using System;
+﻿// LibreCanvas - The AI-enabled simple image editor for everyone, born as a school project by GeniusPilot2016
+// Copyright (C) 2025 GeniusPilot2016
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -27,6 +43,7 @@ namespace Carpathia
         HappyHearts
     }
 
+    // Sunny the Cat is the mascot of LibreCanvas that born from an AI-generated image from this program using "A cute orange cat wearing sunglasses at the beach" prompt in resources.resx
     public partial class SunnyTheCat : UserControl
     {
         private int frame = 0;
@@ -40,6 +57,17 @@ namespace Carpathia
 
         private CatAnimation currentAnimation = CatAnimation.Idle;
         private bool returnToIdleAfterOnce = false;
+
+        // Bubble_Gum_Pop has 14 frames at 12 fps. Index 8 is the ninth frame;
+        // adjust this if the visible burst occurs at a different frame in your PNGs.
+        private const int BubblePopSoundFrame = 8;
+        private bool bubblePopSoundPlayed;
+        private System.Media.SoundPlayer poppingSoundPlayer;
+
+        // Stretch_Yawn has eight frames. Start the yawn sound as the mouth opens.
+        private const int YawnSoundFrame = 1;
+        private bool yawnSoundPlayed;
+        private System.Media.SoundPlayer yawningSoundPlayer;
 
         // Random idle behaviors are separate from click reactions.
         private readonly Random rng = new Random();
@@ -128,6 +156,22 @@ namespace Carpathia
             InitializeComponent();
             originalFrameInterval = timer1.Interval;
 
+            // Keep the SoundPlayer alive until this control is disposed. SoundPlayer.Play()
+            // is asynchronous, so disposing it immediately could interrupt the sound.
+            this.Disposed += (s, e) =>
+            {
+                if (poppingSoundPlayer != null)
+                {
+                    poppingSoundPlayer.Dispose();
+                    poppingSoundPlayer = null;
+                }
+                if (yawningSoundPlayer != null)
+                {
+                    yawningSoundPlayer.Dispose();
+                    yawningSoundPlayer = null;
+                }
+            };
+
             pictureBox1.Dock = DockStyle.Fill;
             pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
             pictureBox1.BackColor = Color.Transparent;
@@ -154,7 +198,7 @@ namespace Carpathia
                 // New animations are loaded on demand when first played.
             };
 
-            // Rastgele boşta davranış zamanlayıcısını kur
+            // Set up the random behavior timer to trigger random idle animations.
             randomBehaviorTimer.Tick += RandomBehaviorTimer_Tick;
             ScheduleNextRandomBehavior();
             randomBehaviorTimer.Start();
@@ -166,11 +210,11 @@ namespace Carpathia
         public CatAnimation CurrentAnimation => currentAnimation;
 
         /// <summary>
-        /// Boşta rastgele animasyon oynatma özelliğini açıp kapatır.
+        /// Gets or sets whether Sunny will perform random idle animations while the user is not interacting with it.
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool EnableRandomIdleAnimations
-        {
+        { 
             get => randomBehaviorTimer.Enabled;
             set
             {
@@ -183,6 +227,43 @@ namespace Carpathia
                 {
                     randomBehaviorTimer.Stop();
                 }
+            }
+        }
+
+        private void PlayPoppingSound()
+        {
+            try
+            {
+                // Retain the resource stream/player for the entire playback.
+                if (poppingSoundPlayer == null)
+                {
+                    poppingSoundPlayer = new System.Media.SoundPlayer(Properties.Resources.bubble_pop);
+                    poppingSoundPlayer.Load();
+                }
+
+                poppingSoundPlayer.Play();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Bubble pop sound failed: " + ex);
+            }
+        }
+
+        private void PlayYawningSound()
+        {
+            try
+            {
+                // Keep the player alive for asynchronous playback.
+                if (yawningSoundPlayer == null)
+                {
+                    yawningSoundPlayer = new System.Media.SoundPlayer(Properties.Resources.yawn);
+                    yawningSoundPlayer.Load();
+                }
+                yawningSoundPlayer.Play();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
             }
         }
 
@@ -224,7 +305,8 @@ namespace Carpathia
 
         private void RandomBehaviorTimer_Tick(object sender, EventArgs e)
         {
-            // Sadece kedi Idle (boşta) durumundaysa rastgele hareket yap
+            if(this.DesignMode)
+                return; // Don't trigger random behaviors in the designer.
             if (currentAnimation == CatAnimation.Idle && idleRandomPool.Length > 0)
             {
                 CatAnimation chosen = idleRandomPool[rng.Next(idleRandomPool.Length)];
@@ -371,10 +453,10 @@ namespace Carpathia
         }
 
         /// <summary>
-        /// Kedinin animasyonunu değiştirir.
+        /// Changes the current animation to the specified one. If playOnce is true, the animation will return to Idle after finishing.
         /// </summary>
-        /// <param name="animation">Oynatılacak animasyon</param>
-        /// <param name="playOnce">True ise animasyon 1 kez oynar ve otomatik Idle'a döner.</param>
+        /// <param name="animation"></param>
+        /// <param name="playOnce"></param>
         public void SetAnimation(CatAnimation animation, bool playOnce = false)
         {
             if (animationMap == null) return;
@@ -395,6 +477,8 @@ namespace Carpathia
                 animation == CatAnimation.ButterflyLandsOnEar;
             frames = selectedFrames;
             frame = 0;
+            bubblePopSoundPlayed = false;
+            yawnSoundPlayed = false;
             frameRegions = null;
             timer1.Interval = GetFrameInterval(animation);
 
@@ -443,6 +527,8 @@ namespace Carpathia
 
         private void timer1_Tick(object sender, EventArgs e)
         {
+            if (this.DesignMode)
+                return; // Don't advance frames in the designer, which can cause "haunted" program phenomenon.
             if (frames == null || frames.Length == 0) return;
 
             int nextFrame = frame + 1;
@@ -455,6 +541,23 @@ namespace Carpathia
 
             frame = nextFrame % frames.Length;
             ApplyFrame(frame);
+
+            // Trigger only on the actual pop frame, never on resize or before
+            // the bubble bursts. Each animation run plays this sound once.
+            if (currentAnimation == CatAnimation.BubbleGumPop &&
+                frame == BubblePopSoundFrame && !bubblePopSoundPlayed)
+            {
+                bubblePopSoundPlayed = true;
+                PlayPoppingSound();
+            }
+
+            // Play once per StretchYawn animation, synchronized with frame 4.
+            if (currentAnimation == CatAnimation.StretchYawn &&
+                frame == YawnSoundFrame && !yawnSoundPlayed)
+            {
+                yawnSoundPlayed = true;
+                PlayYawningSound();
+            }
         }
 
         private void ApplyFrame(int index)
@@ -534,6 +637,20 @@ namespace Carpathia
 
             // Exactly three click outcomes: meow, purr, or wink.
             PlayRandomReaction();
+        }
+
+        private void SunnyTheCat_VisibleChanged(object sender, EventArgs e)
+        {
+            if(this.Visible)
+            {
+                timer1.Start();
+                randomBehaviorTimer.Start();
+            }
+            else
+            {
+                timer1.Stop();
+                randomBehaviorTimer.Stop();
+            }
         }
     }
 }

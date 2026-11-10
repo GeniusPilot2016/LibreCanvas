@@ -65,6 +65,7 @@
             Controls.Add(pictureBox1);
             Name = "SunnyTheCat";
             Load += SunnyTheCat_Load;
+            VisibleChanged += SunnyTheCat_VisibleChanged;
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
         }

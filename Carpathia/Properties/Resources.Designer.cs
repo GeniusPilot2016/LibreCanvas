@@ -361,6 +361,15 @@ namespace Carpathia.Properties {
         }
         
         /// <summary>
+        ///   System.IO.MemoryStream öğesine benzeyen System.IO.UnmanagedMemoryStream türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream bubble_pop {
+            get {
+                return ResourceManager.GetStream("bubble_pop", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
         /// </summary>
         internal static System.Drawing.Bitmap Butterfly_Chase_01 {
@@ -3275,6 +3284,15 @@ namespace Carpathia.Properties {
             get {
                 object obj = ResourceManager.GetObject("Wink_06", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.IO.MemoryStream öğesine benzeyen System.IO.UnmanagedMemoryStream türünde yerelleştirilmiş bir kaynak arar.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream yawn {
+            get {
+                return ResourceManager.GetStream("yawn", resourceCulture);
             }
         }
     }
