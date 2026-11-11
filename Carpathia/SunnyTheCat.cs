@@ -23,6 +23,8 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
+using System.Media;
 
 namespace Carpathia
 {
@@ -61,13 +63,18 @@ namespace Carpathia
         // Bubble_Gum_Pop has 14 frames at 12 fps. Index 8 is the ninth frame;
         // adjust this if the visible burst occurs at a different frame in your PNGs.
         private const int BubblePopSoundFrame = 8;
-        private bool bubblePopSoundPlayed;
-        private System.Media.SoundPlayer poppingSoundPlayer;
+        private const int YawnSoundFrame = 3;
+        // Cached players stay alive until the control is disposed.
+        private readonly Dictionary<string, SoundPlayer> soundPlayers = new Dictionary<string, SoundPlayer>();
+        private readonly Dictionary<string, Stream> soundStreams = new Dictionary<string, Stream>();
+        private readonly HashSet<string> playedAnimationSounds = new HashSet<string>();
+        private int idleBreathingCycles;
+        private bool suppressLookPurr;
 
-        // Stretch_Yawn has eight frames. Start the yawn sound as the mouth opens.
-        private const int YawnSoundFrame = 1;
-        private bool yawnSoundPlayed;
-        private System.Media.SoundPlayer yawningSoundPlayer;
+        // A fresh native balloon for every message avoids stale dimensions.
+        // Do not owner-draw it or override PopupEventArgs.ToolTipSize:
+        // Windows must add the balloon's own border, padding and stem.
+        private ToolTip reactionTooltip;
 
         // Random idle behaviors are separate from click reactions.
         private readonly Random rng = new Random();
@@ -156,20 +163,15 @@ namespace Carpathia
             InitializeComponent();
             originalFrameInterval = timer1.Interval;
 
-            // Keep the SoundPlayer alive until this control is disposed. SoundPlayer.Play()
-            // is asynchronous, so disposing it immediately could interrupt the sound.
             this.Disposed += (s, e) =>
             {
-                if (poppingSoundPlayer != null)
-                {
-                    poppingSoundPlayer.Dispose();
-                    poppingSoundPlayer = null;
-                }
-                if (yawningSoundPlayer != null)
-                {
-                    yawningSoundPlayer.Dispose();
-                    yawningSoundPlayer = null;
-                }
+                foreach (var player in soundPlayers.Values) player.Dispose();
+                soundPlayers.Clear();
+                foreach (var stream in soundStreams.Values) stream.Dispose();
+                soundStreams.Clear();
+                HideReactionTooltip();
+                randomBehaviorTimer.Dispose();
+                ClearRegionCache();
             };
 
             pictureBox1.Dock = DockStyle.Fill;
@@ -214,7 +216,7 @@ namespace Carpathia
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool EnableRandomIdleAnimations
-        { 
+        {
             get => randomBehaviorTimer.Enabled;
             set
             {
@@ -230,70 +232,95 @@ namespace Carpathia
             }
         }
 
-        private void PlayPoppingSound()
+        // Resource names match the WAV entries in Properties/Resources.resx.
+        // Use ResourceManager to support the embedded WAV stream resources.
+        private void PlaySound(string resourceName)
         {
             try
             {
-                // Retain the resource stream/player for the entire playback.
-                if (poppingSoundPlayer == null)
+                SoundPlayer player;
+                if (!soundPlayers.TryGetValue(resourceName, out player))
                 {
-                    poppingSoundPlayer = new System.Media.SoundPlayer(Properties.Resources.bubble_pop);
-                    poppingSoundPlayer.Load();
+                    object resource = Properties.Resources.ResourceManager.GetObject(resourceName);
+                    Stream stream = resource as Stream;
+                    if (stream == null)
+                    {
+                        Debug.WriteLine("Sunny sound resource missing or not WAV: " + resourceName);
+                        return;
+                    }
+                    // Keep the resource stream alive throughout asynchronous playback.
+                    soundStreams[resourceName] = stream;
+                    player = new SoundPlayer(stream);
+                    player.Load();
+                    soundPlayers[resourceName] = player;
                 }
-
-                poppingSoundPlayer.Play();
+                player.Play();
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Bubble pop sound failed: " + ex);
+                Debug.WriteLine("Sunny sound failed (" + resourceName + "): " + ex);
             }
         }
 
-        private void PlayYawningSound()
+        private void PlayOnceAtFrame(string resourceName, int targetFrame)
         {
-            try
-            {
-                // Keep the player alive for asynchronous playback.
-                if (yawningSoundPlayer == null)
-                {
-                    yawningSoundPlayer = new System.Media.SoundPlayer(Properties.Resources.yawn);
-                    yawningSoundPlayer.Load();
-                }
-                yawningSoundPlayer.Play();
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-            }
+            if (frame == targetFrame && playedAnimationSounds.Add(resourceName))
+                PlaySound(resourceName);
         }
 
-        private void PlayMeowSound()
-        {
-            try
-            {
-                using (var player = new System.Media.SoundPlayer(Properties.Resources.meow_sound_effect))
-                {
-                    player.Play();
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-            }
-        }
+        private void PlayPoppingSound() => PlaySound("bubble_pop");
+        private void PlayYawningSound() => PlaySound("yawn");
+        private void PlayMeowSound() => PlaySound("meow_sound_effect");
+        private void PlayPurrSound() => PlaySound("purr_sound_effect");
 
-        private void PlayPurrSound()
+        private void PlayAnimationSounds()
         {
-            try
+            switch (currentAnimation)
             {
-                using (var player = new System.Media.SoundPlayer(Properties.Resources.purr_sound_effect))
-                {
-                    player.Play();
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
+                case CatAnimation.Idle:
+                    // Quiet idle: one breath about every seven 7-frame cycles.
+                    if (frame == 1 && ++idleBreathingCycles >= 7)
+                    {
+                        idleBreathingCycles = 0;
+                        PlaySound("breathing");
+                    }
+                    break;
+                case CatAnimation.LookLeftToRight:
+                    if (!suppressLookPurr) PlayOnceAtFrame("purr_sound_effect_2", 2);
+                    break;
+                case CatAnimation.StretchYawn:
+                    PlayOnceAtFrame("yawn", YawnSoundFrame);
+                    break;
+                case CatAnimation.WalkCycle:
+                    if (frame == 1 || frame == 5) PlaySound("footsteps");
+                    break;
+                case CatAnimation.Wink:
+                    PlayOnceAtFrame("ding", 2);
+                    break;
+                case CatAnimation.BubbleGumBlow:
+                    PlayOnceAtFrame("stretch_squeak", 3);
+                    break;
+                case CatAnimation.BubbleGumPop:
+                    PlayOnceAtFrame("bubble_pop", BubblePopSoundFrame);
+                    break;
+                case CatAnimation.WatchingButterfly:
+                    PlayOnceAtFrame("flutter", 2);
+                    break;
+                case CatAnimation.ButterflyLandsOnEar:
+                    PlayOnceAtFrame("flutter", 1);
+                    PlayOnceAtFrame("chattering", 11);
+                    break;
+                case CatAnimation.ButterflyChase:
+                    PlayOnceAtFrame("chattering", 2);
+                    PlayOnceAtFrame("footsteps", 6);
+                    break;
+                case CatAnimation.SunglassesSparkle:
+                    PlayOnceAtFrame("sparkle", 6);
+                    break;
+                case CatAnimation.HappyHearts:
+                    PlayOnceAtFrame("ding", 4);
+                    PlayOnceAtFrame("multiple_meow", 9);
+                    break;
             }
         }
 
@@ -305,7 +332,7 @@ namespace Carpathia
 
         private void RandomBehaviorTimer_Tick(object sender, EventArgs e)
         {
-            if(this.DesignMode)
+            if (this.DesignMode || this.Visible == false)
                 return; // Don't trigger random behaviors in the designer.
             if (currentAnimation == CatAnimation.Idle && idleRandomPool.Length > 0)
             {
@@ -322,6 +349,40 @@ namespace Carpathia
         /// </summary>
 
         private bool reactionInProgress = false;
+
+        private void HideReactionTooltip()
+        {
+            if (reactionTooltip == null)
+                return;
+
+            ToolTip previous = reactionTooltip;
+            reactionTooltip = null;
+
+            if (!pictureBox1.IsDisposed && pictureBox1.IsHandleCreated)
+                previous.Hide(pictureBox1);
+
+            previous.Dispose();
+        }
+
+        private void ShowReactionTooltip(string message)
+        {
+            HideReactionTooltip();
+            toolTip1.Hide(pictureBox1);
+
+            // Let Windows measure this message and draw the entire balloon.
+            // A new instance avoids reusing the size of an earlier message.
+            reactionTooltip = new ToolTip
+            {
+                IsBalloon = true,
+                OwnerDraw = false,
+                UseAnimation = false,
+                UseFading = false
+            };
+
+            // Keep the original positioning and 1200 ms lifetime unchanged.
+            reactionTooltip.Show(message, pictureBox1,
+                                 pictureBox1.Width / 2, -40, 1200);
+        }
 
         public async void PlayRandomReaction()
         {
@@ -348,16 +409,7 @@ namespace Carpathia
                         break;
                 }
 
-                toolTip1.Hide(pictureBox1);
-
-                // Position tooltip farther above Sunny.
-                toolTip1.Show(
-                    message,
-                    pictureBox1,
-                    pictureBox1.Width / 2,
-                    -40,
-                    1200
-                );
+                ShowReactionTooltip(message);
 
                 await Task.Delay(500);
 
@@ -374,6 +426,7 @@ namespace Carpathia
                     case 1:
                         PlayPurrSound();
                         SetAnimation(CatAnimation.LookLeftToRight, playOnce: true);
+                        suppressLookPurr = true;
                         break;
 
                     default:
@@ -393,9 +446,7 @@ namespace Carpathia
             }
             finally
             {
-                if (!IsDisposed && !Disposing)
-                    toolTip1.Hide(pictureBox1);
-
+                HideReactionTooltip();
                 reactionInProgress = false;
             }
         }
@@ -477,8 +528,8 @@ namespace Carpathia
                 animation == CatAnimation.ButterflyLandsOnEar;
             frames = selectedFrames;
             frame = 0;
-            bubblePopSoundPlayed = false;
-            yawnSoundPlayed = false;
+            playedAnimationSounds.Clear();
+            suppressLookPurr = false;
             frameRegions = null;
             timer1.Interval = GetFrameInterval(animation);
 
@@ -527,7 +578,7 @@ namespace Carpathia
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (this.DesignMode)
+            if (this.DesignMode || this.Visible == false)
                 return; // Don't advance frames in the designer, which can cause "haunted" program phenomenon.
             if (frames == null || frames.Length == 0) return;
 
@@ -542,22 +593,7 @@ namespace Carpathia
             frame = nextFrame % frames.Length;
             ApplyFrame(frame);
 
-            // Trigger only on the actual pop frame, never on resize or before
-            // the bubble bursts. Each animation run plays this sound once.
-            if (currentAnimation == CatAnimation.BubbleGumPop &&
-                frame == BubblePopSoundFrame && !bubblePopSoundPlayed)
-            {
-                bubblePopSoundPlayed = true;
-                PlayPoppingSound();
-            }
-
-            // Play once per StretchYawn animation, synchronized with frame 4.
-            if (currentAnimation == CatAnimation.StretchYawn &&
-                frame == YawnSoundFrame && !yawnSoundPlayed)
-            {
-                yawnSoundPlayed = true;
-                PlayYawningSound();
-            }
+            PlayAnimationSounds();
         }
 
         private void ApplyFrame(int index)
@@ -641,7 +677,7 @@ namespace Carpathia
 
         private void SunnyTheCat_VisibleChanged(object sender, EventArgs e)
         {
-            if(this.Visible)
+            if (this.Visible)
             {
                 timer1.Start();
                 randomBehaviorTimer.Start();

@@ -42,7 +42,7 @@
             tabControl1.Dock = DockStyle.Fill;
             tabControl1.ImageList = tabIcons;
             tabControl1.Location = new Point(0, 0);
-            tabControl1.Margin = new Padding(4, 4, 4, 4);
+            tabControl1.Margin = new Padding(4);
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
             tabControl1.Size = new Size(292, 307);
@@ -56,9 +56,9 @@
             // 
             tabPage1.ImageIndex = 0;
             tabPage1.Location = new Point(4, 55);
-            tabPage1.Margin = new Padding(4, 4, 4, 4);
+            tabPage1.Margin = new Padding(4);
             tabPage1.Name = "tabPage1";
-            tabPage1.Padding = new Padding(4, 4, 4, 4);
+            tabPage1.Padding = new Padding(4);
             tabPage1.Size = new Size(284, 248);
             tabPage1.TabIndex = 0;
             tabPage1.Text = "Image";
@@ -77,7 +77,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             Controls.Add(tabControl1);
             Font = new Font("HarmonyOS Sans", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            Margin = new Padding(4, 4, 4, 4);
+            Margin = new Padding(4);
             Name = "TabControlWithCloseButtons";
             Size = new Size(292, 307);
             Load += TabControlWithCloseButtons_Load;

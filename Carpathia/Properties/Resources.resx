@@ -1102,6 +1102,33 @@
   <data name="bubble_pop" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\bubble_pop.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="purr_sound_effect_2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\purr_sound_effect_2.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ding" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ding.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="multiple_meow" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\multiple_meow.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="flutter" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\flutter.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="stretch_squeak" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\stretch_squeak.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="chattering" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\chattering.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="sparkle" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\sparkle.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="breathing" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\breathing.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="footsteps" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\footsteps.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="yawn" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\yawn.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
