@@ -5,9 +5,12 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
+using System.Windows.Forms.Design;
 
 namespace Carpathia
 {
+    [Designer(typeof(ParentControlDesigner))]
+    [DefaultProperty("TabPages")]
     public partial class TabControlWithCloseButtons : UserControl
     {
         private const int LeftMargin = 7;
@@ -21,6 +24,10 @@ namespace Carpathia
         private int hoveredTab = -1;
         private int hoveredCloseTab = -1;
 
+        public event EventHandler SelectedIndexChanged;
+        public event EventHandler<TabPageEventArgs> TabAdded;
+        public event EventHandler<TabPageEventArgs> TabClosed;
+
         public TabControlWithCloseButtons()
         {
             InitializeComponent();
@@ -30,35 +37,39 @@ namespace Carpathia
             tabControl1.SizeMode = TabSizeMode.Normal;
             tabControl1.Multiline = false;
 
-            int extra = GetFourSpaceWidth() + CloseSize + 12;
-
-            tabControl1.Padding = new Point(
-                Math.Max(6, (extra + 1) / 2),
-                tabControl1.Padding.Y
-            );
+            tabControl1.Padding = new Point(24, 4);
 
             tabControl1.DrawItem += tabControl1_DrawItem;
             tabControl1.MouseClick += tabControl1_MouseClick;
-            tabControl1.MouseLeave += tabControl1_MouseLeave;
             tabControl1.MouseMove += tabControl1_MouseMove;
+            tabControl1.MouseLeave += tabControl1_MouseLeave;
 
             tabControl1.SelectedIndexChanged += (s, e) =>
             {
                 tabControl1.Invalidate();
-                OnSelectedIndexChanged(EventArgs.Empty);
+                SelectedIndexChanged?.Invoke(this, EventArgs.Empty);
             };
+
+            tabControl1.ControlAdded += (s, e) =>
+            {
+                if (e.Control is TabPage page)
+                    TabAdded?.Invoke(this, new TabPageEventArgs(page));
+            };
+
+            tabControl1.BackColor = BackColor;
+            tabControl1.ForeColor = ForeColor;
         }
 
         // =========================================
-        // DESIGNER PROPERTIES
+        // PROPERTIES
         // =========================================
 
         [Category("Appearance")]
-        [Description("The ImageList used for tab icons.")]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [Description("ImageList used for tab icons.")]
+        [DefaultValue(null)]
         public ImageList ImageList
         {
-            get => tabControl1.ImageList;
+            get { return tabControl1.ImageList; }
             set
             {
                 tabControl1.ImageList = value;
@@ -67,7 +78,7 @@ namespace Carpathia
         }
 
         [Category("Appearance")]
-        [Description("The collection of tab pages.")]
+        [Description("Collection of tab pages.")]
         [DesignerSerializationVisibility(
             DesignerSerializationVisibility.Content)]
         [Editor(
@@ -75,7 +86,7 @@ namespace Carpathia
             typeof(System.Drawing.Design.UITypeEditor))]
         public TabControl.TabPageCollection TabPages
         {
-            get => tabControl1.TabPages;
+            get { return tabControl1.TabPages; }
         }
 
         [Browsable(false)]
@@ -83,43 +94,31 @@ namespace Carpathia
             DesignerSerializationVisibility.Hidden)]
         public TabPage SelectedTab
         {
-            get => tabControl1.SelectedTab;
-            set => tabControl1.SelectedTab = value;
+            get { return tabControl1.SelectedTab; }
+            set { tabControl1.SelectedTab = value; }
         }
 
         [Browsable(false)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [DesignerSerializationVisibility(
+            DesignerSerializationVisibility.Hidden)]
         public int SelectedIndex
         {
-            get => tabControl1.SelectedIndex;
-            set => tabControl1.SelectedIndex = value;
+            get { return tabControl1.SelectedIndex; }
+            set { tabControl1.SelectedIndex = value; }
         }
 
-        [Category("Appearance")]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public TabSizeMode SizeMode
+        [Browsable(false)]
+        public int TabCount
         {
-            get => tabControl1.SizeMode;
-            set => tabControl1.SizeMode = value;
+            get { return tabControl1.TabCount; }
         }
 
         [Category("Appearance")]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public TabAlignment Alignment
         {
-            get => tabControl1.Alignment;
-            set => tabControl1.Alignment = value;
-        }
-
-        // =========================================
-        // EVENTS
-        // =========================================
-
-        public event EventHandler SelectedIndexChanged;
-
-        protected virtual void OnSelectedIndexChanged(EventArgs e)
-        {
-            SelectedIndexChanged?.Invoke(this, e);
+            get { return tabControl1.Alignment; }
+            set { tabControl1.Alignment = value; }
         }
 
         // =========================================
@@ -135,26 +134,22 @@ namespace Carpathia
             tabControl1.Invalidate();
         }
 
+        public void AddTab(string text)
+        {
+            AddTab(new TabPage(text));
+        }
+
         public void RemoveTab(TabPage page)
         {
-            if (page == null)
-                return;
-
-            tabControl1.TabPages.Remove(page);
-            tabControl1.Invalidate();
+            CloseTab(page);
         }
 
         public void RemoveTabAt(int index)
         {
-            if (index < 0 || index >= tabControl1.TabPages.Count)
+            if (index < 0 || index >= tabControl1.TabCount)
                 return;
 
-            TabPage page = tabControl1.TabPages[index];
-
-            tabControl1.TabPages.RemoveAt(index);
-            page.Dispose();
-
-            tabControl1.Invalidate();
+            CloseTab(tabControl1.TabPages[index]);
         }
 
         public void SelectTab(TabPage page)
@@ -167,28 +162,24 @@ namespace Carpathia
             tabControl1.SelectTab(index);
         }
 
-        // =========================================
-        // TEXT MEASUREMENT
-        // =========================================
-
-        private int MeasureTextWidth(string text)
+        private void CloseTab(TabPage page)
         {
-            return TextRenderer.MeasureText(
-                text,
-                tabControl1.Font,
-                new Size(10000, 1000),
-                TextFormatFlags.NoPadding |
-                TextFormatFlags.SingleLine
-            ).Width;
-        }
+            if (page == null ||
+                !tabControl1.TabPages.Contains(page))
+                return;
 
-        private int GetFourSpaceWidth()
-        {
-            return Math.Max(
-                1,
-                MeasureTextWidth("A    B") -
-                MeasureTextWidth("AB")
-            );
+            tabControl1.TabPages.Remove(page);
+
+            TabClosed?.Invoke(
+                this,
+                new TabPageEventArgs(page));
+
+            page.Dispose();
+
+            hoveredTab = -1;
+            hoveredCloseTab = -1;
+
+            tabControl1.Invalidate();
         }
 
         // =========================================
@@ -203,11 +194,24 @@ namespace Carpathia
             if (!string.IsNullOrEmpty(page.ImageKey))
             {
                 return tabControl1.ImageList.Images.IndexOfKey(
-                    page.ImageKey
-                );
+                    page.ImageKey);
             }
 
             return page.ImageIndex;
+        }
+
+        // =========================================
+        // TEXT MEASUREMENT
+        // =========================================
+
+        private int MeasureTextWidth(string text)
+        {
+            return TextRenderer.MeasureText(
+                text,
+                tabControl1.Font,
+                new Size(10000, 1000),
+                TextFormatFlags.NoPadding |
+                TextFormatFlags.SingleLine).Width;
         }
 
         // =========================================
@@ -233,45 +237,42 @@ namespace Carpathia
                 imageIndex >= 0 &&
                 imageIndex < tabControl1.ImageList.Images.Count)
             {
-                Size imageSize = tabControl1.ImageList.ImageSize;
+                Size size = tabControl1.ImageList.ImageSize;
 
                 iconRect = new Rectangle(
                     x,
-                    tab.Top + (tab.Height - imageSize.Height) / 2,
-                    imageSize.Width,
-                    imageSize.Height
-                );
+                    tab.Top + (tab.Height - size.Height) / 2,
+                    size.Width,
+                    size.Height);
 
-                x += imageSize.Width + IconTextGap;
+                x += size.Width + IconTextGap;
             }
 
-            int spaceWidth = GetFourSpaceWidth();
-            int desiredWidth = MeasureTextWidth(page.Text);
+            int spaceWidth = Math.Max(
+                1,
+                MeasureTextWidth("A    B") -
+                MeasureTextWidth("AB"));
 
             int maxTextWidth = Math.Max(
                 0,
                 tab.Right - RightMargin -
-                CloseSize - spaceWidth - x
-            );
+                CloseSize - spaceWidth - x);
 
             int textWidth = Math.Min(
-                desiredWidth,
-                maxTextWidth
-            );
+                MeasureTextWidth(page.Text),
+                maxTextWidth);
 
             textRect = new Rectangle(
                 x,
                 tab.Top,
                 textWidth,
-                tab.Height
-            );
+                tab.Height);
 
             closeRect = new Rectangle(
                 x + textWidth + spaceWidth,
                 tab.Top + (tab.Height - CloseSize) / 2,
                 CloseSize,
-                CloseSize
-            );
+                CloseSize);
         }
 
         // =========================================
@@ -289,7 +290,8 @@ namespace Carpathia
             Rectangle tabRect = tabControl1.GetTabRect(e.Index);
             TabPage page = tabControl1.TabPages[e.Index];
 
-            bool selected = e.Index == tabControl1.SelectedIndex;
+            bool selected =
+                e.Index == tabControl1.SelectedIndex;
 
             TabItemState state = selected
                 ? TabItemState.Selected
@@ -302,8 +304,7 @@ namespace Carpathia
                 TabRenderer.DrawTabItem(
                     e.Graphics,
                     tabRect,
-                    state
-                );
+                    state);
             }
             else
             {
@@ -319,20 +320,14 @@ namespace Carpathia
                     e.Graphics,
                     tabRect,
                     SystemColors.ControlDark,
-                    ButtonBorderStyle.Solid
-                );
+                    ButtonBorderStyle.Solid);
             }
-
-            Rectangle iconRect;
-            Rectangle textRect;
-            Rectangle closeRect;
 
             GetLayout(
                 e.Index,
-                out iconRect,
-                out textRect,
-                out closeRect
-            );
+                out Rectangle iconRect,
+                out Rectangle textRect,
+                out Rectangle closeRect);
 
             int imageIndex = GetImageIndex(page);
 
@@ -344,31 +339,30 @@ namespace Carpathia
                     e.Graphics,
                     iconRect.X,
                     iconRect.Y,
-                    imageIndex
-                );
+                    imageIndex);
             }
 
-            if (textRect.Width > 0)
-            {
-                TextRenderer.DrawText(
-                    e.Graphics,
-                    page.Text,
-                    tabControl1.Font,
-                    textRect,
-                    HeaderTextColor,
-                    TextFormatFlags.Left |
-                    TextFormatFlags.VerticalCenter |
-                    TextFormatFlags.SingleLine |
-                    TextFormatFlags.EndEllipsis |
-                    TextFormatFlags.NoPrefix |
-                    TextFormatFlags.NoPadding
-                );
-            }
+            TextRenderer.DrawText(
+                e.Graphics,
+                page.Text,
+                tabControl1.Font,
+                textRect,
+                HeaderTextColor,
+                TextFormatFlags.Left |
+                TextFormatFlags.VerticalCenter |
+                TextFormatFlags.SingleLine |
+                TextFormatFlags.EndEllipsis |
+                TextFormatFlags.NoPrefix |
+                TextFormatFlags.NoPadding);
 
-            bool closeHovered = e.Index == hoveredCloseTab;
+            bool closeHovered =
+                e.Index == hoveredCloseTab;
 
-            SmoothingMode oldMode = e.Graphics.SmoothingMode;
-            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            SmoothingMode oldMode =
+                e.Graphics.SmoothingMode;
+
+            e.Graphics.SmoothingMode =
+                SmoothingMode.AntiAlias;
 
             if (closeHovered)
             {
@@ -378,7 +372,9 @@ namespace Carpathia
                 using (SolidBrush brush = new SolidBrush(
                     Color.FromArgb(220, 53, 69)))
                 {
-                    e.Graphics.FillEllipse(brush, hoverRect);
+                    e.Graphics.FillEllipse(
+                        brush,
+                        hoverRect);
                 }
             }
 
@@ -393,16 +389,14 @@ namespace Carpathia
                     closeRect.Left + 2,
                     closeRect.Top + 2,
                     closeRect.Right - 2,
-                    closeRect.Bottom - 2
-                );
+                    closeRect.Bottom - 2);
 
                 e.Graphics.DrawLine(
                     pen,
                     closeRect.Right - 2,
                     closeRect.Top + 2,
                     closeRect.Left + 2,
-                    closeRect.Bottom - 2
-                );
+                    closeRect.Bottom - 2);
             }
 
             e.Graphics.SmoothingMode = oldMode;
@@ -414,28 +408,28 @@ namespace Carpathia
 
         private int HitTestCloseButton(Point point)
         {
-            for (int i = 0; i < tabControl1.TabCount; i++)
+            for (int i = 0;
+                 i < tabControl1.TabCount;
+                 i++)
             {
-                Rectangle icon;
-                Rectangle text;
-                Rectangle close;
-
-                GetLayout(i, out icon, out text, out close);
+                GetLayout(
+                    i,
+                    out Rectangle icon,
+                    out Rectangle text,
+                    out Rectangle close);
 
                 close.Inflate(3, 3);
 
                 if (close.Contains(point) &&
                     tabControl1.GetTabRect(i).Contains(point))
-                {
                     return i;
-                }
             }
 
             return -1;
         }
 
         // =========================================
-        // MOUSE CLICK
+        // MOUSE EVENTS
         // =========================================
 
         private void tabControl1_MouseClick(
@@ -447,23 +441,9 @@ namespace Carpathia
 
             int index = HitTestCloseButton(e.Location);
 
-            if (index < 0)
-                return;
-
-            TabPage page = tabControl1.TabPages[index];
-
-            hoveredTab = -1;
-            hoveredCloseTab = -1;
-
-            tabControl1.TabPages.Remove(page);
-            page.Dispose();
-
-            tabControl1.Invalidate();
+            if (index >= 0)
+                CloseTab(tabControl1.TabPages[index]);
         }
-
-        // =========================================
-        // MOUSE MOVE
-        // =========================================
 
         private void tabControl1_MouseMove(
             object sender,
@@ -471,7 +451,9 @@ namespace Carpathia
         {
             int newHoveredTab = -1;
 
-            for (int i = 0; i < tabControl1.TabCount; i++)
+            for (int i = 0;
+                 i < tabControl1.TabCount;
+                 i++)
             {
                 if (tabControl1.GetTabRect(i).Contains(e.Location))
                 {
@@ -480,24 +462,23 @@ namespace Carpathia
                 }
             }
 
-            int newHoveredClose = HitTestCloseButton(e.Location);
+            int newHoveredClose =
+                HitTestCloseButton(e.Location);
 
-            tabControl1.Cursor = newHoveredClose >= 0
-                ? Cursors.Hand
-                : Cursors.Default;
+            tabControl1.Cursor =
+                newHoveredClose >= 0
+                    ? Cursors.Hand
+                    : Cursors.Default;
 
             if (newHoveredTab != hoveredTab ||
                 newHoveredClose != hoveredCloseTab)
             {
                 hoveredTab = newHoveredTab;
                 hoveredCloseTab = newHoveredClose;
+
                 tabControl1.Invalidate();
             }
         }
-
-        // =========================================
-        // MOUSE LEAVE
-        // =========================================
 
         private void tabControl1_MouseLeave(
             object sender,
@@ -511,7 +492,7 @@ namespace Carpathia
         }
 
         // =========================================
-        // BACK COLOR
+        // COLOR SUPPORT
         // =========================================
 
         protected override void OnBackColorChanged(EventArgs e)
@@ -527,12 +508,7 @@ namespace Carpathia
                 page.BackColor = BackColor;
 
             tabControl1.Invalidate();
-            Invalidate();
         }
-
-        // =========================================
-        // FORE COLOR
-        // =========================================
 
         protected override void OnForeColorChanged(EventArgs e)
         {
@@ -547,7 +523,16 @@ namespace Carpathia
                 page.ForeColor = ForeColor;
 
             tabControl1.Invalidate();
-            Invalidate();
+        }
+    }
+
+    public class TabPageEventArgs : EventArgs
+    {
+        public TabPage TabPage { get; private set; }
+
+        public TabPageEventArgs(TabPage page)
+        {
+            TabPage = page;
         }
     }
 }
