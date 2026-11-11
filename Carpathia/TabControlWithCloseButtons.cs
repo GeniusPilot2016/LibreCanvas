@@ -1,137 +1,58 @@
-﻿
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
-using System.Windows.Forms.Design;
 
 namespace Carpathia
 {
-    [Designer(typeof(ParentControlDesigner))]
+    // IMPORTANT: This is a REAL TabControl, not a UserControl that contains one.
+    // WinForms' built-in TabControl designer can therefore direct Toolbox drops
+    // to SelectedTab.Controls and serialize them into the hosting Form.
+    // Do NOT attach ParentControlDesigner or a custom GetParentForComponent here.
     [DefaultProperty("TabPages")]
-    public partial class TabControlWithCloseButtons : UserControl
+    public partial class TabControlWithCloseButtons : TabControl
     {
         private const int LeftMargin = 7;
         private const int RightMargin = 7;
         private const int CloseSize = 12;
         private const int IconTextGap = 4;
 
-        private static readonly Color HeaderTextColor =
-            Color.FromArgb(30, 30, 30);
+        private static readonly Color HeaderTextColor = Color.FromArgb(30, 30, 30);
 
         private int hoveredTab = -1;
         private int hoveredCloseTab = -1;
 
-        public event EventHandler SelectedIndexChanged;
+        // SelectedIndexChanged, TabPages, SelectedTab, SelectedIndex, ImageList,
+        // Alignment, TabCount and SelectTab are inherited directly from TabControl.
         public event EventHandler<TabPageEventArgs> TabAdded;
         public event EventHandler<TabPageEventArgs> TabClosed;
 
         public TabControlWithCloseButtons()
         {
-            InitializeComponent();
-
-            tabControl1.Appearance = TabAppearance.Normal;
-            tabControl1.DrawMode = TabDrawMode.OwnerDrawFixed;
-            tabControl1.SizeMode = TabSizeMode.Normal;
-            tabControl1.Multiline = false;
-
-            tabControl1.Padding = new Point(24, 4);
-
-            tabControl1.DrawItem += tabControl1_DrawItem;
-            tabControl1.MouseClick += tabControl1_MouseClick;
-            tabControl1.MouseMove += tabControl1_MouseMove;
-            tabControl1.MouseLeave += tabControl1_MouseLeave;
-
-            tabControl1.SelectedIndexChanged += (s, e) =>
-            {
-                tabControl1.Invalidate();
-                SelectedIndexChanged?.Invoke(this, EventArgs.Empty);
-            };
-
-            tabControl1.ControlAdded += (s, e) =>
-            {
-                if (e.Control is TabPage page)
-                    TabAdded?.Invoke(this, new TabPageEventArgs(page));
-            };
-
-            tabControl1.BackColor = BackColor;
-            tabControl1.ForeColor = ForeColor;
+            // Do NOT call the old UserControl InitializeComponent method.
+            // Its nested tabControl1 must not be created or added here.
+            Appearance = TabAppearance.Normal;
+            DrawMode = TabDrawMode.OwnerDrawFixed;
+            SizeMode = TabSizeMode.Normal;
+            Multiline = false;
+            Padding = new Point(24, 4);
         }
 
-        // =========================================
-        // PROPERTIES
-        // =========================================
-
-        [Category("Appearance")]
-        [Description("ImageList used for tab icons.")]
-        [DefaultValue(null)]
-        public ImageList ImageList
-        {
-            get { return tabControl1.ImageList; }
-            set
-            {
-                tabControl1.ImageList = value;
-                tabControl1.Invalidate();
-            }
-        }
-
-        [Category("Appearance")]
-        [Description("Collection of tab pages.")]
-        [DesignerSerializationVisibility(
-            DesignerSerializationVisibility.Content)]
-        [Editor(
-            "System.Windows.Forms.Design.TabPageCollectionEditor, System.Design",
-            typeof(System.Drawing.Design.UITypeEditor))]
-        public TabControl.TabPageCollection TabPages
-        {
-            get { return tabControl1.TabPages; }
-        }
-
+        // Compatibility with the old wrapper's read-only property. There is
+        // no inner TabControl anymore: the actual TabControl is this instance.
         [Browsable(false)]
-        [DesignerSerializationVisibility(
-            DesignerSerializationVisibility.Hidden)]
-        public TabPage SelectedTab
-        {
-            get { return tabControl1.SelectedTab; }
-            set { tabControl1.SelectedTab = value; }
-        }
-
-        [Browsable(false)]
-        [DesignerSerializationVisibility(
-            DesignerSerializationVisibility.Hidden)]
-        public int SelectedIndex
-        {
-            get { return tabControl1.SelectedIndex; }
-            set { tabControl1.SelectedIndex = value; }
-        }
-
-        [Browsable(false)]
-        public int TabCount
-        {
-            get { return tabControl1.TabCount; }
-        }
-
-        [Category("Appearance")]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public TabAlignment Alignment
-        {
-            get { return tabControl1.Alignment; }
-            set { tabControl1.Alignment = value; }
-        }
-
-        // =========================================
-        // TAB METHODS
-        // =========================================
+        public TabControl DesignTimeTabControl { get { return this; } }
 
         public void AddTab(TabPage page)
         {
             if (page == null)
                 throw new ArgumentNullException(nameof(page));
 
-            tabControl1.TabPages.Add(page);
-            tabControl1.Invalidate();
+            TabPages.Add(page);
+            Invalidate();
         }
 
         public void AddTab(string text)
@@ -146,383 +67,256 @@ namespace Carpathia
 
         public void RemoveTabAt(int index)
         {
-            if (index < 0 || index >= tabControl1.TabCount)
+            if (index < 0 || index >= TabCount)
                 return;
 
-            CloseTab(tabControl1.TabPages[index]);
-        }
-
-        public void SelectTab(TabPage page)
-        {
-            tabControl1.SelectTab(page);
-        }
-
-        public void SelectTab(int index)
-        {
-            tabControl1.SelectTab(index);
+            CloseTab(TabPages[index]);
         }
 
         private void CloseTab(TabPage page)
         {
-            if (page == null ||
-                !tabControl1.TabPages.Contains(page))
+            if (page == null || !TabPages.Contains(page))
                 return;
 
-            tabControl1.TabPages.Remove(page);
-
-            TabClosed?.Invoke(
-                this,
-                new TabPageEventArgs(page));
-
+            TabPages.Remove(page);
+            TabClosed?.Invoke(this, new TabPageEventArgs(page));
             page.Dispose();
 
             hoveredTab = -1;
             hoveredCloseTab = -1;
-
-            tabControl1.Invalidate();
+            Invalidate();
         }
 
-        // =========================================
-        // IMAGE LIST
-        // =========================================
+        protected override void OnControlAdded(ControlEventArgs e)
+        {
+            base.OnControlAdded(e);
+
+            TabPage page = e.Control as TabPage;
+            if (page != null)
+                TabAdded?.Invoke(this, new TabPageEventArgs(page));
+        }
+
+        protected override void OnControlRemoved(ControlEventArgs e)
+        {
+            base.OnControlRemoved(e);
+            hoveredTab = -1;
+            hoveredCloseTab = -1;
+            Invalidate();
+        }
+
+        protected override void OnSelectedIndexChanged(EventArgs e)
+        {
+            hoveredCloseTab = -1;
+            base.OnSelectedIndexChanged(e);
+            Invalidate();
+        }
 
         private int GetImageIndex(TabPage page)
         {
-            if (tabControl1.ImageList == null)
+            if (ImageList == null)
                 return -1;
 
             if (!string.IsNullOrEmpty(page.ImageKey))
-            {
-                return tabControl1.ImageList.Images.IndexOfKey(
-                    page.ImageKey);
-            }
+                return ImageList.Images.IndexOfKey(page.ImageKey);
 
             return page.ImageIndex;
         }
 
-        // =========================================
-        // TEXT MEASUREMENT
-        // =========================================
-
-        private int MeasureTextWidth(string text)
+        private int MeasureTextWidth(string value)
         {
             return TextRenderer.MeasureText(
-                text,
-                tabControl1.Font,
+                value,
+                Font,
                 new Size(10000, 1000),
-                TextFormatFlags.NoPadding |
-                TextFormatFlags.SingleLine).Width;
+                TextFormatFlags.NoPadding | TextFormatFlags.SingleLine).Width;
         }
 
-        // =========================================
-        // TAB LAYOUT
-        // =========================================
-
-        private void GetLayout(
-            int index,
-            out Rectangle iconRect,
-            out Rectangle textRect,
-            out Rectangle closeRect)
+        private void GetLayout(int index, out Rectangle iconRect,
+                               out Rectangle textRect, out Rectangle closeRect)
         {
-            Rectangle tab = tabControl1.GetTabRect(index);
-            TabPage page = tabControl1.TabPages[index];
-
+            Rectangle tab = GetTabRect(index);
+            TabPage page = TabPages[index];
             int x = tab.Left + LeftMargin;
-
             iconRect = Rectangle.Empty;
 
             int imageIndex = GetImageIndex(page);
-
-            if (tabControl1.ImageList != null &&
-                imageIndex >= 0 &&
-                imageIndex < tabControl1.ImageList.Images.Count)
+            if (ImageList != null && imageIndex >= 0 &&
+                imageIndex < ImageList.Images.Count)
             {
-                Size size = tabControl1.ImageList.ImageSize;
-
+                Size size = ImageList.ImageSize;
                 iconRect = new Rectangle(
-                    x,
-                    tab.Top + (tab.Height - size.Height) / 2,
-                    size.Width,
-                    size.Height);
-
+                    x, tab.Top + (tab.Height - size.Height) / 2,
+                    size.Width, size.Height);
                 x += size.Width + IconTextGap;
             }
 
-            int spaceWidth = Math.Max(
-                1,
-                MeasureTextWidth("A    B") -
-                MeasureTextWidth("AB"));
+            int spaceWidth = Math.Max(1,
+                MeasureTextWidth("A    B") - MeasureTextWidth("AB"));
+            int maxTextWidth = Math.Max(0,
+                tab.Right - RightMargin - CloseSize - spaceWidth - x);
+            int textWidth = Math.Min(MeasureTextWidth(page.Text), maxTextWidth);
 
-            int maxTextWidth = Math.Max(
-                0,
-                tab.Right - RightMargin -
-                CloseSize - spaceWidth - x);
-
-            int textWidth = Math.Min(
-                MeasureTextWidth(page.Text),
-                maxTextWidth);
-
-            textRect = new Rectangle(
-                x,
-                tab.Top,
-                textWidth,
-                tab.Height);
-
+            textRect = new Rectangle(x, tab.Top, textWidth, tab.Height);
+            int closeX = Math.Min(tab.Right - RightMargin - CloseSize,
+                x + textWidth + spaceWidth);
             closeRect = new Rectangle(
-                x + textWidth + spaceWidth,
-                tab.Top + (tab.Height - CloseSize) / 2,
-                CloseSize,
-                CloseSize);
+                closeX, tab.Top + (tab.Height - CloseSize) / 2,
+                CloseSize, CloseSize);
         }
 
-        // =========================================
-        // DRAW TAB
-        // =========================================
-
-        private void tabControl1_DrawItem(
-            object sender,
-            DrawItemEventArgs e)
+        protected override void OnDrawItem(DrawItemEventArgs e)
         {
-            if (e.Index < 0 ||
-                e.Index >= tabControl1.TabCount)
+            base.OnDrawItem(e);
+
+            if (e.Index < 0 || e.Index >= TabCount)
                 return;
 
-            Rectangle tabRect = tabControl1.GetTabRect(e.Index);
-            TabPage page = tabControl1.TabPages[e.Index];
-
-            bool selected =
-                e.Index == tabControl1.SelectedIndex;
-
+            Rectangle tabRect = GetTabRect(e.Index);
+            TabPage page = TabPages[e.Index];
+            bool selected = e.Index == SelectedIndex;
             TabItemState state = selected
                 ? TabItemState.Selected
-                : e.Index == hoveredTab
-                    ? TabItemState.Hot
-                    : TabItemState.Normal;
+                : e.Index == hoveredTab ? TabItemState.Hot : TabItemState.Normal;
 
             if (TabRenderer.IsSupported)
             {
-                TabRenderer.DrawTabItem(
-                    e.Graphics,
-                    tabRect,
-                    state);
+                TabRenderer.DrawTabItem(e.Graphics, tabRect, state);
             }
             else
             {
                 using (SolidBrush brush = new SolidBrush(
-                    selected
-                        ? SystemColors.Window
-                        : SystemColors.Control))
+                    selected ? SystemColors.Window : SystemColors.Control))
                 {
                     e.Graphics.FillRectangle(brush, tabRect);
                 }
 
-                ControlPaint.DrawBorder(
-                    e.Graphics,
-                    tabRect,
-                    SystemColors.ControlDark,
-                    ButtonBorderStyle.Solid);
+                ControlPaint.DrawBorder(e.Graphics, tabRect,
+                    SystemColors.ControlDark, ButtonBorderStyle.Solid);
             }
 
-            GetLayout(
-                e.Index,
-                out Rectangle iconRect,
-                out Rectangle textRect,
-                out Rectangle closeRect);
+            Rectangle iconRect, textRect, closeRect;
+            GetLayout(e.Index, out iconRect, out textRect, out closeRect);
 
             int imageIndex = GetImageIndex(page);
+            if (!iconRect.IsEmpty && imageIndex >= 0 && ImageList != null)
+                ImageList.Draw(e.Graphics, iconRect.X, iconRect.Y, imageIndex);
 
-            if (!iconRect.IsEmpty &&
-                imageIndex >= 0 &&
-                tabControl1.ImageList != null)
-            {
-                tabControl1.ImageList.Draw(
-                    e.Graphics,
-                    iconRect.X,
-                    iconRect.Y,
-                    imageIndex);
-            }
-
-            TextRenderer.DrawText(
-                e.Graphics,
-                page.Text,
-                tabControl1.Font,
-                textRect,
+            TextRenderer.DrawText(e.Graphics, page.Text, Font, textRect,
                 HeaderTextColor,
-                TextFormatFlags.Left |
-                TextFormatFlags.VerticalCenter |
-                TextFormatFlags.SingleLine |
-                TextFormatFlags.EndEllipsis |
-                TextFormatFlags.NoPrefix |
-                TextFormatFlags.NoPadding);
+                TextFormatFlags.Left | TextFormatFlags.VerticalCenter |
+                TextFormatFlags.SingleLine | TextFormatFlags.EndEllipsis |
+                TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
 
-            bool closeHovered =
-                e.Index == hoveredCloseTab;
-
-            SmoothingMode oldMode =
-                e.Graphics.SmoothingMode;
-
-            e.Graphics.SmoothingMode =
-                SmoothingMode.AntiAlias;
-
-            if (closeHovered)
+            bool closeHovered = e.Index == hoveredCloseTab;
+            SmoothingMode oldMode = e.Graphics.SmoothingMode;
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            try
             {
-                Rectangle hoverRect = closeRect;
-                hoverRect.Inflate(3, 3);
-
-                using (SolidBrush brush = new SolidBrush(
-                    Color.FromArgb(220, 53, 69)))
+                if (closeHovered)
                 {
-                    e.Graphics.FillEllipse(
-                        brush,
-                        hoverRect);
+                    Rectangle hoverRect = closeRect;
+                    hoverRect.Inflate(3, 3);
+                    using (SolidBrush brush =
+                        new SolidBrush(Color.FromArgb(220, 53, 69)))
+                    {
+                        e.Graphics.FillEllipse(brush, hoverRect);
+                    }
+                }
+
+                using (Pen pen = new Pen(
+                    closeHovered ? Color.White : SystemColors.GrayText, 1.7f))
+                {
+                    e.Graphics.DrawLine(pen,
+                        closeRect.Left + 2, closeRect.Top + 2,
+                        closeRect.Right - 2, closeRect.Bottom - 2);
+                    e.Graphics.DrawLine(pen,
+                        closeRect.Right - 2, closeRect.Top + 2,
+                        closeRect.Left + 2, closeRect.Bottom - 2);
                 }
             }
-
-            using (Pen pen = new Pen(
-                closeHovered
-                    ? Color.White
-                    : SystemColors.GrayText,
-                1.7f))
+            finally
             {
-                e.Graphics.DrawLine(
-                    pen,
-                    closeRect.Left + 2,
-                    closeRect.Top + 2,
-                    closeRect.Right - 2,
-                    closeRect.Bottom - 2);
-
-                e.Graphics.DrawLine(
-                    pen,
-                    closeRect.Right - 2,
-                    closeRect.Top + 2,
-                    closeRect.Left + 2,
-                    closeRect.Bottom - 2);
+                e.Graphics.SmoothingMode = oldMode;
             }
-
-            e.Graphics.SmoothingMode = oldMode;
         }
-
-        // =========================================
-        // CLOSE BUTTON HIT TEST
-        // =========================================
 
         private int HitTestCloseButton(Point point)
         {
-            for (int i = 0;
-                 i < tabControl1.TabCount;
-                 i++)
+            for (int i = 0; i < TabCount; i++)
             {
-                GetLayout(
-                    i,
-                    out Rectangle icon,
-                    out Rectangle text,
-                    out Rectangle close);
-
+                Rectangle icon, text, close;
+                GetLayout(i, out icon, out text, out close);
                 close.Inflate(3, 3);
-
-                if (close.Contains(point) &&
-                    tabControl1.GetTabRect(i).Contains(point))
+                if (close.Contains(point) && GetTabRect(i).Contains(point))
                     return i;
             }
 
             return -1;
         }
 
-        // =========================================
-        // MOUSE EVENTS
-        // =========================================
-
-        private void tabControl1_MouseClick(
-            object sender,
-            MouseEventArgs e)
+        protected override void OnMouseClick(MouseEventArgs e)
         {
-            if (e.Button != MouseButtons.Left)
+            base.OnMouseClick(e);
+
+            // Visual Studio must own design-time page removal and persistence.
+            if (e.Button != MouseButtons.Left || DesignMode ||
+                LicenseManager.UsageMode == LicenseUsageMode.Designtime)
                 return;
 
             int index = HitTestCloseButton(e.Location);
-
             if (index >= 0)
-                CloseTab(tabControl1.TabPages[index]);
+                CloseTab(TabPages[index]);
         }
 
-        private void tabControl1_MouseMove(
-            object sender,
-            MouseEventArgs e)
+        protected override void OnMouseMove(MouseEventArgs e)
         {
-            int newHoveredTab = -1;
+            base.OnMouseMove(e);
 
-            for (int i = 0;
-                 i < tabControl1.TabCount;
-                 i++)
+            int newHoveredTab = -1;
+            for (int i = 0; i < TabCount; i++)
             {
-                if (tabControl1.GetTabRect(i).Contains(e.Location))
+                if (GetTabRect(i).Contains(e.Location))
                 {
                     newHoveredTab = i;
                     break;
                 }
             }
 
-            int newHoveredClose =
-                HitTestCloseButton(e.Location);
-
-            tabControl1.Cursor =
-                newHoveredClose >= 0
-                    ? Cursors.Hand
-                    : Cursors.Default;
+            int newHoveredClose = HitTestCloseButton(e.Location);
+            Cursor = newHoveredClose >= 0 ? Cursors.Hand : Cursors.Default;
 
             if (newHoveredTab != hoveredTab ||
                 newHoveredClose != hoveredCloseTab)
             {
                 hoveredTab = newHoveredTab;
                 hoveredCloseTab = newHoveredClose;
-
-                tabControl1.Invalidate();
+                Invalidate();
             }
         }
 
-        private void tabControl1_MouseLeave(
-            object sender,
-            EventArgs e)
+        protected override void OnMouseLeave(EventArgs e)
         {
+            base.OnMouseLeave(e);
             hoveredTab = -1;
             hoveredCloseTab = -1;
-
-            tabControl1.Cursor = Cursors.Default;
-            tabControl1.Invalidate();
+            Cursor = Cursors.Default;
+            Invalidate();
         }
-
-        // =========================================
-        // COLOR SUPPORT
-        // =========================================
 
         protected override void OnBackColorChanged(EventArgs e)
         {
             base.OnBackColorChanged(e);
-
-            if (tabControl1 == null)
-                return;
-
-            tabControl1.BackColor = BackColor;
-
-            foreach (TabPage page in tabControl1.TabPages)
+            foreach (TabPage page in TabPages)
                 page.BackColor = BackColor;
-
-            tabControl1.Invalidate();
+            Invalidate();
         }
 
         protected override void OnForeColorChanged(EventArgs e)
         {
             base.OnForeColorChanged(e);
-
-            if (tabControl1 == null)
-                return;
-
-            tabControl1.ForeColor = ForeColor;
-
-            foreach (TabPage page in tabControl1.TabPages)
+            foreach (TabPage page in TabPages)
                 page.ForeColor = ForeColor;
-
-            tabControl1.Invalidate();
+            Invalidate();
         }
     }
 
