@@ -49,7 +49,6 @@
             tabControl1.TabIndex = 0;
             tabControl1.DrawItem += tabControl1_DrawItem;
             tabControl1.MouseClick += tabControl1_MouseClick;
-            tabControl1.MouseEnter += tabControl1_MouseEnter;
             tabControl1.MouseLeave += tabControl1_MouseLeave;
             // 
             // tabPage1
@@ -80,7 +79,6 @@
             Margin = new Padding(4);
             Name = "TabControlWithCloseButtons";
             Size = new Size(292, 307);
-            Load += TabControlWithCloseButtons_Load;
             tabControl1.ResumeLayout(false);
             ResumeLayout(false);
         }

@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -14,6 +15,9 @@ namespace Carpathia
         private const int CloseSize = 12;
         private const int IconTextGap = 4;
 
+        private static readonly Color HeaderTextColor =
+            Color.FromArgb(30, 30, 30);
+
         private int hoveredTab = -1;
         private int hoveredCloseTab = -1;
 
@@ -21,12 +25,11 @@ namespace Carpathia
         {
             InitializeComponent();
 
-            // Retain the Windows visual theme.
+            tabControl1.Appearance = TabAppearance.Normal;
             tabControl1.DrawMode = TabDrawMode.OwnerDrawFixed;
             tabControl1.SizeMode = TabSizeMode.Normal;
+            tabControl1.Multiline = false;
 
-            // Reserve the space needed for the close button.
-            // Actual icon/text drawing is left-aligned below.
             int extra = GetFourSpaceWidth() + CloseSize + 12;
 
             tabControl1.Padding = new Point(
@@ -34,26 +37,139 @@ namespace Carpathia
                 tabControl1.Padding.Y
             );
 
-            tabControl1.DrawItem -= tabControl1_DrawItem;
-            tabControl1.MouseClick -= tabControl1_MouseClick;
-            tabControl1.MouseEnter -= tabControl1_MouseEnter;
-            tabControl1.MouseLeave -= tabControl1_MouseLeave;
-            tabControl1.MouseMove -= tabControl1_MouseMove;
-
             tabControl1.DrawItem += tabControl1_DrawItem;
             tabControl1.MouseClick += tabControl1_MouseClick;
-            tabControl1.MouseEnter += tabControl1_MouseEnter;
             tabControl1.MouseLeave += tabControl1_MouseLeave;
             tabControl1.MouseMove += tabControl1_MouseMove;
 
             tabControl1.SelectedIndexChanged += (s, e) =>
+            {
                 tabControl1.Invalidate();
+                OnSelectedIndexChanged(EventArgs.Empty);
+            };
         }
 
-        private void TabControlWithCloseButtons_Load(
-            object sender, EventArgs e)
+        // =========================================
+        // DESIGNER PROPERTIES
+        // =========================================
+
+        [Category("Appearance")]
+        [Description("The ImageList used for tab icons.")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public ImageList ImageList
         {
+            get => tabControl1.ImageList;
+            set
+            {
+                tabControl1.ImageList = value;
+                tabControl1.Invalidate();
+            }
         }
+
+        [Category("Appearance")]
+        [Description("The collection of tab pages.")]
+        [DesignerSerializationVisibility(
+            DesignerSerializationVisibility.Content)]
+        [Editor(
+            "System.Windows.Forms.Design.TabPageCollectionEditor, System.Design",
+            typeof(System.Drawing.Design.UITypeEditor))]
+        public TabControl.TabPageCollection TabPages
+        {
+            get => tabControl1.TabPages;
+        }
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(
+            DesignerSerializationVisibility.Hidden)]
+        public TabPage SelectedTab
+        {
+            get => tabControl1.SelectedTab;
+            set => tabControl1.SelectedTab = value;
+        }
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public int SelectedIndex
+        {
+            get => tabControl1.SelectedIndex;
+            set => tabControl1.SelectedIndex = value;
+        }
+
+        [Category("Appearance")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public TabSizeMode SizeMode
+        {
+            get => tabControl1.SizeMode;
+            set => tabControl1.SizeMode = value;
+        }
+
+        [Category("Appearance")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public TabAlignment Alignment
+        {
+            get => tabControl1.Alignment;
+            set => tabControl1.Alignment = value;
+        }
+
+        // =========================================
+        // EVENTS
+        // =========================================
+
+        public event EventHandler SelectedIndexChanged;
+
+        protected virtual void OnSelectedIndexChanged(EventArgs e)
+        {
+            SelectedIndexChanged?.Invoke(this, e);
+        }
+
+        // =========================================
+        // TAB METHODS
+        // =========================================
+
+        public void AddTab(TabPage page)
+        {
+            if (page == null)
+                throw new ArgumentNullException(nameof(page));
+
+            tabControl1.TabPages.Add(page);
+            tabControl1.Invalidate();
+        }
+
+        public void RemoveTab(TabPage page)
+        {
+            if (page == null)
+                return;
+
+            tabControl1.TabPages.Remove(page);
+            tabControl1.Invalidate();
+        }
+
+        public void RemoveTabAt(int index)
+        {
+            if (index < 0 || index >= tabControl1.TabPages.Count)
+                return;
+
+            TabPage page = tabControl1.TabPages[index];
+
+            tabControl1.TabPages.RemoveAt(index);
+            page.Dispose();
+
+            tabControl1.Invalidate();
+        }
+
+        public void SelectTab(TabPage page)
+        {
+            tabControl1.SelectTab(page);
+        }
+
+        public void SelectTab(int index)
+        {
+            tabControl1.SelectTab(index);
+        }
+
+        // =========================================
+        // TEXT MEASUREMENT
+        // =========================================
 
         private int MeasureTextWidth(string text)
         {
@@ -68,8 +184,6 @@ namespace Carpathia
 
         private int GetFourSpaceWidth()
         {
-            // Measure internal spaces so trailing-space
-            // trimming cannot interfere.
             return Math.Max(
                 1,
                 MeasureTextWidth("A    B") -
@@ -77,18 +191,28 @@ namespace Carpathia
             );
         }
 
+        // =========================================
+        // IMAGE LIST
+        // =========================================
+
         private int GetImageIndex(TabPage page)
         {
             if (tabControl1.ImageList == null)
                 return -1;
 
             if (!string.IsNullOrEmpty(page.ImageKey))
+            {
                 return tabControl1.ImageList.Images.IndexOfKey(
                     page.ImageKey
                 );
+            }
 
             return page.ImageIndex;
         }
+
+        // =========================================
+        // TAB LAYOUT
+        // =========================================
 
         private void GetLayout(
             int index,
@@ -142,7 +266,6 @@ namespace Carpathia
                 tab.Height
             );
 
-            // X is placed AFTER the text + four spaces.
             closeRect = new Rectangle(
                 x + textWidth + spaceWidth,
                 tab.Top + (tab.Height - CloseSize) / 2,
@@ -151,8 +274,13 @@ namespace Carpathia
             );
         }
 
+        // =========================================
+        // DRAW TAB
+        // =========================================
+
         private void tabControl1_DrawItem(
-            object sender, DrawItemEventArgs e)
+            object sender,
+            DrawItemEventArgs e)
         {
             if (e.Index < 0 ||
                 e.Index >= tabControl1.TabCount)
@@ -161,8 +289,7 @@ namespace Carpathia
             Rectangle tabRect = tabControl1.GetTabRect(e.Index);
             TabPage page = tabControl1.TabPages[e.Index];
 
-            bool selected =
-                e.Index == tabControl1.SelectedIndex;
+            bool selected = e.Index == tabControl1.SelectedIndex;
 
             TabItemState state = selected
                 ? TabItemState.Selected
@@ -170,8 +297,6 @@ namespace Carpathia
                     ? TabItemState.Hot
                     : TabItemState.Normal;
 
-            // Use the current Windows visual style instead
-            // of painting Windows 95-style rectangles.
             if (TabRenderer.IsSupported)
             {
                 TabRenderer.DrawTabItem(
@@ -209,7 +334,6 @@ namespace Carpathia
                 out closeRect
             );
 
-            // Restore ImageList icon.
             int imageIndex = GetImageIndex(page);
 
             if (!iconRect.IsEmpty &&
@@ -224,7 +348,6 @@ namespace Carpathia
                 );
             }
 
-            // Draw text at a fixed LEFT margin.
             if (textRect.Width > 0)
             {
                 TextRenderer.DrawText(
@@ -232,7 +355,7 @@ namespace Carpathia
                     page.Text,
                     tabControl1.Font,
                     textRect,
-                    tabControl1.ForeColor,
+                    HeaderTextColor,
                     TextFormatFlags.Left |
                     TextFormatFlags.VerticalCenter |
                     TextFormatFlags.SingleLine |
@@ -242,7 +365,6 @@ namespace Carpathia
                 );
             }
 
-            // Draw close button.
             bool closeHovered = e.Index == hoveredCloseTab;
 
             SmoothingMode oldMode = e.Graphics.SmoothingMode;
@@ -253,15 +375,17 @@ namespace Carpathia
                 Rectangle hoverRect = closeRect;
                 hoverRect.Inflate(3, 3);
 
-                using (SolidBrush brush =
-                    new SolidBrush(Color.FromArgb(220, 53, 69)))
+                using (SolidBrush brush = new SolidBrush(
+                    Color.FromArgb(220, 53, 69)))
                 {
                     e.Graphics.FillEllipse(brush, hoverRect);
                 }
             }
 
             using (Pen pen = new Pen(
-                closeHovered ? Color.White : SystemColors.GrayText,
+                closeHovered
+                    ? Color.White
+                    : SystemColors.GrayText,
                 1.7f))
             {
                 e.Graphics.DrawLine(
@@ -283,6 +407,10 @@ namespace Carpathia
 
             e.Graphics.SmoothingMode = oldMode;
         }
+
+        // =========================================
+        // CLOSE BUTTON HIT TEST
+        // =========================================
 
         private int HitTestCloseButton(Point point)
         {
@@ -306,8 +434,13 @@ namespace Carpathia
             return -1;
         }
 
+        // =========================================
+        // MOUSE CLICK
+        // =========================================
+
         private void tabControl1_MouseClick(
-            object sender, MouseEventArgs e)
+            object sender,
+            MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Left)
                 return;
@@ -328,8 +461,13 @@ namespace Carpathia
             tabControl1.Invalidate();
         }
 
+        // =========================================
+        // MOUSE MOVE
+        // =========================================
+
         private void tabControl1_MouseMove(
-            object sender, MouseEventArgs e)
+            object sender,
+            MouseEventArgs e)
         {
             int newHoveredTab = -1;
 
@@ -357,19 +495,59 @@ namespace Carpathia
             }
         }
 
-        private void tabControl1_MouseEnter(
-            object sender, EventArgs e)
-        {
-        }
+        // =========================================
+        // MOUSE LEAVE
+        // =========================================
 
         private void tabControl1_MouseLeave(
-            object sender, EventArgs e)
+            object sender,
+            EventArgs e)
         {
             hoveredTab = -1;
             hoveredCloseTab = -1;
 
             tabControl1.Cursor = Cursors.Default;
             tabControl1.Invalidate();
+        }
+
+        // =========================================
+        // BACK COLOR
+        // =========================================
+
+        protected override void OnBackColorChanged(EventArgs e)
+        {
+            base.OnBackColorChanged(e);
+
+            if (tabControl1 == null)
+                return;
+
+            tabControl1.BackColor = BackColor;
+
+            foreach (TabPage page in tabControl1.TabPages)
+                page.BackColor = BackColor;
+
+            tabControl1.Invalidate();
+            Invalidate();
+        }
+
+        // =========================================
+        // FORE COLOR
+        // =========================================
+
+        protected override void OnForeColorChanged(EventArgs e)
+        {
+            base.OnForeColorChanged(e);
+
+            if (tabControl1 == null)
+                return;
+
+            tabControl1.ForeColor = ForeColor;
+
+            foreach (TabPage page in tabControl1.TabPages)
+                page.ForeColor = ForeColor;
+
+            tabControl1.Invalidate();
+            Invalidate();
         }
     }
 }
