@@ -686,6 +686,10 @@ namespace Carpathia
             {
                 timer1.Stop();
                 randomBehaviorTimer.Stop();
+                foreach (SoundPlayer player in soundPlayers.Values)
+                {
+                    player.Stop();
+                }
             }
         }
     }
