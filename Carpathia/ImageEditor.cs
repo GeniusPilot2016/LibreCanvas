@@ -410,6 +410,7 @@ namespace Carpathia
             InitializeSelectionPen(); // Initialize the SelectionPen
             createNewFile();
             UpdateUndoRedoButtons(); // Başlangıçta tuşları güncelle
+            InitializeDocumentTabs();
         }
         public ImageEditor(String fileName)
         {
@@ -417,6 +418,7 @@ namespace Carpathia
             SetInitialValues();
             InitializeSelectionPen(); // Initialize the SelectionPen
             openAFile(fileName);
+            InitializeDocumentTabs();
         }
         public ImageEditor(Image image, bool AIGenerated)
         {
@@ -424,6 +426,7 @@ namespace Carpathia
             SetInitialValues();
             InitializeSelectionPen(); // Initialize the SelectionPen
             createFileWithAIorWebcam(image, AIGenerated);
+            InitializeDocumentTabs();
         }
         private Pen SelectionPen;
 
@@ -596,6 +599,8 @@ namespace Carpathia
             comboBoxBlendMode.ForeColor = SystemColors.WindowText;
             listViewHistory.BackColor = SystemColors.Window;
             listViewHistory.ForeColor = SystemColors.WindowText;
+            documentTabsDarkTheme = false;
+            ApplyDocumentTabTheme();
             UIHelper.ApplyCustomTitleBar(this, false);
         }
         private void DarkTheme()
@@ -666,6 +671,8 @@ namespace Carpathia
             comboBoxBlendMode.ForeColor = Color.White;
             listViewHistory.BackColor = Color.Black;
             listViewHistory.ForeColor = Color.White;
+            documentTabsDarkTheme = true;
+            ApplyDocumentTabTheme();
             UIHelper.ApplyCustomTitleBar(this, true);
         }
         private void InitializeSelectionPen()
@@ -693,7 +700,7 @@ namespace Carpathia
             InitializeComponent();
             // Keep the mascot within the *visible* UIPanel viewport while dragging.
             MakeDraggable(sunnyTheCat1, UIPanel);
-            if(!Settings1.Default.ShowSunnyTheCat)
+            if (!Settings1.Default.ShowSunnyTheCat)
             {
                 sunnyTheCat1.Visible = false;
             }
@@ -1395,6 +1402,7 @@ namespace Carpathia
         private void MarkCompositeDirty()
         {
             compositeDirty = true;
+            QueueTabThumbnailRefresh();
         }
 
         private void BeginToolStrokePreview()
@@ -1932,6 +1940,861 @@ namespace Carpathia
             UIPanel.AutoScrollPosition = new Point(x, y);
         }
 
+        // Each tab owns its document data. The designer-created UIPanel (and its
+        // child controls, events, resize handles and scrolling machinery) is the
+        // live editor surface, moved into the selected tab. WinForms controls
+        // cannot belong to two parents; reusing the working control tree avoids
+        // fragile, event-less clones while preserving independent documents.
+        private sealed class CanvasDocument : IDisposable
+        {
+            public TabPage Page;
+            // Stable key: a tab can be re-created when an unsaved close is cancelled.
+            public readonly string TabThumbnailKey = Guid.NewGuid().ToString("N");
+            public readonly List<EditorLayer> Layers = new();
+            public readonly Dictionary<string, bool> Visibility = new(StringComparer.Ordinal);
+            public readonly Dictionary<string, bool> Locks = new(StringComparer.Ordinal);
+            public readonly HashSet<string> DirtyThumbnails = new();
+            public readonly List<(Point Start, Point End)> SelectionOutline = new();
+            public Bitmap Bitmap;
+            public Bitmap Selected;
+            public Bitmap Preview;
+            public Stack<LayerCanvasState> Undo = new();
+            public Stack<LayerCanvasState> Redo = new();
+            public string HistoryBase = "New document";
+            public string FilePath = string.Empty;
+            public string DisplayName = "Unnamed File";
+            public bool Modified, Saved, FileSaved, Generated;
+            public int ActiveLayer = -1;
+            public float Zoom = 1f;
+            public Size CanvasSize;
+            public Point ScrollPosition;
+            public bool IsSelected;
+            public Rectangle SelectionRect;
+            public Point SelectionStart;
+            public Point SelectionImageLocation;
+            public Size SelectionImageSize;
+            public BitArray MagicMask;
+            public int MagicWidth, MagicHeight;
+            public Rectangle MagicBounds;
+            public BlurEffect Blur;
+            public ArtisticFilters Artistic;
+            public BasicFilters Basic;
+
+            public void Dispose()
+            {
+                foreach (EditorLayer layer in Layers) layer.Dispose();
+                Layers.Clear();
+                foreach (LayerCanvasState item in Undo) item.Dispose();
+                foreach (LayerCanvasState item in Redo) item.Dispose();
+                Undo.Clear();
+                Redo.Clear();
+                Bitmap?.Dispose();
+                Selected?.Dispose();
+                Preview?.Dispose();
+                Bitmap = Selected = Preview = null;
+            }
+        }
+
+        private readonly Dictionary<TabPage, CanvasDocument> canvasDocuments = new();
+        private CanvasDocument activeCanvasDocument;
+        private bool switchingCanvasDocument;
+        private bool savingCanvasDocument;
+        private bool closeAllDocumentsInProgress;
+        private TabPage contextDocumentTab;
+        private ContextMenuStrip documentTabMenu;
+        private bool approvedDocumentTabRemoval;
+        private bool documentTabsDarkTheme;
+        private readonly System.Windows.Forms.Timer tabThumbnailRefreshTimer = new System.Windows.Forms.Timer();
+
+        // Thumbnail generation is deferred while painting, but completed before
+        // switching documents so each tab always has its own latest image.
+        private void QueueTabThumbnailRefresh()
+        {
+            if (activeCanvasDocument == null || switchingCanvasDocument ||
+                IsDisposed || Disposing || MainBitmap == null)
+                return;
+            tabThumbnailRefreshTimer.Stop();
+            tabThumbnailRefreshTimer.Start();
+        }
+
+        private void TabThumbnailRefreshTimer_Tick(object sender, EventArgs e)
+        {
+            tabThumbnailRefreshTimer.Stop();
+            if (isdrawing || isResizing || suppressCompositeDuringToolStroke ||
+                switchingCanvasDocument)
+            {
+                QueueTabThumbnailRefresh();
+                return;
+            }
+            RefreshCurrentTabThumbnail();
+        }
+
+        // Like the layer list thumbnails, a tab thumbnail shows transparency
+        // using a checkerboard, and letterboxes wide/tall images to ImageSize.
+        private Bitmap CreateDocumentTabThumbnail(Image source)
+        {
+            Size size = imageListTabThumbnails.ImageSize;
+            int width = Math.Max(1, size.Width);
+            int height = Math.Max(1, size.Height);
+            var thumbnail = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+            using (Graphics g = Graphics.FromImage(thumbnail))
+            {
+                const int check = 4;
+                using (Brush light = new SolidBrush(Color.FromArgb(240, 240, 240)))
+                using (Brush dark = new SolidBrush(Color.FromArgb(205, 205, 205)))
+                {
+                    for (int y = 0; y < height; y += check)
+                        for (int x = 0; x < width; x += check)
+                            g.FillRectangle(((x / check + y / check) & 1) == 0 ? light : dark,
+                                x, y, Math.Min(check, width - x), Math.Min(check, height - y));
+                }
+                g.CompositingMode = CompositingMode.SourceOver;
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                float scale = Math.Min((float)width / source.Width,
+                    (float)height / source.Height);
+                int drawnWidth = Math.Max(1, Math.Min(width, (int)Math.Round(source.Width * scale)));
+                int drawnHeight = Math.Max(1, Math.Min(height, (int)Math.Round(source.Height * scale)));
+                g.DrawImage(source,
+                    new Rectangle((width - drawnWidth) / 2, (height - drawnHeight) / 2,
+                        drawnWidth, drawnHeight),
+                    0, 0, source.Width, source.Height, GraphicsUnit.Pixel);
+            }
+            return thumbnail;
+        }
+
+        private void RefreshCurrentTabThumbnail()
+        {
+            CanvasDocument document = activeCanvasDocument;
+            if (document == null || MainBitmap == null || document.Page == null ||
+                document.Page.IsDisposed || !canvasDocuments.ContainsKey(document.Page) ||
+                imageListTabThumbnails == null)
+                return;
+
+            // Use the full visible composition (layer visibility, opacity and
+            // blend modes included), not the bitmap of just the selected layer.
+            Bitmap temporaryComposite = null;
+            try
+            {
+                Image source = compositeCanvasBitmap;
+                if (source == null || compositeDirty || source.Size != MainBitmap.Size)
+                {
+                    temporaryComposite = CreateCompositeBitmap();
+                    source = temporaryComposite;
+                }
+                if (source == null || source.Width < 1 || source.Height < 1)
+                    return;
+
+                using (Bitmap thumbnail = CreateDocumentTabThumbnail(source))
+                {
+                    string key = document.TabThumbnailKey;
+                    imageListTabThumbnails.Images.RemoveByKey(key);
+                    imageListTabThumbnails.Images.Add(key, new Bitmap(thumbnail));
+                    document.Page.ImageKey = key;
+                }
+                tabControlWithCloseButtons1.Invalidate();
+            }
+            finally
+            {
+                temporaryComposite?.Dispose();
+            }
+        }
+
+        private void FlushTabThumbnailBeforeSwitch()
+        {
+            tabThumbnailRefreshTimer.Stop();
+            RefreshCurrentTabThumbnail();
+        }
+
+        // Set each document TabPage background without changing the tab control.
+        // Apply on creation and on theme changes.
+        private void ApplyDocumentTabTheme(TabPage page = null)
+        {
+            Color background = documentTabsDarkTheme
+                ? Color.FromArgb(32, 32, 32) : SystemColors.Control;
+            Color foreground = documentTabsDarkTheme
+                ? Color.White : SystemColors.ControlText;
+            var tabs = tabControlWithCloseButtons1;
+            if (page != null)
+            {
+                page.UseVisualStyleBackColor = false;
+                page.BackColor = background;
+                page.ForeColor = foreground;
+            }
+            else
+            {
+                foreach (TabPage tab in tabs.TabPages)
+                {
+                    tab.UseVisualStyleBackColor = false;
+                    tab.BackColor = background;
+                    tab.ForeColor = foreground;
+                }
+            }
+            foreach (TabPage tab in tabs.TabPages) tab.Invalidate();
+        }
+
+        private void InitializeDocumentTabs()
+        {
+            // The ImageList is declared in the user's updated Designer file.
+            // Keep its configured ImageSize and use 32-bit images for alpha.
+            imageListTabThumbnails.ColorDepth = ColorDepth.Depth32Bit;
+            var tabs = tabControlWithCloseButtons1;
+            if (!ReferenceEquals(tabs.ImageList, imageListTabThumbnails))
+                tabs.ImageList = imageListTabThumbnails;
+            tabThumbnailRefreshTimer.Interval = 400;
+            tabThumbnailRefreshTimer.Tick -= TabThumbnailRefreshTimer_Tick;
+            tabThumbnailRefreshTimer.Tick += TabThumbnailRefreshTimer_Tick;
+            switchingCanvasDocument = true;
+            try
+            {
+                TabPage firstPage;
+                if (UIPanel.Parent is TabPage existing && existing.Parent == tabs)
+                {
+                    firstPage = existing;
+                }
+                else
+                {
+                    // Put the tab control exactly where UIPanel used to live.
+                    // This works whether the canvas is in a normal Panel or a
+                    // ToolStripContainer.ContentPanel.
+                    Control workspaceParent = UIPanel.Parent;
+                    Rectangle bounds = UIPanel.Bounds;
+                    DockStyle dock = UIPanel.Dock;
+                    AnchorStyles anchor = UIPanel.Anchor;
+                    if (tabs.Parent != workspaceParent)
+                        tabs.Parent = workspaceParent;
+                    tabs.Dock = dock;
+                    if (dock == DockStyle.None)
+                    {
+                        tabs.Bounds = bounds;
+                        tabs.Anchor = anchor;
+                    }
+                    tabs.BringToFront();
+                    firstPage = tabs.TabPages.Count > 0
+                        ? tabs.TabPages[0] : new TabPage();
+                    if (!tabs.TabPages.Contains(firstPage))
+                        tabs.TabPages.Add(firstPage);
+                    UIPanel.Parent = firstPage; // All nested controls come along.
+                    UIPanel.Dock = DockStyle.Fill;
+                }
+                foreach (TabPage redundant in tabs.TabPages.Cast<TabPage>()
+                    .Where(page => page != firstPage).ToArray())
+                {
+                    // Blank designer placeholder tabs are not documents.
+                    if (redundant.Controls.Count == 0)
+                        tabs.TabPages.Remove(redundant);
+                }
+                var document = new CanvasDocument { Page = firstPage };
+                activeCanvasDocument = document;
+                canvasDocuments.Add(firstPage, document);
+                CaptureActiveCanvasDocument();
+                UpdateCanvasDocumentTitle(document);
+                tabs.SelectedTab = firstPage;
+            }
+            finally
+            {
+                switchingCanvasDocument = false;
+            }
+
+            ApplyDocumentTabTheme();
+            // First document already exists when the constructor reaches here.
+            RefreshCurrentTabThumbnail();
+            QueueDocumentCanvasLayout(activeCanvasDocument);
+            tabs.SelectedIndexChanged += CanvasDocumentTab_SelectedIndexChanged;
+            tabs.ControlRemoved += CanvasDocumentTab_ControlRemoved;
+            tabs.MouseUp += CanvasDocumentTab_MouseUp;
+            documentTabMenu = new ContextMenuStrip();
+            var closeItem = new ToolStripMenuItem("Close tab");
+            closeItem.Click += (sender, args) => CloseDocumentTab(contextDocumentTab);
+            documentTabMenu.Items.Add(closeItem);
+        }
+
+        private static string DocumentTabCaption(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return "Unnamed File";
+            if (name.Equals("Unnamed File", StringComparison.OrdinalIgnoreCase))
+                return name;
+            if (name.Equals("AI Generated File", StringComparison.OrdinalIgnoreCase))
+                return name;
+            if (name.Equals("Webcam Image", StringComparison.OrdinalIgnoreCase))
+                return name;
+            return Path.GetFileName(name);
+        }
+
+        private void UpdateCanvasDocumentTitle(CanvasDocument document)
+        {
+            if (document?.Page == null || document.Page.IsDisposed) return;
+            string title = DocumentTabCaption(document.DisplayName);
+            document.Page.Text = document.Modified ? title + " *" : title;
+        }
+
+        private void UpdateCurrentDocumentTitle()
+        {
+            if (activeCanvasDocument == null) return;
+            activeCanvasDocument.DisplayName = labelFileName.Text;
+            activeCanvasDocument.Modified = isModified;
+            UpdateCanvasDocumentTitle(activeCanvasDocument);
+        }
+
+        // Store references, not cloned bitmaps. The inactive document owns them
+        // while editorLayers, undoStack, etc. point at a different document.
+        private void CaptureActiveCanvasDocument()
+        {
+            CanvasDocument document = activeCanvasDocument;
+            if (document == null) return;
+            document.Layers.Clear();
+            document.Layers.AddRange(editorLayers);
+            document.Visibility.Clear();
+            foreach (var pair in untrackedLayerVisibility)
+                document.Visibility.Add(pair.Key, pair.Value);
+            document.Locks.Clear();
+            foreach (var pair in untrackedLayerLocks)
+                document.Locks.Add(pair.Key, pair.Value);
+            document.DirtyThumbnails.Clear();
+            document.DirtyThumbnails.UnionWith(dirtyLayerThumbnailKeys);
+            document.Bitmap = MainBitmap;
+            document.Selected = SelectedBitmap;
+            document.Preview = previewBitmap;
+            document.Undo = undoStack;
+            document.Redo = redoStack;
+            document.ActiveLayer = activeLayerIndex;
+            document.CanvasSize = originalSize;
+            document.Zoom = zoom;
+            document.HistoryBase = historyBaseDescription;
+            document.FilePath = openedFilePath;
+            document.DisplayName = labelFileName.Text;
+            document.Modified = isModified;
+            document.Saved = isSaved;
+            document.FileSaved = fileSaved;
+            document.Generated = aiGenerated;
+            document.ScrollPosition = new Point(
+                -UIPanel.AutoScrollPosition.X, -UIPanel.AutoScrollPosition.Y);
+            document.IsSelected = isSelected;
+            document.SelectionRect = SelectionRectangle;
+            document.SelectionStart = SelectionStartPoint;
+            document.SelectionImageLocation = originalSelectionRectangleLocation;
+            document.SelectionImageSize = originalSelectionRectangleSize;
+            document.MagicMask = magicSelectionMask;
+            document.MagicWidth = magicSelectionMaskWidth;
+            document.MagicHeight = magicSelectionMaskHeight;
+            document.MagicBounds = magicSelectionBounds;
+            document.SelectionOutline.Clear();
+            document.SelectionOutline.AddRange(magicSelectionOutlineSegments);
+            document.Blur = blurEffect;
+            document.Artistic = artisticFilters;
+            document.Basic = basicFilters;
+            UpdateCanvasDocumentTitle(document);
+        }
+
+        // Canvas previews can be regenerated. They are NOT the original layer
+        // bitmaps and must never hold a document's only image data.
+        private void DetachCanvasPreview()
+        {
+            pictureBoxCanvas.Image = null;
+            compositeCanvasBitmap?.Dispose();
+            compositeCanvasBitmap = null;
+            compositeDirty = true;
+        }
+
+        private void RestoreCanvasDocument(CanvasDocument document)
+        {
+            activeCanvasDocument = document;
+            MainBitmap = document.Bitmap;
+            SelectedBitmap = document.Selected;
+            previewBitmap = document.Preview;
+            undoStack = document.Undo;
+            redoStack = document.Redo;
+            historyBaseDescription = document.HistoryBase;
+            editorLayers.Clear();
+            editorLayers.AddRange(document.Layers);
+            untrackedLayerVisibility.Clear();
+            foreach (var pair in document.Visibility)
+                untrackedLayerVisibility.Add(pair.Key, pair.Value);
+            untrackedLayerLocks.Clear();
+            foreach (var pair in document.Locks)
+                untrackedLayerLocks.Add(pair.Key, pair.Value);
+            dirtyLayerThumbnailKeys.Clear();
+            dirtyLayerThumbnailKeys.UnionWith(document.DirtyThumbnails);
+            activeLayerIndex = document.ActiveLayer;
+            originalSize = document.CanvasSize;
+            zoom = document.Zoom;
+            openedFilePath = document.FilePath;
+            fileSaved = document.FileSaved;
+            isSaved = document.Saved;
+            isModified = document.Modified;
+            aiGenerated = document.Generated;
+            isSelected = document.IsSelected;
+            SelectionRectangle = document.SelectionRect;
+            SelectionStartPoint = document.SelectionStart;
+            originalSelectionRectangleLocation = document.SelectionImageLocation;
+            originalSelectionRectangleSize = document.SelectionImageSize;
+            magicSelectionMask = document.MagicMask;
+            magicSelectionMaskWidth = document.MagicWidth;
+            magicSelectionMaskHeight = document.MagicHeight;
+            magicSelectionBounds = document.MagicBounds;
+            magicSelectionOutlineSegments.Clear();
+            magicSelectionOutlineSegments.AddRange(document.SelectionOutline);
+            blurEffect = document.Blur;
+            artisticFilters = document.Artistic;
+            basicFilters = document.Basic;
+            labelFileName.Text = document.DisplayName;
+            farklıKaydetToolStripMenuItem.Enabled = !string.IsNullOrEmpty(openedFilePath);
+            labelSize.Text = MainBitmap != null
+                ? $"{MainBitmap.Width} X {MainBitmap.Height}px" : string.Empty;
+            labelZoom.Text = $"{Math.Round(zoom * 100)}%";
+
+            suppressLayerSelectionChanged = true;
+            // LayerDataGridView derives from DataGridView, not ListView.
+            // SuspendLayout is supported by both and avoids invalid BeginUpdate calls.
+            listView1.SuspendLayout();
+            try
+            {
+                listView1.Items.Clear();
+                imageListLayerThumbnails.Images.Clear();
+                for (int i = 0; i < editorLayers.Count; i++)
+                {
+                    EditorLayer layer = editorLayers[i];
+                    Bitmap source = GetLayerBitmapForRender(i);
+                    if (source != null)
+                        using (Bitmap thumb = CreateLayerThumbnail(source))
+                            imageListLayerThumbnails.Images.Add(
+                                layer.ThumbnailKey, new Bitmap(thumb));
+                    listView1.Items.Add(new ListViewItem(layer.Name)
+                    {
+                        ImageKey = layer.ThumbnailKey,
+                        Tag = layer
+                    });
+                    listView1.SetLayerVisibility(i, layer.Visible);
+                    listView1.SetLayerLocked(i, layer.Locked);
+                }
+                if (activeLayerIndex >= 0 && activeLayerIndex < listView1.Items.Count)
+                {
+                    listView1.Items[activeLayerIndex].Selected = true;
+                    listView1.Items[activeLayerIndex].Focused = true;
+                }
+            }
+            finally
+            {
+                listView1.ResumeLayout(performLayout: true);
+                listView1.Invalidate();
+                suppressLayerSelectionChanged = false;
+            }
+            UpdateActiveLayerSettingsControls();
+            SetZoomedCanvasBounds();
+            CenterCanvasPanel();
+            if (previewBitmap != null)
+                ShowActiveLayerPreview(previewBitmap);
+            else
+                RenderCompositeToCanvas(force: true);
+            ScaleSelection();
+            UIPanel.AutoScrollPosition = document.ScrollPosition;
+            PositionZoomResizeHandles();
+            pictureBoxCanvas.Invalidate();
+            UpdateUndoRedoButtons();
+            UpdateCurrentDocumentTitle();
+        }
+
+        // A removed TabPage may have changed selection BEFORE or AFTER
+        // ControlRemoved. Reconcile after WinForms has finished the entire
+        // tab-removal message and the surviving page has been laid out.
+        private void QueueDocumentTabReconciliation()
+        {
+            if (IsDisposed || Disposing || !IsHandleCreated) return;
+            BeginInvoke(new Action(() =>
+            {
+                if (IsDisposed || Disposing || switchingCanvasDocument) return;
+                TabPage page = tabControlWithCloseButtons1.SelectedTab;
+                if (page == null || !canvasDocuments.TryGetValue(page, out var document))
+                {
+                    page = tabControlWithCloseButtons1.TabPages.Cast<TabPage>()
+                        .FirstOrDefault(candidate => canvasDocuments.ContainsKey(candidate));
+                    if (page == null) return;
+                    tabControlWithCloseButtons1.SelectedTab = page;
+                    if (!canvasDocuments.TryGetValue(page, out document)) return;
+                }
+
+                if (!ReferenceEquals(activeCanvasDocument, document))
+                {
+                    // A different (surviving) document is still active. Save
+                    // its current state before switching to the selected page.
+                    switchingCanvasDocument = true;
+                    try
+                    {
+                        if (activeCanvasDocument != null &&
+                            canvasDocuments.ContainsKey(activeCanvasDocument.Page))
+                        {
+                            CompleteZoomAnimation();
+                            CommitActiveTextEditor();
+                            CommitFloatingImagesToActiveLayer();
+                            layerThumbnailRefreshTimer.Stop();
+                            SyncActiveLayerFromCanvas();
+                            CaptureActiveCanvasDocument();
+                            FlushTabThumbnailBeforeSwitch();
+                        }
+                        DetachCanvasPreview();
+                        UIPanel.Parent = page;
+                        UIPanel.Dock = DockStyle.Fill;
+                        UIPanel.Visible = true;
+                        RestoreCanvasDocument(document);
+                    }
+                    finally { switchingCanvasDocument = false; }
+                }
+                else
+                {
+                    // A selected page can exist without owning the shared
+                    // workspace if the old page was disposed by the X button.
+                    if (!ReferenceEquals(UIPanel.Parent, page))
+                        UIPanel.Parent = page;
+                    UIPanel.Dock = DockStyle.Fill;
+                    UIPanel.Visible = true;
+                }
+                QueueDocumentCanvasLayout(document);
+            }));
+        }
+
+        // UIPanel's scrolling state and canvas centering depend on the page's
+        // final viewport size. Restoring them inside ControlRemoved (or before
+        // the replacement page is selected) uses stale/zero bounds.
+        private void QueueDocumentCanvasLayout(CanvasDocument document)
+        {
+            if (document == null || IsDisposed || Disposing || !IsHandleCreated)
+                return;
+            BeginInvoke(new Action(() =>
+            {
+                if (IsDisposed || Disposing ||
+                    !ReferenceEquals(activeCanvasDocument, document) ||
+                    !ReferenceEquals(tabControlWithCloseButtons1.SelectedTab, document.Page) ||
+                    !ReferenceEquals(UIPanel.Parent, document.Page) || MainBitmap == null)
+                    return;
+
+                document.Page.PerformLayout();
+                UIPanel.Visible = true;
+                UIPanel.Dock = DockStyle.Fill;
+                UIPanel.PerformLayout();
+                // Reset the *previous* tab's scroll offset before the size
+                // change, then restore the target document's offset.
+                UIPanel.AutoScrollPosition = Point.Empty;
+                SetZoomedCanvasBounds();
+                UIPanel.PerformLayout();
+                UIPanel.AutoScrollPosition = document.ScrollPosition;
+                CenterCanvasPanel();
+                PositionZoomResizeHandles();
+                UIPanel.Invalidate(true);
+                pictureBoxCanvas.Invalidate();
+            }));
+        }
+
+        private void CanvasDocumentTab_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (switchingCanvasDocument) return;
+            TabPage page = tabControlWithCloseButtons1.SelectedTab;
+            if (page == null || !canvasDocuments.TryGetValue(page, out var next) ||
+                ReferenceEquals(next, activeCanvasDocument)) return;
+            if (savingCanvasDocument || isImageCurrentlyCreating || isResizing || isdrawing)
+            {
+                // Never allow a task to finish writing into the wrong tab.
+                switchingCanvasDocument = true;
+                try
+                {
+                    if (activeCanvasDocument?.Page != null &&
+                        tabControlWithCloseButtons1.TabPages.Contains(activeCanvasDocument.Page))
+                        tabControlWithCloseButtons1.SelectedTab = activeCanvasDocument.Page;
+                }
+                finally { switchingCanvasDocument = false; }
+                return;
+            }
+            switchingCanvasDocument = true;
+            try
+            {
+                CompleteZoomAnimation();
+                CommitActiveTextEditor();
+                CommitFloatingImagesToActiveLayer();
+                layerThumbnailRefreshTimer.Stop();
+                SyncActiveLayerFromCanvas();
+                CaptureActiveCanvasDocument();
+                FlushTabThumbnailBeforeSwitch();
+                DetachCanvasPreview();
+                UIPanel.Parent = next.Page;
+                UIPanel.Dock = DockStyle.Fill;
+                UIPanel.Visible = true;
+                RestoreCanvasDocument(next);
+            }
+            finally
+            {
+                switchingCanvasDocument = false;
+            }
+            QueueDocumentCanvasLayout(next);
+            QueueTabThumbnailRefresh();
+        }
+
+        private void CreateDocumentTab(Action initialize, string title)
+        {
+            if (savingCanvasDocument || isImageCurrentlyCreating || isResizing) return;
+            CanvasDocument previous = activeCanvasDocument;
+            if (previous != null)
+            {
+                CommitActiveTextEditor();
+                CommitFloatingImagesToActiveLayer();
+                CompleteZoomAnimation();
+                SyncActiveLayerFromCanvas();
+                CaptureActiveCanvasDocument();
+                FlushTabThumbnailBeforeSwitch();
+                DetachCanvasPreview();
+            }
+
+            var page = new TabPage(title);
+            var document = new CanvasDocument { Page = page };
+            switchingCanvasDocument = true;
+            try
+            {
+                canvasDocuments.Add(page, document);
+                tabControlWithCloseButtons1.TabPages.Add(page);
+                ApplyDocumentTabTheme(page);
+                // The document initializer uses the existing canvas controls,
+                // but must have fresh stacks/layers before ResetLayers/ResetHistory.
+                UIPanel.Parent = page;
+                UIPanel.Dock = DockStyle.Fill;
+                UIPanel.Visible = true;
+                MainBitmap = null;
+                SelectedBitmap = null;
+                previewBitmap = null;
+                editorLayers.Clear();
+                untrackedLayerVisibility.Clear();
+                untrackedLayerLocks.Clear();
+                dirtyLayerThumbnailKeys.Clear();
+                imageListLayerThumbnails.Images.Clear();
+                undoStack = new Stack<LayerCanvasState>();
+                redoStack = new Stack<LayerCanvasState>();
+                activeLayerIndex = -1;
+                magicSelectionMask = null;
+                magicSelectionMaskWidth = magicSelectionMaskHeight = 0;
+                magicSelectionBounds = Rectangle.Empty;
+                magicSelectionOutlineSegments.Clear();
+                SelectionRectangle = Rectangle.Empty;
+                originalSelectionRectangleLocation = Point.Empty;
+                originalSelectionRectangleSize = Size.Empty;
+                isSelected = false;
+                isModified = false;
+                isSaved = false;
+                fileSaved = false;
+                blurEffect = BlurEffect.None;
+                artisticFilters = ArtisticFilters.None;
+                basicFilters = BasicFilters.None;
+                zoom = 1f;
+                activeCanvasDocument = document;
+                initialize();
+                CaptureActiveCanvasDocument();
+                FlushTabThumbnailBeforeSwitch();
+                tabControlWithCloseButtons1.SelectedTab = page;
+                UpdateCurrentDocumentTitle();
+                QueueDocumentCanvasLayout(document);
+            }
+            catch
+            {
+                // A corrupt file must not destroy the previous document.
+                CaptureActiveCanvasDocument();
+                DetachCanvasPreview();
+                document.Dispose();
+                canvasDocuments.Remove(page);
+                imageListTabThumbnails.Images.RemoveByKey(document.TabThumbnailKey);
+                // Keep UIPanel alive before its temporary TabPage is destroyed.
+                if (previous != null)
+                {
+                    UIPanel.Parent = previous.Page;
+                    UIPanel.Dock = DockStyle.Fill;
+                    RestoreCanvasDocument(previous);
+                }
+                else
+                {
+                    UIPanel.Parent = tabControlWithCloseButtons1.Parent;
+                    UIPanel.Visible = false;
+                    activeCanvasDocument = null;
+                }
+                tabControlWithCloseButtons1.TabPages.Remove(page);
+                page.Dispose();
+                if (previous != null)
+                    tabControlWithCloseButtons1.SelectedTab = previous.Page;
+                throw;
+            }
+            finally
+            {
+                switchingCanvasDocument = false;
+            }
+        }
+
+        // Closing is handled by the existing tab control and the editor's
+        // ControlRemoved listener. No changes to TabControlWithCloseButtons.
+
+        private void CanvasDocumentTab_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right || documentTabMenu == null) return;
+            for (int i = 0; i < tabControlWithCloseButtons1.TabCount; i++)
+            {
+                if (tabControlWithCloseButtons1.GetTabRect(i).Contains(e.Location))
+                {
+                    contextDocumentTab = tabControlWithCloseButtons1.TabPages[i];
+                    if (canvasDocuments.ContainsKey(contextDocumentTab))
+                        documentTabMenu.Show(tabControlWithCloseButtons1, e.Location);
+                    return;
+                }
+            }
+        }
+
+        private async Task CloseDocumentTab(TabPage page)
+        {
+            if (page == null || !canvasDocuments.ContainsKey(page) ||
+                savingCanvasDocument || closeAllDocumentsInProgress) return;
+            tabControlWithCloseButtons1.SelectedTab = page;
+            if (tabControlWithCloseButtons1.SelectedTab != page) return;
+            if (isModified)
+            {
+                DialogResult answer = MessageForm.Show(
+                    "Save changes before closing this tab?", "Unsaved Changes",
+                    MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                if (answer == DialogResult.Cancel) return;
+                if (answer == DialogResult.Yes && !await SaveAsync()) return;
+            }
+            // Removal is handled by ControlRemoved, including image disposal.
+            if (canvasDocuments.ContainsKey(page))
+            {
+                approvedDocumentTabRemoval = true;
+                try
+                {
+                    tabControlWithCloseButtons1.TabPages.Remove(page);
+                    page.Dispose();
+                }
+                finally { approvedDocumentTabRemoval = false; }
+            }
+        }
+
+        private void CanvasDocumentTab_ControlRemoved(object sender, ControlEventArgs e)
+        {
+            if (switchingCanvasDocument || e.Control is not TabPage page ||
+                !canvasDocuments.TryGetValue(page, out CanvasDocument document)) return;
+
+            bool wasActive = ReferenceEquals(document, activeCanvasDocument);
+            if (wasActive)
+            {
+                CommitActiveTextEditor();
+                CompleteZoomAnimation();
+                CommitFloatingImagesToActiveLayer();
+                layerThumbnailRefreshTimer.Stop();
+                SyncActiveLayerFromCanvas();
+                CaptureActiveCanvasDocument();
+                FlushTabThumbnailBeforeSwitch();
+            }
+
+            // The built-in X button may remove and Dispose the TabPage right
+            // after this event. When cancellation is requested, reconstruct the
+            // page rather than attaching a live UIPanel to a doomed control.
+            if (!approvedDocumentTabRemoval && !closeConfirmed && document.Modified)
+            {
+                DialogResult answer = MessageForm.Show(
+                    $"Close {DocumentTabCaption(document.DisplayName)} without saving?",
+                    "Unsaved Changes", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (answer == DialogResult.No)
+                {
+                    TabPage recovered = new TabPage(page.Text)
+                    {
+                        ImageKey = document.TabThumbnailKey
+                    };
+                    ApplyDocumentTabTheme(recovered);
+                    switchingCanvasDocument = true;
+                    try
+                    {
+                        canvasDocuments.Remove(page);
+                        document.Page = recovered;
+                        canvasDocuments.Add(recovered, document);
+                        tabControlWithCloseButtons1.TabPages.Add(recovered);
+                        if (ReferenceEquals(UIPanel.Parent, page))
+                        {
+                            UIPanel.Parent = recovered;
+                            UIPanel.Dock = DockStyle.Fill;
+                            UIPanel.Visible = true;
+                        }
+                        tabControlWithCloseButtons1.SelectedTab = recovered;
+                    }
+                    finally { switchingCanvasDocument = false; }
+                    QueueDocumentTabReconciliation();
+                    return;
+                }
+            }
+
+            switchingCanvasDocument = true;
+            try
+            {
+                // Critical: NEVER let the closing TabPage own UIPanel when the
+                // custom tab control disposes that page. This is independent of
+                // the order of SelectedIndexChanged and ControlRemoved events.
+                if (ReferenceEquals(UIPanel.Parent, page))
+                {
+                    UIPanel.Visible = false;
+                    UIPanel.Dock = DockStyle.None;
+                    UIPanel.Parent = tabControlWithCloseButtons1.Parent;
+                }
+
+                if (wasActive)
+                {
+                    DetachCanvasPreview();
+                    activeCanvasDocument = null;
+                    MainBitmap = null;
+                    SelectedBitmap = null;
+                    previewBitmap = null;
+                    editorLayers.Clear();
+                    untrackedLayerVisibility.Clear();
+                    untrackedLayerLocks.Clear();
+                    dirtyLayerThumbnailKeys.Clear();
+                    imageListLayerThumbnails.Images.Clear();
+                    undoStack = new Stack<LayerCanvasState>();
+                    redoStack = new Stack<LayerCanvasState>();
+                    activeLayerIndex = -1;
+                    isSelected = false;
+                    magicSelectionMask = null;
+                    magicSelectionMaskWidth = magicSelectionMaskHeight = 0;
+                    magicSelectionBounds = Rectangle.Empty;
+                    magicSelectionOutlineSegments.Clear();
+                    SelectionRectangle = Rectangle.Empty;
+                    originalSelectionRectangleLocation = Point.Empty;
+                    originalSelectionRectangleSize = Size.Empty;
+                    blurEffect = BlurEffect.None;
+                    artisticFilters = ArtisticFilters.None;
+                    basicFilters = BasicFilters.None;
+                    openedFilePath = string.Empty;
+                    labelFileName.Text = string.Empty;
+                    labelSize.Text = string.Empty;
+                    isModified = false;
+                    isSaved = true;
+                    fileSaved = false;
+                    UpdateUndoRedoButtons();
+                }
+                canvasDocuments.Remove(page);
+                imageListTabThumbnails.Images.RemoveByKey(document.TabThumbnailKey);
+                tabControlWithCloseButtons1.Invalidate();
+                document.Dispose();
+            }
+            finally { switchingCanvasDocument = false; }
+
+            // At this point TabControl may still be recalculating SelectedTab.
+            // It is now safe for it to dispose the old page; choose the next
+            // document and fix viewport geometry once the message has ended.
+            QueueDocumentTabReconciliation();
+        }
+
+        // Delayed layout work must not reposition whichever tab happens to be
+        // selected by the time the WinForms message is finally processed.
+        private void QueueCanvasCentering()
+        {
+            CanvasDocument requested = activeCanvasDocument;
+            if (!IsHandleCreated) return;
+            BeginInvoke(new Action(() =>
+            {
+                if (IsDisposed || (requested != null &&
+                    !ReferenceEquals(requested, activeCanvasDocument))) return;
+                CenterCanvasPanel();
+                CenterScrollbars();
+            }));
+        }
+
         private void createNewFile()
         {
             CommitActiveTextEditor();
@@ -1962,8 +2825,7 @@ namespace Carpathia
             zoom = 1;
             labelZoom.Text = "100%";
 
-            BeginInvoke(new Action(CenterCanvasPanel));
-            BeginInvoke(new Action(CenterScrollbars));
+            QueueCanvasCentering();
         }
 
         private void openAFile(string fileName)
@@ -1995,8 +2857,7 @@ namespace Carpathia
             zoom = 1;
             labelZoom.Text = "100%";
 
-            BeginInvoke(new Action(CenterCanvasPanel));
-            BeginInvoke(new Action(CenterScrollbars));
+            QueueCanvasCentering();
         }
 
         private void createFileWithAIorWebcam(Image generatedImage, bool isAIGenerated)
@@ -2025,7 +2886,7 @@ namespace Carpathia
                     labelFileName.Text = "AI Generated File";
                     break;
                 case false:
-                    labelFileName.Text = "Unnamed File";
+                    labelFileName.Text = "Webcam Image";
                     break;
             }
             ResetHistory(isAIGenerated ? "AI generated image" : "Webcam image");
@@ -2035,8 +2896,7 @@ namespace Carpathia
             zoom = 1;
             labelZoom.Text = "100%";
 
-            BeginInvoke(new Action(CenterCanvasPanel));
-            BeginInvoke(new Action(CenterScrollbars));
+            QueueCanvasCentering();
         }
 
         // WinForms uses ScrollWindowEx when moving child controls during scrolling.
@@ -3000,6 +3860,7 @@ namespace Carpathia
             SyncActiveLayerFromCanvas();
             RefreshActiveLayerThumbnail(force: true);
             fileSaved = false;
+            savingCanvasDocument = true;
 
             string extension = Path.GetExtension(targetFilePath);
             string tempFilePath = Path.Combine(Path.GetDirectoryName(targetFilePath),
@@ -3045,6 +3906,7 @@ namespace Carpathia
                 openedFilePath = targetFilePath;
                 labelFileName.Text = targetFilePath;
                 fileSaved = true;
+                UpdateCurrentDocumentTitle();
                 Logger.Log($"File saved successfully: {targetFilePath}", Logger.LogTypes.Info);
                 return true;
             }
@@ -3060,6 +3922,8 @@ namespace Carpathia
             }
             finally
             {
+                savingCanvasDocument = false;
+                UpdateCurrentDocumentTitle();
                 labelSaving.Visible = false;
                 progressBarSaving.Visible = false;
                 toolStripSeparator13.Visible = false;
@@ -3118,23 +3982,45 @@ namespace Carpathia
 
         private void ImageEditor_FormClosing(object sender, FormClosingEventArgs e)
         {
+            if (closeConfirmed) return;
             CommitActiveTextEditor();
-            if (!isModified || closeConfirmed)
-                return;
-
-            DialogResult result = MessageForm.Show("Do you want to save changes to your image?",
-                "Unsaved Changes", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
-            switch (result)
+            if (canvasDocuments.Count == 0)
             {
-                case DialogResult.Yes:
-                    e.Cancel = true;              // the save is asynchronous; close again once it succeeds
-                    _ = SaveAndCloseAsync();
-                    break;
-                case DialogResult.No:
-                    break;
-                default:
-                    e.Cancel = true;
-                    break;
+                if (!isModified) return;
+                e.Cancel = true;
+                _ = SaveAndCloseAsync();
+                return;
+            }
+            CaptureActiveCanvasDocument();
+            if (!canvasDocuments.Values.Any(doc => doc.Modified)) return;
+            e.Cancel = true;
+            if (!closeAllDocumentsInProgress)
+                _ = ConfirmAndCloseAllDocumentsAsync();
+        }
+
+        private async Task ConfirmAndCloseAllDocumentsAsync()
+        {
+            closeAllDocumentsInProgress = true;
+            try
+            {
+                foreach (CanvasDocument doc in canvasDocuments.Values.ToArray())
+                {
+                    if (!doc.Modified) continue;
+                    tabControlWithCloseButtons1.SelectedTab = doc.Page;
+                    if (tabControlWithCloseButtons1.SelectedTab != doc.Page) return;
+                    DialogResult answer = MessageForm.Show(
+                        $"Save changes to {DocumentTabCaption(doc.DisplayName)}?",
+                        "Unsaved Changes", MessageBoxButtons.YesNoCancel,
+                        MessageBoxIcon.Warning);
+                    if (answer == DialogResult.Cancel) return;
+                    if (answer == DialogResult.Yes && !await SaveAsync()) return;
+                }
+                closeConfirmed = true;
+                Close();
+            }
+            finally
+            {
+                closeAllDocumentsInProgress = false;
             }
         }
 
@@ -5841,6 +6727,24 @@ namespace Carpathia
         {
             CancelActiveTextEditor();
             CancelZoomAnimation();
+            StopResizePreview();
+            layerThumbnailRefreshTimer.Stop();
+            tabThumbnailRefreshTimer.Stop();
+            tabThumbnailRefreshTimer.Tick -= TabThumbnailRefreshTimer_Tick;
+            tabThumbnailRefreshTimer.Dispose();
+            CaptureActiveCanvasDocument();
+            pictureBoxCanvas.Image = null;
+            compositeCanvasBitmap?.Dispose();
+            compositeCanvasBitmap = null;
+            // Inactive documents are not disposed automatically by the WinForms
+            // control tree. Release every bitmap, layer and history snapshot.
+            foreach (CanvasDocument doc in canvasDocuments.Values)
+                doc.Dispose();
+            canvasDocuments.Clear();
+            activeCanvasDocument = null;
+            documentTabMenu?.Dispose();
+            CancelActiveTextEditor();
+            CancelZoomAnimation();
             zoomAnimationTimer.Tick -= ZoomAnimationTimer_Tick;
             zoomAnimationTimer.Dispose();
             StopResizePreview();
@@ -5855,7 +6759,7 @@ namespace Carpathia
 
         private void açToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            AskForSavingOrCancel(new Action(() => openAFile()));
+            openAFile();
         }
         private void openAFile()
         {
@@ -5865,7 +6769,7 @@ namespace Carpathia
                 if (dialogResult == DialogResult.OK)
                 {
                     string file = openFileDialog1.FileName;
-                    openAFile(file);
+                    CreateDocumentTab(() => openAFile(file), Path.GetFileName(file));
                     if (Settings1.Default.RecentFiles.Contains(file) == false)
                     {
                         Settings1.Default.RecentFiles.Add(file);
@@ -5886,7 +6790,7 @@ namespace Carpathia
         }
         private void yeniToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            AskForSavingOrCancel(new Action(() => createNewFile()));
+            CreateDocumentTab(createNewFile, "Unnamed File");
         }
 
         private void createWithAIToolStripMenuItem_Click(object sender, EventArgs e)
@@ -5896,7 +6800,8 @@ namespace Carpathia
             var generatedImage = createWithAIForm.GetGeneratedImage();
             if (generatedImage != null)
             {
-                AskForSavingWithRetry(new Action(() => createFileWithAIorWebcam(generatedImage, true)));
+                CreateDocumentTab(() => createFileWithAIorWebcam(generatedImage, true),
+                    "AI Generated File");
             }
         }
 
@@ -5909,8 +6814,9 @@ namespace Carpathia
 
         private void TakePhotoFromWebcam_PhotoAccepted(object sender, ImageAcceptedEventArgs e)
         {
-            // Directly update the canvas with the accepted image
-            AskForSavingWithRetry(new Action(() => createFileWithAIorWebcam(e.AcceptedImage, false)));
+            // A webcam capture is its own editable document, not a replacement.
+            CreateDocumentTab(() => createFileWithAIorWebcam(e.AcceptedImage, false),
+                "Webcam Image");
         }
 
         private void comboBoxSpraySize_TextChanged(object sender, EventArgs e)
@@ -6449,6 +7355,8 @@ namespace Carpathia
             geriAlToolStripMenuItem.Enabled = undoStack.Count > 0;
             yineleToolStripMenuItem.Enabled = redoStack.Count > 0;
             UpdateHistoryList();
+            UpdateCurrentDocumentTitle();
+            QueueTabThumbnailRefresh();
         }
 
         private void toolStripButton9_Click(object sender, EventArgs e)
@@ -9659,7 +10567,13 @@ namespace Carpathia
             return true;
         }
 
-
+        private void tabControlWithCloseButtons1_TabClosed(object sender, TabPageEventArgs e)
+        {
+            if (tabControlWithCloseButtons1.TabPages.Count == 0)
+            {
+                Application.Exit(); // Exit the application if all tabs are closed
+            }
+        }
     }
 
     internal sealed class LayerVisibilityToggledEventArgs : EventArgs

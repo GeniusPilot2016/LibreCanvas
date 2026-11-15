@@ -51,6 +51,8 @@
             labelAIImageErasing = new ToolStripLabel();
             progressBarAIImageCreation = new ToolStripProgressBar();
             sunnyTheCat1 = new SunnyTheCat();
+            tabControlWithCloseButtons1 = new TabControlWithCloseButtons();
+            tabPage3 = new TabPage();
             UIPanel = new Panel();
             contextMenuStrip1 = new ContextMenuStrip(components);
             cutToolStripMenuItem = new ToolStripMenuItem();
@@ -67,6 +69,7 @@
             resize_top = new Panel();
             pictureBoxCanvas = new PictureBox();
             panelResizer = new Panel();
+            imageListTabThumbnails = new ImageList(components);
             tabControl1 = new TabControl();
             tabPage1 = new TabPage();
             tableLayoutPanel1 = new TableLayoutPanel();
@@ -321,6 +324,8 @@
             toolStripContainer1.TopToolStripPanel.SuspendLayout();
             toolStripContainer1.SuspendLayout();
             toolStripBase.SuspendLayout();
+            tabControlWithCloseButtons1.SuspendLayout();
+            tabPage3.SuspendLayout();
             UIPanel.SuspendLayout();
             contextMenuStrip1.SuspendLayout();
             canvasPanel.SuspendLayout();
@@ -361,7 +366,7 @@
             // toolStripContainer1.ContentPanel
             // 
             toolStripContainer1.ContentPanel.Controls.Add(sunnyTheCat1);
-            toolStripContainer1.ContentPanel.Controls.Add(UIPanel);
+            toolStripContainer1.ContentPanel.Controls.Add(tabControlWithCloseButtons1);
             toolStripContainer1.ContentPanel.Controls.Add(tabControl1);
             toolStripContainer1.ContentPanel.Size = new Size(1250, 759);
             toolStripContainer1.Dock = DockStyle.Fill;
@@ -533,6 +538,32 @@
             sunnyTheCat1.Size = new Size(101, 90);
             sunnyTheCat1.TabIndex = 5;
             // 
+            // tabControlWithCloseButtons1
+            // 
+            tabControlWithCloseButtons1.Controls.Add(tabPage3);
+            tabControlWithCloseButtons1.Dock = DockStyle.Fill;
+            tabControlWithCloseButtons1.DrawMode = TabDrawMode.OwnerDrawFixed;
+            tabControlWithCloseButtons1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            tabControlWithCloseButtons1.ImageList = imageListTabThumbnails;
+            tabControlWithCloseButtons1.Location = new Point(0, 0);
+            tabControlWithCloseButtons1.Name = "tabControlWithCloseButtons1";
+            tabControlWithCloseButtons1.Padding = new Point(24, 4);
+            tabControlWithCloseButtons1.SelectedIndex = 0;
+            tabControlWithCloseButtons1.Size = new Size(989, 759);
+            tabControlWithCloseButtons1.TabIndex = 6;
+            tabControlWithCloseButtons1.TabClosed += tabControlWithCloseButtons1_TabClosed;
+            // 
+            // tabPage3
+            // 
+            tabPage3.Controls.Add(UIPanel);
+            tabPage3.Location = new Point(4, 29);
+            tabPage3.Name = "tabPage3";
+            tabPage3.Padding = new Padding(3);
+            tabPage3.Size = new Size(981, 726);
+            tabPage3.TabIndex = 0;
+            tabPage3.Text = "Unnamed File";
+            tabPage3.UseVisualStyleBackColor = true;
+            // 
             // UIPanel
             // 
             UIPanel.AutoScroll = true;
@@ -543,9 +574,9 @@
             UIPanel.ContextMenuStrip = contextMenuStrip1;
             UIPanel.Controls.Add(canvasPanel);
             UIPanel.Dock = DockStyle.Fill;
-            UIPanel.Location = new Point(0, 0);
+            UIPanel.Location = new Point(3, 3);
             UIPanel.Name = "UIPanel";
-            UIPanel.Size = new Size(989, 759);
+            UIPanel.Size = new Size(975, 720);
             UIPanel.TabIndex = 3;
             UIPanel.Click += panel1_Click;
             UIPanel.DragDrop += ImageEditor_DragDrop;
@@ -601,7 +632,7 @@
             canvasPanel.Controls.Add(resize_top);
             canvasPanel.Controls.Add(pictureBoxCanvas);
             canvasPanel.Controls.Add(panelResizer);
-            canvasPanel.Location = new Point(79, 88);
+            canvasPanel.Location = new Point(72, 51);
             canvasPanel.Name = "canvasPanel";
             canvasPanel.Size = new Size(820, 620);
             canvasPanel.TabIndex = 2;
@@ -755,6 +786,12 @@
             panelResizer.Name = "panelResizer";
             panelResizer.Size = new Size(800, 600);
             panelResizer.TabIndex = 3;
+            // 
+            // imageListTabThumbnails
+            // 
+            imageListTabThumbnails.ColorDepth = ColorDepth.Depth32Bit;
+            imageListTabThumbnails.ImageSize = new Size(20, 20);
+            imageListTabThumbnails.TransparentColor = Color.Transparent;
             // 
             // tabControl1
             // 
@@ -2976,7 +3013,6 @@
             toolStripContainer1.BottomToolStripPanel.ResumeLayout(false);
             toolStripContainer1.BottomToolStripPanel.PerformLayout();
             toolStripContainer1.ContentPanel.ResumeLayout(false);
-            toolStripContainer1.ContentPanel.PerformLayout();
             toolStripContainer1.LeftToolStripPanel.ResumeLayout(false);
             toolStripContainer1.LeftToolStripPanel.PerformLayout();
             toolStripContainer1.TopToolStripPanel.ResumeLayout(false);
@@ -2985,6 +3021,9 @@
             toolStripContainer1.PerformLayout();
             toolStripBase.ResumeLayout(false);
             toolStripBase.PerformLayout();
+            tabControlWithCloseButtons1.ResumeLayout(false);
+            tabPage3.ResumeLayout(false);
+            tabPage3.PerformLayout();
             UIPanel.ResumeLayout(false);
             contextMenuStrip1.ResumeLayout(false);
             canvasPanel.ResumeLayout(false);
@@ -3327,6 +3366,9 @@
         private ImageList imageListHistoryIcons;
         private ToolStripButton lassoTool;
         private SunnyTheCat sunnyTheCat1;
+        private TabControlWithCloseButtons tabControlWithCloseButtons1;
+        private TabPage tabPage3;
+        private ImageList imageListTabThumbnails;
     }
 
 }
