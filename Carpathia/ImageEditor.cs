@@ -384,6 +384,7 @@ namespace Carpathia
             Triangle,
             Hexagon,
             Text,
+            CloneStamp,
             ColorDrop
         }
         private enum ResizeDirection
@@ -10573,6 +10574,19 @@ namespace Carpathia
             {
                 Application.Exit(); // Exit the application if all tabs are closed
             }
+        }
+
+        private void cloneStampTool_CheckedChanged(object sender, EventArgs e)
+        {
+            if (cloneStampTool.Checked)
+            {
+                selectedTool = Tools.CloneStamp;
+            }
+        }
+
+        private void cloneStampTool_Click(object sender, EventArgs e)
+        {
+            ToolStripButtonsClick(cloneStampTool);
         }
     }
 

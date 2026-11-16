@@ -114,6 +114,8 @@
             roundedRectangleToolStripMenuItem = new ToolStripMenuItem();
             triangleToolStripMenuItem1 = new ToolStripMenuItem();
             hexagonToolStripMenuItem1 = new ToolStripMenuItem();
+            toolStripSeparator51 = new ToolStripSeparator();
+            cloneStampTool = new ToolStripButton();
             toolStripSeparator6 = new ToolStripSeparator();
             colorDropTool = new ToolStripButton();
             createWithAITool = new ToolStripDropDownButton();
@@ -141,6 +143,9 @@
             flipVTool = new ToolStripButton();
             grayscaleTool = new ToolStripButton();
             fitTool = new ToolStripButton();
+            toolStripSeparator48 = new ToolStripSeparator();
+            toolStripSeparator49 = new ToolStripSeparator();
+            toolStripSeparator50 = new ToolStripSeparator();
             toolStripAirBrush = new ToolStrip();
             toolStripLabel20 = new ToolStripLabel();
             toolStripSeparator38 = new ToolStripSeparator();
@@ -1083,7 +1088,7 @@
             toolStripTools.Dock = DockStyle.None;
             toolStripTools.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             toolStripTools.ImageScalingSize = new Size(20, 20);
-            toolStripTools.Items.AddRange(new ToolStripItem[] { mouseTool, toolStripSeparator11, selectTool, magicSelectTool, lassoTool, toolStripSeparator10, brushTool, penTool, eraserTool, bucketTool, sprayTool, addTextTool, drawShapeTool, toolStripSeparator6, colorDropTool, createWithAITool, zoomTool, toolStripSeparator9, foregroundColorButton, backgroundColorButton, toolStripSeparator7, pasteTool, copyTool, cutTool, toolStripButton9, toolStripSeparatorProfessional, cropTool, rotateTool, flipHTool, flipVTool, grayscaleTool, fitTool });
+            toolStripTools.Items.AddRange(new ToolStripItem[] { mouseTool, toolStripSeparator11, selectTool, magicSelectTool, lassoTool, toolStripSeparator10, brushTool, penTool, eraserTool, bucketTool, sprayTool, addTextTool, drawShapeTool, toolStripSeparator51, cloneStampTool, toolStripSeparator6, colorDropTool, createWithAITool, zoomTool, toolStripSeparator9, foregroundColorButton, backgroundColorButton, toolStripSeparator7, pasteTool, copyTool, cutTool, toolStripButton9, toolStripSeparatorProfessional, cropTool, rotateTool, flipHTool, flipVTool, grayscaleTool, fitTool, toolStripSeparator48, toolStripSeparator49, toolStripSeparator50 });
             toolStripTools.Location = new Point(0, 0);
             toolStripTools.Name = "toolStripTools";
             toolStripTools.Size = new Size(39, 759);
@@ -1302,6 +1307,23 @@
             hexagonToolStripMenuItem1.Text = "Hexagon";
             hexagonToolStripMenuItem1.CheckedChanged += hexagonToolStripMenuItem1_CheckedChanged;
             hexagonToolStripMenuItem1.Click += hexagonToolStripMenuItem1_Click;
+            // 
+            // toolStripSeparator51
+            // 
+            toolStripSeparator51.Name = "toolStripSeparator51";
+            toolStripSeparator51.Size = new Size(37, 6);
+            // 
+            // cloneStampTool
+            // 
+            cloneStampTool.CheckOnClick = true;
+            cloneStampTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            cloneStampTool.Image = Properties.Resources.icons8_stamp_48;
+            cloneStampTool.ImageTransparentColor = Color.Magenta;
+            cloneStampTool.Name = "cloneStampTool";
+            cloneStampTool.Size = new Size(37, 24);
+            cloneStampTool.Text = "Clone Stamp";
+            cloneStampTool.CheckedChanged += cloneStampTool_CheckedChanged;
+            cloneStampTool.Click += cloneStampTool_Click;
             // 
             // toolStripSeparator6
             // 
@@ -1525,7 +1547,7 @@
             flipVTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
             flipVTool.Image = Properties.Resources.icons8_flip_vertical_48;
             flipVTool.Name = "flipVTool";
-            flipVTool.Size = new Size(37, 24);
+            flipVTool.Size = new Size(24, 24);
             flipVTool.Text = "Flip V";
             flipVTool.ToolTipText = "Flip V";
             flipVTool.Click += flipVTool_Click;
@@ -1535,7 +1557,7 @@
             grayscaleTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
             grayscaleTool.Image = Properties.Resources.icons8_black_and_white_48__1_;
             grayscaleTool.Name = "grayscaleTool";
-            grayscaleTool.Size = new Size(37, 24);
+            grayscaleTool.Size = new Size(24, 24);
             grayscaleTool.Text = "B&W";
             grayscaleTool.ToolTipText = "B&W";
             grayscaleTool.Click += grayscaleTool_Click;
@@ -1545,10 +1567,25 @@
             fitTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
             fitTool.Image = Properties.Resources.icons8_fit_to_page_48;
             fitTool.Name = "fitTool";
-            fitTool.Size = new Size(37, 24);
+            fitTool.Size = new Size(24, 24);
             fitTool.Text = "Fit";
             fitTool.ToolTipText = "Fit canvas in workspace";
             fitTool.Click += fitTool_Click;
+            // 
+            // toolStripSeparator48
+            // 
+            toolStripSeparator48.Name = "toolStripSeparator48";
+            toolStripSeparator48.Size = new Size(6, 41);
+            // 
+            // toolStripSeparator49
+            // 
+            toolStripSeparator49.Name = "toolStripSeparator49";
+            toolStripSeparator49.Size = new Size(6, 41);
+            // 
+            // toolStripSeparator50
+            // 
+            toolStripSeparator50.Name = "toolStripSeparator50";
+            toolStripSeparator50.Size = new Size(6, 41);
             // 
             // toolStripAirBrush
             // 
@@ -3369,6 +3406,11 @@
         private TabControlWithCloseButtons tabControlWithCloseButtons1;
         private TabPage tabPage3;
         private ImageList imageListTabThumbnails;
+        private ToolStripSeparator toolStripSeparator51;
+        private ToolStripButton cloneStampTool;
+        private ToolStripSeparator toolStripSeparator48;
+        private ToolStripSeparator toolStripSeparator49;
+        private ToolStripSeparator toolStripSeparator50;
     }
 
 }
