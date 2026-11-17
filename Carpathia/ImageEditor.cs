@@ -52,7 +52,26 @@ namespace Carpathia
             tolerance2 = 50,
             pixelationSize = Settings1.Default.DefaultPixelationSize,
             pixelationOffsetX = Settings1.Default.DefaultPixelationOffsetX,
-            pixelationOffsetY = Settings1.Default.DefaultPixelationOffsetY;
+            pixelationOffsetY = Settings1.Default.DefaultPixelationOffsetY,
+            cloneStampSize = 11;
+
+        // Clone Stamp samples the active layer at Alt+click and paints its pixels
+        // at a fixed offset. A frozen copy per stroke prevents feedback/smearing.
+        private Point cloneStampSourcePoint;
+        private bool cloneStampHasSource;
+        private string cloneStampSourceLayerKey;
+        private Bitmap cloneStampStrokeSource;
+        private Point cloneStampStrokeOffset;
+        private Point? cloneStampPreviousPoint;
+
+        private string CurrentCloneStampLayerKey =>
+            activeLayerIndex >= 0 && activeLayerIndex < editorLayers.Count
+                ? editorLayers[activeLayerIndex].ThumbnailKey : null;
+
+        private bool HasValidCloneStampSource =>
+            cloneStampHasSource && cloneStampSourceLayerKey == CurrentCloneStampLayerKey &&
+            MainBitmap != null && new Rectangle(Point.Empty, MainBitmap.Size).Contains(cloneStampSourcePoint);
+
         float textSize = Settings1.Default.DefaultTextSize;
         float zoom = 1,
             gaussianBlurSize = Settings1.Default.DefaultGaussianBlurRadius;
@@ -509,6 +528,7 @@ namespace Carpathia
             textBoxPixelationOffsetX.Text = pixelationOffsetX.ToString();
             textBoxPixelationOffsetY.Text = pixelationOffsetY.ToString();
             textboxGaussianBlurRadius.Text = gaussianBlurSize.ToString();
+            cloneStampSizeCombobox.Text = cloneStampSize.ToString();
         }
         private void SetTheme()
         {
@@ -699,6 +719,15 @@ namespace Carpathia
         private void InitializeComponentAndFont()
         {
             InitializeComponent();
+            // Ensure the Clone Stamp handlers are attached exactly once even if a
+            // Designer revision omitted one of the event subscriptions.
+            cloneStampTool.CheckOnClick = true;
+            cloneStampTool.CheckedChanged -= cloneStampTool_CheckedChanged;
+            cloneStampTool.CheckedChanged += cloneStampTool_CheckedChanged;
+            cloneStampTool.Click -= cloneStampTool_Click;
+            cloneStampTool.Click += cloneStampTool_Click;
+            cloneStampSizeCombobox.SelectedIndexChanged -= toolStripComboBox1_SelectedIndexChanged;
+            cloneStampSizeCombobox.SelectedIndexChanged += toolStripComboBox1_SelectedIndexChanged;
             // Keep the mascot within the *visible* UIPanel viewport while dragging.
             MakeDraggable(sunnyTheCat1, UIPanel);
             if (!Settings1.Default.ShowSunnyTheCat)
@@ -750,6 +779,9 @@ namespace Carpathia
             }
             SetTheme();
             SetFonts();
+            // The Designer's SelectedIndexChanged handles preset sizes. Validate
+            // a custom size when the editable combo box loses focus as well.
+            cloneStampSizeCombobox.ComboBox.Leave += (s, e) => UpdateCloneStampSize();
             InitializeHistoryPanel();
             InitializeLayerSystem();
             // Set the default selected font to the first one in the list
@@ -1617,6 +1649,10 @@ namespace Carpathia
             if (newIndex < 0 || newIndex >= editorLayers.Count || newIndex == activeLayerIndex)
                 return;
 
+            // A source chosen on a different layer must not silently sample new pixels.
+            StopCloneStampStroke();
+            cloneStampHasSource = false;
+            cloneStampSourceLayerKey = null;
             CompleteZoomAnimation();
 
             // Persist the previous active layer, but do not regenerate its thumbnail
@@ -1716,6 +1752,7 @@ namespace Carpathia
                 isdrawing = false;
                 if (suppressCompositeDuringToolStroke)
                     EndToolStrokePreview();
+                StopCloneStampStroke();
             }
 
             // Locking is a view/editing permission. It must not create a history row.
@@ -1762,7 +1799,8 @@ namespace Carpathia
             return tool == Tools.Brush ||
                    tool == Tools.Pen ||
                    tool == Tools.Eraser ||
-                   tool == Tools.Spray;
+                   tool == Tools.Spray ||
+                   tool == Tools.CloneStamp;
         }
 
         private int GetCurrentPaintToolSize()
@@ -1773,6 +1811,7 @@ namespace Carpathia
                 case Tools.Pen: return Math.Max(1, penSize);
                 case Tools.Eraser: return Math.Max(1, eraserSize);
                 case Tools.Spray: return Math.Max(1, sprayToolSize);
+                case Tools.CloneStamp: return Math.Max(1, cloneStampSize);
                 default: return 1;
             }
         }
@@ -4792,6 +4831,7 @@ namespace Carpathia
             {
                 isdrawing = false;
                 if (suppressCompositeDuringToolStroke) EndToolStrokePreview();
+                StopCloneStampStroke();
                 return;
             }
             if (e.Button == MouseButtons.Left)
@@ -4808,6 +4848,10 @@ namespace Carpathia
             {
                 if (isdrawing)
                 {
+                    // Finish the last segment before the rendering/selection merge.
+                    if (selectedTool == Tools.CloneStamp && cloneStampStrokeSource != null)
+                        drawIntoCanvas(e);
+
                     if (suppressCompositeDuringToolStroke)
                         EndToolStrokePreview();
 
@@ -4897,10 +4941,20 @@ namespace Carpathia
                                 Math.Min(SelectedBitmap.Width, targetRect.Width),
                                 Math.Min(SelectedBitmap.Height, targetRect.Height));
 
-                            // Yüksek kalite ayarlarını kullan
-                            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                            g.SmoothingMode = SmoothingMode.AntiAlias;
-                            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                            // A Clone Stamp transfers exact ARGB pixels, including
+                            // transparency. SourceOver would leave old pixels behind.
+                            if (selectedTool == Tools.CloneStamp)
+                            {
+                                g.CompositingMode = CompositingMode.SourceCopy;
+                                g.InterpolationMode = InterpolationMode.NearestNeighbor;
+                                g.PixelOffsetMode = PixelOffsetMode.None;
+                            }
+                            else
+                            {
+                                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                                g.SmoothingMode = SmoothingMode.AntiAlias;
+                                g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                            }
 
                             // Dönüştürülmüş alanı ana resme çiz
                             g.DrawImage(SelectedBitmap, targetRect, sourceRect, GraphicsUnit.Pixel);
@@ -4922,6 +4976,7 @@ namespace Carpathia
                     pictureBoxCanvas.Invalidate();
                     this.Invalidate();
                     this.Update();
+                    StopCloneStampStroke();
                 }
             }
         }
@@ -4951,6 +5006,8 @@ namespace Carpathia
             if (IsActiveLayerLocked && isdrawing && !IsNonPaintingTool())
             {
                 isdrawing = false;
+                StopCloneStampStroke();
+                if (suppressCompositeDuringToolStroke) EndToolStrokePreview();
                 return;
             }
             // Canvas captures the pointer while moving a floating PNG.
@@ -5353,6 +5410,26 @@ namespace Carpathia
         private void drawIntoCanvas(MouseEventArgs e)
         {
             if (IsActiveLayerLocked && !IsNonPaintingTool()) return;
+            if (selectedTool == Tools.CloneStamp)
+            {
+                if (isdrawing && cloneStampStrokeSource != null)
+                {
+                    Point destination = new Point(
+                        (int)Math.Floor(e.X / zoom), (int)Math.Floor(e.Y / zoom));
+                    Rectangle dirty = ContinueCloneStampStroke(destination);
+                    if (!dirty.IsEmpty)
+                    {
+                        isModified = true;
+                        isSaved = false;
+                        MarkLayerThumbnailDirty();
+                        if (HasRectSelection && SelectedBitmap != null)
+                            pictureBoxCanvas.Invalidate(SelectionRectangle);
+                        else
+                            RefreshLiveStrokeRegion(dirty);
+                    }
+                }
+                return;
+            }
             // Preserve the previous image-space point before DrawBrush/FillGap updates x/y.
             // It is needed to refresh the complete segment touched by this mouse event.
             int previousStrokeX = x;
@@ -5747,7 +5824,9 @@ namespace Carpathia
                 // Draw brush/pen/eraser/spray cursor preview when not drawing
                 if (!isdrawing && MainBitmap != null && isMouseOverCanvas)
                 {
-                    bool shouldShow = selectedTool == Tools.Brush || selectedTool == Tools.Pen || selectedTool == Tools.Eraser || selectedTool == Tools.Spray;
+                    bool shouldShow = selectedTool == Tools.Brush || selectedTool == Tools.Pen ||
+                                      selectedTool == Tools.Eraser || selectedTool == Tools.Spray ||
+                                      selectedTool == Tools.CloneStamp;
                     if (shouldShow)
                     {
                         e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
@@ -5772,6 +5851,10 @@ namespace Carpathia
                                 sizePixels = sprayToolSize;
                                 styleIndex = 0;
                                 break;
+                            case Tools.CloneStamp:
+                                sizePixels = cloneStampSize;
+                                styleIndex = 0;
+                                break;
                         }
 
                         int displaySize = Math.Max(1, (int)Math.Round(sizePixels * zoom));
@@ -5793,6 +5876,29 @@ namespace Carpathia
                         else if (selectedTool == Tools.Spray)
                         {
                             DrawSprayPreview(e.Graphics, center, displaySize, ActivePaintColor, zoom);
+                        }
+                        else if (selectedTool == Tools.CloneStamp)
+                        {
+                            // A non-destructive cursor and an anchored source marker.
+                            int radius = Math.Max(1, displaySize / 2);
+                            using (Pen outline = new Pen(Color.White, 1.5f))
+                            using (Pen shadow = new Pen(Color.Black, 3f))
+                            {
+                                e.Graphics.DrawEllipse(shadow, center.X - radius, center.Y - radius,
+                                    radius * 2, radius * 2);
+                                e.Graphics.DrawEllipse(outline, center.X - radius, center.Y - radius,
+                                    radius * 2, radius * 2);
+                            }
+                            if (HasValidCloneStampSource)
+                            {
+                                Point source = new Point((int)Math.Round(cloneStampSourcePoint.X * zoom),
+                                                         (int)Math.Round(cloneStampSourcePoint.Y * zoom));
+                                using (Pen cross = new Pen(Color.Yellow, 1.5f))
+                                {
+                                    e.Graphics.DrawLine(cross, source.X - 6, source.Y, source.X + 6, source.Y);
+                                    e.Graphics.DrawLine(cross, source.X, source.Y - 6, source.X, source.Y + 6);
+                                }
+                            }
                         }
                     }
                 }
@@ -6153,6 +6259,54 @@ namespace Carpathia
                 {
                     isdrawing = false;
                     RenderCompositeToCanvas(force: true);
+                    return;
+                }
+
+                if (selectedTool == Tools.CloneStamp)
+                {
+                    Point point = new Point(
+                        (int)Math.Floor(e.X / zoom), (int)Math.Floor(e.Y / zoom));
+                    Rectangle canvasBounds = new Rectangle(Point.Empty, MainBitmap.Size);
+                    isdrawing = false;
+                    if (!canvasBounds.Contains(point))
+                        return;
+
+                    // Standard Photoshop/GIMP gesture: Alt+click samples the source.
+                    if ((ModifierKeys & Keys.Alt) == Keys.Alt)
+                    {
+                        StopCloneStampStroke();
+                        cloneStampSourcePoint = point;
+                        cloneStampSourceLayerKey = CurrentCloneStampLayerKey;
+                        cloneStampHasSource = true;
+                        currentMousePosition = e.Location;
+                        pictureBoxCanvas.Invalidate();
+                        return;
+                    }
+                    if (e.Button != MouseButtons.Left)
+                        return;
+                    if (!HasValidCloneStampSource)
+                    {
+                        MessageForm.Show("Alt+click an image pixel to choose a Clone Stamp source, " +
+                            "then click and drag to paint.", "Clone Stamp",
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return;
+                    }
+
+                    CancelFilters();
+                    if (HasRectSelection && SelectedBitmap == null)
+                        SelectedBitmap = CreateSelectionWorkingBitmap();
+                    // A separate bitmap is essential: cloning across overlapping
+                    // regions must read the original pixels throughout the drag.
+                    StopCloneStampStroke();
+                    SaveStateForUndo(description: "Clone stamp");
+                    EnsureCloneStampBitmapFormat();
+                    cloneStampStrokeSource = CreateCloneStampSourceSnapshot();
+                    cloneStampStrokeOffset = new Point(cloneStampSourcePoint.X - point.X,
+                                                       cloneStampSourcePoint.Y - point.Y);
+                    cloneStampPreviousPoint = null;
+                    isdrawing = true;
+                    BeginToolStrokePreview();
+                    drawIntoCanvas(e);
                     return;
                 }
 
@@ -7092,6 +7246,7 @@ namespace Carpathia
             Tools.Pen => "Pen stroke",
             Tools.Eraser => "Erase",
             Tools.Spray => "Spray",
+            Tools.CloneStamp => "Clone stamp",
             Tools.Bucket => "Fill",
             Tools.Line => "Line",
             Tools.Round => "Ellipse",
@@ -10576,17 +10731,239 @@ namespace Carpathia
             }
         }
 
+        private void EnsureCloneStampBitmapFormat()
+        {
+            // LockBits requires a compatible pixel format. Imported images can
+            // be 24-bit or indexed; convert just the editable layer when needed.
+            if (MainBitmap.PixelFormat != PixelFormat.Format32bppArgb)
+            {
+                var converted = new Bitmap(MainBitmap.Width, MainBitmap.Height,
+                    PixelFormat.Format32bppArgb);
+                using (Graphics g = Graphics.FromImage(converted))
+                {
+                    g.CompositingMode = CompositingMode.SourceCopy;
+                    g.DrawImageUnscaled(MainBitmap, 0, 0);
+                }
+                MainBitmap.Dispose();
+                MainBitmap = converted;
+            }
+            if (HasRectSelection && SelectedBitmap != null &&
+                SelectedBitmap.PixelFormat != PixelFormat.Format32bppArgb)
+            {
+                var converted = new Bitmap(SelectedBitmap.Width, SelectedBitmap.Height,
+                    PixelFormat.Format32bppArgb);
+                using (Graphics g = Graphics.FromImage(converted))
+                {
+                    g.CompositingMode = CompositingMode.SourceCopy;
+                    g.DrawImageUnscaled(SelectedBitmap, 0, 0);
+                }
+                SelectedBitmap.Dispose();
+                SelectedBitmap = converted;
+            }
+        }
+
+        // Creates a 32-bit, exact-pixel snapshot of the current layer as seen in
+        // the selection. Read from this snapshot until MouseUp, not from the
+        // progressively edited destination bitmap.
+        private Bitmap CreateCloneStampSourceSnapshot()
+        {
+            var snapshot = new Bitmap(MainBitmap.Width, MainBitmap.Height,
+                PixelFormat.Format32bppArgb);
+            using (Graphics g = Graphics.FromImage(snapshot))
+            {
+                g.CompositingMode = CompositingMode.SourceCopy;
+                g.InterpolationMode = InterpolationMode.NearestNeighbor;
+                g.DrawImageUnscaled(MainBitmap, 0, 0);
+                if (HasRectSelection && SelectedBitmap != null)
+                {
+                    Rectangle selection = GetSelectionImageBounds();
+                    if (!selection.IsEmpty)
+                        g.DrawImage(SelectedBitmap, selection,
+                            new Rectangle(Point.Empty, SelectedBitmap.Size), GraphicsUnit.Pixel);
+                }
+            }
+            return snapshot;
+        }
+
+        private void StopCloneStampStroke()
+        {
+            cloneStampStrokeSource?.Dispose();
+            cloneStampStrokeSource = null;
+            cloneStampPreviousPoint = null;
+        }
+
+        // Paint a continuous sequence of round pixel-copy dabs. The source offset
+        // is calculated once at MouseDown, so moving the cursor by (dx, dy)
+        // samples the source at the same (dx, dy) displacement.
+        private Rectangle ContinueCloneStampStroke(Point destination)
+        {
+            Rectangle dirty = Rectangle.Empty;
+            if (cloneStampStrokeSource == null || MainBitmap == null)
+                return dirty;
+
+            Point start = cloneStampPreviousPoint ?? destination;
+            double dx = (double)destination.X - start.X;
+            double dy = (double)destination.Y - start.Y;
+            double distance = Math.Sqrt(dx * dx + dy * dy);
+            double spacing = Math.Max(1d, cloneStampSize / 4d);
+            int steps = Math.Max(1, (int)Math.Ceiling(distance / spacing));
+
+            for (int i = cloneStampPreviousPoint.HasValue ? 1 : 0; i <= steps; i++)
+            {
+                double t = i / (double)steps;
+                Point dab = new Point(
+                    (int)Math.Round(start.X + dx * t),
+                    (int)Math.Round(start.Y + dy * t));
+                Rectangle painted = StampClonePixels(dab);
+                if (!painted.IsEmpty)
+                    dirty = dirty.IsEmpty ? painted : Rectangle.Union(dirty, painted);
+            }
+            cloneStampPreviousPoint = destination;
+            return dirty;
+        }
+
+        // This is an exact ARGB transfer (not a brush-colored blend): transparent
+        // source pixels erase the target, and alpha is preserved without halos.
+        // A rectangular or Magic Wand/lasso selection restricts writes to its area.
+        private Rectangle StampClonePixels(Point center)
+        {
+            Bitmap source = cloneStampStrokeSource;
+            if (source == null || MainBitmap == null)
+                return Rectangle.Empty;
+
+            bool rectangularSelection = HasRectSelection && SelectedBitmap != null;
+            Bitmap target = rectangularSelection ? SelectedBitmap : MainBitmap;
+            Rectangle selectionBounds = rectangularSelection
+                ? GetSelectionImageBounds() : new Rectangle(Point.Empty, MainBitmap.Size);
+
+            int size = Math.Max(1, cloneStampSize);
+            int left = center.X - (size - 1) / 2;
+            int top = center.Y - (size - 1) / 2;
+            Rectangle area = new Rectangle(left, top, size, size);
+            area.Intersect(new Rectangle(Point.Empty, MainBitmap.Size));
+            area.Intersect(selectionBounds);
+            // Ensure translated source coordinates are also valid.
+            area.Intersect(new Rectangle(-cloneStampStrokeOffset.X, -cloneStampStrokeOffset.Y,
+                                         source.Width, source.Height));
+            if (area.IsEmpty)
+                return Rectangle.Empty;
+
+            Rectangle sourceArea = new Rectangle(
+                area.X + cloneStampStrokeOffset.X,
+                area.Y + cloneStampStrokeOffset.Y, area.Width, area.Height);
+            Rectangle targetArea = new Rectangle(
+                area.X - (rectangularSelection ? selectionBounds.X : 0),
+                area.Y - (rectangularSelection ? selectionBounds.Y : 0),
+                area.Width, area.Height);
+            if (targetArea.X < 0 || targetArea.Y < 0 ||
+                targetArea.Right > target.Width || targetArea.Bottom > target.Height)
+                return Rectangle.Empty;
+
+            BitmapData sourceBits = null;
+            BitmapData targetBits = null;
+            bool changed = false;
+            try
+            {
+                sourceBits = source.LockBits(sourceArea, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                targetBits = target.LockBits(targetArea, ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+                int rowBytes = area.Width * 4;
+                byte[] sourceRow = new byte[rowBytes];
+                byte[] targetRow = new byte[rowBytes];
+                // Pixel centers lie at integer image coordinates. This also
+                // ensures a size-1 brush stamps exactly one image pixel.
+                double radius = size / 2d;
+                double radiusSquared = radius * radius;
+                for (int row = 0; row < area.Height; row++)
+                {
+                    int imageY = area.Y + row;
+                    double yDistance = imageY - center.Y;
+                    IntPtr srcPtr = IntPtr.Add(sourceBits.Scan0, row * sourceBits.Stride);
+                    IntPtr dstPtr = IntPtr.Add(targetBits.Scan0, row * targetBits.Stride);
+                    Marshal.Copy(srcPtr, sourceRow, 0, rowBytes);
+                    Marshal.Copy(dstPtr, targetRow, 0, rowBytes);
+                    bool rowChanged = false;
+                    for (int col = 0; col < area.Width; col++)
+                    {
+                        int imageX = area.X + col;
+                        double xDistance = imageX - center.X;
+                        if (xDistance * xDistance + yDistance * yDistance > radiusSquared)
+                            continue;
+                        if (HasMaskSelection &&
+                            (magicSelectionMaskWidth != MainBitmap.Width ||
+                             magicSelectionMaskHeight != MainBitmap.Height ||
+                             !magicSelectionMask[imageY * magicSelectionMaskWidth + imageX]))
+                            continue;
+
+                        int pixel = col * 4;
+                        if (sourceRow[pixel] == targetRow[pixel] &&
+                            sourceRow[pixel + 1] == targetRow[pixel + 1] &&
+                            sourceRow[pixel + 2] == targetRow[pixel + 2] &&
+                            sourceRow[pixel + 3] == targetRow[pixel + 3])
+                            continue;
+                        System.Buffer.BlockCopy(sourceRow, pixel, targetRow, pixel, 4);
+                        rowChanged = true;
+                    }
+                    if (rowChanged)
+                    {
+                        Marshal.Copy(targetRow, 0, dstPtr, rowBytes);
+                        changed = true;
+                    }
+                }
+            }
+            finally
+            {
+                if (targetBits != null) target.UnlockBits(targetBits);
+                if (sourceBits != null) source.UnlockBits(sourceBits);
+            }
+            return changed ? area : Rectangle.Empty;
+        }
+
         private void cloneStampTool_CheckedChanged(object sender, EventArgs e)
         {
             if (cloneStampTool.Checked)
             {
                 selectedTool = Tools.CloneStamp;
+                toolStripCloneStamp.Visible = true;
             }
+            else
+            {
+                toolStripCloneStamp.Visible = false;
+                if (cloneStampStrokeSource != null)
+                {
+                    // Finishing by clicking another tool must not leave the fast
+                    // composite stroke path enabled for the next tool.
+                    if (suppressCompositeDuringToolStroke)
+                        EndToolStrokePreview();
+                    isdrawing = false;
+                    StopCloneStampStroke();
+                }
+            }
+            pictureBoxCanvas.Invalidate();
         }
 
         private void cloneStampTool_Click(object sender, EventArgs e)
         {
             ToolStripButtonsClick(cloneStampTool);
+        }
+
+        private void toolStripComboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateCloneStampSize();
+        }
+
+        private void UpdateCloneStampSize()
+        {
+            string input = cloneStampSizeCombobox.Text;
+            if (!int.TryParse(input, out int size) || size < 1 || size > 1024)
+            {
+                Logger.Log("Invalid clone stamp size: " + input, Logger.LogTypes.Error);
+                MessageForm.Show("Enter a Clone Stamp size between 1 and 1024 pixels.",
+                    "Clone Stamp", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                cloneStampSizeCombobox.Text = cloneStampSize.ToString();
+                return;
+            }
+            cloneStampSize = size;
+            pictureBoxCanvas.Invalidate();
         }
     }
 
