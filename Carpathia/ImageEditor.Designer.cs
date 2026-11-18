@@ -69,6 +69,10 @@
             resize_top = new Panel();
             pictureBoxCanvas = new PictureBox();
             panelResizer = new Panel();
+            rulerControl2 = new RulerControl();
+            panel3 = new Panel();
+            rulerControl1 = new RulerControl();
+            label3 = new Label();
             imageListTabThumbnails = new ImageList(components);
             tabControl1 = new TabControl();
             tabPage1 = new TabPage();
@@ -338,6 +342,7 @@
             contextMenuStrip1.SuspendLayout();
             canvasPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBoxCanvas).BeginInit();
+            panel3.SuspendLayout();
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
             tableLayoutPanel1.SuspendLayout();
@@ -566,6 +571,8 @@
             // tabPage3
             // 
             tabPage3.Controls.Add(UIPanel);
+            tabPage3.Controls.Add(rulerControl2);
+            tabPage3.Controls.Add(panel3);
             tabPage3.Location = new Point(4, 29);
             tabPage3.Name = "tabPage3";
             tabPage3.Padding = new Padding(3);
@@ -584,9 +591,9 @@
             UIPanel.ContextMenuStrip = contextMenuStrip1;
             UIPanel.Controls.Add(canvasPanel);
             UIPanel.Dock = DockStyle.Fill;
-            UIPanel.Location = new Point(3, 3);
+            UIPanel.Location = new Point(26, 26);
             UIPanel.Name = "UIPanel";
-            UIPanel.Size = new Size(975, 720);
+            UIPanel.Size = new Size(952, 697);
             UIPanel.TabIndex = 3;
             UIPanel.Click += panel1_Click;
             UIPanel.DragDrop += ImageEditor_DragDrop;
@@ -642,7 +649,7 @@
             canvasPanel.Controls.Add(resize_top);
             canvasPanel.Controls.Add(pictureBoxCanvas);
             canvasPanel.Controls.Add(panelResizer);
-            canvasPanel.Location = new Point(72, 51);
+            canvasPanel.Location = new Point(66, 38);
             canvasPanel.Name = "canvasPanel";
             canvasPanel.Size = new Size(820, 620);
             canvasPanel.TabIndex = 2;
@@ -796,6 +803,54 @@
             panelResizer.Name = "panelResizer";
             panelResizer.Size = new Size(800, 600);
             panelResizer.TabIndex = 3;
+            // 
+            // rulerControl2
+            // 
+            rulerControl2.BackColor = SystemColors.Window;
+            rulerControl2.Dock = DockStyle.Top;
+            rulerControl2.Font = new Font("Segoe UI", 8F);
+            rulerControl2.ForeColor = Color.FromArgb(60, 60, 60);
+            rulerControl2.Location = new Point(26, 3);
+            rulerControl2.Name = "rulerControl2";
+            rulerControl2.Size = new Size(952, 23);
+            rulerControl2.TabIndex = 9;
+            rulerControl2.TabStop = false;
+            rulerControl2.Text = "rulerControl2";
+            // 
+            // panel3
+            // 
+            panel3.Controls.Add(rulerControl1);
+            panel3.Controls.Add(label3);
+            panel3.Dock = DockStyle.Left;
+            panel3.Location = new Point(3, 3);
+            panel3.Margin = new Padding(0);
+            panel3.Name = "panel3";
+            panel3.Size = new Size(23, 720);
+            panel3.TabIndex = 8;
+            // 
+            // rulerControl1
+            // 
+            rulerControl1.BackColor = SystemColors.Window;
+            rulerControl1.Dock = DockStyle.Fill;
+            rulerControl1.Font = new Font("Segoe UI", 8F);
+            rulerControl1.ForeColor = Color.FromArgb(60, 60, 60);
+            rulerControl1.Location = new Point(0, 23);
+            rulerControl1.Name = "rulerControl1";
+            rulerControl1.Size = new Size(23, 697);
+            rulerControl1.TabIndex = 6;
+            rulerControl1.TabStop = false;
+            rulerControl1.Text = "rulerControl1";
+            rulerControl1.Vertical = true;
+            // 
+            // label3
+            // 
+            label3.BackColor = SystemColors.Window;
+            label3.Dock = DockStyle.Top;
+            label3.Location = new Point(0, 0);
+            label3.Name = "label3";
+            label3.Size = new Size(23, 23);
+            label3.TabIndex = 5;
+            label3.Text = "px";
             // 
             // imageListTabThumbnails
             // 
@@ -1552,7 +1607,7 @@
             flipVTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
             flipVTool.Image = Properties.Resources.icons8_flip_vertical_48;
             flipVTool.Name = "flipVTool";
-            flipVTool.Size = new Size(24, 24);
+            flipVTool.Size = new Size(37, 24);
             flipVTool.Text = "Flip V";
             flipVTool.ToolTipText = "Flip V";
             flipVTool.Click += flipVTool_Click;
@@ -1562,7 +1617,7 @@
             grayscaleTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
             grayscaleTool.Image = Properties.Resources.icons8_black_and_white_48__1_;
             grayscaleTool.Name = "grayscaleTool";
-            grayscaleTool.Size = new Size(24, 24);
+            grayscaleTool.Size = new Size(24, 38);
             grayscaleTool.Text = "B&W";
             grayscaleTool.ToolTipText = "B&W";
             grayscaleTool.Click += grayscaleTool_Click;
@@ -1572,7 +1627,7 @@
             fitTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
             fitTool.Image = Properties.Resources.icons8_fit_to_page_48;
             fitTool.Name = "fitTool";
-            fitTool.Size = new Size(24, 24);
+            fitTool.Size = new Size(24, 38);
             fitTool.Text = "Fit";
             fitTool.ToolTipText = "Fit canvas in workspace";
             fitTool.Click += fitTool_Click;
@@ -3103,6 +3158,7 @@
             contextMenuStrip1.ResumeLayout(false);
             canvasPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)pictureBoxCanvas).EndInit();
+            panel3.ResumeLayout(false);
             tabControl1.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
             tabPage1.PerformLayout();
@@ -3425,18 +3481,6 @@
         private TrackBar trackBarOpacity;
         private Label label1;
         private Label labelOpacity;
-        private Panel UIPanel;
-        private Panel canvasPanel;
-        private Panel resize_bottom_left;
-        private Panel resize_bottom_right;
-        private Panel resize_right;
-        private Panel resize_bottom;
-        private Panel resize_left;
-        private Panel resize_top_left;
-        private Panel resize_top_right;
-        private Panel resize_top;
-        private PictureBox pictureBoxCanvas;
-        private Panel panelResizer;
         private TabPage tabPage2;
         private ListView listViewHistory;
         private ColumnHeader columnHeader2;
@@ -3454,6 +3498,22 @@
         private ToolStripLabel toolStripLabel33;
         private ToolStripComboBox cloneStampSizeCombobox;
         private ToolStripSeparator toolStripSeparator53;
+        private Panel panel3;
+        private RulerControl rulerControl1;
+        private Label label3;
+        private Panel UIPanel;
+        private Panel canvasPanel;
+        private Panel resize_bottom_left;
+        private Panel resize_bottom_right;
+        private Panel resize_right;
+        private Panel resize_bottom;
+        private Panel resize_left;
+        private Panel resize_top_left;
+        private Panel resize_top_right;
+        private Panel resize_top;
+        private PictureBox pictureBoxCanvas;
+        private Panel panelResizer;
+        private RulerControl rulerControl2;
     }
 
 }
