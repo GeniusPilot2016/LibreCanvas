@@ -622,6 +622,8 @@ namespace Carpathia
             listViewHistory.ForeColor = SystemColors.WindowText;
             documentTabsDarkTheme = false;
             ApplyDocumentTabTheme();
+            rulerControl1.BackColor = rulerControl2.BackColor = SystemColors.Control;
+            rulerControl1.ForeColor = rulerControl2.ForeColor = SystemColors.ControlText;
             UIHelper.ApplyCustomTitleBar(this, false);
         }
         private void DarkTheme()
@@ -694,6 +696,8 @@ namespace Carpathia
             listViewHistory.ForeColor = Color.White;
             documentTabsDarkTheme = true;
             ApplyDocumentTabTheme();
+            rulerControl1.BackColor = rulerControl2.BackColor = Color.FromArgb(32, 32, 32);
+            rulerControl2.ForeColor = rulerControl1.ForeColor = Color.White;
             UIHelper.ApplyCustomTitleBar(this, true);
         }
         private void InitializeSelectionPen()
@@ -719,6 +723,15 @@ namespace Carpathia
         private void InitializeComponentAndFont()
         {
             InitializeComponent();
+
+            // The zoomed canvas is the scrollable content of UIPanel. WinForms
+            // AutoScroll cannot reliably reach the far edges of children
+            // anchored to Bottom/Right, or children docked to Fill.
+            // Keep the image surface top/left anchored; only UIPanel is docked
+            // into the (tab-shared) ruler workspace.
+            canvasPanel.Dock = DockStyle.None;
+            canvasPanel.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            UIPanel.AutoScroll = true;
             // Ensure the Clone Stamp handlers are attached exactly once even if a
             // Designer revision omitted one of the event subscriptions.
             cloneStampTool.CheckOnClick = true;
@@ -1960,14 +1973,267 @@ namespace Carpathia
             return thumbnail;
         }
 
+        // The canvas, both rulers and panel3 (which contains label3) form a
+        // SINGLE shared workspace. ImageEditor keeps one canvas for all tabs;
+        // moving the whole host prevents rulers being left in an older tab.
+        private bool rulersInitialized;
+        private TableLayoutPanel rulerWorkspace;
+
+        private void InitializeRulers()
+        {
+            if (rulersInitialized)
+                return;
+
+            // The first document's TabPage already owns UIPanel at this point.
+            // Preserve designer-created controls, including the label3/panel3
+            // hierarchy, the Vertical setting and the colors.
+            Control originalParent = UIPanel.Parent;
+            if (originalParent == null)
+                return;
+
+            // A missing Designer serialization of Vertical should not crash
+            // the entire editor. Correct the second ruler at runtime if needed.
+            if (rulerControl1.Vertical == rulerControl2.Vertical)
+                rulerControl2.Vertical = !rulerControl1.Vertical;
+            RulerControl horizontal = rulerControl1.Vertical ? rulerControl2 : rulerControl1;
+            RulerControl verticalRuler = rulerControl1.Vertical ? rulerControl1 : rulerControl2;
+
+            // Only the LEFT ruler/corner width comes from panel3.
+            // panel3 can be taller than the original horizontal ruler;
+            // using panel3.Height for the top row made the horizontal ruler
+            // unexpectedly thick (up to 60 px) on every document tab.
+            int cornerWidth = Math.Clamp(panel3.Width, 20, 60);
+
+            // Capture the horizontal ruler's Designer height BEFORE Dock=Fill.
+            // If it was already stretched in the Designer, use the control's
+            // standard 26 px thickness (DPI-scaled) instead.
+            int defaultRulerHeight = Math.Max(20,
+                (int)Math.Round(26.0 * DeviceDpi / 96.0));
+            int maximumDesignerHeight = Math.Max(36,
+                (int)Math.Round(36.0 * DeviceDpi / 96.0));
+            int cornerHeight = horizontal.Height >= 18 &&
+                horizontal.Height <= maximumDesignerHeight
+                ? horizontal.Height
+                : defaultRulerHeight;
+
+            rulerWorkspace = new TableLayoutPanel
+            {
+                Name = "rulerWorkspace",
+                Dock = DockStyle.Fill,
+                ColumnCount = 2,
+                RowCount = 2,
+                Margin = Padding.Empty,
+                Padding = Padding.Empty,
+                BackColor = UIPanel.BackColor
+            };
+            rulerWorkspace.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, cornerWidth));
+            rulerWorkspace.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            rulerWorkspace.RowStyles.Add(new RowStyle(SizeType.Absolute, cornerHeight));
+            rulerWorkspace.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+
+            rulerWorkspace.SuspendLayout();
+            try
+            {
+                // Reparent the existing controls (not copies of them).
+                // label3 stays in panel3; the image is still inside UIPanel.
+                panel3.Dock = DockStyle.Fill;
+                panel3.Margin = Padding.Empty;
+                horizontal.Dock = DockStyle.Fill;
+                horizontal.Margin = Padding.Empty;
+                verticalRuler.Dock = DockStyle.Fill;
+                verticalRuler.Margin = Padding.Empty;
+                UIPanel.Dock = DockStyle.Fill;
+                UIPanel.Margin = Padding.Empty;
+
+                rulerWorkspace.Controls.Add(panel3, 0, 0);
+                rulerWorkspace.Controls.Add(horizontal, 1, 0);
+                rulerWorkspace.Controls.Add(verticalRuler, 0, 1);
+                rulerWorkspace.Controls.Add(UIPanel, 1, 1);
+
+                // Attach to the active tab only after all four cells exist.
+                rulerWorkspace.Parent = originalParent;
+            }
+            finally
+            {
+                rulerWorkspace.ResumeLayout(true);
+            }
+
+            rulersInitialized = true;
+            InitializeGuideInteractions(horizontal, verticalRuler);
+
+            pictureBoxCanvas.MouseMove += RulerCanvas_MouseMove;
+            pictureBoxCanvas.MouseLeave += RulerCanvas_MouseLeave;
+            UIPanel.Scroll += (s, e) => UpdateRulers();
+            UIPanel.Resize += (s, e) => UpdateRulers();
+            canvasPanel.LocationChanged += (s, e) => UpdateRulers();
+            pictureBoxCanvas.LocationChanged += (s, e) => UpdateRulers();
+            pictureBoxCanvas.SizeChanged += (s, e) => UpdateRulers();
+            rulerControl1.SizeChanged += (s, e) => UpdateRulers();
+            rulerControl2.SizeChanged += (s, e) => UpdateRulers();
+
+            tabControlWithCloseButtons1.SelectedIndexChanged += (s, e) =>
+            {
+                ClearRulerMouseMarkers();
+                UpdateRulers();
+            };
+            Shown += (s, e) => UpdateRulers();
+            UpdateRulers();
+        }
+
+        // Called by every tab creation/switch/reconciliation and tab close.
+        // The TabPage never owns only the canvas: it owns the entire ruler
+        // workspace. This also keeps live controls out of disposed TabPages.
+        private void MoveCanvasWorkspaceTo(Control destination, bool visible = true)
+        {
+            if (destination == null || destination.IsDisposed)
+                return;
+
+            if (rulerWorkspace == null)
+            {
+                // Initial form setup (before InitializeRulers is called).
+                if (!ReferenceEquals(UIPanel.Parent, destination))
+                    UIPanel.Parent = destination;
+                UIPanel.Dock = DockStyle.Fill;
+                UIPanel.Visible = visible;
+                return;
+            }
+
+            if (!ReferenceEquals(rulerWorkspace.Parent, destination))
+            {
+                // Guides belong to the document, not to whichever tab owns the controls.
+                CancelGuideDrag();
+                rulerWorkspace.Parent = destination;
+            }
+
+            rulerWorkspace.Dock = DockStyle.Fill;
+            rulerWorkspace.Visible = visible;
+            UIPanel.Visible = visible;
+            ClearRulerMouseMarkers();
+        }
+
+        private bool CanvasWorkspaceIsIn(Control parent) =>
+            ReferenceEquals(rulerWorkspace?.Parent ?? UIPanel.Parent, parent);
+
+        private void RulerCanvas_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (MainBitmap == null || !pictureBoxCanvas.IsHandleCreated)
+                return;
+
+            // Mouse coordinates are in PictureBox space. Convert them into
+            // each ruler's own client coordinates, even when their parents differ.
+            Point mouseScreen = pictureBoxCanvas.PointToScreen(e.Location);
+            UpdateRulerMouseMarker(rulerControl1, mouseScreen);
+            UpdateRulerMouseMarker(rulerControl2, mouseScreen);
+        }
+
+        private static void UpdateRulerMouseMarker(RulerControl ruler, Point mouseScreen)
+        {
+            if (ruler.IsDisposed || !ruler.IsHandleCreated)
+                return;
+
+            Point position = ruler.PointToClient(mouseScreen);
+            ruler.MouseMarker = ruler.Vertical ? position.Y : position.X;
+        }
+
+        private void RulerCanvas_MouseLeave(object sender, EventArgs e) =>
+            ClearRulerMouseMarkers();
+
+        private void ClearRulerMouseMarkers()
+        {
+            rulerControl1.MouseMarker = null;
+            rulerControl2.MouseMarker = null;
+        }
+
+        private void UpdateRulers()
+        {
+            try
+            {
+                if (!rulersInitialized || IsDisposed || Disposing ||
+                MainBitmap == null || MainBitmap.Width == 0 || MainBitmap.Height == 0 ||
+                !UIPanel.IsHandleCreated || !pictureBoxCanvas.IsHandleCreated)
+                    return;
+
+                Point imageOriginScreen;
+                double scaleX;
+                double scaleY;
+
+                if (zoomAnimationTimer.Enabled)
+                {
+                    // The zoom animation draws into a temporary overlay; the actual
+                    // PictureBox does not resize until the animation completes.
+                    // Match exactly the image rectangle in PaintZoomAnimationFrame.
+                    int imageWidth = Math.Max(1,
+                        (int)Math.Round(MainBitmap.Width * zoomAnimationShown));
+                    int imageHeight = Math.Max(1,
+                        (int)Math.Round(MainBitmap.Height * zoomAnimationShown));
+                    scaleX = (double)imageWidth / MainBitmap.Width;
+                    scaleY = (double)imageHeight / MainBitmap.Height;
+
+                    Size viewport = UIPanel.ClientSize;
+                    double left = imageWidth + 20 <= viewport.Width
+                        ? (viewport.Width - imageWidth) / 2.0
+                        : Math.Max(viewport.Width - imageWidth - 10.0,
+                            Math.Min(10.0, viewport.Width / 2.0 - zoomAnchorImageX * scaleX));
+                    double top = imageHeight + 20 <= viewport.Height
+                        ? (viewport.Height - imageHeight) / 2.0
+                        : Math.Max(viewport.Height - imageHeight - 10.0,
+                            Math.Min(10.0, viewport.Height / 2.0 - zoomAnchorImageY * scaleY));
+
+                    imageOriginScreen = UIPanel.PointToScreen(
+                        new Point((int)Math.Round(left), (int)Math.Round(top)));
+                }
+                else
+                {
+                    // Effective displayed size, not just the requested zoom:
+                    // WinForms rounds PictureBox dimensions to integer pixels.
+                    imageOriginScreen = pictureBoxCanvas.PointToScreen(Point.Empty);
+                    scaleX = (double)pictureBoxCanvas.Width / MainBitmap.Width;
+                    scaleY = (double)pictureBoxCanvas.Height / MainBitmap.Height;
+                }
+
+                UpdateSingleRuler(rulerControl1, imageOriginScreen, scaleX, scaleY);
+                UpdateSingleRuler(rulerControl2, imageOriginScreen, scaleX, scaleY);
+            }
+            catch { }
+        }
+
+        private static void UpdateSingleRuler(
+            RulerControl ruler, Point imageOriginScreen, double scaleX, double scaleY)
+        {
+            if (ruler.IsDisposed || !ruler.IsHandleCreated)
+                return;
+
+            Point zero = ruler.PointToClient(imageOriginScreen);
+            ruler.Scale = ruler.Vertical ? scaleY : scaleX;
+            ruler.Origin = ruler.Vertical ? zero.Y : zero.X;
+        }
+
         private void CenterCanvasPanel()
         {
-            Rectangle area = UIPanel.DisplayRectangle;
+            if (UIPanel.IsDisposed || canvasPanel.IsDisposed)
+                return;
 
-            canvasPanel.Location = new Point(
-                area.X + Math.Max(0, (area.Width - canvasPanel.Width) / 2),
-                area.Y + Math.Max(0, (area.Height - canvasPanel.Height) / 2)
-            );
+            // DisplayRectangle is the virtual SCROLLING rectangle. Its size
+            // can include a previous centered origin, so recentering a larger
+            // image inside it shifts the canvas below/behind the last
+            // reachable scrollbar position (the image's bottom gets clipped).
+            // Center only an axis that fits. For an overflowing axis, honor
+            // WinForms' actual scroll offset (negative when scrolled).
+            Size viewport = UIPanel.ClientSize;
+            Point scrollOffset = UIPanel.AutoScrollPosition;
+
+            int left = canvasPanel.Width <= viewport.Width
+                ? Math.Max(0, (viewport.Width - canvasPanel.Width) / 2)
+                : scrollOffset.X;
+            int top = canvasPanel.Height <= viewport.Height
+                ? Math.Max(0, (viewport.Height - canvasPanel.Height) / 2)
+                : scrollOffset.Y;
+
+            Point desiredLocation = new Point(left, top);
+            if (canvasPanel.Location != desiredLocation)
+                canvasPanel.Location = desiredLocation;
+
+            UpdateRulers();
         }
         private void CenterScrollbars()
         {
@@ -1995,6 +2261,8 @@ namespace Carpathia
             public readonly Dictionary<string, bool> Locks = new(StringComparer.Ordinal);
             public readonly HashSet<string> DirtyThumbnails = new();
             public readonly List<(Point Start, Point End)> SelectionOutline = new();
+            // Ruler guides belong to each image/document tab, never to the shared workspace.
+            public readonly List<CanvasGuide> Guides = new();
             public Bitmap Bitmap;
             public Bitmap Selected;
             public Bitmap Preview;
@@ -2024,6 +2292,7 @@ namespace Carpathia
             {
                 foreach (EditorLayer layer in Layers) layer.Dispose();
                 Layers.Clear();
+                Guides.Clear();
                 foreach (LayerCanvasState item in Undo) item.Dispose();
                 foreach (LayerCanvasState item in Redo) item.Dispose();
                 Undo.Clear();
@@ -2247,6 +2516,7 @@ namespace Carpathia
             var closeItem = new ToolStripMenuItem("Close tab");
             closeItem.Click += (sender, args) => CloseDocumentTab(contextDocumentTab);
             documentTabMenu.Items.Add(closeItem);
+            InitializeRulers();
         }
 
         private static string DocumentTabCaption(string name)
@@ -2432,6 +2702,7 @@ namespace Carpathia
             pictureBoxCanvas.Invalidate();
             UpdateUndoRedoButtons();
             UpdateCurrentDocumentTitle();
+            UpdateRulers();
         }
 
         // A removed TabPage may have changed selection BEFORE or AFTER
@@ -2472,9 +2743,7 @@ namespace Carpathia
                             FlushTabThumbnailBeforeSwitch();
                         }
                         DetachCanvasPreview();
-                        UIPanel.Parent = page;
-                        UIPanel.Dock = DockStyle.Fill;
-                        UIPanel.Visible = true;
+                        MoveCanvasWorkspaceTo(page);
                         RestoreCanvasDocument(document);
                     }
                     finally { switchingCanvasDocument = false; }
@@ -2483,10 +2752,7 @@ namespace Carpathia
                 {
                     // A selected page can exist without owning the shared
                     // workspace if the old page was disposed by the X button.
-                    if (!ReferenceEquals(UIPanel.Parent, page))
-                        UIPanel.Parent = page;
-                    UIPanel.Dock = DockStyle.Fill;
-                    UIPanel.Visible = true;
+                    MoveCanvasWorkspaceTo(page);
                 }
                 QueueDocumentCanvasLayout(document);
             }));
@@ -2504,10 +2770,11 @@ namespace Carpathia
                 if (IsDisposed || Disposing ||
                     !ReferenceEquals(activeCanvasDocument, document) ||
                     !ReferenceEquals(tabControlWithCloseButtons1.SelectedTab, document.Page) ||
-                    !ReferenceEquals(UIPanel.Parent, document.Page) || MainBitmap == null)
+                    !CanvasWorkspaceIsIn(document.Page) || MainBitmap == null)
                     return;
 
                 document.Page.PerformLayout();
+                rulerWorkspace?.PerformLayout();
                 UIPanel.Visible = true;
                 UIPanel.Dock = DockStyle.Fill;
                 UIPanel.PerformLayout();
@@ -2521,6 +2788,7 @@ namespace Carpathia
                 PositionZoomResizeHandles();
                 UIPanel.Invalidate(true);
                 pictureBoxCanvas.Invalidate();
+                UpdateRulers();
             }));
         }
 
@@ -2554,9 +2822,7 @@ namespace Carpathia
                 CaptureActiveCanvasDocument();
                 FlushTabThumbnailBeforeSwitch();
                 DetachCanvasPreview();
-                UIPanel.Parent = next.Page;
-                UIPanel.Dock = DockStyle.Fill;
-                UIPanel.Visible = true;
+                MoveCanvasWorkspaceTo(next.Page);
                 RestoreCanvasDocument(next);
             }
             finally
@@ -2592,9 +2858,7 @@ namespace Carpathia
                 ApplyDocumentTabTheme(page);
                 // The document initializer uses the existing canvas controls,
                 // but must have fresh stacks/layers before ResetLayers/ResetHistory.
-                UIPanel.Parent = page;
-                UIPanel.Dock = DockStyle.Fill;
-                UIPanel.Visible = true;
+                MoveCanvasWorkspaceTo(page);
                 MainBitmap = null;
                 SelectedBitmap = null;
                 previewBitmap = null;
@@ -2640,14 +2904,12 @@ namespace Carpathia
                 // Keep UIPanel alive before its temporary TabPage is destroyed.
                 if (previous != null)
                 {
-                    UIPanel.Parent = previous.Page;
-                    UIPanel.Dock = DockStyle.Fill;
+                    MoveCanvasWorkspaceTo(previous.Page);
                     RestoreCanvasDocument(previous);
                 }
                 else
                 {
-                    UIPanel.Parent = tabControlWithCloseButtons1.Parent;
-                    UIPanel.Visible = false;
+                    MoveCanvasWorkspaceTo(tabControlWithCloseButtons1.Parent, visible: false);
                     activeCanvasDocument = null;
                 }
                 tabControlWithCloseButtons1.TabPages.Remove(page);
@@ -2746,12 +3008,8 @@ namespace Carpathia
                         document.Page = recovered;
                         canvasDocuments.Add(recovered, document);
                         tabControlWithCloseButtons1.TabPages.Add(recovered);
-                        if (ReferenceEquals(UIPanel.Parent, page))
-                        {
-                            UIPanel.Parent = recovered;
-                            UIPanel.Dock = DockStyle.Fill;
-                            UIPanel.Visible = true;
-                        }
+                        if (CanvasWorkspaceIsIn(page))
+                            MoveCanvasWorkspaceTo(recovered);
                         tabControlWithCloseButtons1.SelectedTab = recovered;
                     }
                     finally { switchingCanvasDocument = false; }
@@ -2763,15 +3021,11 @@ namespace Carpathia
             switchingCanvasDocument = true;
             try
             {
-                // Critical: NEVER let the closing TabPage own UIPanel when the
-                // custom tab control disposes that page. This is independent of
-                // the order of SelectedIndexChanged and ControlRemoved events.
-                if (ReferenceEquals(UIPanel.Parent, page))
-                {
-                    UIPanel.Visible = false;
-                    UIPanel.Dock = DockStyle.None;
-                    UIPanel.Parent = tabControlWithCloseButtons1.Parent;
-                }
+                // Critical: detach the entire workspace before a TabPage is
+                // disposed, or WinForms would dispose the rulers and panel3 too.
+                // The reconciliation callback moves it into the surviving tab.
+                if (CanvasWorkspaceIsIn(page))
+                    MoveCanvasWorkspaceTo(tabControlWithCloseButtons1.Parent, visible: false);
 
                 if (wasActive)
                 {
@@ -3008,9 +3262,9 @@ namespace Carpathia
             if (MainBitmap == null || IsDisposed || Disposing)
                 return;
 
-            // A resize gesture keeps its own fixed screen-space edge anchor.
-            // Ignore zoom requests until that gesture has been committed.
-            if (isResizing)
+            // A resize or guide drag uses live picture-box coordinates.
+            // Do not change zoom until either gesture has finished.
+            if (isResizing || guideDragging)
                 return;
 
             targetZoom = Math.Max(0.05f, Math.Min(5f, targetZoom));
@@ -3071,6 +3325,7 @@ namespace Carpathia
             zoomAnimationOverlay.Invalidate();
             zoomAnimationClock.Restart();
             zoomAnimationTimer.Start();
+            UpdateRulers();
         }
 
         private void UpdateZoomAnimationOverlayBounds()
@@ -3109,6 +3364,7 @@ namespace Carpathia
                 zoomAnimationOverlay.Invalidate();
             }
             labelZoom.Text = $"{Math.Round(zoomAnimationShown * 100)}%";
+            UpdateRulers();
 
             if (t >= 1.0)
                 CompleteZoomAnimation();
@@ -3142,6 +3398,7 @@ namespace Carpathia
             }
             if (MainBitmap != null && !labelZoom.IsDisposed)
                 labelZoom.Text = $"{Math.Round(zoom * 100)}%";
+            UpdateRulers();
         }
 
         private void PaintZoomAnimationFrame(Graphics g, Size viewport, float animatedZoom)
@@ -3290,6 +3547,9 @@ namespace Carpathia
                     }
                 }
             }
+
+            // Keep guide locations synchronized with the temporary zoom overlay.
+            DrawRulerGuides(g, imageRect);
 
             // Preview resize handles so they do not disappear during the animation.
             Point[] handles = {
@@ -4827,6 +5087,9 @@ namespace Carpathia
 
         private void pictureBoxCanvas_MouseUp(object sender, MouseEventArgs e)
         {
+            if (FinishCanvasGuideDrag(e))
+                return;
+
             if (IsActiveLayerLocked && isdrawing && !IsNonPaintingTool())
             {
                 isdrawing = false;
@@ -5003,6 +5266,9 @@ namespace Carpathia
 
         private void pictureBoxCanvas_MouseMove(object sender, MouseEventArgs e)
         {
+            if (UpdateCanvasGuideDrag(e))
+                return;
+
             if (IsActiveLayerLocked && isdrawing && !IsNonPaintingTool())
             {
                 isdrawing = false;
@@ -5903,6 +6169,11 @@ namespace Carpathia
                     }
                 }
             }
+
+            // Paint guidelines AFTER the image and selection overlays; they are
+            // UI-only pixels and never modify the image/layers or exported files.
+            DrawRulerGuides(e.Graphics,
+                new Rectangle(Point.Empty, pictureBoxCanvas.ClientSize));
         }
 
         private void DrawBrush(Graphics graphics, Action<Graphics, Color, int, Point> drawAction, Color color, int size, Point location)
@@ -6211,6 +6482,11 @@ namespace Carpathia
 
         private void pictureBoxCanvas_MouseDown(object sender, MouseEventArgs e)
         {
+            // When using the Cursor tool (or Alt), grabbing a guide must not
+            // start drawing, commit floating images, or enter selection mode.
+            if (TryBeginCanvasGuideDrag(e))
+                return;
+
             if (e.Button != MouseButtons.Left && e.Button != MouseButtons.Right)
                 return;
 
@@ -8852,12 +9128,10 @@ namespace Carpathia
                         break;
 
                     Point current = UIPanel.AutoScrollPosition;
-                    int nextX = fitsX ? 0 : Math.Max(0, Math.Min(
-                        UIPanel.HorizontalScroll.Maximum,
-                        -current.X + errorX));
-                    int nextY = fitsY ? 0 : Math.Max(0, Math.Min(
-                        UIPanel.VerticalScroll.Maximum,
-                        -current.Y + errorY));
+                    int nextX = fitsX ? 0 : Math.Clamp(
+                        -current.X + errorX, 0, maxX);
+                    int nextY = fitsY ? 0 : Math.Clamp(
+                        -current.Y + errorY, 0, maxY);
                     if (nextX == -current.X && nextY == -current.Y)
                         break;
                     UIPanel.AutoScrollPosition = new Point(nextX, nextY);
@@ -8874,6 +9148,7 @@ namespace Carpathia
             PositionZoomResizeHandles();
             labelZoom.Text = $"{Math.Round(zoom * 100)}%";
             RepaintZoomSurface();
+            UpdateRulers();
         }
 
         private void buttonBold_CheckedChanged(object sender, EventArgs e)
@@ -9587,6 +9862,12 @@ namespace Carpathia
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             Keys key = keyData & Keys.KeyCode;
+
+            if (guideDragging && key == Keys.Escape)
+            {
+                CancelGuideDrag();
+                return true;
+            }
 
             if (activeTextEditor != null)
             {
@@ -10964,6 +11245,319 @@ namespace Carpathia
             }
             cloneStampSize = size;
             pictureBoxCanvas.Invalidate();
+        }
+
+        private sealed class CanvasGuide
+        {
+            public bool Vertical { get; }
+            public double Position { get; set; }
+
+            public CanvasGuide(bool vertical, double position)
+            {
+                Vertical = vertical;
+                Position = position;
+            }
+        }
+
+        private bool guidesVisible = true;
+        private bool guidesLocked;
+        private bool guideDragging;
+        private bool guideDragVertical;
+        private double guideDragPosition;
+        private CanvasGuide guideMoving;
+        private CanvasDocument guideDragDocument;
+        private Control guideDragSource;
+        private ContextMenuStrip guideMenu;
+        private ToolStripMenuItem showGuidesItem;
+        private ToolStripMenuItem lockGuidesItem;
+        private ToolStripMenuItem clearGuidesItem;
+
+        private void InitializeGuideInteractions(RulerControl horizontal, RulerControl vertical)
+        {
+            // Reuse the Designer-created rulers. Capture remains on the ruler
+            // while dragging toward the image, so drawing tools aren't activated.
+            foreach (RulerControl ruler in new[] { horizontal, vertical })
+            {
+                ruler.MouseDown += RulerGuide_MouseDown;
+                ruler.MouseMove += RulerGuide_MouseMove;
+                ruler.MouseUp += RulerGuide_MouseUp;
+                ruler.Cursor = ruler.Vertical ? Cursors.SizeWE : Cursors.SizeNS;
+            }
+
+            guideMenu = new ContextMenuStrip();
+            showGuidesItem = new ToolStripMenuItem("Show Guides")
+            {
+                CheckOnClick = true,
+                Checked = true
+            };
+            lockGuidesItem = new ToolStripMenuItem("Lock Guides")
+            {
+                CheckOnClick = true
+            };
+            clearGuidesItem = new ToolStripMenuItem("Clear Guides");
+            showGuidesItem.CheckedChanged += (_, _) =>
+            {
+                guidesVisible = showGuidesItem.Checked;
+                CancelGuideDrag();
+                pictureBoxCanvas.Invalidate();
+                zoomAnimationOverlay?.Invalidate();
+            };
+            lockGuidesItem.CheckedChanged += (_, _) =>
+            {
+                guidesLocked = lockGuidesItem.Checked;
+                if (guidesLocked) CancelGuideDrag();
+            };
+            clearGuidesItem.Click += (_, _) =>
+            {
+                if (activeCanvasDocument == null || guidesLocked)
+                    return;
+                CancelGuideDrag();
+                activeCanvasDocument.Guides.Clear();
+                pictureBoxCanvas.Invalidate();
+                zoomAnimationOverlay?.Invalidate();
+            };
+            guideMenu.Opening += (_, _) =>
+            {
+                lockGuidesItem.Enabled = activeCanvasDocument != null;
+                clearGuidesItem.Enabled = !guidesLocked &&
+                    activeCanvasDocument?.Guides.Count > 0;
+            };
+            guideMenu.Items.AddRange(new ToolStripItem[]
+            {
+                showGuidesItem, lockGuidesItem,
+                new ToolStripSeparator(), clearGuidesItem
+            });
+            horizontal.ContextMenuStrip = guideMenu;
+            vertical.ContextMenuStrip = guideMenu;
+            Disposed += (_, _) => guideMenu?.Dispose();
+        }
+
+        private void RulerGuide_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left || !guidesVisible || guidesLocked ||
+                MainBitmap == null || activeCanvasDocument == null ||
+                switchingCanvasDocument || isdrawing || isResizing ||
+                guideDragging || sender is not RulerControl ruler)
+                return;
+
+            // Match the live picture box geometry. Finish any outstanding
+            // animation before the gesture so the coordinates stay consistent.
+            if (zoomAnimationTimer.Enabled)
+                CompleteZoomAnimation();
+
+            guideDragging = true;
+            guideDragDocument = activeCanvasDocument;
+            guideDragSource = ruler;
+            guideMoving = null;
+            guideDragVertical = !ruler.Vertical;
+            ruler.Capture = true;
+            UpdateGuideDragPosition(ruler.PointToScreen(e.Location));
+        }
+
+        private void RulerGuide_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (guideDragging && ReferenceEquals(guideDragSource, sender) &&
+                sender is RulerControl ruler)
+                UpdateGuideDragPosition(ruler.PointToScreen(e.Location));
+        }
+
+        private void RulerGuide_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (guideDragging && ReferenceEquals(guideDragSource, sender) &&
+                sender is RulerControl ruler)
+                FinishGuideDrag(ruler.PointToScreen(e.Location), e.Button == MouseButtons.Left);
+        }
+
+        // Called before ImageEditor's existing MouseDown handler performs
+        // any painting. Guide grab is available with Cursor, or Alt+drag.
+        private bool TryBeginCanvasGuideDrag(MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left || guideDragging || !guidesVisible ||
+                guidesLocked || isdrawing || isResizing || isImageCurrentlyCreating ||
+                MainBitmap == null || activeCanvasDocument == null ||
+                (selectedTool != Tools.Cursor && (ModifierKeys & Keys.Alt) == 0))
+                return false;
+
+            // A floating image has priority over any guide passing behind it.
+            foreach (MovingImageControl floating in pictureBoxCanvas.Controls.OfType<MovingImageControl>())
+                if (floating.ContainsCanvasPoint(e.Location))
+                    return false;
+
+            double sx = (double)pictureBoxCanvas.Width / MainBitmap.Width;
+            double sy = (double)pictureBoxCanvas.Height / MainBitmap.Height;
+            CanvasGuide nearest = null;
+            double nearestDistance = 7.0; // Screen pixels regardless of zoom.
+            foreach (CanvasGuide guide in activeCanvasDocument.Guides)
+            {
+                double line = guide.Position * (guide.Vertical ? sx : sy);
+                double distance = Math.Abs((guide.Vertical ? e.X : e.Y) - line);
+                if (distance < nearestDistance)
+                {
+                    nearest = guide;
+                    nearestDistance = distance;
+                }
+            }
+            if (nearest == null) return false;
+
+            guideDragging = true;
+            guideDragDocument = activeCanvasDocument;
+            guideDragSource = pictureBoxCanvas;
+            guideMoving = nearest;
+            guideDragVertical = nearest.Vertical;
+            pictureBoxCanvas.Capture = true;
+            UpdateGuideDragPosition(pictureBoxCanvas.PointToScreen(e.Location));
+            return true;
+        }
+
+        private bool UpdateCanvasGuideDrag(MouseEventArgs e)
+        {
+            if (!guideDragging || !ReferenceEquals(guideDragSource, pictureBoxCanvas))
+                return false;
+            UpdateGuideDragPosition(pictureBoxCanvas.PointToScreen(e.Location));
+            return true;
+        }
+
+        private bool FinishCanvasGuideDrag(MouseEventArgs e)
+        {
+            if (!guideDragging || !ReferenceEquals(guideDragSource, pictureBoxCanvas))
+                return false;
+            FinishGuideDrag(pictureBoxCanvas.PointToScreen(e.Location),
+                e.Button == MouseButtons.Left);
+            return true;
+        }
+
+        private void UpdateGuideDragPosition(Point screenPoint)
+        {
+            if (!guideDragging || MainBitmap == null ||
+                !ReferenceEquals(guideDragDocument, activeCanvasDocument) ||
+                !pictureBoxCanvas.IsHandleCreated)
+                return;
+            Point local = pictureBoxCanvas.PointToClient(screenPoint);
+            double sx = Math.Max(0.000001, (double)pictureBoxCanvas.Width / MainBitmap.Width);
+            double sy = Math.Max(0.000001, (double)pictureBoxCanvas.Height / MainBitmap.Height);
+            double length = guideDragVertical ? MainBitmap.Width : MainBitmap.Height;
+            guideDragPosition = Math.Clamp(
+                Math.Round((guideDragVertical ? local.X / sx : local.Y / sy)), 0, length);
+            pictureBoxCanvas.Invalidate();
+        }
+
+        private static bool ScreenContains(Control control, Point screenPoint) =>
+            control != null && !control.IsDisposed && control.IsHandleCreated &&
+            control.RectangleToScreen(control.ClientRectangle).Contains(screenPoint);
+
+        private void FinishGuideDrag(Point screenPoint, bool commit)
+        {
+            if (!guideDragging) return;
+            CanvasDocument document = guideDragDocument;
+            CanvasGuide existing = guideMoving;
+            bool vertical = guideDragVertical;
+
+            // Recalculate for the exact mouse-up location.
+            UpdateGuideDragPosition(screenPoint);
+            double position = guideDragPosition;
+            bool inViewport = ScreenContains(UIPanel, screenPoint);
+            bool inImage = ScreenContains(pictureBoxCanvas, screenPoint);
+            bool toRuler = ScreenContains(rulerControl1, screenPoint) ||
+                           ScreenContains(rulerControl2, screenPoint);
+
+            CancelGuideDrag();
+            if (!commit || document == null || !ReferenceEquals(document, activeCanvasDocument) ||
+                !guidesVisible || guidesLocked || MainBitmap == null)
+                return;
+
+            if (inViewport && inImage)
+            {
+                // Store pixel positions, not scaled coordinates, per document.
+                if (existing != null)
+                    existing.Position = position;
+                else
+                    document.Guides.Add(new CanvasGuide(vertical, position));
+            }
+            else if (existing != null && toRuler)
+            {
+                // Photoshop-style: dragging an existing guide back onto a ruler
+                // removes it. Dropping elsewhere simply leaves it unchanged.
+                document.Guides.Remove(existing);
+            }
+            pictureBoxCanvas.Invalidate();
+            zoomAnimationOverlay?.Invalidate();
+        }
+
+        private void CancelGuideDrag()
+        {
+            if (!guideDragging) return;
+            Control source = guideDragSource;
+            guideDragging = false;
+            guideMoving = null;
+            guideDragDocument = null;
+            guideDragSource = null;
+            if (source != null && !source.IsDisposed && source.Capture)
+                source.Capture = false;
+            if (!pictureBoxCanvas.IsDisposed)
+                pictureBoxCanvas.Invalidate();
+            zoomAnimationOverlay?.Invalidate();
+        }
+
+        // Render guides as overlay lines only. Never add them to MainBitmap,
+        // compositeCanvasBitmap, or any image-export pipeline.
+        // imageRect is either PictureBox client bounds or animated image bounds.
+        private void DrawRulerGuides(Graphics graphics, Rectangle imageRect)
+        {
+            if (!guidesVisible || MainBitmap == null || activeCanvasDocument == null ||
+                imageRect.Width < 1 || imageRect.Height < 1)
+                return;
+
+            var saved = graphics.Save();
+            try
+            {
+                graphics.SetClip(imageRect, CombineMode.Intersect);
+                using var contrastPen = new Pen(Color.FromArgb(210, 0, 0, 0), 3f);
+                using var guidePen = new Pen(Color.FromArgb(255, 45, 199, 240), 1f)
+                {
+                    DashStyle = DashStyle.Dash,
+                    DashPattern = new[] { 4f, 3f }
+                };
+                using var previewPen = new Pen(Color.FromArgb(245, 255, 188, 61), 1.5f)
+                {
+                    DashStyle = DashStyle.Dash,
+                    DashPattern = new[] { 5f, 3f }
+                };
+                double scaleX = (double)imageRect.Width / MainBitmap.Width;
+                double scaleY = (double)imageRect.Height / MainBitmap.Height;
+
+                void PaintLine(bool vertical, double position, bool preview)
+                {
+                    double limit = vertical ? MainBitmap.Width : MainBitmap.Height;
+                    if (position < 0 || position > limit) return;
+                    float coordinate = (float)(vertical
+                        ? imageRect.Left + position * scaleX
+                        : imageRect.Top + position * scaleY);
+                    PointF a = vertical
+                        ? new PointF(coordinate, imageRect.Top)
+                        : new PointF(imageRect.Left, coordinate);
+                    PointF b = vertical
+                        ? new PointF(coordinate, imageRect.Bottom)
+                        : new PointF(imageRect.Right, coordinate);
+                    if (!preview)
+                        graphics.DrawLine(contrastPen, a, b);
+                    graphics.DrawLine(preview ? previewPen : guidePen, a, b);
+                }
+
+                foreach (CanvasGuide guide in activeCanvasDocument.Guides)
+                {
+                    // A moving guide is shown only once, in its preview position.
+                    if (guideDragging && ReferenceEquals(guideMoving, guide))
+                        continue;
+                    PaintLine(guide.Vertical, guide.Position, false);
+                }
+                if (guideDragging &&
+                    ReferenceEquals(guideDragDocument, activeCanvasDocument))
+                    PaintLine(guideDragVertical, guideDragPosition, true);
+            }
+            finally
+            {
+                graphics.Restore(saved);
+            }
         }
     }
 

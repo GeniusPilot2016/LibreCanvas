@@ -53,22 +53,13 @@
             sunnyTheCat1 = new SunnyTheCat();
             tabControlWithCloseButtons1 = new TabControlWithCloseButtons();
             tabPage3 = new TabPage();
-            UIPanel = new Panel();
+            panel3 = new Panel();
+            rulerControl1 = new RulerControl();
+            label3 = new Label();
             contextMenuStrip1 = new ContextMenuStrip(components);
             cutToolStripMenuItem = new ToolStripMenuItem();
             copyToolStripMenuItem = new ToolStripMenuItem();
             pasteToolStripMenuItem = new ToolStripMenuItem();
-            canvasPanel = new Panel();
-            resize_bottom_left = new Panel();
-            resize_bottom_right = new Panel();
-            resize_right = new Panel();
-            resize_bottom = new Panel();
-            resize_left = new Panel();
-            resize_top_left = new Panel();
-            resize_top_right = new Panel();
-            resize_top = new Panel();
-            pictureBoxCanvas = new PictureBox();
-            panelResizer = new Panel();
             imageListTabThumbnails = new ImageList(components);
             tabControl1 = new TabControl();
             tabPage1 = new TabPage();
@@ -326,6 +317,19 @@
             printPreviewDialog1 = new PrintPreviewDialog();
             dataGridViewImageColumn4 = new DataGridViewImageColumn();
             dataGridViewTextBoxColumn2 = new DataGridViewTextBoxColumn();
+            rulerControl2 = new RulerControl();
+            canvasPanel = new Panel();
+            panelResizer = new Panel();
+            pictureBoxCanvas = new PictureBox();
+            resize_top = new Panel();
+            resize_top_right = new Panel();
+            resize_top_left = new Panel();
+            resize_left = new Panel();
+            resize_bottom = new Panel();
+            resize_right = new Panel();
+            resize_bottom_right = new Panel();
+            resize_bottom_left = new Panel();
+            UIPanel = new Panel();
             toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             toolStripContainer1.ContentPanel.SuspendLayout();
             toolStripContainer1.LeftToolStripPanel.SuspendLayout();
@@ -334,10 +338,8 @@
             toolStripBase.SuspendLayout();
             tabControlWithCloseButtons1.SuspendLayout();
             tabPage3.SuspendLayout();
-            UIPanel.SuspendLayout();
+            panel3.SuspendLayout();
             contextMenuStrip1.SuspendLayout();
-            canvasPanel.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBoxCanvas).BeginInit();
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
             tableLayoutPanel1.SuspendLayout();
@@ -363,6 +365,9 @@
             toolStripArtisticFilters.SuspendLayout();
             toolStripEraser.SuspendLayout();
             menuStrip1.SuspendLayout();
+            canvasPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureBoxCanvas).BeginInit();
+            UIPanel.SuspendLayout();
             SuspendLayout();
             // 
             // toolStripContainer1
@@ -566,6 +571,8 @@
             // tabPage3
             // 
             tabPage3.Controls.Add(UIPanel);
+            tabPage3.Controls.Add(rulerControl2);
+            tabPage3.Controls.Add(panel3);
             tabPage3.Location = new Point(4, 29);
             tabPage3.Name = "tabPage3";
             tabPage3.Padding = new Padding(3);
@@ -574,25 +581,39 @@
             tabPage3.Text = "Unnamed File";
             tabPage3.UseVisualStyleBackColor = true;
             // 
-            // UIPanel
+            // panel3
             // 
-            UIPanel.AutoScroll = true;
-            UIPanel.AutoScrollMargin = new Size(25, 25);
-            UIPanel.AutoScrollMinSize = new Size(820, 620);
-            UIPanel.AutoSize = true;
-            UIPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            UIPanel.ContextMenuStrip = contextMenuStrip1;
-            UIPanel.Controls.Add(canvasPanel);
-            UIPanel.Dock = DockStyle.Fill;
-            UIPanel.Location = new Point(3, 3);
-            UIPanel.Name = "UIPanel";
-            UIPanel.Size = new Size(975, 720);
-            UIPanel.TabIndex = 3;
-            UIPanel.Click += panel1_Click;
-            UIPanel.DragDrop += ImageEditor_DragDrop;
-            UIPanel.DragEnter += ImageEditor_DragEnter;
-            UIPanel.Paint += panel1_Paint;
-            UIPanel.MouseMove += panel1_MouseMove;
+            panel3.Controls.Add(rulerControl1);
+            panel3.Controls.Add(label3);
+            panel3.Dock = DockStyle.Left;
+            panel3.Location = new Point(3, 3);
+            panel3.Margin = new Padding(0);
+            panel3.Name = "panel3";
+            panel3.Size = new Size(23, 720);
+            panel3.TabIndex = 8;
+            // 
+            // rulerControl1
+            // 
+            rulerControl1.BackColor = SystemColors.Control;
+            rulerControl1.Dock = DockStyle.Fill;
+            rulerControl1.Font = new Font("Segoe UI", 8F);
+            rulerControl1.ForeColor = Color.FromArgb(60, 60, 60);
+            rulerControl1.Location = new Point(0, 23);
+            rulerControl1.Name = "rulerControl1";
+            rulerControl1.Size = new Size(23, 697);
+            rulerControl1.TabIndex = 6;
+            rulerControl1.TabStop = false;
+            rulerControl1.Text = "rulerControl1";
+            rulerControl1.Vertical = true;
+            // 
+            // label3
+            // 
+            label3.Dock = DockStyle.Top;
+            label3.Location = new Point(0, 0);
+            label3.Name = "label3";
+            label3.Size = new Size(23, 23);
+            label3.TabIndex = 5;
+            label3.Text = "px";
             // 
             // contextMenuStrip1
             // 
@@ -628,174 +649,6 @@
             pasteToolStripMenuItem.Size = new Size(145, 22);
             pasteToolStripMenuItem.Text = "Paste";
             pasteToolStripMenuItem.Click += pasteToolStripMenuItem_Click;
-            // 
-            // canvasPanel
-            // 
-            canvasPanel.Anchor = AnchorStyles.None;
-            canvasPanel.Controls.Add(resize_bottom_left);
-            canvasPanel.Controls.Add(resize_bottom_right);
-            canvasPanel.Controls.Add(resize_right);
-            canvasPanel.Controls.Add(resize_bottom);
-            canvasPanel.Controls.Add(resize_left);
-            canvasPanel.Controls.Add(resize_top_left);
-            canvasPanel.Controls.Add(resize_top_right);
-            canvasPanel.Controls.Add(resize_top);
-            canvasPanel.Controls.Add(pictureBoxCanvas);
-            canvasPanel.Controls.Add(panelResizer);
-            canvasPanel.Location = new Point(72, 51);
-            canvasPanel.Name = "canvasPanel";
-            canvasPanel.Size = new Size(820, 620);
-            canvasPanel.TabIndex = 2;
-            canvasPanel.Click += canvasPanel_Click;
-            canvasPanel.DragDrop += ImageEditor_DragDrop;
-            canvasPanel.DragEnter += ImageEditor_DragEnter;
-            canvasPanel.Paint += canvasPanel_Paint;
-            // 
-            // resize_bottom_left
-            // 
-            resize_bottom_left.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            resize_bottom_left.BackColor = Color.White;
-            resize_bottom_left.BorderStyle = BorderStyle.FixedSingle;
-            resize_bottom_left.Cursor = Cursors.SizeNESW;
-            resize_bottom_left.Location = new Point(5, 605);
-            resize_bottom_left.Name = "resize_bottom_left";
-            resize_bottom_left.Size = new Size(10, 10);
-            resize_bottom_left.TabIndex = 1;
-            resize_bottom_left.Click += resize_top_Click;
-            resize_bottom_left.MouseDown += resize_MouseDown;
-            resize_bottom_left.MouseMove += resize_MouseMove;
-            resize_bottom_left.MouseUp += resize_MouseUp;
-            // 
-            // resize_bottom_right
-            // 
-            resize_bottom_right.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            resize_bottom_right.BackColor = Color.White;
-            resize_bottom_right.BorderStyle = BorderStyle.FixedSingle;
-            resize_bottom_right.Cursor = Cursors.SizeNWSE;
-            resize_bottom_right.Location = new Point(805, 605);
-            resize_bottom_right.Name = "resize_bottom_right";
-            resize_bottom_right.Size = new Size(10, 10);
-            resize_bottom_right.TabIndex = 1;
-            resize_bottom_right.Click += resize_top_Click;
-            resize_bottom_right.MouseDown += resize_MouseDown;
-            resize_bottom_right.MouseMove += resize_MouseMove;
-            resize_bottom_right.MouseUp += resize_MouseUp;
-            // 
-            // resize_right
-            // 
-            resize_right.Anchor = AnchorStyles.Right;
-            resize_right.BackColor = Color.White;
-            resize_right.BorderStyle = BorderStyle.FixedSingle;
-            resize_right.Cursor = Cursors.SizeWE;
-            resize_right.Location = new Point(805, 305);
-            resize_right.Name = "resize_right";
-            resize_right.Size = new Size(10, 10);
-            resize_right.TabIndex = 1;
-            resize_right.Click += resize_top_Click;
-            resize_right.MouseDown += resize_MouseDown;
-            resize_right.MouseMove += resize_MouseMove;
-            resize_right.MouseUp += resize_MouseUp;
-            // 
-            // resize_bottom
-            // 
-            resize_bottom.Anchor = AnchorStyles.Bottom;
-            resize_bottom.BackColor = Color.White;
-            resize_bottom.BorderStyle = BorderStyle.FixedSingle;
-            resize_bottom.Cursor = Cursors.SizeNS;
-            resize_bottom.Location = new Point(405, 605);
-            resize_bottom.Name = "resize_bottom";
-            resize_bottom.Size = new Size(10, 10);
-            resize_bottom.TabIndex = 1;
-            resize_bottom.Click += resize_top_Click;
-            resize_bottom.MouseDown += resize_MouseDown;
-            resize_bottom.MouseMove += resize_MouseMove;
-            resize_bottom.MouseUp += resize_MouseUp;
-            // 
-            // resize_left
-            // 
-            resize_left.Anchor = AnchorStyles.Left;
-            resize_left.BackColor = Color.White;
-            resize_left.BorderStyle = BorderStyle.FixedSingle;
-            resize_left.Cursor = Cursors.SizeWE;
-            resize_left.Location = new Point(5, 305);
-            resize_left.Name = "resize_left";
-            resize_left.Size = new Size(10, 10);
-            resize_left.TabIndex = 1;
-            resize_left.Click += resize_top_Click;
-            resize_left.MouseDown += resize_MouseDown;
-            resize_left.MouseMove += resize_MouseMove;
-            resize_left.MouseUp += resize_MouseUp;
-            // 
-            // resize_top_left
-            // 
-            resize_top_left.BackColor = Color.White;
-            resize_top_left.BorderStyle = BorderStyle.FixedSingle;
-            resize_top_left.Cursor = Cursors.SizeNWSE;
-            resize_top_left.Location = new Point(5, 5);
-            resize_top_left.Name = "resize_top_left";
-            resize_top_left.Size = new Size(10, 10);
-            resize_top_left.TabIndex = 1;
-            resize_top_left.Click += resize_top_Click;
-            resize_top_left.MouseDown += resize_MouseDown;
-            resize_top_left.MouseMove += resize_MouseMove;
-            resize_top_left.MouseUp += resize_MouseUp;
-            // 
-            // resize_top_right
-            // 
-            resize_top_right.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            resize_top_right.BackColor = Color.White;
-            resize_top_right.BorderStyle = BorderStyle.FixedSingle;
-            resize_top_right.Cursor = Cursors.SizeNESW;
-            resize_top_right.Location = new Point(805, 5);
-            resize_top_right.Name = "resize_top_right";
-            resize_top_right.Size = new Size(10, 10);
-            resize_top_right.TabIndex = 1;
-            resize_top_right.Click += resize_top_Click;
-            resize_top_right.MouseDown += resize_MouseDown;
-            resize_top_right.MouseMove += resize_MouseMove;
-            resize_top_right.MouseUp += resize_MouseUp;
-            // 
-            // resize_top
-            // 
-            resize_top.Anchor = AnchorStyles.Top;
-            resize_top.BackColor = Color.White;
-            resize_top.BorderStyle = BorderStyle.FixedSingle;
-            resize_top.Cursor = Cursors.SizeNS;
-            resize_top.Location = new Point(405, 5);
-            resize_top.Name = "resize_top";
-            resize_top.Size = new Size(10, 10);
-            resize_top.TabIndex = 1;
-            resize_top.Click += resize_top_Click;
-            resize_top.MouseDown += resize_MouseDown;
-            resize_top.MouseMove += resize_MouseMove;
-            resize_top.MouseUp += resize_MouseUp;
-            // 
-            // pictureBoxCanvas
-            // 
-            pictureBoxCanvas.BackColor = Color.White;
-            pictureBoxCanvas.BorderStyle = BorderStyle.FixedSingle;
-            pictureBoxCanvas.Cursor = Cursors.Cross;
-            pictureBoxCanvas.Location = new Point(10, 10);
-            pictureBoxCanvas.MinimumSize = new Size(1, 1);
-            pictureBoxCanvas.Name = "pictureBoxCanvas";
-            pictureBoxCanvas.Size = new Size(800, 600);
-            pictureBoxCanvas.TabIndex = 0;
-            pictureBoxCanvas.TabStop = false;
-            pictureBoxCanvas.DragDrop += ImageEditor_DragDrop;
-            pictureBoxCanvas.DragEnter += ImageEditor_DragEnter;
-            pictureBoxCanvas.Paint += pictureBoxCanvas_Paint;
-            pictureBoxCanvas.MouseDown += pictureBoxCanvas_MouseDown;
-            pictureBoxCanvas.MouseLeave += pictureBoxCanvas_MouseLeave;
-            pictureBoxCanvas.MouseMove += pictureBoxCanvas_MouseMove;
-            pictureBoxCanvas.MouseUp += pictureBoxCanvas_MouseUp;
-            // 
-            // panelResizer
-            // 
-            panelResizer.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            panelResizer.Location = new Point(10, 10);
-            panelResizer.Name = "panelResizer";
-            panelResizer.Size = new Size(800, 600);
-            panelResizer.TabIndex = 3;
             // 
             // imageListTabThumbnails
             // 
@@ -1552,7 +1405,7 @@
             flipVTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
             flipVTool.Image = Properties.Resources.icons8_flip_vertical_48;
             flipVTool.Name = "flipVTool";
-            flipVTool.Size = new Size(24, 24);
+            flipVTool.Size = new Size(37, 24);
             flipVTool.Text = "Flip V";
             flipVTool.ToolTipText = "Flip V";
             flipVTool.Click += flipVTool_Click;
@@ -1562,7 +1415,7 @@
             grayscaleTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
             grayscaleTool.Image = Properties.Resources.icons8_black_and_white_48__1_;
             grayscaleTool.Name = "grayscaleTool";
-            grayscaleTool.Size = new Size(24, 24);
+            grayscaleTool.Size = new Size(24, 38);
             grayscaleTool.Text = "B&W";
             grayscaleTool.ToolTipText = "B&W";
             grayscaleTool.Click += grayscaleTool_Click;
@@ -1572,7 +1425,7 @@
             fitTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
             fitTool.Image = Properties.Resources.icons8_fit_to_page_48;
             fitTool.Name = "fitTool";
-            fitTool.Size = new Size(24, 24);
+            fitTool.Size = new Size(24, 38);
             fitTool.Text = "Fit";
             fitTool.ToolTipText = "Fit canvas in workspace";
             fitTool.Click += fitTool_Click;
@@ -2815,14 +2668,14 @@
             filtersToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { mirrorToolStripMenuItem, flashToolStripMenuItem, frozenToolStripMenuItem, winterToolStripMenuItem, blackAndWhiteToolStripMenuItem, oldPictureToolStripMenuItem, cherryToolStripMenuItem, lightAddToolStripMenuItem, purpleToolStripMenuItem, fogToolStripMenuItem });
             filtersToolStripMenuItem.Image = Properties.Resources.icons8_photo_gallery_48;
             filtersToolStripMenuItem.Name = "filtersToolStripMenuItem";
-            filtersToolStripMenuItem.Size = new Size(160, 26);
+            filtersToolStripMenuItem.Size = new Size(184, 26);
             filtersToolStripMenuItem.Text = "Basic Filters";
             // 
             // mirrorToolStripMenuItem
             // 
             mirrorToolStripMenuItem.Image = Properties.Resources.icons8_reflection_48;
             mirrorToolStripMenuItem.Name = "mirrorToolStripMenuItem";
-            mirrorToolStripMenuItem.Size = new Size(168, 26);
+            mirrorToolStripMenuItem.Size = new Size(184, 26);
             mirrorToolStripMenuItem.Text = "Mirror";
             mirrorToolStripMenuItem.Click += mirrorToolStripMenuItem_Click;
             // 
@@ -2830,7 +2683,7 @@
             // 
             flashToolStripMenuItem.Image = Properties.Resources.icons8_flash_48;
             flashToolStripMenuItem.Name = "flashToolStripMenuItem";
-            flashToolStripMenuItem.Size = new Size(168, 26);
+            flashToolStripMenuItem.Size = new Size(184, 26);
             flashToolStripMenuItem.Text = "Flash";
             flashToolStripMenuItem.Click += flashToolStripMenuItem_Click;
             // 
@@ -2838,7 +2691,7 @@
             // 
             frozenToolStripMenuItem.Image = Properties.Resources.icons8_icy_48;
             frozenToolStripMenuItem.Name = "frozenToolStripMenuItem";
-            frozenToolStripMenuItem.Size = new Size(168, 26);
+            frozenToolStripMenuItem.Size = new Size(184, 26);
             frozenToolStripMenuItem.Text = "Frozen";
             frozenToolStripMenuItem.Click += frozenToolStripMenuItem_Click;
             // 
@@ -2846,7 +2699,7 @@
             // 
             winterToolStripMenuItem.Image = Properties.Resources.icons8_winter_48;
             winterToolStripMenuItem.Name = "winterToolStripMenuItem";
-            winterToolStripMenuItem.Size = new Size(168, 26);
+            winterToolStripMenuItem.Size = new Size(184, 26);
             winterToolStripMenuItem.Text = "Winter";
             winterToolStripMenuItem.Click += winterToolStripMenuItem_Click;
             // 
@@ -2854,7 +2707,7 @@
             // 
             blackAndWhiteToolStripMenuItem.Image = Properties.Resources.icons8_black_and_white_48;
             blackAndWhiteToolStripMenuItem.Name = "blackAndWhiteToolStripMenuItem";
-            blackAndWhiteToolStripMenuItem.Size = new Size(168, 26);
+            blackAndWhiteToolStripMenuItem.Size = new Size(184, 26);
             blackAndWhiteToolStripMenuItem.Text = "Black and White";
             blackAndWhiteToolStripMenuItem.Click += blackAndWhiteToolStripMenuItem_Click;
             // 
@@ -2862,7 +2715,7 @@
             // 
             oldPictureToolStripMenuItem.Image = Properties.Resources.icons8_old_fashioned_family_photo_48;
             oldPictureToolStripMenuItem.Name = "oldPictureToolStripMenuItem";
-            oldPictureToolStripMenuItem.Size = new Size(168, 26);
+            oldPictureToolStripMenuItem.Size = new Size(184, 26);
             oldPictureToolStripMenuItem.Text = "Old Picture";
             oldPictureToolStripMenuItem.Click += oldPictureToolStripMenuItem_Click;
             // 
@@ -2870,7 +2723,7 @@
             // 
             cherryToolStripMenuItem.Image = Properties.Resources.icons8_cherry_48;
             cherryToolStripMenuItem.Name = "cherryToolStripMenuItem";
-            cherryToolStripMenuItem.Size = new Size(168, 26);
+            cherryToolStripMenuItem.Size = new Size(184, 26);
             cherryToolStripMenuItem.Text = "Cherry";
             cherryToolStripMenuItem.Click += cherryToolStripMenuItem_Click;
             // 
@@ -2878,7 +2731,7 @@
             // 
             lightAddToolStripMenuItem.Image = Properties.Resources.icons8_light_48;
             lightAddToolStripMenuItem.Name = "lightAddToolStripMenuItem";
-            lightAddToolStripMenuItem.Size = new Size(168, 26);
+            lightAddToolStripMenuItem.Size = new Size(184, 26);
             lightAddToolStripMenuItem.Text = "Light add";
             lightAddToolStripMenuItem.Click += lightAddToolStripMenuItem_Click;
             // 
@@ -2886,7 +2739,7 @@
             // 
             purpleToolStripMenuItem.Image = Properties.Resources.icons8_lavender_48;
             purpleToolStripMenuItem.Name = "purpleToolStripMenuItem";
-            purpleToolStripMenuItem.Size = new Size(168, 26);
+            purpleToolStripMenuItem.Size = new Size(184, 26);
             purpleToolStripMenuItem.Text = "Purple";
             purpleToolStripMenuItem.Click += purpleToolStripMenuItem_Click;
             // 
@@ -2894,7 +2747,7 @@
             // 
             fogToolStripMenuItem.Image = Properties.Resources.icons8_fog_48;
             fogToolStripMenuItem.Name = "fogToolStripMenuItem";
-            fogToolStripMenuItem.Size = new Size(168, 26);
+            fogToolStripMenuItem.Size = new Size(184, 26);
             fogToolStripMenuItem.Text = "Fog";
             fogToolStripMenuItem.Click += fogToolStripMenuItem_Click;
             // 
@@ -2903,7 +2756,7 @@
             artisticFiltersToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { cartoonToolStripMenuItem, oilPaintingToolStripMenuItem });
             artisticFiltersToolStripMenuItem.Image = Properties.Resources.icons8_art_48;
             artisticFiltersToolStripMenuItem.Name = "artisticFiltersToolStripMenuItem";
-            artisticFiltersToolStripMenuItem.Size = new Size(160, 26);
+            artisticFiltersToolStripMenuItem.Size = new Size(184, 26);
             artisticFiltersToolStripMenuItem.Text = "Artistic Filters";
             // 
             // cartoonToolStripMenuItem
@@ -2927,7 +2780,7 @@
             ambientFiltersToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { chloeToolStripMenuItem });
             ambientFiltersToolStripMenuItem.Image = Properties.Resources.icons8_spa_candle_48;
             ambientFiltersToolStripMenuItem.Name = "ambientFiltersToolStripMenuItem";
-            ambientFiltersToolStripMenuItem.Size = new Size(160, 26);
+            ambientFiltersToolStripMenuItem.Size = new Size(184, 26);
             ambientFiltersToolStripMenuItem.Text = "Ambient Filters";
             // 
             // chloeToolStripMenuItem
@@ -2943,7 +2796,7 @@
             blurToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { pixellateToolStripMenuItem, blurToolStripMenuItem1 });
             blurToolStripMenuItem.Image = Properties.Resources.icons8_blur_48;
             blurToolStripMenuItem.Name = "blurToolStripMenuItem";
-            blurToolStripMenuItem.Size = new Size(160, 26);
+            blurToolStripMenuItem.Size = new Size(184, 26);
             blurToolStripMenuItem.Text = "Blurring";
             // 
             // pixellateToolStripMenuItem
@@ -3066,6 +2919,207 @@
             dataGridViewTextBoxColumn2.ReadOnly = true;
             dataGridViewTextBoxColumn2.SortMode = DataGridViewColumnSortMode.NotSortable;
             // 
+            // rulerControl2
+            // 
+            rulerControl2.BackColor = SystemColors.Control;
+            rulerControl2.Dock = DockStyle.Top;
+            rulerControl2.Font = new Font("Segoe UI", 8F);
+            rulerControl2.ForeColor = Color.FromArgb(60, 60, 60);
+            rulerControl2.Location = new Point(26, 3);
+            rulerControl2.Name = "rulerControl2";
+            rulerControl2.Size = new Size(952, 23);
+            rulerControl2.TabIndex = 9;
+            rulerControl2.TabStop = false;
+            rulerControl2.Text = "rulerControl2";
+            // 
+            // canvasPanel
+            // 
+            canvasPanel.Anchor = AnchorStyles.None;
+            canvasPanel.Controls.Add(resize_bottom_left);
+            canvasPanel.Controls.Add(resize_bottom_right);
+            canvasPanel.Controls.Add(resize_right);
+            canvasPanel.Controls.Add(resize_bottom);
+            canvasPanel.Controls.Add(resize_left);
+            canvasPanel.Controls.Add(resize_top_left);
+            canvasPanel.Controls.Add(resize_top_right);
+            canvasPanel.Controls.Add(resize_top);
+            canvasPanel.Controls.Add(pictureBoxCanvas);
+            canvasPanel.Controls.Add(panelResizer);
+            canvasPanel.Location = new Point(66, 38);
+            canvasPanel.Name = "canvasPanel";
+            canvasPanel.Size = new Size(820, 620);
+            canvasPanel.TabIndex = 2;
+            canvasPanel.Click += canvasPanel_Click;
+            canvasPanel.DragDrop += ImageEditor_DragDrop;
+            canvasPanel.DragEnter += ImageEditor_DragEnter;
+            canvasPanel.Paint += canvasPanel_Paint;
+            // 
+            // panelResizer
+            // 
+            panelResizer.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            panelResizer.Location = new Point(10, 10);
+            panelResizer.Name = "panelResizer";
+            panelResizer.Size = new Size(800, 600);
+            panelResizer.TabIndex = 3;
+            // 
+            // pictureBoxCanvas
+            // 
+            pictureBoxCanvas.BackColor = Color.White;
+            pictureBoxCanvas.BorderStyle = BorderStyle.FixedSingle;
+            pictureBoxCanvas.Cursor = Cursors.Cross;
+            pictureBoxCanvas.Location = new Point(10, 10);
+            pictureBoxCanvas.MinimumSize = new Size(1, 1);
+            pictureBoxCanvas.Name = "pictureBoxCanvas";
+            pictureBoxCanvas.Size = new Size(800, 600);
+            pictureBoxCanvas.TabIndex = 0;
+            pictureBoxCanvas.TabStop = false;
+            pictureBoxCanvas.DragDrop += ImageEditor_DragDrop;
+            pictureBoxCanvas.DragEnter += ImageEditor_DragEnter;
+            pictureBoxCanvas.Paint += pictureBoxCanvas_Paint;
+            pictureBoxCanvas.MouseDown += pictureBoxCanvas_MouseDown;
+            pictureBoxCanvas.MouseLeave += pictureBoxCanvas_MouseLeave;
+            pictureBoxCanvas.MouseMove += pictureBoxCanvas_MouseMove;
+            pictureBoxCanvas.MouseUp += pictureBoxCanvas_MouseUp;
+            // 
+            // resize_top
+            // 
+            resize_top.Anchor = AnchorStyles.Top;
+            resize_top.BackColor = Color.White;
+            resize_top.BorderStyle = BorderStyle.FixedSingle;
+            resize_top.Cursor = Cursors.SizeNS;
+            resize_top.Location = new Point(405, 5);
+            resize_top.Name = "resize_top";
+            resize_top.Size = new Size(10, 10);
+            resize_top.TabIndex = 1;
+            resize_top.Click += resize_top_Click;
+            resize_top.MouseDown += resize_MouseDown;
+            resize_top.MouseMove += resize_MouseMove;
+            resize_top.MouseUp += resize_MouseUp;
+            // 
+            // resize_top_right
+            // 
+            resize_top_right.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            resize_top_right.BackColor = Color.White;
+            resize_top_right.BorderStyle = BorderStyle.FixedSingle;
+            resize_top_right.Cursor = Cursors.SizeNESW;
+            resize_top_right.Location = new Point(805, 5);
+            resize_top_right.Name = "resize_top_right";
+            resize_top_right.Size = new Size(10, 10);
+            resize_top_right.TabIndex = 1;
+            resize_top_right.Click += resize_top_Click;
+            resize_top_right.MouseDown += resize_MouseDown;
+            resize_top_right.MouseMove += resize_MouseMove;
+            resize_top_right.MouseUp += resize_MouseUp;
+            // 
+            // resize_top_left
+            // 
+            resize_top_left.BackColor = Color.White;
+            resize_top_left.BorderStyle = BorderStyle.FixedSingle;
+            resize_top_left.Cursor = Cursors.SizeNWSE;
+            resize_top_left.Location = new Point(5, 5);
+            resize_top_left.Name = "resize_top_left";
+            resize_top_left.Size = new Size(10, 10);
+            resize_top_left.TabIndex = 1;
+            resize_top_left.Click += resize_top_Click;
+            resize_top_left.MouseDown += resize_MouseDown;
+            resize_top_left.MouseMove += resize_MouseMove;
+            resize_top_left.MouseUp += resize_MouseUp;
+            // 
+            // resize_left
+            // 
+            resize_left.Anchor = AnchorStyles.Left;
+            resize_left.BackColor = Color.White;
+            resize_left.BorderStyle = BorderStyle.FixedSingle;
+            resize_left.Cursor = Cursors.SizeWE;
+            resize_left.Location = new Point(5, 305);
+            resize_left.Name = "resize_left";
+            resize_left.Size = new Size(10, 10);
+            resize_left.TabIndex = 1;
+            resize_left.Click += resize_top_Click;
+            resize_left.MouseDown += resize_MouseDown;
+            resize_left.MouseMove += resize_MouseMove;
+            resize_left.MouseUp += resize_MouseUp;
+            // 
+            // resize_bottom
+            // 
+            resize_bottom.Anchor = AnchorStyles.Bottom;
+            resize_bottom.BackColor = Color.White;
+            resize_bottom.BorderStyle = BorderStyle.FixedSingle;
+            resize_bottom.Cursor = Cursors.SizeNS;
+            resize_bottom.Location = new Point(405, 605);
+            resize_bottom.Name = "resize_bottom";
+            resize_bottom.Size = new Size(10, 10);
+            resize_bottom.TabIndex = 1;
+            resize_bottom.Click += resize_top_Click;
+            resize_bottom.MouseDown += resize_MouseDown;
+            resize_bottom.MouseMove += resize_MouseMove;
+            resize_bottom.MouseUp += resize_MouseUp;
+            // 
+            // resize_right
+            // 
+            resize_right.Anchor = AnchorStyles.Right;
+            resize_right.BackColor = Color.White;
+            resize_right.BorderStyle = BorderStyle.FixedSingle;
+            resize_right.Cursor = Cursors.SizeWE;
+            resize_right.Location = new Point(805, 305);
+            resize_right.Name = "resize_right";
+            resize_right.Size = new Size(10, 10);
+            resize_right.TabIndex = 1;
+            resize_right.Click += resize_top_Click;
+            resize_right.MouseDown += resize_MouseDown;
+            resize_right.MouseMove += resize_MouseMove;
+            resize_right.MouseUp += resize_MouseUp;
+            // 
+            // resize_bottom_right
+            // 
+            resize_bottom_right.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            resize_bottom_right.BackColor = Color.White;
+            resize_bottom_right.BorderStyle = BorderStyle.FixedSingle;
+            resize_bottom_right.Cursor = Cursors.SizeNWSE;
+            resize_bottom_right.Location = new Point(805, 605);
+            resize_bottom_right.Name = "resize_bottom_right";
+            resize_bottom_right.Size = new Size(10, 10);
+            resize_bottom_right.TabIndex = 1;
+            resize_bottom_right.Click += resize_top_Click;
+            resize_bottom_right.MouseDown += resize_MouseDown;
+            resize_bottom_right.MouseMove += resize_MouseMove;
+            resize_bottom_right.MouseUp += resize_MouseUp;
+            // 
+            // resize_bottom_left
+            // 
+            resize_bottom_left.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            resize_bottom_left.BackColor = Color.White;
+            resize_bottom_left.BorderStyle = BorderStyle.FixedSingle;
+            resize_bottom_left.Cursor = Cursors.SizeNESW;
+            resize_bottom_left.Location = new Point(5, 605);
+            resize_bottom_left.Name = "resize_bottom_left";
+            resize_bottom_left.Size = new Size(10, 10);
+            resize_bottom_left.TabIndex = 1;
+            resize_bottom_left.Click += resize_top_Click;
+            resize_bottom_left.MouseDown += resize_MouseDown;
+            resize_bottom_left.MouseMove += resize_MouseMove;
+            resize_bottom_left.MouseUp += resize_MouseUp;
+            // 
+            // UIPanel
+            // 
+            UIPanel.AutoScroll = true;
+            UIPanel.AutoScrollMargin = new Size(25, 25);
+            UIPanel.AutoScrollMinSize = new Size(820, 620);
+            UIPanel.AutoSize = true;
+            UIPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            UIPanel.ContextMenuStrip = contextMenuStrip1;
+            UIPanel.Controls.Add(canvasPanel);
+            UIPanel.Dock = DockStyle.Fill;
+            UIPanel.Location = new Point(26, 26);
+            UIPanel.Name = "UIPanel";
+            UIPanel.Size = new Size(952, 697);
+            UIPanel.TabIndex = 3;
+            UIPanel.Click += panel1_Click;
+            UIPanel.DragDrop += ImageEditor_DragDrop;
+            UIPanel.DragEnter += ImageEditor_DragEnter;
+            UIPanel.Paint += panel1_Paint;
+            UIPanel.MouseMove += panel1_MouseMove;
+            // 
             // ImageEditor
             // 
             AllowDrop = true;
@@ -3099,10 +3153,8 @@
             tabControlWithCloseButtons1.ResumeLayout(false);
             tabPage3.ResumeLayout(false);
             tabPage3.PerformLayout();
-            UIPanel.ResumeLayout(false);
+            panel3.ResumeLayout(false);
             contextMenuStrip1.ResumeLayout(false);
-            canvasPanel.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)pictureBoxCanvas).EndInit();
             tabControl1.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
             tabPage1.PerformLayout();
@@ -3149,6 +3201,9 @@
             toolStripEraser.PerformLayout();
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
+            canvasPanel.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)pictureBoxCanvas).EndInit();
+            UIPanel.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -3425,18 +3480,6 @@
         private TrackBar trackBarOpacity;
         private Label label1;
         private Label labelOpacity;
-        private Panel UIPanel;
-        private Panel canvasPanel;
-        private Panel resize_bottom_left;
-        private Panel resize_bottom_right;
-        private Panel resize_right;
-        private Panel resize_bottom;
-        private Panel resize_left;
-        private Panel resize_top_left;
-        private Panel resize_top_right;
-        private Panel resize_top;
-        private PictureBox pictureBoxCanvas;
-        private Panel panelResizer;
         private TabPage tabPage2;
         private ListView listViewHistory;
         private ColumnHeader columnHeader2;
@@ -3454,6 +3497,22 @@
         private ToolStripLabel toolStripLabel33;
         private ToolStripComboBox cloneStampSizeCombobox;
         private ToolStripSeparator toolStripSeparator53;
+        private Panel panel3;
+        private RulerControl rulerControl1;
+        private Label label3;
+        private Panel UIPanel;
+        private Panel canvasPanel;
+        private Panel resize_bottom_left;
+        private Panel resize_bottom_right;
+        private Panel resize_right;
+        private Panel resize_bottom;
+        private Panel resize_left;
+        private Panel resize_top_left;
+        private Panel resize_top_right;
+        private Panel resize_top;
+        private PictureBox pictureBoxCanvas;
+        private Panel panelResizer;
+        private RulerControl rulerControl2;
     }
 
 }
