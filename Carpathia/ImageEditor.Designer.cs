@@ -2702,7 +2702,7 @@
             yeniToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             yeniToolStripMenuItem.Name = "yeniToolStripMenuItem";
             yeniToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.N;
-            yeniToolStripMenuItem.Size = new Size(188, 22);
+            yeniToolStripMenuItem.Size = new Size(192, 26);
             yeniToolStripMenuItem.Text = "&New";
             yeniToolStripMenuItem.Click += yeniToolStripMenuItem_Click;
             // 
@@ -2710,7 +2710,7 @@
             // 
             createWithWebcamToolStripMenuItem.Image = Properties.Resources.icons8_webcam_481;
             createWithWebcamToolStripMenuItem.Name = "createWithWebcamToolStripMenuItem";
-            createWithWebcamToolStripMenuItem.Size = new Size(188, 22);
+            createWithWebcamToolStripMenuItem.Size = new Size(192, 26);
             createWithWebcamToolStripMenuItem.Text = "Create with Webcam";
             createWithWebcamToolStripMenuItem.Click += createWithWebcamToolStripMenuItem_Click;
             // 
@@ -2718,7 +2718,7 @@
             // 
             createWithAIToolStripMenuItem.Image = Properties.Resources.icons8_artificial_intelligence_48;
             createWithAIToolStripMenuItem.Name = "createWithAIToolStripMenuItem";
-            createWithAIToolStripMenuItem.Size = new Size(188, 22);
+            createWithAIToolStripMenuItem.Size = new Size(192, 26);
             createWithAIToolStripMenuItem.Text = "Create with AI";
             createWithAIToolStripMenuItem.Click += createWithAIToolStripMenuItem_Click;
             // 
@@ -2728,14 +2728,14 @@
             açToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             açToolStripMenuItem.Name = "açToolStripMenuItem";
             açToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.O;
-            açToolStripMenuItem.Size = new Size(188, 22);
+            açToolStripMenuItem.Size = new Size(192, 26);
             açToolStripMenuItem.Text = "&Open";
             açToolStripMenuItem.Click += açToolStripMenuItem_Click;
             // 
             // toolStripSeparator
             // 
             toolStripSeparator.Name = "toolStripSeparator";
-            toolStripSeparator.Size = new Size(185, 6);
+            toolStripSeparator.Size = new Size(189, 6);
             // 
             // kaydetToolStripMenuItem
             // 
@@ -2743,7 +2743,7 @@
             kaydetToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             kaydetToolStripMenuItem.Name = "kaydetToolStripMenuItem";
             kaydetToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.S;
-            kaydetToolStripMenuItem.Size = new Size(188, 22);
+            kaydetToolStripMenuItem.Size = new Size(192, 26);
             kaydetToolStripMenuItem.Text = "&Save";
             kaydetToolStripMenuItem.Click += kaydetToolStripMenuItem_Click;
             // 
@@ -2751,14 +2751,14 @@
             // 
             farklıKaydetToolStripMenuItem.Enabled = false;
             farklıKaydetToolStripMenuItem.Name = "farklıKaydetToolStripMenuItem";
-            farklıKaydetToolStripMenuItem.Size = new Size(188, 22);
+            farklıKaydetToolStripMenuItem.Size = new Size(192, 26);
             farklıKaydetToolStripMenuItem.Text = "&Save As";
             farklıKaydetToolStripMenuItem.Click += farklıKaydetToolStripMenuItem_Click;
             // 
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new Size(185, 6);
+            toolStripSeparator1.Size = new Size(189, 6);
             // 
             // printToolStripMenuItem
             // 
@@ -2766,7 +2766,7 @@
             printToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             printToolStripMenuItem.Name = "printToolStripMenuItem";
             printToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.P;
-            printToolStripMenuItem.Size = new Size(188, 22);
+            printToolStripMenuItem.Size = new Size(192, 26);
             printToolStripMenuItem.Text = "&Print";
             printToolStripMenuItem.Click += printToolStripMenuItem_Click;
             // 
@@ -2775,19 +2775,19 @@
             printPreviewToolStripMenuItem.Image = Properties.Resources.icons8_view_48;
             printPreviewToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             printPreviewToolStripMenuItem.Name = "printPreviewToolStripMenuItem";
-            printPreviewToolStripMenuItem.Size = new Size(188, 22);
+            printPreviewToolStripMenuItem.Size = new Size(192, 26);
             printPreviewToolStripMenuItem.Text = "P&rint Preview";
             printPreviewToolStripMenuItem.Click += printPreviewToolStripMenuItem_Click;
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new Size(185, 6);
+            toolStripSeparator2.Size = new Size(189, 6);
             // 
             // çıkışToolStripMenuItem
             // 
             çıkışToolStripMenuItem.Name = "çıkışToolStripMenuItem";
-            çıkışToolStripMenuItem.Size = new Size(188, 22);
+            çıkışToolStripMenuItem.Size = new Size(192, 26);
             çıkışToolStripMenuItem.Text = "&Exit";
             çıkışToolStripMenuItem.Click += çıkışToolStripMenuItem_Click;
             // 
