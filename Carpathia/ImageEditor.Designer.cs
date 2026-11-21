@@ -574,8 +574,8 @@
             tabPage3.Controls.Add(rulerControl2);
             tabPage3.Controls.Add(panel3);
             tabPage3.Location = new Point(4, 29);
+            tabPage3.Margin = new Padding(0);
             tabPage3.Name = "tabPage3";
-            tabPage3.Padding = new Padding(3);
             tabPage3.Size = new Size(981, 726);
             tabPage3.TabIndex = 0;
             tabPage3.Text = "Unnamed File";
@@ -591,9 +591,9 @@
             UIPanel.ContextMenuStrip = contextMenuStrip1;
             UIPanel.Controls.Add(canvasPanel);
             UIPanel.Dock = DockStyle.Fill;
-            UIPanel.Location = new Point(26, 26);
+            UIPanel.Location = new Point(23, 23);
             UIPanel.Name = "UIPanel";
-            UIPanel.Size = new Size(952, 697);
+            UIPanel.Size = new Size(958, 703);
             UIPanel.TabIndex = 3;
             UIPanel.Click += panel1_Click;
             UIPanel.DragDrop += ImageEditor_DragDrop;
@@ -649,7 +649,7 @@
             canvasPanel.Controls.Add(resize_top);
             canvasPanel.Controls.Add(pictureBoxCanvas);
             canvasPanel.Controls.Add(panelResizer);
-            canvasPanel.Location = new Point(66, 38);
+            canvasPanel.Location = new Point(69, 41);
             canvasPanel.Name = "canvasPanel";
             canvasPanel.Size = new Size(820, 620);
             canvasPanel.TabIndex = 2;
@@ -810,9 +810,9 @@
             rulerControl2.Dock = DockStyle.Top;
             rulerControl2.Font = new Font("Segoe UI", 8F);
             rulerControl2.ForeColor = Color.FromArgb(60, 60, 60);
-            rulerControl2.Location = new Point(26, 3);
+            rulerControl2.Location = new Point(23, 0);
             rulerControl2.Name = "rulerControl2";
-            rulerControl2.Size = new Size(952, 23);
+            rulerControl2.Size = new Size(958, 23);
             rulerControl2.TabIndex = 9;
             rulerControl2.TabStop = false;
             rulerControl2.Text = "rulerControl2";
@@ -822,10 +822,10 @@
             panel3.Controls.Add(rulerControl1);
             panel3.Controls.Add(label3);
             panel3.Dock = DockStyle.Left;
-            panel3.Location = new Point(3, 3);
+            panel3.Location = new Point(0, 0);
             panel3.Margin = new Padding(0);
             panel3.Name = "panel3";
-            panel3.Size = new Size(23, 720);
+            panel3.Size = new Size(23, 726);
             panel3.TabIndex = 8;
             // 
             // rulerControl1
@@ -836,7 +836,7 @@
             rulerControl1.ForeColor = Color.FromArgb(60, 60, 60);
             rulerControl1.Location = new Point(0, 23);
             rulerControl1.Name = "rulerControl1";
-            rulerControl1.Size = new Size(23, 697);
+            rulerControl1.Size = new Size(23, 703);
             rulerControl1.TabIndex = 6;
             rulerControl1.TabStop = false;
             rulerControl1.Text = "rulerControl1";
