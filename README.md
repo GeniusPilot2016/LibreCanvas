@@ -1,4 +1,4 @@
-![librecanvas_banner](https://github.com/user-attachments/assets/c5cf3cfe-7740-452f-b40e-d5e65cd9a116)
+<img width="1227" height="433" alt="librecanvas_banner" src="https://github.com/user-attachments/assets/86d4cbb2-4d83-4769-925b-45a6aa96195b" />
 
 # 🎨🖌️🖼️🤖 LibreCanvas: Traditional Image Editing Meets Modern AI
 
@@ -15,7 +15,7 @@ LibreCanvas is an open-source C# image editor that combines traditional painting
 [![GitHub forks](https://img.shields.io/github/forks/GeniusPilot2016/LibreCanvas?style=social)](https://github.com/GeniusPilot2016/LibreCanvas/network/members)
 [![Alpha](https://img.shields.io/badge/status-alpha-orange?style=flat-square)](https://github.com/GeniusPilot2016/LibreCanvas)
 
-![LibreCanvas](https://github.com/user-attachments/assets/c31b47a8-f5c5-41e1-99d0-4173b4a07d20)
+![LibreCanvas](https://github.com/user-attachments/assets/c9193b40-db85-45fa-aaf1-e97538798c2b)
 
 ## 🚧 Status
 
@@ -27,43 +27,44 @@ The first stable release is planned for when the core editing workflow is suffic
 
 - ### 🖥️ Familiar and flexible image-editing environment
   LibreCanvas is inspired by traditional paint applications and Photoshop-like editing workflows. Its goal is to bring familiar creative tools and AI-assisted operations together in one application, making it easier to move between drawing, editing, and image refinement.
-  <img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/7b044b7b-b2e0-4e4c-a677-fa3e8a593113" />
+
+  <img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/8716121e-e425-4e9b-bbc4-fb72d4c365ce" />
 
 - ### 🖌️ Traditional painting and editing tools
   Create and modify images using conventional painting and image-manipulation operations. LibreCanvas is being developed to support the essential tools needed for everyday image creation and editing.
 
-  <img width="294" height="673" alt="image" src="https://github.com/user-attachments/assets/7101346e-d63c-4e23-8f48-9c7873d70247" />
+  <img width="298" height="702" alt="image" src="https://github.com/user-attachments/assets/8ea0d991-45a7-49f9-9d9b-384c6e54a024" />
 
 - ### 🖼️ Canvas and image management
   The core workflow is being built around creating new canvases, opening existing images, and saving or exporting completed work. Reliable undo and redo behavior is also an important first-release goal.
-  <img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/7ca1c503-ce24-413b-a17d-1778f130b18a" />
+  <img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/651f7501-7cec-4083-9824-3a4429ded5e1" />
 
 - ### 🚀 More Than a Traditional Image Editor
   LibreCanvas is designed to go beyond conventional image editing by integrating AI-powered creative workflows directly into the editor.
 
   - #### 🤖 Turn text into images
     LibreCanvas aims to support **text-to-image generation**, allowing users to create images from natural-language prompts and continue working with the results in the editor.
-    <img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/deda5b68-dc8d-4eec-b6bf-5d47ffd4351b" />
+    <img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/c16aae46-cf66-4674-b0eb-e2fa144e3688" />
 
   - #### 🎨 Edit existing images with AI
     The planned **image-to-image editing** workflow lets users provide an existing image and instructions for transforming or refining it.
-    <img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/62027936-18ca-439f-9761-c95a4a75dd8e" />
+    <img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/2cb3cf82-b87c-4df5-9807-15975c613a55" />
     
   - #### ✂️ Edit selected regions
     **Selection-based AI editing** is intended to apply changes to particular areas of an image rather than replacing the entire canvas.
-    <img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/5696d043-147b-4be8-b229-1e36e0f246e0" />
+    <img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/c5990e24-7b48-4f0a-b660-eb69741ec339" />
 
   - #### 🪄 Remove backgrounds with AI
     **AI-assisted background removal** is intended to isolate subjects and produce results with transparent backgrounds.
-    <img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/e0bb1f99-dbc7-47f3-b01f-a187fbb18fa9" />
+    <img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/9c3bc1b2-c338-4e44-899c-029592d1fac9" />
 
   - #### 🖼️ Use reference images
     **Reference-image support** is intended to let users guide AI operations with an existing image.
-    <img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/1f8149bc-3bb8-477f-844c-e83f902d4c2c" />
+    <img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/40e15f8b-f9e3-4f1b-9fc2-5a6e011dd8bc" />
 
   - #### 🔙 Continue editing AI-generated results
     LibreCanvas aims to integrate AI results into its ordinary editing workflow, including normal canvas operations and undo behavior, rather than treating AI as a separate tool.
-    <img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/8149f0b6-1455-4c25-ac00-3d34e9826c36" />
+    <img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/dfffacb8-e595-4e33-a9f0-5780d9796131" />
 
 **Note:** AI functionality and output depend on its availability, rate limits, supported image sizes, and model behavior. The capabilities above describe development targets and may not all be complete in the current version.
 
