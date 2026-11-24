@@ -2008,6 +2008,8 @@ namespace Carpathia
         // moving the whole host prevents rulers being left in an older tab.
         private bool rulersInitialized;
         private TableLayoutPanel rulerWorkspace;
+        private int visibleRulerWidth;
+        private int visibleRulerHeight;
 
         private void InitializeRulers()
         {
@@ -2045,6 +2047,9 @@ namespace Carpathia
                 horizontal.Height <= maximumDesignerHeight
                 ? horizontal.Height
                 : defaultRulerHeight;
+
+            visibleRulerWidth = cornerWidth;
+            visibleRulerHeight = cornerHeight;
 
             rulerWorkspace = new TableLayoutPanel
             {
@@ -2107,7 +2112,7 @@ namespace Carpathia
                 UpdateRulers();
             };
             Shown += (s, e) => UpdateRulers();
-            UpdateRulers();
+            SetRulersVisible(toolStripMenuItem1.Checked);
         }
 
         // Called by every tab creation/switch/reconciliation and tab close.
@@ -11592,7 +11597,43 @@ namespace Carpathia
 
         private void toolStripMenuItem1_CheckedChanged(object sender, EventArgs e)
         {
-            label3.Visible = rulerControl2.Visible = rulerControl1.Visible = toolStripMenuItem1.Checked;
+            SetRulersVisible(toolStripMenuItem1.Checked);
+        }
+
+        private void SetRulersVisible(bool visible)
+        {
+            // CheckedChanged can run during InitializeComponent, before the
+            // shared workspace has been created. InitializeRulers applies it later.
+            if (!rulersInitialized || rulerWorkspace == null || rulerWorkspace.IsDisposed)
+                return;
+
+            if (!visible)
+            {
+                if (guideDragging && guideDragSource is RulerControl)
+                    CancelGuideDrag();
+                ClearRulerMouseMarkers();
+            }
+
+            rulerWorkspace.SuspendLayout();
+            try
+            {
+                rulerControl1.Visible = visible;
+                rulerControl2.Visible = visible;
+                label3.Visible = visible;
+                panel3.Visible = visible;
+
+                rulerWorkspace.ColumnStyles[0].Width = visible ? visibleRulerWidth : 0;
+                rulerWorkspace.RowStyles[0].Height = visible ? visibleRulerHeight : 0;
+            }
+            finally
+            {
+                rulerWorkspace.ResumeLayout(true);
+            }
+
+            UIPanel.PerformLayout();
+            CenterCanvasPanel();
+            PositionZoomResizeHandles();
+            rulerWorkspace.Invalidate(true);
         }
 
         private void statusBarToolStripMenuItem_Click(object sender, EventArgs e)
