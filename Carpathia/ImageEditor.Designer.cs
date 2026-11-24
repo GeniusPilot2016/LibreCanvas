@@ -315,6 +315,11 @@
             blurToolStripMenuItem = new ToolStripMenuItem();
             pixellateToolStripMenuItem = new ToolStripMenuItem();
             blurToolStripMenuItem1 = new ToolStripMenuItem();
+            viewToolStripMenuItem = new ToolStripMenuItem();
+            toolStripMenuItem1 = new ToolStripMenuItem();
+            statusBarToolStripMenuItem = new ToolStripMenuItem();
+            toolStripSeparator48 = new ToolStripSeparator();
+            fullScreenToolStripMenuItem = new ToolStripMenuItem();
             settingsToolStripMenuItem = new ToolStripMenuItem();
             yardımToolStripMenuItem = new ToolStripMenuItem();
             içindekilerToolStripMenuItem = new ToolStripMenuItem();
@@ -1607,7 +1612,7 @@
             flipVTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
             flipVTool.Image = Properties.Resources.icons8_flip_vertical_48;
             flipVTool.Name = "flipVTool";
-            flipVTool.Size = new Size(37, 24);
+            flipVTool.Size = new Size(24, 24);
             flipVTool.Text = "Flip V";
             flipVTool.ToolTipText = "Flip V";
             flipVTool.Click += flipVTool_Click;
@@ -1617,7 +1622,7 @@
             grayscaleTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
             grayscaleTool.Image = Properties.Resources.icons8_black_and_white_48__1_;
             grayscaleTool.Name = "grayscaleTool";
-            grayscaleTool.Size = new Size(24, 38);
+            grayscaleTool.Size = new Size(24, 24);
             grayscaleTool.Text = "B&W";
             grayscaleTool.ToolTipText = "B&W";
             grayscaleTool.Click += grayscaleTool_Click;
@@ -1627,7 +1632,7 @@
             fitTool.DisplayStyle = ToolStripItemDisplayStyle.Image;
             fitTool.Image = Properties.Resources.icons8_fit_to_page_48;
             fitTool.Name = "fitTool";
-            fitTool.Size = new Size(24, 38);
+            fitTool.Size = new Size(24, 24);
             fitTool.Text = "Fit";
             fitTool.ToolTipText = "Fit canvas in workspace";
             fitTool.Click += fitTool_Click;
@@ -2681,7 +2686,7 @@
             menuStrip1.BackgroundImageLayout = ImageLayout.Stretch;
             menuStrip1.Font = new Font("HarmonyOS Sans", 8.999999F, FontStyle.Regular, GraphicsUnit.Point, 0);
             menuStrip1.ImageScalingSize = new Size(20, 20);
-            menuStrip1.Items.AddRange(new ToolStripItem[] { dosyaToolStripMenuItem, düzenleToolStripMenuItem, araçlarToolStripMenuItem, settingsToolStripMenuItem, yardımToolStripMenuItem, shareToolStripMenuItem, queryTheAIUsageToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { dosyaToolStripMenuItem, düzenleToolStripMenuItem, araçlarToolStripMenuItem, viewToolStripMenuItem, settingsToolStripMenuItem, yardımToolStripMenuItem, shareToolStripMenuItem, queryTheAIUsageToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(1289, 28);
@@ -2702,7 +2707,7 @@
             yeniToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             yeniToolStripMenuItem.Name = "yeniToolStripMenuItem";
             yeniToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.N;
-            yeniToolStripMenuItem.Size = new Size(192, 26);
+            yeniToolStripMenuItem.Size = new Size(188, 22);
             yeniToolStripMenuItem.Text = "&New";
             yeniToolStripMenuItem.Click += yeniToolStripMenuItem_Click;
             // 
@@ -2710,7 +2715,7 @@
             // 
             createWithWebcamToolStripMenuItem.Image = Properties.Resources.icons8_webcam_481;
             createWithWebcamToolStripMenuItem.Name = "createWithWebcamToolStripMenuItem";
-            createWithWebcamToolStripMenuItem.Size = new Size(192, 26);
+            createWithWebcamToolStripMenuItem.Size = new Size(188, 22);
             createWithWebcamToolStripMenuItem.Text = "Create with Webcam";
             createWithWebcamToolStripMenuItem.Click += createWithWebcamToolStripMenuItem_Click;
             // 
@@ -2718,7 +2723,7 @@
             // 
             createWithAIToolStripMenuItem.Image = Properties.Resources.icons8_artificial_intelligence_48;
             createWithAIToolStripMenuItem.Name = "createWithAIToolStripMenuItem";
-            createWithAIToolStripMenuItem.Size = new Size(192, 26);
+            createWithAIToolStripMenuItem.Size = new Size(188, 22);
             createWithAIToolStripMenuItem.Text = "Create with AI";
             createWithAIToolStripMenuItem.Click += createWithAIToolStripMenuItem_Click;
             // 
@@ -2728,14 +2733,14 @@
             açToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             açToolStripMenuItem.Name = "açToolStripMenuItem";
             açToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.O;
-            açToolStripMenuItem.Size = new Size(192, 26);
+            açToolStripMenuItem.Size = new Size(188, 22);
             açToolStripMenuItem.Text = "&Open";
             açToolStripMenuItem.Click += açToolStripMenuItem_Click;
             // 
             // toolStripSeparator
             // 
             toolStripSeparator.Name = "toolStripSeparator";
-            toolStripSeparator.Size = new Size(189, 6);
+            toolStripSeparator.Size = new Size(185, 6);
             // 
             // kaydetToolStripMenuItem
             // 
@@ -2743,7 +2748,7 @@
             kaydetToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             kaydetToolStripMenuItem.Name = "kaydetToolStripMenuItem";
             kaydetToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.S;
-            kaydetToolStripMenuItem.Size = new Size(192, 26);
+            kaydetToolStripMenuItem.Size = new Size(188, 22);
             kaydetToolStripMenuItem.Text = "&Save";
             kaydetToolStripMenuItem.Click += kaydetToolStripMenuItem_Click;
             // 
@@ -2751,14 +2756,14 @@
             // 
             farklıKaydetToolStripMenuItem.Enabled = false;
             farklıKaydetToolStripMenuItem.Name = "farklıKaydetToolStripMenuItem";
-            farklıKaydetToolStripMenuItem.Size = new Size(192, 26);
+            farklıKaydetToolStripMenuItem.Size = new Size(188, 22);
             farklıKaydetToolStripMenuItem.Text = "&Save As";
             farklıKaydetToolStripMenuItem.Click += farklıKaydetToolStripMenuItem_Click;
             // 
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new Size(189, 6);
+            toolStripSeparator1.Size = new Size(185, 6);
             // 
             // printToolStripMenuItem
             // 
@@ -2766,7 +2771,7 @@
             printToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             printToolStripMenuItem.Name = "printToolStripMenuItem";
             printToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.P;
-            printToolStripMenuItem.Size = new Size(192, 26);
+            printToolStripMenuItem.Size = new Size(188, 22);
             printToolStripMenuItem.Text = "&Print";
             printToolStripMenuItem.Click += printToolStripMenuItem_Click;
             // 
@@ -2775,19 +2780,19 @@
             printPreviewToolStripMenuItem.Image = Properties.Resources.icons8_view_48;
             printPreviewToolStripMenuItem.ImageTransparentColor = Color.Magenta;
             printPreviewToolStripMenuItem.Name = "printPreviewToolStripMenuItem";
-            printPreviewToolStripMenuItem.Size = new Size(192, 26);
+            printPreviewToolStripMenuItem.Size = new Size(188, 22);
             printPreviewToolStripMenuItem.Text = "P&rint Preview";
             printPreviewToolStripMenuItem.Click += printPreviewToolStripMenuItem_Click;
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new Size(189, 6);
+            toolStripSeparator2.Size = new Size(185, 6);
             // 
             // çıkışToolStripMenuItem
             // 
             çıkışToolStripMenuItem.Name = "çıkışToolStripMenuItem";
-            çıkışToolStripMenuItem.Size = new Size(192, 26);
+            çıkışToolStripMenuItem.Size = new Size(188, 22);
             çıkışToolStripMenuItem.Text = "&Exit";
             çıkışToolStripMenuItem.Click += çıkışToolStripMenuItem_Click;
             // 
@@ -3017,6 +3022,49 @@
             blurToolStripMenuItem1.Text = "Gaussian Blur";
             blurToolStripMenuItem1.Click += blurToolStripMenuItem1_Click;
             // 
+            // viewToolStripMenuItem
+            // 
+            viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { toolStripMenuItem1, statusBarToolStripMenuItem, toolStripSeparator48, fullScreenToolStripMenuItem });
+            viewToolStripMenuItem.Name = "viewToolStripMenuItem";
+            viewToolStripMenuItem.Size = new Size(46, 24);
+            viewToolStripMenuItem.Text = "&View";
+            // 
+            // toolStripMenuItem1
+            // 
+            toolStripMenuItem1.Checked = true;
+            toolStripMenuItem1.CheckOnClick = true;
+            toolStripMenuItem1.CheckState = CheckState.Checked;
+            toolStripMenuItem1.Name = "toolStripMenuItem1";
+            toolStripMenuItem1.ShortcutKeys = Keys.Control | Keys.R;
+            toolStripMenuItem1.Size = new Size(212, 22);
+            toolStripMenuItem1.Text = "Rulers and guides";
+            toolStripMenuItem1.CheckedChanged += toolStripMenuItem1_CheckedChanged;
+            // 
+            // statusBarToolStripMenuItem
+            // 
+            statusBarToolStripMenuItem.Checked = true;
+            statusBarToolStripMenuItem.CheckOnClick = true;
+            statusBarToolStripMenuItem.CheckState = CheckState.Checked;
+            statusBarToolStripMenuItem.Name = "statusBarToolStripMenuItem";
+            statusBarToolStripMenuItem.Size = new Size(212, 22);
+            statusBarToolStripMenuItem.Text = "Status bar";
+            statusBarToolStripMenuItem.Click += statusBarToolStripMenuItem_Click;
+            // 
+            // toolStripSeparator48
+            // 
+            toolStripSeparator48.Name = "toolStripSeparator48";
+            toolStripSeparator48.Size = new Size(209, 6);
+            // 
+            // fullScreenToolStripMenuItem
+            // 
+            fullScreenToolStripMenuItem.CheckOnClick = true;
+            fullScreenToolStripMenuItem.Name = "fullScreenToolStripMenuItem";
+            fullScreenToolStripMenuItem.ShortcutKeys = Keys.F11;
+            fullScreenToolStripMenuItem.Size = new Size(212, 22);
+            fullScreenToolStripMenuItem.Text = "Full screen";
+            fullScreenToolStripMenuItem.CheckedChanged += fullScreenToolStripMenuItem_CheckedChanged;
+            fullScreenToolStripMenuItem.Click += fullScreenToolStripMenuItem_Click;
+            // 
             // settingsToolStripMenuItem
             // 
             settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
@@ -3138,6 +3186,7 @@
             WindowState = FormWindowState.Maximized;
             FormClosing += ImageEditor_FormClosing;
             FormClosed += ImageEditor_FormClosed;
+            SizeChanged += ImageEditor_SizeChanged;
             DragDrop += ImageEditor_DragDrop;
             DragEnter += ImageEditor_DragEnter;
             toolStripContainer1.BottomToolStripPanel.ResumeLayout(false);
@@ -3514,6 +3563,11 @@
         private PictureBox pictureBoxCanvas;
         private Panel panelResizer;
         private RulerControl rulerControl2;
+        private ToolStripMenuItem viewToolStripMenuItem;
+        private ToolStripMenuItem toolStripMenuItem1;
+        private ToolStripMenuItem statusBarToolStripMenuItem;
+        private ToolStripSeparator toolStripSeparator48;
+        private ToolStripMenuItem fullScreenToolStripMenuItem;
     }
 
 }

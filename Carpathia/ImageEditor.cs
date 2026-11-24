@@ -29,6 +29,7 @@ using System.Runtime.Serialization;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 using Windows.Storage.Streams;
+using DirectShowLib;
 
 namespace Carpathia
 {
@@ -631,7 +632,7 @@ namespace Carpathia
             label3.ForeColor = SystemColors.WindowText;
             rulerControl1.BackColor = rulerControl2.BackColor = SystemColors.Window;
             rulerControl1.ForeColor = rulerControl2.ForeColor = SystemColors.WindowText;
-            UIPanel.BackColor = Color.Transparent; 
+            UIPanel.BackColor = Color.Transparent;
             ApplyWorkspaceTheme(SystemColors.Control);
             UIHelper.ApplyCustomTitleBar(this, false);
         }
@@ -11586,6 +11587,52 @@ namespace Carpathia
             finally
             {
                 graphics.Restore(saved);
+            }
+        }
+
+        private void toolStripMenuItem1_CheckedChanged(object sender, EventArgs e)
+        {
+            label3.Visible = rulerControl2.Visible = rulerControl1.Visible = toolStripMenuItem1.Checked;
+        }
+
+        private void statusBarToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            toolStripBase.Visible = statusBarToolStripMenuItem.Checked;
+        }
+
+        private void fullScreenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void ToggleFullScreen(bool isFullScreen)
+        {
+            this.SizeChanged -= ImageEditor_SizeChanged;
+            if (isFullScreen)
+            {
+                this.WindowState = FormWindowState.Normal; // Reset first to cover taskbar
+                this.FormBorderStyle = FormBorderStyle.None;
+                this.WindowState = FormWindowState.Maximized;
+            }
+            else
+            {
+                this.FormBorderStyle = FormBorderStyle.Sizable;
+                this.WindowState = _lastWindowState;
+            }
+            this.SizeChanged += ImageEditor_SizeChanged;
+        }
+
+        private void fullScreenToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+        {
+            ToggleFullScreen(fullScreenToolStripMenuItem.Checked);
+        }
+
+        private FormWindowState _lastWindowState = FormWindowState.Normal;
+        private void ImageEditor_SizeChanged(object sender, EventArgs e)
+        {
+            if (this.WindowState != _lastWindowState)
+            {
+                _lastWindowState = this.WindowState;
             }
         }
     }
