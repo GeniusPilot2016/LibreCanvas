@@ -138,6 +138,7 @@ namespace Carpathia
         // One editable text overlay at a time. The backing layer is changed only
         // on commit, so cancelling an edit cannot leave half-rendered text behind.
         private TextBox activeTextEditor;
+        private CanvasTextOverlay activeTextOverlay;
         private Font activeTextDocumentFont;
         private PointF activeTextImageLocation;
         private Color activeTextForeground;
@@ -530,6 +531,7 @@ namespace Carpathia
             textBoxPixelationOffsetY.Text = pixelationOffsetY.ToString();
             textboxGaussianBlurRadius.Text = gaussianBlurSize.ToString();
             cloneStampSizeCombobox.Text = cloneStampSize.ToString();
+            fontsComboBox.SelectedItem = "Arial";
         }
         private void SetTheme()
         {
@@ -3294,6 +3296,7 @@ namespace Carpathia
 
         private void StartZoomAnimation(float targetZoom, bool centerOnImage = false)
         {
+            CommitActiveTextEditor();
             if (MainBitmap == null || IsDisposed || Disposing)
                 return;
 
@@ -7967,6 +7970,7 @@ namespace Carpathia
         {
             if (IsActiveLayerLocked) return;
             CommitActiveTextEditor();
+            CompleteZoomAnimation();
             if (MainBitmap == null || isImageCurrentlyCreating)
                 return;
 
@@ -8001,15 +8005,15 @@ namespace Carpathia
             activeTextBackground = color2;
             activeTextFillBackground = backgroundFilling;
 
-            // WinForms text controls are not alpha-transparent. The light backing
-            // exists *only* during editing and is never painted into the image.
+            // A painted overlay shows the actual canvas through the text. A native
+            // TextBox remains the keyboard/clipboard/IME input engine.
             int left = Math.Max(0, displayPoint.X);
-            int top = Math.Max(0, displayPoint.Y);
+            int top = Math.Max(0, displayPoint.Y - CanvasTextOverlay.GripHeight);
             int availableWidth = Math.Max(1, pictureBoxCanvas.ClientSize.Width - left);
             int width = Math.Min(Math.Max(70, (int)Math.Round(260 * zoom)), availableWidth);
-            int availableHeight = Math.Max(1, pictureBoxCanvas.ClientSize.Height - top);
+            int availableHeight = Math.Max(1, pictureBoxCanvas.ClientSize.Height - top - CanvasTextOverlay.GripHeight);
             int height = Math.Min(Math.Max(28, (int)Math.Ceiling(pointSize * zoom * 1.8f)), availableHeight);
-            activeTextImageLocation = new PointF(left / zoom, top / zoom);
+            activeTextImageLocation = new PointF(left / zoom, (top + CanvasTextOverlay.GripHeight) / zoom);
 
             var editor = new TextBox
             {
@@ -8018,9 +8022,9 @@ namespace Carpathia
                 AcceptsTab = false,
                 WordWrap = true,
                 AutoSize = false,
-                BorderStyle = BorderStyle.FixedSingle,
+                BorderStyle = BorderStyle.None,
                 ScrollBars = ScrollBars.None,
-                Location = new Point(left, top),
+                Location = Point.Empty,
                 Size = new Size(width, height),
                 ForeColor = activeTextForeground,
                 BackColor = activeTextFillBackground ? activeTextBackground : SystemColors.Window,
@@ -8033,26 +8037,45 @@ namespace Carpathia
             editor.TextChanged += ActiveTextEditor_TextChanged;
             editor.LostFocus += ActiveTextEditor_LostFocus;
             editor.KeyDown += ActiveTextEditor_KeyDown;
-            pictureBoxCanvas.Controls.Add(editor);
-            editor.BringToFront();
+            var overlay = new CanvasTextOverlay(editor, documentFont, zoom,
+                activeTextForeground, activeTextBackground, activeTextFillBackground)
+            {
+                Location = new Point(left, top),
+                Size = new Size(width, height + CanvasTextOverlay.GripHeight)
+            };
+            activeTextOverlay = overlay;
+            overlay.LocationChanged += (sender, args) =>
+            {
+                if (ReferenceEquals(activeTextOverlay, overlay))
+                    activeTextImageLocation = new PointF(overlay.Left / zoom,
+                        (overlay.Top + CanvasTextOverlay.GripHeight) / zoom);
+            };
+            pictureBoxCanvas.Controls.Add(overlay);
+            overlay.BringToFront();
             editor.Focus();
+            overlay.Invalidate();
         }
 
         private void ActiveTextEditor_TextChanged(object sender, EventArgs e)
         {
             TextBox editor = activeTextEditor;
-            if (editor == null || editor.IsDisposed)
+            if (editor == null || editor.IsDisposed || activeTextOverlay == null)
                 return;
             // Keep the editor's width fixed so wrapping is predictable. The
             // previous code had three conflicting TextChanged resize handlers.
-            int maxHeight = Math.Max(1, pictureBoxCanvas.ClientSize.Height - editor.Top);
+            int maxHeight = Math.Max(1, pictureBoxCanvas.ClientSize.Height - activeTextOverlay.Top - CanvasTextOverlay.GripHeight);
             Size measured = TextRenderer.MeasureText(
                 string.IsNullOrEmpty(editor.Text) ? "Ag" : editor.Text + " ",
                 editor.Font,
                 new Size(Math.Max(1, editor.ClientSize.Width - 4), 16000),
                 TextFormatFlags.WordBreak | TextFormatFlags.TextBoxControl);
-            editor.Height = Math.Min(maxHeight, Math.Max(
+            int requiredHeight = CanvasTextOverlay.GripHeight + Math.Min(maxHeight, Math.Max(
                 (int)Math.Ceiling(editor.Font.Height * 1.5), measured.Height + 8));
+            // A manually sized box keeps its chosen height, but can grow as more
+            // text is typed (up to the edge of the canvas).
+            activeTextOverlay.Height = activeTextOverlay.UserResized
+                ? Math.Max(activeTextOverlay.Height, requiredHeight) : requiredHeight;
+            activeTextOverlay.Invalidate();
         }
 
         private void ActiveTextEditor_LostFocus(object sender, EventArgs e)
@@ -8084,6 +8107,8 @@ namespace Carpathia
             completingTextEditor = true;
             TextBox editor = activeTextEditor;
             activeTextEditor = null; // Prevent reentry via LostFocus/Dispose.
+            CanvasTextOverlay overlay = activeTextOverlay;
+            activeTextOverlay = null;
             try
             {
                 editor.LostFocus -= ActiveTextEditor_LostFocus;
@@ -8129,9 +8154,9 @@ namespace Carpathia
             }
             finally
             {
-                if (editor.Parent != null)
-                    editor.Parent.Controls.Remove(editor);
-                editor.Dispose();
+                overlay?.Dispose();
+                if (!editor.IsDisposed) editor.Dispose();
+                pictureBoxCanvas.Invalidate();
                 activeTextDocumentFont?.Dispose();
                 activeTextDocumentFont = null;
                 completingTextEditor = false;
@@ -8145,20 +8170,330 @@ namespace Carpathia
             completingTextEditor = true;
             TextBox editor = activeTextEditor;
             activeTextEditor = null;
+            CanvasTextOverlay overlay = activeTextOverlay;
+            activeTextOverlay = null;
             try
             {
                 editor.LostFocus -= ActiveTextEditor_LostFocus;
                 editor.TextChanged -= ActiveTextEditor_TextChanged;
                 editor.KeyDown -= ActiveTextEditor_KeyDown;
-                if (editor.Parent != null)
-                    editor.Parent.Controls.Remove(editor);
-                editor.Dispose();
+                overlay?.Dispose();
+                if (!editor.IsDisposed) editor.Dispose();
+                pictureBoxCanvas.Invalidate();
             }
             finally
             {
                 activeTextDocumentFont?.Dispose();
                 activeTextDocumentFont = null;
                 completingTextEditor = false;
+            }
+        }
+
+        // The native input control is clipped to an empty region, rather than
+        // disabled or hidden, so it still accepts keyboard input and clipboard commands.
+        private sealed class CanvasTextOverlay : Control
+        {
+            public const int GripHeight = 14;
+            private const int ResizeHandleSize = 7;
+            [Flags]
+            private enum TextResizeEdge { None = 0, Left = 1, Top = 2, Right = 4, Bottom = 8 }
+            private TextResizeEdge resizeEdge;
+            private Rectangle originalBounds;
+            public bool UserResized { get; private set; }
+            private readonly TextBox input;
+            private readonly Font documentFont;
+            private readonly float displayZoom;
+            private readonly Color foreground, background;
+            private readonly bool fillBackground;
+            private readonly System.Windows.Forms.Timer caretTimer;
+            private bool moving, selecting, caretVisible = true;
+            private Point dragStart, originalLocation;
+            private int selectionAnchor;
+
+            public CanvasTextOverlay(TextBox input, Font font, float zoom,
+                Color foreground, Color background, bool fillBackground)
+            {
+                this.input = input;
+                documentFont = font;
+                displayZoom = zoom;
+                this.foreground = foreground;
+                this.background = background;
+                this.fillBackground = fillBackground;
+                SetStyle(ControlStyles.SupportsTransparentBackColor | ControlStyles.UserPaint |
+                    ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, true);
+                SetStyle(ControlStyles.Selectable, false);
+                BackColor = Color.Transparent;
+                TabStop = false;
+                input.Region = new Region(Rectangle.Empty);
+                Controls.Add(input);
+                input.TextChanged += (s, e) => RefreshCaret();
+                input.KeyUp += (s, e) => RefreshCaret();
+                input.GotFocus += (s, e) => RefreshCaret();
+                caretTimer = new System.Windows.Forms.Timer { Interval = 500 };
+                caretTimer.Tick += (s, e) => { caretVisible = !caretVisible; Invalidate(); };
+                caretTimer.Start();
+            }
+
+            private void RefreshCaret()
+            {
+                caretVisible = true;
+                Invalidate();
+            }
+
+            protected override void OnSizeChanged(EventArgs e)
+            {
+                base.OnSizeChanged(e);
+                if (input == null) return;
+                input.Bounds = new Rectangle(0, GripHeight, Math.Max(1, Width),
+                    Math.Max(1, Height - GripHeight));
+                Invalidate();
+            }
+
+            protected override void OnPaint(PaintEventArgs e)
+            {
+                base.OnPaint(e);
+                if (input == null || Width < 1 || Height <= GripHeight) return;
+                Graphics g = e.Graphics;
+                Rectangle content = new Rectangle(0, GripHeight, Width, Height - GripHeight);
+                if (fillBackground)
+                    using (var brush = new SolidBrush(background)) g.FillRectangle(brush, content);
+                var state = g.Save();
+                g.SetClip(content);
+                g.TranslateTransform(0, GripHeight);
+                g.ScaleTransform(displayZoom, displayZoom);
+                g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+                var layout = new RectangleF(0, 0, content.Width / displayZoom,
+                    content.Height / displayZoom);
+                using (var format = new StringFormat(StringFormat.GenericDefault))
+                using (var brush = new SolidBrush(foreground))
+                {
+                    format.Alignment = input.TextAlign == HorizontalAlignment.Center ? StringAlignment.Center :
+                        input.TextAlign == HorizontalAlignment.Right ? StringAlignment.Far : StringAlignment.Near;
+                    format.LineAlignment = StringAlignment.Near;
+                    // Use the same GDI+ text layout as CommitActiveTextEditor.
+                    g.DrawString(input.Text, documentFont, brush, layout, format);
+                }
+                g.Restore(state);
+
+                // The native edit control provides character positions and selection.
+                // They are approximate for fonts whose GDI/GDI+ metrics differ.
+                int start = input.SelectionStart;
+                int end = start + input.SelectionLength;
+                var adornmentState = g.Save();
+                g.SetClip(content);
+                if (end > start)
+                {
+                    using var highlight = new SolidBrush(Color.FromArgb(75, SystemColors.Highlight));
+                    for (int i = start; i < end; i++)
+                    {
+                        Point a = CharPosition(i), b = CharPosition(i + 1);
+                        int w = a.Y == b.Y ? Math.Max(2, b.X - a.X) : Math.Max(2, Width - a.X);
+                        g.FillRectangle(highlight, a.X, a.Y + GripHeight, w, input.Font.Height);
+                    }
+                }
+                else if (input.Focused && caretVisible)
+                {
+                    Point caret = CharPosition(start);
+                    using var shadow = new Pen(Color.White, 3);
+                    using var pen = new Pen(Color.Black, 1);
+                    g.DrawLine(shadow, caret.X, caret.Y + GripHeight, caret.X, caret.Y + GripHeight + input.Font.Height);
+                    g.DrawLine(pen, caret.X, caret.Y + GripHeight, caret.X, caret.Y + GripHeight + input.Font.Height);
+                }
+                g.Restore(adornmentState);
+                using (var grip = new SolidBrush(Color.FromArgb(185, SystemColors.Control)))
+                    g.FillRectangle(grip, 0, 0, Width, GripHeight);
+                using (var outline = new Pen(SystemColors.ControlDark))
+                {
+                    g.DrawRectangle(outline, 0, 0, Width - 1, Height - 1);
+                    g.DrawLine(outline, 0, GripHeight - 1, Width, GripHeight - 1);
+                    for (int x = Math.Max(2, Width / 2 - 9); x < Math.Min(Width - 2, Width / 2 + 10); x += 4)
+                        g.DrawLine(outline, x, 4, x, 9);
+                }
+                // Seven handles: four corners, two sides and bottom center.
+                // The remaining top edge is reserved for the move grip.
+                using (var handleFill = new SolidBrush(SystemColors.Window))
+                using (var handleOutline = new Pen(SystemColors.ControlDarkDark))
+                {
+                    foreach (var handle in ResizeHandles())
+                    {
+                        g.FillRectangle(handleFill, handle.Bounds);
+                        g.DrawRectangle(handleOutline, handle.Bounds.X, handle.Bounds.Y,
+                            handle.Bounds.Width - 1, handle.Bounds.Height - 1);
+                    }
+                }
+            }
+
+            private IEnumerable<(Rectangle Bounds, TextResizeEdge Edge)> ResizeHandles()
+            {
+                int n = Math.Min(ResizeHandleSize, Math.Min(Width, Height));
+                if (n <= 0) yield break;
+                int right = Width - n, bottom = Height - n;
+                int middleX = (Width - n) / 2, middleY = (Height - n) / 2;
+                yield return (new Rectangle(0, 0, n, n), TextResizeEdge.Left | TextResizeEdge.Top);
+                yield return (new Rectangle(right, 0, n, n), TextResizeEdge.Right | TextResizeEdge.Top);
+                yield return (new Rectangle(0, bottom, n, n), TextResizeEdge.Left | TextResizeEdge.Bottom);
+                yield return (new Rectangle(right, bottom, n, n), TextResizeEdge.Right | TextResizeEdge.Bottom);
+                yield return (new Rectangle(0, middleY, n, n), TextResizeEdge.Left);
+                yield return (new Rectangle(right, middleY, n, n), TextResizeEdge.Right);
+                yield return (new Rectangle(middleX, bottom, n, n), TextResizeEdge.Bottom);
+            }
+
+            private TextResizeEdge HitResizeHandle(Point point)
+            {
+                foreach (var handle in ResizeHandles())
+                    if (handle.Bounds.Contains(point)) return handle.Edge;
+                return TextResizeEdge.None;
+            }
+
+            private static Cursor ResizeCursor(TextResizeEdge edge)
+            {
+                switch (edge)
+                {
+                    case TextResizeEdge.Left | TextResizeEdge.Top:
+                    case TextResizeEdge.Right | TextResizeEdge.Bottom: return Cursors.SizeNWSE;
+                    case TextResizeEdge.Right | TextResizeEdge.Top:
+                    case TextResizeEdge.Left | TextResizeEdge.Bottom: return Cursors.SizeNESW;
+                    case TextResizeEdge.Left:
+                    case TextResizeEdge.Right: return Cursors.SizeWE;
+                    default: return Cursors.SizeNS;
+                }
+            }
+
+            private void ResizeFromPointer(Point screenPoint)
+            {
+                if (Parent == null) return;
+                int dx = screenPoint.X - dragStart.X, dy = screenPoint.Y - dragStart.Y;
+                int left = originalBounds.Left, right = originalBounds.Right;
+                int top = originalBounds.Top, bottom = originalBounds.Bottom;
+                int canvasWidth = Parent.ClientSize.Width, canvasHeight = Parent.ClientSize.Height;
+                // Permit a small box near an edge even if the normal minimum does
+                // not fit. Clamp the opposite edge in place during each drag.
+                int minWidth = Math.Min(32, Math.Max(1, originalBounds.Width));
+                int minHeight = Math.Min(GripHeight + Math.Max(12, input.Font.Height),
+                    Math.Max(1, originalBounds.Height));
+                if ((resizeEdge & TextResizeEdge.Left) != 0)
+                    left = Math.Clamp(originalBounds.Left + dx, 0, Math.Max(0, right - minWidth));
+                if ((resizeEdge & TextResizeEdge.Right) != 0)
+                    right = Math.Clamp(originalBounds.Right + dx, Math.Min(canvasWidth, left + minWidth), canvasWidth);
+                if ((resizeEdge & TextResizeEdge.Top) != 0)
+                    top = Math.Clamp(originalBounds.Top + dy, 0, Math.Max(0, bottom - minHeight));
+                if ((resizeEdge & TextResizeEdge.Bottom) != 0)
+                    bottom = Math.Clamp(originalBounds.Bottom + dy, Math.Min(canvasHeight, top + minHeight), canvasHeight);
+                UserResized = true;
+                Bounds = Rectangle.FromLTRB(left, top, Math.Max(left + 1, right), Math.Max(top + 1, bottom));
+                RefreshCaret();
+            }
+
+            private Point CharPosition(int index)
+            {
+                if (index < input.TextLength) return input.GetPositionFromCharIndex(Math.Max(0, index));
+                if (input.TextLength == 0)
+                    return new Point(input.TextAlign == HorizontalAlignment.Center ? Width / 2 :
+                        input.TextAlign == HorizontalAlignment.Right ? Width - 2 : 1, 0);
+                int last = input.TextLength - 1;
+                Point p = input.GetPositionFromCharIndex(last);
+                if (input.Text[last] == '\n')
+                    return new Point(input.TextAlign == HorizontalAlignment.Center ? Width / 2 :
+                        input.TextAlign == HorizontalAlignment.Right ? Width - 2 : 1, p.Y + input.Font.Height);
+                int w = TextRenderer.MeasureText(input.Text.Substring(last, 1), input.Font,
+                    Size.Empty, TextFormatFlags.NoPadding | TextFormatFlags.SingleLine).Width;
+                return new Point(p.X + w, p.Y);
+            }
+
+            private int IndexAt(Point p)
+            {
+                p.Y -= GripHeight;
+                int i = input.GetCharIndexFromPosition(p);
+                if (i >= 0 && i < input.TextLength && input.Text[i] != '\n' && input.Text[i] != '\r')
+                {
+                    Point a = CharPosition(i), b = CharPosition(i + 1);
+                    if (a.Y == b.Y && p.X > (a.X + b.X) / 2) i++;
+                }
+                return Math.Clamp(i, 0, input.TextLength);
+            }
+
+            protected override void OnMouseDown(MouseEventArgs e)
+            {
+                base.OnMouseDown(e);
+                if (e.Button != MouseButtons.Left) return;
+                input.Focus();
+                resizeEdge = HitResizeHandle(e.Location);
+                if (resizeEdge != TextResizeEdge.None)
+                {
+                    dragStart = PointToScreen(e.Location);
+                    originalBounds = Bounds;
+                    Cursor = ResizeCursor(resizeEdge);
+                }
+                else if (e.Y < GripHeight)
+                {
+                    moving = true;
+                    dragStart = PointToScreen(e.Location);
+                    originalLocation = Location;
+                }
+                else
+                {
+                    selecting = true;
+                    selectionAnchor = IndexAt(e.Location);
+                    input.Select(selectionAnchor, 0);
+                }
+                Capture = true;
+                RefreshCaret();
+            }
+
+            protected override void OnMouseMove(MouseEventArgs e)
+            {
+                base.OnMouseMove(e);
+                TextResizeEdge hoverEdge = resizeEdge != TextResizeEdge.None ? resizeEdge : HitResizeHandle(e.Location);
+                Cursor = moving ? Cursors.SizeAll : selecting ? Cursors.IBeam :
+                    hoverEdge != TextResizeEdge.None ? ResizeCursor(hoverEdge) :
+                    e.Y < GripHeight ? Cursors.SizeAll : Cursors.IBeam;
+                if (resizeEdge != TextResizeEdge.None)
+                {
+                    ResizeFromPointer(PointToScreen(e.Location));
+                }
+                else if (moving && Parent != null)
+                {
+                    Point now = PointToScreen(e.Location);
+                    Location = new Point(
+                        Math.Clamp(originalLocation.X + now.X - dragStart.X, 0, Math.Max(0, Parent.ClientSize.Width - Width)),
+                        Math.Clamp(originalLocation.Y + now.Y - dragStart.Y, 0, Math.Max(0, Parent.ClientSize.Height - Height)));
+                }
+                else if (selecting)
+                {
+                    int i = IndexAt(e.Location);
+                    input.Select(Math.Min(i, selectionAnchor), Math.Abs(i - selectionAnchor));
+                    RefreshCaret();
+                }
+            }
+
+            protected override void OnMouseUp(MouseEventArgs e)
+            {
+                base.OnMouseUp(e);
+                moving = selecting = false;
+                resizeEdge = TextResizeEdge.None;
+                Capture = false;
+                RefreshCaret();
+            }
+
+            protected override void OnMouseCaptureChanged(EventArgs e)
+            {
+                base.OnMouseCaptureChanged(e);
+                if (!Capture)
+                {
+                    moving = selecting = false;
+                    resizeEdge = TextResizeEdge.None;
+                }
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                if (disposing)
+                {
+                    caretTimer?.Stop();
+                    caretTimer?.Dispose();
+                    input?.Font?.Dispose();
+                }
+                base.Dispose(disposing);
             }
         }
 
